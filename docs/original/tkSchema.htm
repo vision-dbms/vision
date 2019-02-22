@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision ToolKit Class: Schema </title>
+</head>
+<body bgcolor=white>
+<h2>Vision ToolKit Class: Schema</h2>
+
+<p>
+     | <a href="FHome.htm">Home</a> 
+     | <a href="Classes.htm">Classes</a>
+     | <a href="Messages.htm">Messages</a>
+     | <a href="kitNav.htm">Database Navigator Kit </a>
+     | <a href="mSchema.htm">Message Cross Reference </a>
+     |
+<hr>
+<h3>Topics Covered:</h3>
+<ul type=square>
+<li><a href="#overview">Schema Overview</a>
+<li><a href="#basics">Basic Review</a>
+<li><a href="#cd">The Schema ClassDescriptor Class</a>
+<li><a href="#mid">The Schema MessageImplementationDescriptor Class</a>
+<li><a href="#md">The Schema MessageDescriptor Class</a>
+<li><a href="#maintain">Maintaining Schema Information</a>
+<li><a href="#use">Using Schema Information</a>
+<li><a href="#reports">Database Navigation Tools</a>
+<li><a href="#install">Installation</a>
+</ul>
+<hr>
+<p>
+The Vision <b>Schema</b> ToolKit has been created to provide a set of
+classes and messages that aid in tracking information about your
+Vision database itself.  The Schema ToolKit enables you to:
+<p>
+<ul type="disc">
+<li>Store documentation and descriptive information for each class and message
+in your database.
+<li>Cross reference all messages in your Vision database by message
+name, class, type, and function.
+<li>Track method changes over time.
+<li>Track superclass and subclass hierarchies for a class.
+</ul>
+<p>
+Because the Schema information is maintained as part of your database
+using standard classes and messages,
+all Vision protocol is available for managing and using the information.
+<p>
+This ToolKit has been a standard component of all databases bootstrapped
+since March 1994.  
+<p>
+<hr>
+<h3><a name="overview">Schema Overview</a></h3>
+<p>
+The <b>Schema</b> class is used to support the protocol for
+managing information about your Vision database.
+As with all ToolKits, subclasses of the <b>Schema</b> ToolKit are
+named relative to the <b>Schema</b> class.  The subclass hierarchy is
+shown below:
+<pre>
+          <a href="clObject.htm">Object</a>
+             |
+          ToolKit
+             |
+             <b>Schema</b>
+                Schema Descriptor
+                   Schema ClassDescriptor
+                   Schema MessageDescriptor
+                   Schema MessageImplementationDescriptor
+
+</pre>
+<p>
+The <b>Schema</b> class organizes protocol used to process and manage
+schema information.  It is not instantiated directly.  
+<p>
+The class <b>Schema ClassDescriptor (<i>Schema CD</i>) </b> is used to manage
+information about each class in your database.  There will be one
+instance in this class for every subclass created.
+<p>
+The class <b>Schema MessageImplementationDescriptor (<i>Schema
+MID</i>) </b> is used to manage information about each message in your
+database.  There will be one instance in this class for every message
+defined for any class in your database.  A separate instance is
+created for each definition of the message, even if the same message
+name is used with multiple classes.  
+<p>
+The class <b>Schema MessageDescriptor (<i>Schema MD</i>) </b> is used to manage
+information about each unique message name in your database.  There
+will be one instance in this class for every unique message name created.
+This class is not referenced directly by the user.  Its instances are 
+maintained and accessed via messages defined for the
+<b>ClassDescriptor</b> and <b>MessageImplementationDescriptor</b> 
+classes.
+<p>
+Most of your interactions will be directly with the <b>Schema</b>
+class and with the <b>ClassDescriptor</b> and
+<b>MessageImplementationDescriptor</b> subclasses.
+
+<p>
+<hr>
+<h3><a name="basics">Basic Review</a></h3>
+<p>
+The basic rules for class and instance creation are presented in the
+documents <a href="Fund.htm#class"><i>Vision Fundamentals</i></a>  
+and <a href="Classes.htm"><i>Vision Classes</i></a>.
+The basic rules for message creation and management are presented
+in the documents <a href="Fund.htm#message"><i>Vision Fundamentals</i></a>  
+and <a href="Messages.htm"><i>Vision Messages</i></a>.
+This section reviews the relationship between Vision classes and messages
+and the <b>Schema</b> classes.
+<p>
+The class <b>Schema ClassDescriptor</b> is used to maintain
+information about the classes in your Vision database.  Each instance
+of this class corresponds to a specific class in your database.
+Messages defined for this class record information pertaining to
+class hierarchy, naming dictionaries, and descriptions.  The
+<i>classDescriptor</i> message is defined for each class to return
+the instance of the <i>Schema ClassDescriptor</i> class used to store
+descriptive information about the class.  
+<p>
+You can create a new class from an existing class using the
+expression:<pre><tt><b>
+     !NewClass <- Object createSubclass ;
+</b></tt></pre>
+In this case, the variable <i>NewClass</i> is defined to be a subclass of 
+the class <i>Object</i>.  The expression:<pre><tt><b>
+     NewClass classDescriptor
+</b></tt></pre>
+returns the <i>Schema ClassDescriptor</i> instance associated with this
+class.  The variations of the <i>createSubclass</i> message
+(i.e., <i>createSubclass:</i> and <i>createSubclass:at:</i>)
+also create a new <i>Schema ClassDescriptor</i> instance that
+can be accessed via the <i>classDescriptor</i> message at the new class.
+<p>
+The class <b>Schema MessageImplementationDescriptor</b>
+is used to maintain information about the
+messages in your Vision database.  Each instance of
+<i>Schema MessageImplementationDescriptor</i>
+corresponds to a specific message in the Vision database.
+These instances track
+information about the message itself including its type, function, and
+description, as well as tracking changes to methods over time.
+<p>
+New instances of the <i>Schema MessageImplementationDescriptor</i>
+class are NOT
+created automatically.  Each time you use one of the <i>define</i>
+messages, the class is flagged to indicate
+that new messages are pending.  To process and refresh all pending messages,
+you execute the expression:<pre><tt><b>
+     Schema processAllMessages
+</b></tt></pre>
+This process creates and refreshes information as needed.
+<p>
+The expression:<pre><tt><b>
+     object getMessage: "message"
+</b></tt></pre>
+is used to access the descriptor associated with a specific
+implementation of a message.  This message
+returns an instance of the class <i>Schema
+MessageImplementationDescriptor</i>.
+The messages <i>displayInfo</i> and <i>describe</i> display
+useful information about this message in a short and long format.
+
+<p>
+<hr>
+<h3><a name="cd">The Schema ClassDescriptor Class</a></h3>
+<p>
+This class is used to maintain information about the classes in your
+Vision database.  Each instance of Schema ClassDescriptor corresponds
+to a specific class.  Messages defined for this class enable you to
+record information pertaining to class hierarchy, naming conventions,
+and descriptions.  The expression:<pre><tt><b>
+             object classDescriptor
+</b></tt></pre>
+returns an instance of this class.
+<p>
+<h4>Descriptive Information</h4>
+<p>
+A number of messages defined for the <i>Schema ClassDescriptor</i>
+class are used to store and access descriptive information about 
+the class:
+<p><Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<th>Message
+<th>Definition
+<th>Update Using
+</tr>
+
+<tr>
+<td><i>class</i>
+<td>Default instance of class associated with descriptor.
+<td>should not be modified
+<tr>
+<td><i>name</i>
+<td>Name of the class.  This is normally the class' 'whatAmI'.
+<td>should not be modified
+<tr>
+<td><i>parent</i>
+<td>Class descriptor associated with the super
+class of the recipient's underlying class.
+<td>should not be modified
+<tr>
+<td><i>type</i>
+<td>Returns an instance of the
+class <a href="#classType"><i>ClassType</i></a>.  
+<td><i>setClassTypeTo:string</i>
+<tr>
+<td><i>description</i>
+<td>Description of the class.
+<td><i>setDescriptionTo:string</i>
+<tr>
+<td><i>sampleUsage</i>
+<td>Describes sample syntax for accessing instances of the recipient's 
+underlying class.
+<td><i>setSampleUsageTo:string</i>
+<tr>
+<td><i>_htmlDocName</i>
+<td>Name of the HTML document that describes
+this class in detail on insyte's www.insytenet.com web site.
+<td><i>setHtmlDocNameTo: string</i>
+<tr>
+<td><i>htmlDocName</i>
+<td>Name of the HTML document that describes
+this class in detail on insyte's www.insytenet.com web site; if no document
+is defined, the document name associated with the first super
+class in the recipient's hierarchy that has a document is returned.
+<td>Cover Method for <i>_htmlDocName</i>
+<tr>
+<td><i>_imageName</i>
+<td>Name of the image file associated with this class.
+<td><i>:_imageName <- "imageFile.gif" ;</i>
+<tr>
+<td><i>imageName</i>
+<td>Name of the image file associated with
+this class formatted as an image tag if defined.  The class name is
+returned otherwise.
+<td>Cover Method for <i>_imageName</i>
+
+</tr></table></Center>
+
+<p>
+<h4>New ClassDescriptor Instances</h4>
+<p>
+A new <i>Schema ClassDescriptor</i> instance is automatically created
+whenever a new subclass is created using a variation of the
+<i>createSubclass:</i> messages.  When this new instance is created,
+the following operations are performed on it:
+<p>
+<ol type="1">
+<li>The property <i>class</i> is set to the default instance of
+the new class.
+<li>The property <i>code</i> is set to the name of the underlying
+class.  This is the value of the parameter in the
+<i>createSubclass:</i> message.  The property <i>name</i> is set to 
+the value of <i>whatAmI</i> for the class.
+<li>The property <i>defaultAccessPath</i> is set to the object at
+which the underlying class is defined.  This is the class
+<i>^global</i> by default and corresponds to the value of the
+<i>at:</i> parameter when the subclass is created using the
+form <i>createSubclass:at:</i>.
+<li>The property <i>parent</i> is set to the class descriptor of
+the direct superclass of this class.
+<li>The class constant <i>classDescriptor</i> is defined at the
+new class to return this new class descriptor instance.
+<li>The property <i>type</i> is set to a default <i>ClassType</i>.
+<li>A number of additional properties associated with class inheritance,
+and instantiations for the underlying class are initialized.  
+</ol>
+<p>
+For example, the expression:<pre><tt><b>
+     Entity createSubclass: "Company" 
+</b></tt></pre>
+creates a new subclass of <i>Entity</i> named <i>Company</i> and a new
+instance of the <i>Schema ClassDescriptor</i> class initialized as
+follows:
+<p>
+<ol type="1">
+<li>The property <i>class</i> is set to the default <i>Company</i>.
+<li>The properties <i>code</i> and <i>name</i> are set to the 
+string "Company".
+<li>The property <i>defaultAccessPath</i> is set to <i>^global</i>.
+<li>The property <i>parent</i> is set to the class descriptor of
+the class <i>Entity</i> (i.e., <i>Entity classDescriptor</i>).
+<li>The class constant <i>classDescriptor</i> is defined at the
+<i>Company</i> class to return this new class descriptor instance
+(i.e., <i>Company classDescriptor</i> returns the new instance).
+<li>The property <i>type</i> is set to 
+<a href="#classType"><i>Named ClassType Application</i></a>.
+<li>A number of additional properties associated with class inheritance,
+and instantiations for the underlying class are initialized.  
+</ol>
+<p>
+<h4><a name="classType">Assigning the ClassType</a></h4>
+<p>
+A Vision database contains a large number of classes organized into a
+hierarchy that all eventually inherit from the class <i>Object</i>.
+The property <i>type</i> has been defined for the <i>Schema ClassDescriptor</i>
+class to provide a mechanism for grouping subsets of classes into
+logical categories.  The value of type is defined to be an instance
+of the <b>ClassType</b> class.  The following <i>ClassType</i> instances
+have been defined:
+<p><Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<th>ClassType
+<th>Definition
+</tr>
+
+<tr>
+<td><a href="clXRef.htm"<i>BuiltIn</i></a>
+<td>all bootstrap classes such as List, Number, and Block ;
+these classes are part of all Vision databases.
+<tr>
+<td><a href="appClasses.htm"><i>Application</i></a>
+<td>user defined classes that are used to model the
+entities, data, and navigations that define a specific Vision
+system; all Entity, DataRecord, LinkRecord, and DataBridge
+subclasses are part of this category.  This category also 
+includes DataSet classes that manage external data that is accessed 
+directly via other classes.
+<tr>
+<td><i>DataFeed</i>
+<td>user defined classes that model and store data loaded from
+external sources; instances of these classes are used to create
+and refresh Application instances and are not normally referenced
+by user applications.  
+<tr>
+<td><i>ToolKit</i>
+<td>used to organize packages of classes and messages offered as a
+unit to perform a set of related functions. 
+<tr>
+<td><i>Dictionary</i>
+<td>used to manage a set of names that return related objects.
+<tr>
+<td><i>ObjectSpace</i>
+<td>used to define separate work areas that inherit from the
+shared CoreWorkspace.
+<tr>
+<td><i>Other</i>
+<td>other classes used to support the development process.
+<tr>
+<td><i>Unused</i>
+<td>classes that are still part of the database but are
+not currently documented or used anywhere.
+
+</tr></table></Center>
+<p>
+The underlying class is used to assign an initial <i>ClassType</i> to
+the <i>type</i> property for a <i>Schema ClassDescriptor</i> instance. 
+The property value can be reassigned using the <i>setClassTypeTo:</i>
+message.  To look at the current assignments use:<pre><tt><b>
+     Schema CD instanceList
+         groupedBy: [ type ] .
+     do: [ "===> " print ; code printNL ;
+           groupList sortUp: [ name ] .
+           do: [ name printNL ] ;
+           newLine print ;
+         ] ;
+</b></tt></pre>
+<p>
+<h4>Tracking Inheritance</h4>
+<p>
+The property <i>inheritancePath</i> is defined at <i>Schema ClassDescriptor</i>
+and contains an indexed list of the
+class descriptors in the recipient's super class hierarchy including
+the recipient.
+The property <i>childList</i> is defined at <i>Schema ClassDescriptor</i>
+and contains an indexed list of the
+class descriptors that are direct subclasses of the instance's 
+underlying class.  Both of these properties are maintained by the
+initialization methods defined for <i>Schema ClassDescriptor</i>
+and should not be changed manually.
+<p>
+Several messages have been defined at <i>Schema ClassDescriptor</i>
+to use these properties.  Note that many of these messages are
+called by equivalent methods defined at <i>Object</i>.
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<th>Message
+<th>Definition
+</tr>
+
+<tr>
+<td><i>inheritsFrom: cd</i>
+<td>Returns TRUE if the class associated with the recipient object
+inherits from the class associated with the class descriptor provided,
+FALSE otherwise.  This is similar to the version at Object except the
+parameter must be a class descriptor.
+<tr>
+<td><i>isSubClassOf: cd</i>
+<td>Returns TRUE if the recipient is a sub class of the parameter.
+<tr>
+<td><i>isSuperClassOf: cd</i>
+<td>Returns TRUE if the recipient is a super class of the parameter.
+<tr>
+<td><i>isInInheritancePathOf: cd</i>
+<td>Returns TRUE if the recipient inherits from the supplied
+parameter or the supplied parameter inherits from the recipient.
+<tr>
+<td><i>getInheritancePath</i>
+<td>Returns a list of class descriptors representing the
+super class hierarchy of the recipient.  The list is sorted with the
+class descriptor for Object first and the class descriptor for the
+recipient class last.
+<tr>
+<td><i>getAllChildren</i>
+<td>Returns a list of all the class descriptors that refer to subclasses
+of the recipient.
+<tr>
+<td><i>showChildren</i>
+<td>Recursively displays each subclass of the recipient.
+<tr>
+<td><i>showParents</i>
+<td>Displays the super class hierarchy for the recipient.
+<tr>
+<td><i>showInheritance</i>
+<td>Displays the inheritance hierarchy for the recipient.  This method
+is called directory by the version at <i>Object<i>.
+
+</tr></table></Center>
+<p>
+<h4>Naming Dictionaries</h4>
+<p>
+<a href="clDict.htm#named">Naming Dictionaries</a> are subclasses of
+<i>Dictionary</i> that are used to organize instance names for a class.
+To avoid conflicting names across classes, a separate
+naming dictionary is defined for any class that wants to be able
+to refer to individual instances using one or more aliases.
+Each <a href="clEntity.htm#access">Entity subclass</a> has its
+own naming dictionary that is created when the class is created.
+You can define a naming dictionary for any class that needs it.
+<p>
+The property <i>namingDictionary</i> can be used to store a reference
+to the underlying class' naming dictionary, if it
+exists.  By default this value will be NA.
+You can also flag a class to indicate that subclasses should
+automatically have a naming dictionary created for it.
+<p>
+When a new <i>Schema ClassDescriptor</i> instance is created, the
+naming dictionary for the class is set to the value of its
+parent's naming dictionary.  If you've explicitly
+created your own naming dictionary and wish to record its value in
+the class descriptor, you can use the <i>setNamingDictionaryTo: dictionary</i>
+message.  For example, the naming dictionary associated
+with application workspaces for the <i>Interface</i> class was
+defined as follows:<pre><tt><b>
+     Dictionary createSubclass: "Named" at: Interface ;
+     Interface Named createInstance: "ApplicationWS" ;
+     Interface ApplicationWS classDescriptor
+        setNamingDictionaryTo: Interface Named ApplicationWS ;
+</b></tt></pre>
+<p>
+The message <i>setAutoCreateNamingDictionaryOn</i> can be sent to
+a class descriptor to indicate that a new naming dictionary should
+automatically be created when new subclasses of the instance's 
+underlying class are created.  For example, this flag has been
+set for the <i>Entity</i> class so that each subclass gets its
+own naming dictionary.  When a new <i>Schema ClassDescriptor</i>
+instance is created, this flag is set to the value of its parent's
+flag.  You can turn this flag off using
+the message <i>setAutoCreateNamingDictionaryOff</i> .
+
+<p>
+<h4>New Instances of the Underlying Class</h4>
+<p>
+Information recorded in a class' class descriptor is used to
+create new instances of the class.  The <i>createInstance:</i>
+method at <i>Object</i> runs two methods that use information
+stored in the class descriptor: <i>initializeDefaults</i>
+and <i>initializeNames</i>.
+<p>
+The <i>initializeDefaults</i> message uses the class descriptor
+property <i>defaultPropertyList</i> to assign initial values
+to the new instance.  The <i>defaultPropertyList</i> contains
+a list of <i>Schema MessageImplementationDescriptor</i> objects
+which contain default values for any properties that require
+them.  The techniques for setting default values for properties
+are <a href="#settingDefaults">described below.</a>.
+<p>
+The <i>initializeNames</i> message updates the naming dictionary associated
+with the class descriptor with the code and any aliases defined
+for the new instance.
+<p>
+<h4>Additional Information</h4>
+<p>
+The <i>Schema ClassDescriptor</i> messages are described further in
+the document <a href="mSchema.htm"><i>Schema Message Dictionary</i></a>.
+<p>
+
+<p>
+<hr>
+<h3><a name="mid">The Schema MessageImplementationDescriptor Class</a></h3>
+<p>
+This class is used to maintain information about each message
+implementation.  Each message defined for a class in the Schema
+database has a corresponding instance in this class.
+The expression:<pre><tt><b>
+             object getMessage: "string"
+</b></tt></pre>
+returns a message implementation descriptor if the <i>string</i> is defined
+as a message to which the object responds.  You can send the <i>displayInfo</i>
+or <i>describe</i> message to the result to display a short or long
+description of the message.
+
+<p>
+<h4>Descriptive Information</h4>
+<p>
+A number of messages defined for the <i>Schema 
+MessageImplementationDescriptor</i>
+class are used to store and access descriptive information about 
+the class:
+<p><Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<th>Message
+<th>Definition
+<th>Update Using
+</tr>
+
+<tr>
+<td><i>code</i>
+<td>Name of the message.
+<td>should not be modified
+<tr>
+<td><i>messageClassDescriptor</i>
+<td><i>ClassDescriptor</i> of the class defining this version of the message.
+<td>should not be modified
+<tr>
+<td><i>class</i>
+<td>Class defining this version of the message.
+<td>Cover method
+<tr>
+<td><i>messageDescriptor</i>
+<td><i>MessageDescriptor</i> for this message name.
+<td>should not be modified
+<tr>
+<td><i>message</i>
+<td>Same as <i>code</i>.
+<td>Cover method
+<tr>
+<td><i>type</i>
+<td><a href="#schemaTables"><i>MessageType</i></a> of this message.
+<td>Automatically updated based on the implementation, this value should only
+be manually reset to indicate that a method is time-varying using 
+<i>setTypeTo: Named MessageType MethodTV</i>
+<tr>
+<td><i>isTimeVarying</i>
+<td>TRUE if the <i>type</i> is <i>TimeSeriesProperty</i> or <i>MethodTV</i>.
+<td>Cover method
+<tr>
+<td><i>functionType</i>
+<td><a href="#schemaTables"><i>FunctionType</i></a> of this message.
+<td><i>setFunctionTypeTo: string</i>
+<tr>
+<td><i>parameterList</i>
+<td><i>ClassDescriptor</i> indicating the class of each parameter to this 
+message if it is a binary or keyword message.
+<td><i>setParameter: n typeTo: cd</i>
+<tr>
+<td><i>returnObjectType</i>
+<td><i>ClassDescriptor</i> indicating the type of object returned by this
+message.
+<td><i>setReturnObjectTypeTo: cd</i>
+<tr>
+<td><i>returnObjectContainer</i>
+<td><i>ClassDescriptor</i> indicating if the returned object is a 
+scalar object or a collection.
+<td><i>setReturnObjectContainerTo: cd</i>
+<tr>
+<td><i>keyType</i>
+<td><a href="#schemaTables"><i>KeyType</i></a> of this message.
+<td><i>flagAsKeyField</i> ; <i>flagAsPartialKeyField</i>
+<tr>
+<td><i>usageLevel</i>
+<td><a href="#schemaTables"><i>UsageLevel</i></a> of this message.
+<td><i>setUsageLevelTo: string</i>
+<tr>
+<td><i>fullSelector</i>
+<td>Name of the message with appropriate
+parameters names filled in for binary and keyword messages.
+<td><i>setSelectorTo: string</i>
+
+</tr></table></Center>
+<p>
+
+<p>
+<h4>
+<a name="schemaTables">MessageType, FunctionType, UsageLevel, and KeyType</a>
+</h4>
+<p>
+The class <b>MessageType</b> defines instances that correspond to
+the different types of message that can be defined in Vision.  The
+possible instance values are: <i>Constant</i>, <i>FixedProperty</i>
+<i>TimeSeriesProperty</i>, <i>Method</i>, <i>MethodTV</i>, and
+<i>Primitive</i>.  These instances are accessible via the 
+naming dictionary <i>Named MessageType</i>.  Messages of type <i>Constant</i>
+were created with the <i>define:toBe:</i> message.  Messages of type
+<i>FixedProperty</i> were created with the <i>defineFixedProperty:</i>
+message.  Messages of type <i>TimeSeriesProperty</i> were created
+with the <i>define:</i> message.  Messages of type <i>Method</i>
+and <i>MethodTV</i> were created with the <i>defineMethod:</i> message.
+The latter type can be explicitly assigned to indicate that a method
+could return different values as of different points in time.  Messages
+of type <i>Primitive</i> are defined as part of the process
+of bootstrapping a Vision database. 
+<p>
+The class <b>FunctionType</b> defines instances used to classify
+messages by function such as <i>Access</i>, <i>Update</i>, and
+<i>Inquiry</i>.  The value of the <i>functionType</i> property
+is set to an instance of <i>FunctionType</i>.  You can
+create and set function types with the <i>setFunctionTypeTo:</i> message.
+If the supplied string does not define a current function, a new instance
+is created.
+<p>
+The class <b>UsageLevel</b> defines instances used to classify messages
+by usage level.  Current levels are: <i>Basic</i>, <i>Advanced</i>,
+<i>Internal</i>, and <i>DBA</i>.  The value of the <i>usageLevel</i>
+property is set  to an instance of <i>UsageLevel</i>.  The default
+value is <i>Basic</i>.  You can reset the level using <i>setUsageLevelTo:</i>.
+<p>
+The class <b>KeyType</b> defines two instances: <i>Full</i> and <i>Partial</i>.
+The property <i>keyType</i> can be set to one of these instances using
+the <i>flagAsKeyField</i> or the <i>flagAsPartialKeyField</i> message.
+By default, this property is NA.  This flag can be used to indicate that
+the message could serve as a "key" for the class.
+Although, Vision does not require or use keys directly, this is sometimes 
+useful for classes that are presented as part of a data model.
+
+<p>
+<h4><a name="settingDefaults">Default Values</a></h4>
+<p>
+The property <i>defaultValue</i> is used to store a default value for
+a <i>MessageImplementationDescriptor</i>.  It is only meaningful to
+store default values for messages that are properties.  You can set
+this value using the <i>setDefaultValueTo:</i> message.  You can 
+clear this value using the <i>clearDefaultValue</i> message.
+<p>
+When a property is defined for a class using the 
+<i>defineFixedProperty:</i> or <i>define:</i> message,
+the initial value of the property is <a href="clNA.htm"><i>NA</i></a>
+for all instances of the class and for any new instance when it is
+created.  The expression:<pre><tt><b>
+     class defineFixedProperty: 'name' withDefault: object
+</b>or<b>
+     class define: 'name' withDefault: object
+</b></tt></pre>
+runs the <i>defineFixedProperty:</i> or <i>define:</i>
+message and sets the default value in
+the associated message implementation descriptor to the supplied
+object.  All existing instances are initialized to have this value.
+In addition, this property will be set to this default value as part
+of the execution of the 
+<a href="Classes.htm#instance"><i>createInstance</i></a>
+method.  
+
+<p>
+<h4>Method History</h4>
+<p>
+The time series property <i>implementationSource</i> provides a history
+of method changes.  To display the implementation history for a particular
+method use:<pre><tt><b>
+     Number getMessage: "absoluteValue" .
+     :implementationSource     #- returns time series of strings
+     do: [ "Implementation As Of: " print; ^date printNL ;
+           printNL ;           #- displays implementation
+           "-" fill: 50 . printNL ;
+         ] ;
+</b></tt></pre>
+<p>
+
+<p>
+<h4>New Instances</h4>
+<p>
+New instances of the <i>Schema MessageImplementationDescriptor</i>
+class are NOT
+created automatically.  Each time you use one of the <i>define</i>
+messages, the class is flagged to indicate
+that new messages are pending.  To process and refresh all pending messages,
+execute the expression:<pre><tt><b>
+     Schema processAllMessages
+</b></tt></pre>
+This process creates new <i>MessageImplementationDescriptor</i>
+instances and refreshes information as needed.  Four properties
+supply update information for an instance.  The <i>creationDate</i>
+property contains the date that the instance was first created.
+The <i>updateDate</i> property contains the date the message
+implementation last changed (i.e., message type and
+method implementation changes).  The <i>createdInLastPosting</i>
+property is set to TRUE if the instance was created during
+the last execution of the <i>processAllMessages</i> message.
+The <i>refreshedInLastPosting</i> property is set to TRUE if
+the instance implementation or type changed during the last update.
+
+<p>
+<h4>Additional Information</h4>
+<p>
+The <i>Schema MessageImplementationDescriptor</i>
+messages are described further in
+the document <a href="mSchema.htm"><i>Schema Message Dictionary</i></a>.
+<p>
+
+
+<p>
+<hr>
+<h3><a name="md">The Schema MessageDescriptor Class</a></h3>
+<p>
+This class is used to maintain information about the message names
+used in the database.  It is primarily used for internal cross-
+referencing purposes and you should rarely need to access these values
+directly.  
+<p>
+The <i>Schema MessageDescriptor</i> messages are described further in
+the document <a href="mSchema.htm"><i>Schema Message Dictionary</i></a>.
+<p>
+
+<p>
+<hr>
+<h3><a name="maintain">Maintaining Schema Information</a></h3>
+<p>
+Message implementation descriptors are not automatically generated
+for new messages.  As a result, the <i>Schema MID</i> class will not
+contain up-to-date entries for messages defined or modified recently.
+To process and refresh all pending messages, execute the 
+expression:<pre><tt><b>
+     Schema processAllMessages
+</b></tt></pre>
+This process creates and refreshes message information as needed.
+Messages are normally updated as part of a a standard nightly production
+process.
+<p>
+Several messages are available for updating descriptive information
+about a class including:
+<p>
+<ul>
+<li><i>setDescriptionTo: string </i>
+<li><i>setSampleUsageTo: string </i>
+<li><i>setHtmlDocNameTo: string </i>
+<li><i>setClassTypeTo: string</i>
+<li><i>setNamingDictionaryTo: dictionary</i>
+</ul>
+<p>
+All of these messages return the current class
+descriptor and can therefore be streamed together.  
+For example:<pre><tt><b>
+   Currency classDescriptor
+      setDescriptionTo:
+      "Instances of the Class Currency represents different monetary units." .
+      setSampleUsageTo: "Named Currency USD ;  "USD" asCurrency ; " .
+      setHtmlDocNameTo: "clCurrency.htm" .
+      ;
+</b></tt></pre>
+<p>
+Several messages are available for updating descriptive information
+about a message including:
+<p>
+<ul>
+<li><i>setDescriptionTo: string </i>
+<li><i>setReturnObjectTypeTo: class</i>
+<li><i>setReturnObjectContainerTo: class</i>
+<li><i>setFunctionTypeTo: string</i>
+<li><i>setLevelTo: string</i>
+<li><i>setParameter: n typeTo: cd </i>
+<li><i>setSelectorTo: string</i>
+<li><i>setTypeTo: ClassType </i>
+<li><i>flagAsKeyField</i> 
+<li><i>flagAsPartialKeyField</i> 
+<li><i>setDefaultValueTo: object</i>
+<li><i>clearDefaultValue</i>
+</ul>
+<p>
+All of these messages return the current message implementation
+descriptor and can therefore be streamed together.  
+For example, to add descriptive information to the <i>absoluteValue</i>
+message defined at <i>Number</i>:<pre><tt><b>
+     Number getMessage: "absoluteValue" .
+        setDescriptionTo: "Returns the absolute value of the recipient" .
+        setReturnObjectTypeTo: Number .
+        setFunctionTypeTo: "Calc" .
+        describe ;
+</b></tt></pre>
+producing:<pre><tt><b>
+     Message:                 absoluteValue
+     Class:                   Number
+     Created:                 10/30/1992
+     Updated:                 10/30/1992
+     Function Type:           Calc
+     Returns the absolute value of the recipient
+     Returns:                 Number
+     Implementation Type:     Method
+     {|absoluteValue|
+     ^self < 0 ifTrue: [^self negated]
+     ifFalse: [^self]}
+</b></tt></pre>
+
+<p>
+<hr>
+<h3><a name="use">Using Schema Information</a></h3>
+<p>
+A number of messages have been defined at the class <i>Object</i>
+that interface with the <i>Schema</i> classes including:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<th>Message
+<th>Definition
+</tr>
+
+<tr>
+<td><i>getMessage: string</i>
+<td>Returns a <i>Schema MID</i> instance
+if <i>string</i> is defined as a message for recipient, NA otherwise.
+<tr>
+<td><i>deleteMessage: string</i>
+<td>Deletes the message if <i>string</i> is defined for the recipient
+class.
+<tr>
+<td><i>showInheritance</i>
+<td>Displays the inheritance hierarchy (parents and children) for the
+recipient.
+<tr>
+<td><i>inheritsFrom: class</i>
+<td>Returns TRUE if the recipient class inherits from the <i>parameter</i>
+class.
+<tr>
+<td><i>isSuperClassOf: class</i>
+<td>Returns TRUE if the recipient class is a super class of the
+<i>parameter</i> class.
+<tr>
+<td><i>subclassList</i>
+<td>Returns the list of classes that are subclasses of the recipient.
+The default instances of the actual classes are returned.
+<tr>
+<td><i>getMessages</i>
+<td>Returns a list of <i>Schema MID</i> instances that are the messages
+defined explicitly for the recipient class.
+<tr>
+<td><i>getMessagesX</i>
+<td>Returns a list of <i>Schema MID</i> instances that are the messages
+defined explicitly for the recipient class or any of its super classes.
+<tr>
+<td><i>getMessagesInInheritancePath</i>
+<td>Returns a list of <i>Schema MID</i> instances that are the messages
+defined explicitly for the recipient class or any of its super 
+or sub classes.
+<tr>
+<td><i>getMessagesDefining: string</i>
+<td>Returns a list of <i>Schema MID</i> instances that explicitly
+define the message named by <i>string</i> for the recipient class
+or any of its super or sub classes.
+<tr>
+<td><i>getMessageNamesContaining: string</i>
+<td>Returns a list of <i>Schema MID</i> instances that 
+define message names that contain <i>string</i> for the recipient class
+or any of its super or sub classes.
+<tr>
+<td><i>getMessagesUsing: string</i>
+<td>Returns a list of <i>Schema MID</i> instances that 
+correspond to methods that contain <i>string</i> for the recipient class
+or any of its super or sub classes.
+<tr>
+<td><i>showMessages</i>
+<td>Displays the messages that are
+defined explicitly for the recipient class or any of its super classes.
+<tr>
+<td><i>showMessagesX</i>
+<td>Displays the messages
+defined explicitly for the recipient class or any of its super classes
+excluding messages at <i>Object</i>.
+<tr>
+<td><i>showProperties</i>
+<td>Displays the messages that are properties
+defined explicitly for the recipient class or any of its super classes.
+
+<tr>
+<td><i>showMessagesDefining: string</i>
+<td>Displays the messages that explicitly
+define the message named by <i>string</i> for the recipient class
+or any of its super or sub classes.
+<tr>
+<td><i>showMessageNamesContaining: string</i>
+<td>Displays the messages that
+define message names that contain <i>string</i> for the recipient class
+or any of its super or sub classes.
+<tr>
+<td><i>showMessagesUsing: string</i>
+<td>Displays the messages that
+correspond to methods that contain <i>string</i> for the recipient class
+or any of its super or sub classes.
+<tr>
+<td><i>showMethodsUsing: string</i>
+<td>Displays the method implementationis that
+contain <i>string</i> for the recipient class
+or any of its super or sub classes.
+
+</tr></table></Center>
+<p>
+See <a href="Messages.htm#access"><i>Vision Messages: Access Techniques</i></a>
+for samples that use these messages.
+<p>
+Two additional messages are defined at the <i>Schema ClassDescriptor</i>
+class which are useful for cross referencing the messages in your database.
+The message <i>getMessagesReturningClass</i> returns a list of
+<i>Schema MID</i> instances that return the recipient's class or a 
+sub class of it.  
+The message <i>getMessagesReturningSuperClass</i> returns a list of
+<i>Schema MID</i> instances that return a super class of the recipient's class.
+<p>
+The schema information can be used to answer a number of different
+questions.  For example:<pre><tt><b>
+     1. ===>  Find all Constants and display message, class, and value
+
+     Schema MessageImplementationDescriptor activeList
+         select: [ type isConstant ] .
+     do: [ message print: 30 ;
+           messageClassDescriptor print: 30 ;
+           implementationSource printNL ;
+         ] ;
+
+     2. ===>  Get all messages defined for Integer and group by function
+
+     Integer getMessagesX
+        groupedBy: [ functionType ] .
+     do: [ printNL ;
+           groupList do: [ displayInfo ] ;
+           newLine print ;
+         ] ;
+
+     3. ===> Display all Entity messages that do not have a description
+
+     Entity getMessages
+        select: [ description isNA ] .
+     do: [ displayInfo ] ;
+
+
+     4. ===> Display all methods that use the <i>asDate</i> message
+
+             Object showMethodsUsing: "asDate" ;
+
+
+     5. ===> Display old versions of the 'absoluteValue' message
+
+     Number getMessage: "absoluteValue" .
+     :implementationSource
+     do: [ "Implementation As Of: " print; ^date printNL ;
+           printNL ;    # displays implementation
+           "-" fill: 50 . printNL ;
+         ] ;
+
+     6.  ===>  Show Messages By Name
+               Sort by message, then by class within message:
+
+     "Message" print: 20 ;
+     "Class" print: 30 ;
+     "Type" print: 13 ;
+     "Function" printNL ;
+     Schema MessageImplementationDescriptor activeList
+        sortUpBy: [ messageDescriptor message ]
+        then: [ messageClassDescriptor ] .
+     do: [ message print: 19 ; " " print ;
+           messageClassDescriptor code print: 29 ; " " print ;
+           type shortName print: 12 ; " " print ;
+           functionType printNL ;
+         ] ;
+
+     7.  ===>  Show Messages By Function
+               Group by function, then sort by message, then class
+
+     "Message" print: 30 ;
+     "Class" print: 40 ;
+     "Type" printNL ;
+     Schema MessageImplementationDescriptor activeList
+         groupedBy: [ functionType ] .
+     do: [ "===> Function Type: " print ; code printNL ;
+           groupList
+             sortUpBy: [ messageDescriptor message ]
+                 then: [ messageClassDescriptor ] .
+           do: [ message print: 29 ; " " print ;
+                 messageClassDescriptor code print: 39 ; " " print ;
+                 type shortName printNL ;
+               ] ;
+           newLine print ;
+         ] ;
+
+     8.  ===>  Show Messages By Class
+
+         For each class, display all messages (excluding those at Object):
+
+     "Message" print: 50 ;
+     "Type" print: 13 ;
+     "Implemented At Class: " printNL ;
+     Schema ClassDescriptor activeList
+     do: [ "Extended Message Dictionary For Class: " print ;
+           code printNL ;
+           class getMessagesX
+              select: [ messageClassDescriptor isObjectDescriptor not ] .
+           do: [ message print: 49 ; " " print ;
+                 type shortName print: 12 ; " " print ;
+                 messageClassDescriptor name printNL ;
+               ] ;
+           newPage print ;
+         ] ;
+</b></tt></pre>
+<p>
+These examples can easily be modified to restrict the display to
+messages that have been updated since a known date using:<pre><tt><b>
+     Schema MessageImplementationDescriptor activeList
+          select: [ updateDate >= ^today - 3 monthEnds ] .
+             . . .
+</b></tt></pre>
+
+<p>
+<hr>
+<h3><a name="reports">Database Navigation Tools</a></h3>
+<p>
+A sample kit of reports designed to work with HTML browsers,
+has been defined to display class and message information.
+These reports can be executed as part of a "live" Vision enviornment
+or can be pre-generated and stored on a server for static access.
+<p>
+For information describing the functionality and installation of this
+kit, see the document,
+<a href="kitNav.htm"><i>The Vision Database Navigator Kit</i></a>.
+
+<p>
+<hr>
+<h3><a name="install">Installation</a></h3>
+<p>
+The <b>Schema</b>
+ToolKit has been a standard component of all databases bootstrapped
+since March 1994.  
+<p>
+<h4>Adding Classes Created With <i>specialized</i> </h4>
+<p>
+Variations of the <i>specialized</i> message create subclasses
+without generating a corresponding <i>ClassDescriptor</i> instance.
+The message <i>hasSchema</i> can be sent to any object to determine
+if its class has a corresponding instance in the <i>Schema ClassDescriptor</i>
+class.  Several messages have been
+provided with this tool kit that enable you to create a class
+descriptor for an existing class.  To add a class, the following
+conditions must be true:
+<p>
+<ul type="disc">
+<li>The class does not currently have a class descriptor.
+<li>The class' direct super class does have a class descriptor.
+</ul>
+<p>
+The expressions:<pre><tt><b>
+      Schema addClass: class
+</b>and<b>
+      Schema addClass: class at: object
+</b>and<b>
+      Schema addClass: class as: id at: object
+</b></tt></pre>
+can be used to add a class descriptor for a class the does not
+have one.  The parameter <i>class</i> refers to the class that
+needs a class descriptor.  The <i>id</i> parameter is a string used to
+fill in the <i>code</i> property for the class descriptor.
+The 'whatAmI' of the class is used if the parameter is not supplied.
+The <i>object</i> parameter is used to fill in the
+<i>defaultAccessPath</i> property for the class descriptor.
+The path is defined relative to '^global' if this parameter is not
+supplied.
+
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated June 25, 1997</font>
+
+</table>
+

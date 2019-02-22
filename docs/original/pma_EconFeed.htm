@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Upload Format: EconFeed </title>
+
+</head>
+<body>
+<body bgcolor=white>
+<h2>Vision Portfolio Management Application Layer: Data Feeds</h2>
+<p>
+| <a href="pmaFeeds.htm">Application Feeds</a> |
+<hr><p>
+<font size=+2><b>Data Feed: </b><i>EconFeed</i></font><p>
+<font size=+1><b>Category: </b><i>EntityExtenderFeed</i></font><p>
+
+<h3>Summary:</h3>
+<p>
+<ul>
+The <i>EconFeed</i> feed is used to create and update 
+   <b>EconomicData</b> data record instances for countries.  
+   A single <b>EconomicData</b> record is created for each
+   <b>Country</b>; time series properties are defined for this
+   record and can be updated at whatever frequency is appropriate
+   for the series.  The data is accessed via the property <i>econData</i>
+   defined for the <b>Country</b> class.
+<p>
+   This feed can include data for any number
+   of countries for any number of dates and 
+   can be used to set initial values for 
+   properties and/or change existing values.
+<p>
+   This class is described in the
+   <a href="pmaSupp.htm#Econ"><i>Portfolio Management Application
+   Supplemental Classes</i></a> document.  
+</ul>
+<p>
+
+<h3>Available Fields:</h3>
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>Field<th>EconomicData<br>Property<th>Type<th>Description
+<tr>
+<tr><th align=center colspan=4>--- Required Fields ---
+<tr>
+<td><i>entityId</i>
+<td><i>entity</i>
+<td>String
+<td>any valid country identifier
+<tr>
+<td><i>date</i>
+<td><i>date</i>
+<td>Date
+<td>date of data
+<tr>
+<tr><th align=center colspan=4>--- Suggested Fields ---
+<tr>
+<td><i>gnp</i>
+<td><i>gnp</i>
+<td>Number
+<td>Gross National Production
+<tr>
+<td><i>cpi</i>
+<td><i>cpi</i>
+<td>Number
+<td>Consumer Price Index
+<tr>
+</table></center>
+<p>
+
+<h3>Special Processing Rules:</h3>
+<p>
+<ul type=disc>
+<li>
+The <i>entityId</i> must correspond to an existing <b>Country</b>
+     instance.  Any valid country alias can be used to identify the country.
+<p>
+<li>The <i>date</i> is used to update any of the fields associated with
+      time series properties.  It can be in any valid date format
+      such as <i>9705</i> or <i>5/31/97</i>.  
+<p>
+<li>A country's <b>EconomicData</b> record is attached to the country
+      via the fixed property <i>econData</i>.  The individual properties
+      associated with the record are defined to vary over time.  A
+      single upload should include fields that vary over time with the
+      same frequency.
+</ul>
+
+<p>
+<a name="related">
+<h3>Related Feeds:</h3>
+<p>
+<ul type=disc>
+<li><a href="pma_CountryMaster.htm"><i>CountryMaster</i></a>:
+defines Country instances referenced by this feed
+</ul>
+<p>
+<h3>Sample Upload:</h3>
+<p>
+The following tab-delimited feed could be used to create and update <b>EconomicData</b>
+instances:<pre><tt><b>
+  Interface ExternalFeedManager upload: "EconFeed" using:
+     "entityId     date       gnp      cpi
+      US           95         1234.56  987.65
+      US           96         2345.67  876.54
+      CA           95         111.22   33.44
+      CA           96         222.33   44.55
+     " ;
+</b></tt></pre>
+
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated August 27, 1998</font>
+</tr>
+</table>
+
+</body>
+</html>

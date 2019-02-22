@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>The Company And Security Classes</title>
+</head>
+
+<body bgcolor=white>
+
+<h2>The Company And Security Classes</h2>
+| <a href="index.htm">Home</a> | <a href="invRef.htm">Investment Reference</a> |
+<hr>   
+
+<h3>Topics Covered:</h3>
+
+<ul type = square>
+<li><a href="#Overview">Overview</a>
+<li><a href="#The Company Class">The Company Class</a>
+<li><a href="#Other Company Messages">Other Company Messages</a>
+<li><a href="#The Security Class">The Security Class</a>
+<li><a href="#Other Security Messages">Other Security Messages</a>
+<li><a href="#New Instances and Additional Messages">New Instances and Additional Messages</a>
+</ul>
+<hr>
+
+<a name = "Overview"><h3>Overview</h3></a>
+
+The instances of the class Company represent the individual  corporate
+entities  for which you track information.  Information maintained for
+a company typically includes sales, earnings estimates,  and  ratings.
+A large  amount  of raw data about companies is available in external
+databases.  In Vision, the data  provided  by  each  external  company
+database  is  viewed as a property of the company. In other words, the
+company <i>Nestles</i> is a Vision object whose  properties  could  include
+<i>IbesData</i> and <i>WorldScopeData</i> in addition to <i>name</i>, <i>industry</i>, and
+<i>earnings</i>.
+<p>
+
+The  instances  of  the  class  Security  represent   the   individual
+securities  issued by a corporation, government, or some other entity.
+A variety of security  types  exist  including  common  and  preferred
+stocks,  convertible and non-convertible bonds, cash, and put and call
+options.  Data maintained for a  security  typically  includes  price,
+dividend and shares outstanding information.  Portfolios hold specific
+amounts of one or more individual securities.  Some external databases
+provide  information about specific securities.  The security <i>Nestles
+Common Stock</i> is  a  Vision  object  whose  properties  could  include
+<i>MSCIData</i> in addition to <i>name</i>, <i>price</i>, and <i>sharesOut</i>.
+<p>
+
+The  security  <i>Nestles  Common  Stock</i>  is  a  Vision  object   whose
+properties  include  pricing,  dividend,  and split information.  This
+object is distinct from the company <i>Nestles</i> whose properties include
+sales,  earnings,  and  industry  information.   Although  Company and
+Security are distinct  classes  in  the  Vision  hierarchy,  there  is
+obviously  a  close  relationship between related instances of the two
+classes since each security is issued by a unique  company  (or  other
+issuer).
+<p>
+
+When you refer to the price earnings ratio for  a  security,  you  are
+really  asking  for  the  current price of the security divided by the
+earnings per share for the corporate entity that issued the  security.
+The  property  <i>company</i> is defined at Security to return the value of
+the  company  associated  with  the  security.   The   actual   object
+representing  the  company  is  returned.   For  example,  the  Vision
+expression:
+
+<pre><b>    Named Security GM company</b></pre>
+
+returns the object representing the company GM and the expression:
+
+
+<pre><b>    Named Security GM company = Named Company GM </b></pre>
+
+yields the result TRUE.  Note that several  securities  may  have  the
+same value for company since more than one security can be issued by a
+single Company entity.  By default,  the  value  of  <i>company</i>  for  a
+security  is  the default company instance. Automated and manual rules
+can be used to link a security to its "real" company instance.
+<p>
+
+When you refer to the price earnings ratio  for  a  company,  you  are
+really  asking for the current price of the company's primary security
+divided by the earnings per  share  for  the  company.   The  property
+<i>primarySecurity</i>  is  defined  at  Company to return the value of the
+security defined as the primary security for the company.  The  actual
+object representing the security is returned.  For example, the Vision
+expression:
+
+<pre><b>    Named Company GM primarySecurity </b></pre>
+
+returns the object representing GM's common  stock  security  and  the
+expression:
+
+<pre><b>    Named Company GM primarySecurity = Named Security GM</b></pre>
+
+yields the result TRUE.  Note that only one security can  be  assigned
+as  the  <i>primarySecurity</i>  for  a  Company.  By default, the value of
+<i>primarySecurity</i> for a company  is  the  default  security  instance.
+Automated and manual rules can be used to link a company to its <i>real</i>
+primary security instance.
+<p>
+<hr>
+<a name="The Company Class"><h3>The Company Class</h3></a>
+ 
+The following key properties are defined for the class Company:
+<p>
+
+<center><table border=1 cellspacing=2 cellpadding=8>
+<tr><td><b>Property</b><td><b>Initial Value</b><td><b>Type</b>
+<tr><td>code<td>Supplied String<td>String
+<tr><td>name<td>code<td>String
+<tr><td>ticker<td>code<td>String
+<tr><td>* primarySecurity<td>Named Security Default<td>Security
+<tr><td>* baseSecurity<td>Named Currency Default<td>Currency
+<tr><td>* country<td>Named Country Default<td>Country
+<tr><td>* industry<td>Named Industry Default<td>Industry
+<tr><td>* fiscalYearEnd<td>12<td>Integer
+<tr><td>securityList<td>Empty List<td>List   
+</table></center>                
+<center>* Included in Company initialization list</center>
+<p>
+                             
+In addition to the standard Entity initializations, the class  Company
+performs the following steps when you create a new instance:
+<p>
+
+<ul type=disc>
+<li>The <i>ticker</i> property is assigned the value of code (i.e., the
+value supplied as a parameter to the <i>createInstance:</i> message).
+<p>
+<li>The <i>fiscalYearEnd</i> property is assigned to the value 12.
+<p>
+<li>The <i>securityList</i> property is assigned to be an empty list.  By
+default, no security instances are associated with this company. 
+</ul>
+
+For example, the expression:
+
+<pre><b>    Company createInstance: "370442". </b></pre>
+
+creates a new Company instance with a code of <i>370442</i>.  The <i>profile</i>
+message can be used to display a summary description of this company:
+
+<pre><b>    Named Company at: "370442". profile </b></pre>
+
+produces:
+
+<pre><b>    *** Company Profile For: 370442
+    Code:                         370442
+    Aliases:                      370442  
+
+    ---  Links   ---
+    primarySecurity :             Default   00000000  Default   Default
+    baseCurrency :                Default   Default
+    country :                     Default   Default
+    industry :                    Default   Default
+
+    ---  XRefs  ---
+
+    ---  Supplemental Data  ---
+    ticker:                       370442
+    fiscalYearEnd:                12 
+</b> </pre>
+   The message <i>setTickerTo:</i> is used to assign an alternative  value  to
+   the <i>ticker</i> property.  This value is automatically added to the alias
+   list for the company instance as well.  For example:
+
+<pre><b>     Named Company at: "370442" .
+                setNameTo: "GENERAL MOTORS" .
+                setTickerTo: "GM" ;
+     Named Company GM profile ;  
+</b></pre>
+
+produces:
+
+<pre><b>    *** Company Profile For: GENERAL MOTORS
+    Code:                         370442
+    Aliases:                      370442 / GM /
+
+    ---  Links   ---
+    primarySecurity :             Default   00000000  Default   Default
+    baseCurrency :                Default   Default
+    country :                     Default   Default
+    industry :                    Default   Default
+
+    ---  XRefs  ---
+
+    ---  Supplemental Data  ---
+    ticker:                       GM
+    fiscalYearEnd:                12 
+</b></pre>
+
+Notice that messages  such  as  <i>baseCurrency</i>  and  <i>primarySecurity</i>
+return   an  object  of  another  entity  class.   As  a  result,  the
+expression:
+
+<pre><b>    Named Company GM baseCurrency name </b></pre>
+
+returns the name associated  with  the  company  GM's  currency.   The
+expression:
+
+<pre><b>    Named Company GM primarySecurity price </b></pre>
+
+returns the price associated with GM's primary security.
+<p>
+
+The <i>primarySecurity</i> for a company is initially set  to  the  Default
+security  instance.   The message: <i>setPrimarySecurityTo:</i> can be used
+to assign a different security as the default.  You can use  a  string
+that is a valid alias for the security or an actual security instance
+as the parameter.  For example, if a  security  named  <i>GM</i>  has  been
+defined, the expressions:
+
+<pre><b>    Named Company GM setPrimarySecurityTo: Named Security GM  .</b></pre>
+or
+<pre><b>    Named Company GM setPrimarySecurityTo: "GM"  . </b></pre>
+
+can be used to assign the value of the <i>primarySecurity</i> property.  If
+the supplied parameter does not refer to a valid security, the value of
+<i>primarySecurity</i> will not  be  changed.   If  the  supplied  security
+refers  to  a  company other than this instance, the reassignment will
+also not be executed.  If the security currently refers to the default
+company, its company will automatically be reassigned to refer to this
+instance.  Since this method is often used as part of a <i>bulk</i> update,
+no  error  messages  are  displayed  when  the  primarySecurity is not
+reassigned.
+<p>
+
+<hr>
+
+<a name = "Other Company Messages"><h3>Other Company Messages</h3></a>
+
+When you change the <i>name</i>, <i>ticker</i> or  <i>primarySecurity</i>  properties
+for  a  company,  you  should use one of the messages described in the
+previous section.  The message <i>setFiscalYearEndTo:</i> should be used to
+change  the  value of <i>fiscalYearEnd</i> for a company.  This method only
+changes the value if the supplied parameter is a number between 1  and
+12.  For example:
+
+<pre><b>    Named Company GM setFiscalYearEndTo: 12 ; </b> </pre>
+
+Note that companies are automatically created with  a  default  fiscal
+year end value of 12.
+<p>
+
+The property <i>securityList</i> has been defined to return the list of
+securities associated with the company.  This list is initially empty.
+The message  <i>rebuildSecurityList</i> can  be  executed  to  update  the
+<i>securityList</i>  property  for  all  companies. This method is normally
+executed as part of the production update cycle; however, you can  use
+it during your session if you have manually redefined the relationship
+between any security and company instances.
+<p>
+
+The following section summarizes additional messages defined  for  the
+Company  class  and  links to  where  they  are  described in further
+detail:
+<p>
+
+<center><table border=1 cellspacing=2 cellpadding=8>
+<tr><td><b><a href="clCurrency.htm">Currency Related Messages</a></b>
+<tr><td>baseCurrency
+<tr><td>currency
+<tr><td>currencyFactor
+<tr><td>inCurrency:do:
+<tr><td>setBaseCurrencyTo:
+</table></center>
+<p>
+
+<center><table border=1 cellspacing=2 cellpadding=8>
+<tr><td><b><a href="invIssues.htm#splits">Split Adjsutment Messages</a></b>
+<tr><td>adjustmentRelativeTo:
+<tr><td>getAdjustedDataFor:
+<tr><td>getAdjustedSharesDataFor:
+</table></center>
+<p>             
+
+<center><table border=1 cellspacing=2 cellpadding=8>
+<tr><td><b><a href="clDict.htm#Xref">Alternative Cross Referencing Messages</a></b>
+<tr><td>XRef
+<tr><td>createNewXRefManager
+<tr><td>createXRef:withProperty
+<tr><td>setXRefIn:to:
+</table></center>
+<p>               
+
+The remaining properties can be changed using the standard  assignment
+operation.  For example, the expression:
+
+<pre><b>    Named Company GM :country <- Named Country US ; </b></pre>
+
+assigns the Country instance representing the United  States  to  GM's
+country property.
+<p>
+<hr>
+
+<a name = "The Security Class"><h3>The Security Class</h3></a>
+
+The following key properties are defined for the class Security:
+<p>
+
+<center><table border=1 cellspacing=2 cellpadding=8>
+<tr><td><b>Property</b><td><b>Initial Value</b><td><b>Type</b>
+<tr><td>code<td>Supplied String<td>String
+<tr><td>name<td>code<td>String
+<tr><td>ticker<td>code<td>String
+<tr><td>cusip<td>NA<td>String
+<tr><td>canCusip<td>NA<td>String
+<tr><td>sedol<td>NA<td>String
+<tr><td>* company<td>Named Company Default<td>Company
+<tr><td>* baseCurrency<td>Named Currency Default<td>Currency
+<tr><td>* type<td>Named SecurityType Default<td>Security
+<tr><td>adjustmentFactor<td>1.0<td>Number
+<tr><td>unitCalc<td>1.0<td>Number
+</table></center>
+<center>* Included in Security initialization list</center>
+<p>
+
+In addition to the standard Entity initializations, the class Security
+performs the following steps when you create a new instance:
+<p>
+<ul type=disc>
+<li>The <i>ticker</i> property is assigned the value of code (i.e., the
+value supplied as a parameter to the <i>createInstance:</i> message).
+<p>
+<li>The structures needed to support pricing, dividend, and holdings access are initialized.
+<p>
+<li>The <i>adjustmentFactor</i> and <i>unitCalc</i> values are initialized to 1. 
+</ul>
+
+For example, the expression:
+
+<pre><b>    Security createInstance: "37044210" . </b></pre>
+
+creates a new Security  instance  with  a  code  of  <i>37044210</i>.   The
+<i>profile</i> message can be used to display a summary description of this
+security:
+
+<pre><b>    Named Security at: "37044210" . profile </b></pre>
+
+produces:
+
+<pre><b>    *** Security Profile For: 37044210
+    Code:                         37044210
+    Aliases:                      37044210 /
+
+    ---  Links   ---
+    company :                     Default   Default   Default
+    baseCurrency :                Default   Default
+    type :                        Default   Default
+
+    ---  XRefs  ---
+    canCusip:                          NA
+    cusip:                             NA
+    sedol:                             NA
+
+    ---  Supplemental Data  ---
+    ticker:                       37044210
+    price: (Latest)                     NA  (1/1/1)
+    sharesOut:                          NA
+    eps:                                NA
+    unitCalc:                          1.00
+    holdings (count):                     0 
+</b></pre>
+
+The message <i>setTickerTo:</i> is used to assign an alternative  value  to
+the  <i>ticker</i>  property.   This  value  is  automatically added to the
+<i>aliases</i> property for the security instance as well. For example:
+
+<pre><b>    Named Security at: "37044210" .
+       setNameTo: "GENERAL MOTORS COM" .
+       setTickerTo: "GM" ;
+    Named Security GM profile ;
+</b></pre>
+
+produces:
+
+<pre><b>    *** Security Profile For: GENERAL MOTORS COM
+    Code:                         37044210
+    Aliases:                      37044210 / GM /
+
+    ---  Links   ---
+    company :                     Default   Default   Default
+    baseCurrency :                Default   Default
+    type :                        Default   Default
+
+    ---  XRefs  ---
+    canCusip:                          NA
+    cusip:                             NA
+    sedol:                             NA
+    . . .
+</b></pre>
+
+The properties <i>cusip</i>, <i>canCusip</i>, and <i>sedol</i> have been  defined  to
+allow  you  alternative  means for identifying a security.  A specific
+security will set the value of  one  of  these  properties  using  the
+message   <i>setCusipTo:</i>,   <i>setCanCusipTo:</i>,  or  <i>setSedolTo:</i>.   For
+example:
+
+<pre><b>    Named Security GM
+          setCusipTo: "37044210" .
+    do: [ "Cusip: " print: 20 ; cusip printNL ;
+          "Can Cusip: " print: 20 ; canCusip printNL ;
+          "Sedol: " print: 20 ; sedol printNL ;
+        ] ;
+</b></pre>
+
+produces:
+
+<pre><b>    Cusip:              37044210
+    Can Cusip:                 NA
+    Sedol:                     NA
+</b></pre>
+
+The <i>cusip</i> or <i>sedol</i> value is automatically added to  the  <i>aliases</i>
+property  for the security instance.  Because there are many different
+potential sources for a security identifier, conflicts  are  possible.
+For  example,  a  US  and  a Canadian security may have the same cusip
+number.  Only one of these can be returned using the  <i>Named  Security
+cusipId</i> expression.  You can set up additional XRef dictionaries to track additional identifiers.
+<p>
+
+The <i>company</i> for a security is initially set to the  Default  company
+instance.   The  message:  <i>setCompanyTo:</i>  can  be  used  to assign a
+different company.  You can use a string that is a valid alias for the
+company  or an actual company instance as the parameter.  For example,
+the expressions:
+
+<pre><b>    Named Security GM setCompanyTo: Named Company GM </b></pre>
+or
+<pre><b>    Named Security GM setCompanyTo: "GM"</b></pre>
+
+can be used to assign the value of the  <i>company</i>  property.   If  the
+supplied  parameter  does  not  refer  to a valid company the value of
+<i>company</i> will not be changed. Since this method is often used as part
+of  a  "bulk" update, no error messages are displayed when the company
+is not reassigned.
+<p>
+<hr>
+
+<a name="Other Security Messages"><h3>Other Security Messages</h3></a>
+
+The  following  section summarizes  additional  messages  defined  for  the Security class and
+indicates where they are described in further detail, if appropriate:
+<p>
+<center><table border=1 cellspacing=2 cellpadding=8>
+<tr><th colspan=2><b>Basic Security Data</b>
+<tr><td>*_eps<td>unadjusted earning per share value
+<tr><td>eps<td>split/currency adjusted eps
+<tr><td>*_sharesOut<td>unadjusted shares outstanding
+<tr><td>sharesOut<td>split adjusted shares outstanding
+<tr><td>_price<td>unadjusted price
+<tr><td>marketCap<td>currency adjusted market capitalization
+<tr><td>pe<td>price-earnings ratio
+<tr><td>issuer<td>same as <i>company</i>
+<tr><td>* type<td>instance of SecurityType class
+<tr><td>unitCalc<td>unit adjustment for mkt value calcs (default 1.0)
+</table border></center>
+<p>
+<center>* Indicates a property value that can be changed directly</center>
+<p>
+
+The <i>_eps</i>, <i>_sharesOut</i>, and pricing data are usually updated as part
+of  an  external  pricing feed.  These values are all stored over time
+and are updated using the <i>asOf:put:</i>  message.   Split  and  currency
+adjustment  issues are described more fully in the <a href="invIssues.htm">
+Investment Issues</a> document.  The  <i>type</i>  and  <i>unitCalc</i>  properties  are
+maintained  as  part  of  the external pricing update or as part of an
+internal security <i>refresh</i> feed.  These values can be  changed  using
+the standard assignment operation.  For example, the expression:
+
+<pre><b>    Named Security GM :_sharesOut asOf: 9311 put: 1234000 ;</b></pre>
+
+assigns the value 1234000 as  GM's  shares  outstanding  value  as  of
+November 1993 and the expression:
+
+<pre><b>    Named Security GM :unitCalc <- 1.0 ; </b></pre>
+
+assigns the values 1 to the <i>unitCalc</i> property.
+<p>
+
+Additional messages defined at the Security class include:
+<p>
+
+<center><table border=1 cellspacing=2 cellpadding=8>
+<tr><th colspan=2><b><a href="clCurrency.htm">Currency Related Messages</a></b>
+<tr><td>baseCurrency<td>local currency for Security
+<tr><td>currency<td>current currency override
+<tr><td>currencyFactor<td>currency conversion multiple
+<tr><td>setBaseCurrencyTo:<td>change baseCurrency of Security
+</table></center>
+<p>
+
+<center><table border=1 cellspacing=2 cellpadding=8>
+<tr><th colspan=2><b><a href="invIssues.htm">Price and Dividend Messages</a></b>
+<tr><td>_price<td>unadjusted price
+<tr><td>price<td>split/currency adjusted price
+<tr><td>_high<td>unadjusted high
+<tr><td>high<td>split/currency adjusted high
+<tr><td>_low<td>unadjusted low
+<tr><td>low<td>split/currency adjusted low
+<tr><td>_open<td>unadjusted open
+<tr><td>open<td>split/currency adjusted open
+<tr><td>_volume<td>unadjusted volume
+<tr><td>volume<td>split adjusted volume
+<tr><td>getPriceRecord<td>returns PriceRecord instance as of ^date
+<tr><td>prices<td>split/currency adjusted TimeSeries
+<tr><td>pricingSeries
+<tr><td>priceChangeFrom:to:<td>computation
+<tr><td>totalReturnFrom:to:<td>computation
+<tr><td>addPrice:asOf:inCurrency:<td>create new PriceRecord
+<tr><td>changePriceCurrencyOn:to:<td>change PriceRecord value
+<tr><td>changePriceOn:to:<td>change PriceRecord value
+<tr><td>setHighTo:asOf:<td>change PriceRecord value
+<tr><td>setLowTo:asOf:<td>change PriceRecord value
+<tr><td>setOpenTo:asOf:<td>change PriceRecord value
+<tr><td>setVolumeTo:asOf:<td>change PriceRecord value
+<tr><td>_dividend<td>unadjusted dividend
+<tr><td>dividend<td>split/currency adjusted dividend
+<tr><td>dividendSeries<td>DivRecord (as of ^date)
+<tr><td>dividends<td>TimeSeries of DivRecords
+<tr><td>getDivsFrom:to:<td>computation
+<tr><td>addDiv:asOf:inCurrency:<td>create new DivRecord
+<tr><td>changeDivCurrencyOn:to:<td>change DivRecord value
+<tr><td>changeDivOn:to:<td>change DivRecord value
+</table></center>
+<p>
+           
+<center><table border=1 cellspacing=2 cellpadding=8>
+<tr><th colspan=2><b><a href="invHolding.htm">Holdings Related Messages</a></b>
+<tr><td>getHoldingIn:<td>returns Holding in account                                  
+<tr><td>getIndices<td>List of IndexAccount instances
+<tr><td>heldIn:<td>returns TRUE/FALSE
+<tr><td>holdings<td>List of Holdings over time              
+<tr><td>holdingsDate<td>effective date of holdings               
+<tr><td>rebuildHoldings<td>update security holdings lists
+<tr><td>taxlots<td>List taxlots in Security
+</table></center>
+<p>
+               
+<center><table border=1 cellspacing=2 cellpadding=8>
+<tr><th colspan=2><b><a href="invIssues.htm#splits">Split Adjustment Messages</a></b>
+<tr><td>addSplitFactorOf:onExDate:
+<tr><td>adjustmentFactor
+<tr><td>adjustmentRelativeTo:
+<tr><td>getAdjustedDataFor:
+<tr><td>getAdjsutedSharesDataFor:
+<tr><td>rawSplitFactor
+<tr><td>rebuildAdjustmentFactor
+</table></center>              
+<p>
+
+<center><table border=1 cellspacing=2 cellpadding=8>
+<tr><td><b><a href="clDict.htm#Xref">Alternative Cross Referencing Messages</a></b>
+<tr><td>XRef
+<tr><td>createNewXRefManager
+<tr><td>createXRef:withProperty
+<tr><td>setXRefIn:to:
+</table></center>
+<p>
+               
+<hr>  
+            
+<a name = "New Instances and Additional Messages"><h3>New Instances and Additional Messages</h3></a>
+
+
+Company and Security instances are usually created and  maintained  as
+part  of  a  nightly  production cycle.  The specific processing rules
+used vary based  on  your  installation's  policies.   
+<p>
+
+Your installation may have defined many additional  messages  for  the
+Company  and  Security  classes.  The <i>showMessages</i> message is the
+fastest way to determine the current list of messages available for  a
+class.  For example:
+<pre><b>    Company showMessages </b></pre>
+
+External databases such as WorldScope  and  Ibes  provide  data  about
+specific  entities.  Each  database  includes one or more classes that
+track different information about a company (or security)  over  time.
+Access  to this data is provided via a set of messages defined to link
+a specific company or security instance with its corresponding data in
+the  external  source.   External  databases  are updated as part of a
+regular production cycle.  Access to external databases  is  described
+in detail in <a href="invExtDB.htm">External Database Access</a> of this document.
+<p>
+
+<hr>
+
+<table border="0" width="100%">
+<tr>
+<td align="left"><font size="-1">Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align="right"><font size="-1">Created June 11, 1997</font>
+
+</table>
+<hr>
+
+</body>
+</html>
+

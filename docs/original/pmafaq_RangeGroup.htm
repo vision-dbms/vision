@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<body>
+<title>Vision Portfolio Management FAQ: Range Groups </title>
+
+<body>
+<body bgcolor=white>
+<h2>Vision Portfolio Management FAQ:  Range Groups</h2>
+<hr><p>
+<h4>Goal:</h4>
+<ul>To define a classification scheme that uses value ranges to group related instances.
+</ul>
+<p>
+
+<h4>Description:</h4>
+<ul>
+Three RangeGroup feeds are pre-defined with the Portfolio Management
+Application Layer: <a href="pma_McapGroups.htm"><i>MCapGroups</i></a>, 
+<a href="pma_PeGroups.htm"><i>PeGroups</i></a>, and 
+<a href="pma_PbGroups.htm"><i>PbGroups</i></a>. 
+<p>
+RangeGroups are used to define ranges of values for a particular attribute.
+For example, you may want to define market capitalization ranges that
+group securities into "less than $500 million", "$500 million - 1 billion",
+and "greater than $1 billion" based on the value of the security's
+<i>marketCapUS</i>.
+
+
+This FAQ illustrates how to define your own ranges for each of these groups. 
+</ul>
+<p>
+
+
+<p>
+<h4>DataFeed Assumptions:</h4>
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>DataFeed<th>Fields
+<tr>
+<td><a href="pma_McapGroups.htm">McapGroups</a>
+<td><i>startValue, endValue, label</i>
+
+<tr>
+<td>DataItemFeed
+<td><i>id, shortName, sortCode, baseClass, accessPath, isGroup </i>
+
+<tr>
+<td>ClassSetup
+<td><i>ClassId, ParentId, Description</i>
+
+<tr>
+<td>PropertySetup
+<td><i>classId, property, defaultValue, description</i>
+
+<tr>
+<td>RangeGroupSetup
+<td><i>feedId, rangeClassId, updateClassId, updatePath, accessRule</i>
+</table></center>
+<p>
+
+<h4>
+Topic 1:
+
+Using the <i>McapGroups</i> range group to define market capitalization ranges.
+</h4>
+
+<h4>Steps:</h4>
+
+<ol type="A">
+
+<li>Load the instances for the RangeGroup, <b>McapGroups</b>.
+<p>
+<ol type="1">
+<li>Set up the spreadsheet to look like the following. 
+Note that the feed name <i>MCapGroups</i> is in the top left of the range.
+  
+<ul>
+<b><pre>
+MCapGroups
+
+startValue	endValue	label
+NA        	250     	less than $250M
+250             500	        $250M - $500
+500        	1000      	$500M - $1B
+1000        	2500      	$1B - $2.5B
+2500        	5000      	$2.5B - $5B
+5000        	10000      	$5B - $10B
+10000        	NA      	greater than $10B
+</pre></b>
+</ul>
+
+<li>Select the entire range.
+<li>Select <i>Upload Data</i> from the <i>VUpload</i> menu.
+<li>Select the <i>Range</i> button
+
+</ol>
+<p>
+The <i>McapGroups</i> instances have been created.
+
+<p>
+
+
+<li>Define <b>MCap Group</b> as a grouping choice.
+
+<p>
+<ol type="1">
+<li>Set up the spreadsheet to look like the following.
+Note that the feed name <i>DataItemFeed</i> is in the top left of the range.
+
+<ul>
+<b><pre>
+DataItemFeed
+
+id         shortName    baseClass    accessPath       isGroup
+mcapGroup  MCap Group   Security     marketCapGroup   Y
+</pre></b>
+</ul>
+
+<li>Select the entire range.
+<li>Select <i>Upload Data</i> from the <i>VUpload</i> menu.
+<li>Select the <i>Range</i> button.
+
+</ol>
+<p>
+<i>MCap Group</i> has been defined as a grouping choice. 
+
+<p>
+
+<li>Test browser to confirm the addition of <b>MCap Group</b> as a grouping choice:
+<ol type="1">
+
+<p>
+
+<li>Open the Vision Reporter in your web browser at http://visionweb/vision
+<li>Select <i>Account Reports</i>.
+<li>Select <i>AccountBreakdown</i>.
+<li>Enter an account and run the report.
+</ol>
+<p>
+
+<i>MCap Group</i> should now appear in the group menu at the bottom of report.
+<p>
+</ol>
+<hr>
+
+<h4>Topic 2: Creating New RangeGroups</h4>
+
+<p>
+
+Create a new range group that will group securities by price ranges:
+
+<ol type="A">
+
+<li>Define a <b>RangeClassification</b> subclass <b>PriceGroup</b>:
+<p>
+<ol type="1">
+<li>Set up the spreadsheet to look like the following.
+Note that the feed name <i>ClassSetup</i> is in the top left of the range.
+
+
+<ul>
+<pre><b>
+ClassSetup
+
+ClassId     ParentId              Description
+PriceGroup  RangeClassification   This class tracks security price range.
+</b></pre>
+</ul>
+
+<li>Select the entire range.
+<li>Select <i>Upload Data</i> from the <i>VUpload</i> menu.
+<li>Select the <i>Range</i> button.
+
+</ol>
+<p>
+
+The RangeGroup class <b>PriceGroup</b> has been created.
+<p>
+
+<li>Define a property at <b>Security</b> to hold <b>priceGroup</b> 
+<p>
+<ol type="1">
+<li>Set up the spreadsheet to look like the following.
+Note that the feed name <i>PropertySetup</i> is in the top left of the range.
+
+<ul>
+<pre><b>
+PropertySetup
+
+classId  property       defaultValue     description
+Security priceGroup     PriceGroup       price group
+</b></pre>
+</ul>
+
+<li>Select the entire range.
+<li>Select <i>Upload Data</i> from the <i>VUpload</i> menu.
+<li>Select the <i>Range</i> button.
+
+</ol>
+<p>
+The <i>priceGroup</i> property has been created for Security.
+
+<p>
+
+
+<li>Define a new RangeGroup feed 
+
+<p>
+<ol type="1">
+<li>Set up the spreadsheet to look like the following.
+Note that the feed name <i>RangeGroupFeedSetup</i> is in the top left of the range.
+
+<ul>
+<b><pre>
+RangeGroupFeedSetup
+
+feedId	      rangeClassId	updateClassId	updatePath	accessRule
+PriceGroups   PriceGroup	Security	priceGroup	price
+</pre></b>
+</ul>
+
+<p>
+
+<li>Select the entire range.
+<li>Select <i>Upload Data</i> from the <i>VUpload</i> menu.
+<li>Select the <i>Range</i> button.
+</ol>
+<p>
+
+The <i>RangeGroup</i> feed <i>PriceGroups</i> has been created.
+The <i>updatePath</i> name of the property is defined by the <i>updateClassId</i> which  
+holds the group value.  The <i>accessRule</i> defines the expression which accessed the basic data value
+grouped into the correct range.
+<p>
+
+<li>Load the instances for the <b>RangeGroup</b> <b>PriceGroups</b>:
+<p>
+<ol type="1">
+<li>Set up the spreadsheet to look like the following. 
+Note that the feed name <i>PriceGroups</i> is in the top left of the range.
+
+<ul>
+<b><pre>
+PriceGroups
+
+startValue        endValue        label
+NA                8               less than 8
+8                 25              8 - 25
+25                100             25 - 100
+100               NA              greater than 100
+</pre></b>
+</ul>     
+
+<li>Select the entire range.
+<li>Select <i>Upload Data</i> from the <i>VUpload</i> menu.
+<li>Select the <i>Range</i> button.
+
+</ol>
+<p>
+The <i>PriceGroup</i> ranges have been created.
+
+<p>
+
+
+<li>Define <b>Price Group</b> as a grouping choice for a report:
+<p>
+<ol type="1">
+<li>Set up the spreadsheet to look like the following.
+Note that the feed name <i>DataItemFeed</i> is in the top left of the range.
+
+
+<ul>
+<pre><b>
+DataItemFeed
+
+id          shortName    baseClass    accessPath       isGroup
+priceGroup  Price Group  Security     priceGroup       Y
+</b></pre>
+</ul>
+
+
+<li>Select the entire range.
+<li>Select <i>Upload Data</i> from the <i>VUpload</i> menu.
+<li>Select the <i>Range</i> button.
+
+</ol>
+<p>
+<i>Price Group</i> has been defined as a grouping choice. 
+
+<p>
+
+<li>Test that <b>Price Group</b> has been added as a grouping choice:
+<ol type="1">
+
+<p>
+
+<li>Open the Vision Reporter in your web browser at <i>http://visionweb/vision</i>.
+<li>Select <i>Account Reports</i>.
+<li>Select <i>AccountBreakdown</i>.
+<li>Enter an account and run the report.
+<p>
+</ol>
+<i>Price Group</i> should now appear in the group menu at the bottom of 
+report.
+</ol>
+
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated January 28, 1999</font>
+</tr>
+</table>
+</body></html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Application Layer: Portfolio Management</title>
+</head>
+<body bgcolor=white>
+<h2>Vision Application Layer: Portfolio Management</h2>
+
+<p>
+| <a href="investmanag.htm">Portfolio Management Application Home Page</a>
+| <a href="pmaXRef.htm">Application Cross Reference</a>
+|
+<hr>
+<h3>Topics Covered:</h3>
+<ul type=square>
+<li><a href="#overview">Overview</a>
+<li><a href="#install">Installation</a>
+<li><a href="#apps">Headstart Applications and Analyst Tools</a>
+<li><a href="#upload">Uploading Data</a>
+<li><a href="#dbadmin">Database Updates and Administration</a>
+<li><a href="#start">Getting Started</a>
+<li><a href="#next">Next Steps</a>
+<li><a href="#core">Core Classes</a>
+<li><a href="#supp">Supplemental Core Classes</a>
+<li><a href="#issues">Special Issues</a>
+<li><a href="#tutor">Language Tutorial</a>
+<li><a href="#xref">Document Cross Reference</a>
+<li><a href="#faq">FAQ Reference</a>
+</ul>
+<p>
+<hr>
+<h3><a name="overview">Overview</a></h3>
+<p>
+The core Vision system comes with a set of classes already defined.
+These classes include an initial set of methods which can be
+modified and extended by the user.  Vision's built-in class
+hierarchy is discussed in detail in the 
+<a href="clXRef.htm">general Vision documentation</a>.
+The <b>Portfolio Management Application Layer</b> defines 
+classes, protocol, and starter applications that address the
+needs of the portfolio management function.
+This layer is entirely implemented using the Vision
+language and can be readily tailored 
+to meet the specific needs of your organization.
+<p>
+Note that the actual entities created for the core investment classes
+will be dependent on your installation's requirements.  Many of the
+named entities used in the examples in these documents
+are included for illustration
+purposes only and may not exist in your environment.
+You can create them using the techniques provided or substitute
+entity identifiers that are defined for you organization.
+
+<p>
+<hr>
+<h3><a name="install">Installation</a></h3>
+<p>
+The <i>Vision Run-Time Environment</i> provides the tools needed to
+build and maintain a Vision database designed to 
+deliver Web-based applications to users via an internal intranet.
+Basic capabilities provided in this environment include
+a starter suite of web-based applications, initial templates for
+loading portfolio, security, and supporting information, and basic tools
+for committing data to the database.
+<p>
+The document, 
+<a href="pmaInstall.htm"><i>Portfolio Management Application: Installation
+</i></a>
+describes the implementation process.
+
+<p>
+<hr>
+<h3><a name="apps">Headstart Applications and Analyst Tools</a></h3>
+<p>
+The <b>Portfolio Management Application Layer</b> includes a starter
+suite of web-based applications.  These applications are accessed with
+a web browser via an organization's intranet.
+The Headstart applications are described in the document,
+<a href="pmaApps.htm"><i>Portfolio Management Application: Headstart Application</i></a>.
+<p>
+In addition,
+analysts can interact with Vision using Excel Add-ins designed to extract
+data from Vision and temporarily define and modify data that is
+used in conjunction with browser applications.  These analyst tools
+are described in the document,
+<a href="pmaAnalyst.htm"><i>Portfolio Management Application: Analyst Tools</i></a>.
+
+<p>
+<hr>
+<h3><a name="upload">Uploading Data</a></h3>
+<p>
+Standardized interfaces for loading data from external sources are
+provided as part of this Application Layer.
+An <a href="pmaAnalyst.htm">Excel interface is available</a> for making
+temporary modifications to the database.  These changes will be
+reflected in an analyst's private versions of browser reports,
+but will not be saved permanently.  Tools for committing permanent
+changes to the database <a href="pmaDBA.htm#data">are also provided</a>.
+<p>
+The pre-defined data feeds are described in the document,
+<a href="pmaFeeds.htm"><i>Portfolio Management Application: Feeds</i></a>.
+
+<p>
+<hr>
+<h3><a name="dbadmin">Database Updates and Administration</a></h3>
+<p>
+A collection of database administration tools are available for 
+loading data into the database, defining additional database 
+schema, and performing various database maintenance functions.
+<p>
+A single user is designated as the Vision database administrator
+and is given access to these tools which are described in the document,
+<a href="pmaDBA.htm"><i>Portfolio Management Application: Administration</i>
+</a>.
+
+<p>
+<hr>
+<h3><a name="start">Getting Started</a></h3>
+<p>
+Once you have <a href="#install">installed your software</a>,
+reviewed the <a href="pmaFeeds.htm"> data feed requirements</a>,
+and created an initial set of feeds, you are ready to
+start loading and using your data.   Samples of this process
+are described in the document,
+<a href="pmaStarting.htm">
+<i>Portfolio Management Application: Getting Started</i></a>.
+<p>
+
+<p>
+<hr>
+<h3><a name="next">Next Steps</a></h3>
+<p>
+Over time, you will probably want to add new reports and
+expand the set of internal and external data feeds you incorporate.
+You will be able to do many of these enhancements on your own using
+the techniques you learned during the installation process.  
+At this point, you may want to learn more about the Vision language
+so you can modify and create additional applications.  In addition,
+you may want to familiarize yourself with the production tools 
+that have been defined to help manage your Vision environment.
+<p>
+More information
+about "next steps" <a href="pmaNextSteps.htm">is available</a>.
+
+<p>
+<hr>
+<h3><a name="core">Core Classes</a></h3>
+<p>
+The <b>Portfolio Management Application Layer</b> defines a number of
+core classes used to manage investment data.  Core entity classes
+include <b>Company</b>, <b>Security</b>, <b>Industry</b>, and <b>Account</b>.
+Additional information is managed by subclasses of <b>DataRecord</b>
+and <b>LinkRecord</b> including <b>PriceRecord</b>, <b>DivRecord</b>,
+and <b>Holding</b>. 
+<p>
+These classes are described in detail in the document, 
+<a href="pmaClasses.htm"><i>Portfolio Management Application: Classes</i></a>.
+
+<p>
+<hr>
+<h3><a name="supp">Supplemental Core Classes</a></h3>
+<p>
+The <b>Portfolio Management Application Layer</b> defines a number of
+supplemental core classes that are available as part of the <i>Headstart
+Application Kit</i>.  Supplemental entity classes include
+<b>Analyst</b> and <b>Manager</b>.
+Additional information is managed by subclasses of <b>DataRecord</b>
+including fundamental company data and country economics.
+<p>
+These classes are described in detail in the document, 
+<a href="pmaSupp.htm"><i>Portfolio Management Application: 
+Supplemental Classes</i></a>.
+
+<p>
+<hr>
+<h3><a name="issues">Special Issues</a></h3>
+<p>
+Special structures have been designed to manage holdings, dividend,
+price, and adjustment data in the Vision database.
+These structures have been created to correctly handle split and
+currency adjustments
+automatically.  In addition, these structures have been designed
+to facilitate future reorganizations as the database grows, so that 
+applications that use this data are sheltered from structural changes.
+<p>
+The document, 
+<a href="pmaIssues.htm"><i>Portfolio Management Application: Issues</i></a>
+describes these issues in more detail.
+
+<p>
+<hr>
+<h3><a name="tutor">Language Tutorial</a></h3>
+<p>
+
+<p>
+The document, 
+<a href="pmaTutor.htm">
+<i>Portfolio Management Application: Language Tutorial</i></a>
+provides a tutorial for writing basic Vision programs using the
+<b>Portfolio Management Application Layer</b> classes and messages.
+
+<p>
+<hr>
+<h3><a name="xref">Document Cross Reference</a></h3>
+<p>
+
+<p>
+The document, 
+<a href="pmaXRef.htm"><i>Portfolio Management Application: 
+Document Cross Reference</i></a> provides a cross reference to the
+documents directly related to this application layer.
+<p>
+
+<p>
+<hr>
+<h3><a name="faq">FAQ</a></h3>
+<p>
+
+<p>
+The document, <a href="pmaFAQ.htm"><i>Portfolio Management Application: 
+FAQ</i></a> provides guides that answer frequently asked questions about Portfolio Management Applications.
+<p>
+
+
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated December 23, 1998</font>
+</table>
+
+</body>
+</html>

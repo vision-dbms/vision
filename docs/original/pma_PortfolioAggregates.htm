@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Upload Format: PortfolioAggregates </title>
+
+</head>
+<body>
+<body bgcolor=white>
+<h2>Vision Portfolio Management Application Layer: Data Feeds</h2>
+<p>
+| <a href="pmaFeeds.htm">Application Feeds</a> |
+<hr><p>
+<font size=+2><b>Data Feed: </b><i>PortfolioAggregates</i></font><p>
+<font size=+1><b>Category: </b><i>MembershipFeed</i></font><p>
+
+<h3>Summary:</h3>
+<p>
+<ul>The <i>PortfolioAggregates</i> feed is used to define the
+     member <b>Portfolios</b> in an <b>AggAccount</b> over time.
+     The records supplied by this feed are used to update the
+     <b>AggAccount</b> time series property <i>memberList</i>.
+     Whenever a membership is updated, the holdings for the <b>AggAccount</b>
+     are recreated for each date that any of the member <b>Portfolios</b>
+     has holdings.
+<p>
+     A number of <a href="#related feeds">related feeds</a> are available
+     to create new <b>Portfolio</b> and <b>AggAccount</b> instances
+    and to update other account-based information.
+</ul>
+<p>
+<h3>Available Fields:</h3>
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>Field<th>Type<th>Description
+<tr>
+<tr><th align=center colspan=4>--- Required Fields ---
+<tr>
+<td><i>groupId</i>
+<td>String
+<td>id of existing AggAccount instance
+<tr><td><i>memberId</i>
+<td>String
+<td>id of existing Portfolio instance
+<tr>
+<tr><th align=center colspan=4>--- Suggested Fields ---
+<tr>
+<td><i>date</i>
+<td><i>Date</i>
+<td>date of the membership
+<tr>
+</table></center>
+<p>
+<h3>Special Processing Rules:</h3>
+<p>
+<ul type=disc>
+<li>The <i>groupId</i> and <i>memberId</i> fields must be supplied.
+     The <i>groupId</i> must correspond to an existing <b>AggAccount</b>
+     instance.  The <i>memberId</i> must correspond to
+     an existing <b>Portfolio</b> instance.  
+<p>
+<li>The <i>date</i> field is optional and should be supplied if you want to 
+    track membership changes over time.  It can be supplied in any
+     valid date format such as <i>19971215</i> or <i>12/15/97</i>.
+     To specify an initial membership, use the 
+     date <i>10101</i> or the string <i>Default</i> as the value of
+     the <i>date</i> field.
+<p>
+<li>The <i>memberList</i> time series property will be updated
+     for each <i>groupId/date</i> combination included in this feed
+     with an IndexedList of the <b>Portfolio</b> instances specified
+     in this feed.  Because the memberships will replace the existing
+     <i>memberList</i> for a date, you must specify all the portfolios
+     for each <i>groupId/date</i> included.
+<p>
+<li>Holdings for the <b>AggAccounts</b> referenced in this feed
+    will be recreated for one or more dates.  Starting with each
+    date for which the membership was updated, new holdings are
+    created for the <b>AggAccount</b> for any date where any of 
+    the member <b>Portfolios</b> has holdings.   When holdings are
+    recreated, the <b>AggAccount</b>
+    time series properties <i>_totalMarketValue</i>, 
+    <i>_totalMarketValueCash</i>, <i>_totalMarketValueEquity</i>, 
+    <i>_totalMarketValueFixed</i>, and <i>_totalCost</i>, are
+    computed as well as the
+    holding properties <i>percentOfPort</i> and <i>percentOfEquity</i>.
+</ul>
+
+<p>
+<a name="related feeds">
+<h3>Related Feeds:</h3></a>
+<p>
+<ul type=disc>
+<li><a href="pma_AggAccountMaster.htm"><i>AggAccountMaster</i></a>:
+creates AggAccount instances 
+<li><a href="pma_PortfolioMaster.htm"><i>PortfolioMaster</i></a>:
+creates Portfolio instances 
+<li><a href="pma_HoldingsFeed.htm"><i>HoldingsFeed</i></a>:
+loads holding records for one or more Portfolio or CompositeAccount 
+instances for one or more time periods
+<li><a href="pma_CompositeAccountMaster.htm"><i>CompositeAccountMaster</i></a>:
+creates CompositeAccount instances 
+<li><a href="pma_CompositeAccountMembers.htm"><i>CompositeAccountMembers</i></a>:
+defines weighted combinations of Portfolio, AggAccount, IndexAccount, and/or other 
+CompositeAccount instances that make up a composite over time
+<li><a href="pma_IndexAccountMaster.htm"><i>IndexAccountMaster</i></a>:
+creates IndexAccount instances 
+<li><a href="pma_IndexAccountBuilder.htm"><i>IndexAccountBuilder</i></a>:
+creates holdings for one or more IndexAccount instances over time using existing 
+Security Universe instances and a weighting rule
+</ul>
+<p>
+
+<h3>Sample Upload:</h3>
+<p>
+
+The following tab-delimited feed could be used to define <b>AggAccount</b>
+memberships over time.  
+<pre><tt><b>
+     Interface ExternalFeedManager upload: "PortfolioAggregates" using:
+     "groupId     memberId     date
+
+      #-  define AGG1 to have 3 members since earliest possible date
+      AGG1        PORT1        Default
+      AGG1        PORT2        Default
+      AGG1        PORT3        Default
+
+      #- define AGG2 to have 2 members in 95 and a third added in 96
+      AGG2        PORT2        1/1/95
+      AGG2        PORT7        1/1/95
+      AGG2        PORT2        1/1/96
+      AGG2        PORT7        1/1/96
+      AGG2        PORT4        1/1/96
+     " ;
+</b></tt></pre>
+
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated October 31, 1999</font>
+</tr>
+</table>
+
+</body>
+</html>

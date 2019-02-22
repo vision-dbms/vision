@@ -1,0 +1,2353 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Messages: OpenVision</title>
+</head>
+<body bgcolor=white>
+<p>
+<center> | <A href="FHome.htm">Home</A>
+ | <A href="tkOpenVision.htm">OpenVision Class  </A>
+ | <A href="mXRef.htm">Message XRef</A>
+ | <A href="Messages.htm">Messages (General)</A>
+ | 
+</center><hr>
+
+<center>
+<font face="Arial" color="darkblue" size=3 >
+<h3>Profile of Class <i>OpenVision</i></h3>
+</center>
+</font><p>
+<blockquote><center><hr width=70%><p>
+Includes Classes: <i>OpenVision, OpenVision Channel, OpenVision Channel BinaryFormat, OpenVision Channel ChannelType, OpenVision Channel Error, OpenVision Channel Option, OpenVision Channel PromptFormat, OpenVision Channel State, OpenVision Channel Status, OpenVision Channel TrimFormat, OpenVision Constant, OpenVision OptionValue, ToolKit</i>
+<p><hr width=70%></center></blockquote><p>
+<pre>
+
+<A href="clObject.htm">Object</A>
+  | 
+ToolKit
+  | 
+  +--- <b>OpenVision</b>
+  |      |
+  |      +--- OpenVision Channel
+  |      |
+  |      +--- OpenVision Constant
+  |      |      |
+  |      |      +--- OpenVision Channel ChannelType
+  |      |      |
+  |      |      +--- OpenVision Channel Error
+  |      |      |
+  |      |      +--- OpenVision Channel Option
+  |      |      |
+  |      |      +--- OpenVision Channel State
+  |      |      |
+  |      |      +--- OpenVision Channel Status
+  |      |      |
+  |      |      +--- OpenVision OptionValue
+  |      |      |      |
+  |      |      |      +--- OpenVision Channel BinaryFormat
+  |      |      |      |
+  |      |      |      +--- OpenVision Channel PromptFormat
+  |      |      |      |
+  |      |      |      +--- OpenVision Channel TrimFormat
+</pre>
+<p><hr align=left width=70% ><p>
+
+
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Message Index</font>
+<p><img src="instdot.gif" align="middle" alt="o "><A href="#ActiveChannel"><b>ActiveChannel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#BinaryFormat"><b>BinaryFormat</b></A><i> (OpenVision Channel)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#BinaryFormat"><b>BinaryFormat</b></A><i> (OpenVision Channel Option)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Blocked"><b>Blocked</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Channel"><b>Channel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#ChannelType"><b>ChannelType</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Closed"><b>Closed</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Closing"><b>Closing</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Completed"><b>Completed</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Constant"><b>Constant</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Editor"><b>Editor</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Error"><b>Error</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Failed"><b>Failed</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#File"><b>File</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#HostName"><b>HostName</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Intel"><b>Intel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#NoError"><b>NoError</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#None"><b>None</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Normal"><b>Normal</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Null"><b>Null</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Option"><b>Option</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#OptionValue"><b>OptionValue</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#PARisc"><b>PARisc</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#PromptFormat"><b>PromptFormat</b></A><i> (OpenVision Channel)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#PromptFormat"><b>PromptFormat</b></A><i> (OpenVision Channel Option)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Ready"><b>Ready</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Restarting"><b>Restarting</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Running"><b>Running</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#SeekOffset"><b>SeekOffset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Service"><b>Service</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Sparc"><b>Sparc</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Starting"><b>Starting</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#State"><b>State</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Status"><b>Status</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Stream"><b>Stream</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#TrimBoundingBlanks"><b>TrimBoundingBlanks</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#TrimFormat"><b>TrimFormat</b></A><i> (OpenVision Channel)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#TrimFormat"><b>TrimFormat</b></A><i> (OpenVision Channel Option)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#TrimLeadingBlanks"><b>TrimLeadingBlanks</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#TrimTrailingBlanks"><b>TrimTrailingBlanks</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Untranslated"><b>Untranslated</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Untrimmed"><b>Untrimmed</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#Unused"><b>Unused</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__ActiveChannel"><b>__ActiveChannel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__acceptConnection"><b>__acceptConnection</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__channelType"><b>__channelType</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__fixReference"><b>__fixReference</b></A><i> (OpenVision Channel)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__fixReference"><b>__fixReference</b></A><i> (OpenVision Channel State)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__fixReference"><b>__fixReference</b></A><i> (OpenVision Channel Status)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__fixReference"><b>__fixReference</b></A><i> (OpenVision Channel Error)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__fixReference"><b>__fixReference</b></A><i> (OpenVision Channel ChannelType)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__fixReference"><b>__fixReference</b></A><i> (OpenVision Channel Option)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__fixReference"><b>__fixReference</b></A><i> (OpenVision Channel PromptFormat)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__fixReference"><b>__fixReference</b></A><i> (OpenVision Channel BinaryFormat)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__fixReference"><b>__fixReference</b></A><i> (OpenVision Channel TrimFormat)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__instanceListCount"><b>__instanceListCount</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__lastError"><b>__lastError</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__option"><b>__option</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__optionValue"><b>__optionValue</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__state"><b>__state</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__status"><b>__status</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__wait:"><b>__wait:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#acceptConnection"><b>acceptConnection</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asOpenVisionChannel"><b>asOpenVisionChannel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (ToolKit)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (OpenVision)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (OpenVision Channel)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (OpenVision Constant)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (OpenVision Channel State)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (OpenVision Channel Status)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (OpenVision Channel Error)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (OpenVision Channel ChannelType)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (OpenVision Channel Option)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (OpenVision OptionValue)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (OpenVision Channel PromptFormat)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (OpenVision Channel BinaryFormat)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (OpenVision Channel TrimFormat)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#becomeErrorOutputOf:"><b>becomeErrorOutputOf: primaryChannel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#becomeOptionOf:"><b>becomeOptionOf: channel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#becomeOptionValueOf:"><b>becomeOptionValueOf: channel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#binaryFormat"><b>binaryFormat</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#byteCount"><b>byteCount</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#channelType"><b>channelType</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (ToolKit)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (OpenVision)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (OpenVision Channel)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (OpenVision Constant)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (OpenVision Channel State)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (OpenVision Channel Status)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (OpenVision Channel Error)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (OpenVision Channel ChannelType)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (OpenVision Channel Option)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (OpenVision OptionValue)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (OpenVision Channel PromptFormat)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (OpenVision Channel BinaryFormat)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (OpenVision Channel TrimFormat)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#close"><b>close</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#consumeVisionPrompt"><b>consumeVisionPrompt</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (ToolKit)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (OpenVision)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (OpenVision Channel)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (OpenVision Constant)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (OpenVision Channel State)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (OpenVision Channel Status)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (OpenVision Channel Error)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (OpenVision Channel ChannelType)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (OpenVision Channel Option)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (OpenVision OptionValue)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (OpenVision Channel PromptFormat)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (OpenVision Channel BinaryFormat)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (OpenVision Channel TrimFormat)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#description"><b>description</b></A><i> (ToolKit)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#description"><b>description</b></A><i> (OpenVision Channel State)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#description"><b>description</b></A><i> (OpenVision Channel Status)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#description"><b>description</b></A><i> (OpenVision Channel Error)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#description"><b>description</b></A><i> (OpenVision Channel ChannelType)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#description"><b>description</b></A><i> (OpenVision Channel Option)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#description"><b>description</b></A><i> (OpenVision Channel PromptFormat)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#description"><b>description</b></A><i> (OpenVision Channel BinaryFormat)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#description"><b>description</b></A><i> (OpenVision Channel TrimFormat)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#disableHandler"><b>disableHandler</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#displayInfo"><b>displayInfo</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#enableHandler"><b>enableHandler</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#endReception"><b>endReception</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#endTransmission"><b>endTransmission</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#errorInput"><b>errorInput</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#errorOutput"><b>errorOutput</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getByte"><b>getByte</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getByteAt:"><b>getByteAt: offset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getDouble"><b>getDouble</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getDoubleAt:"><b>getDoubleAt: offset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getFloat"><b>getFloat</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getFloatAt:"><b>getFloatAt: offset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getLine"><b>getLine</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getLineAt:"><b>getLineAt: offset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getLong"><b>getLong</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getLongAt:"><b>getLongAt: offset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getShort"><b>getShort</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getShortAt:"><b>getShortAt: offset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getString"><b>getString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getString:"><b>getString:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getString:at:"><b>getString: ofLength at: offset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getStringAt:"><b>getStringAt: offset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getStringThroughPrompt:"><b>getStringThroughPrompt: prompt</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getUnsignedByte"><b>getUnsignedByte</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getUnsignedByteAt:"><b>getUnsignedByteAt: offset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getUnsignedShort"><b>getUnsignedShort</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getUnsignedShortAt:"><b>getUnsignedShortAt: offset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#handler"><b>handler</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#index"><b>index</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#instanceList"><b>instanceList</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isAFileChannel"><b>isAFileChannel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isAServiceChannel"><b>isAServiceChannel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isAStreamChannel"><b>isAStreamChannel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isAtEndOfInput"><b>isAtEndOfInput</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isClosing"><b>isClosing</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isConstant"><b>isConstant</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isOpenVision"><b>isOpenVision</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isOpenVisionChannel"><b>isOpenVisionChannel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isOptionValue"><b>isOptionValue</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isReady"><b>isReady</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isRestarting"><b>isRestarting</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isRunning"><b>isRunning</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isStarting"><b>isStarting</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isToolKit"><b>isToolKit</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isUnused"><b>isUnused</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isntAtEndOfInput"><b>isntAtEndOfInput</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#lastError"><b>lastError</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#nameInstances:"><b>nameInstances: count</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#option"><b>option</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#peerName"><b>peerName</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#print"><b>print</b></A><i> (OpenVision Channel)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#print"><b>print</b></A><i> (OpenVision Constant)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#print:"><b>print: aWidth</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#promptFormat"><b>promptFormat</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putByte:"><b>putByte: byte</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putByte:at:"><b>putByte: byte at: offset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putDouble:"><b>putDouble: double</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putDouble:at:"><b>putDouble: double at: offset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putFloat:"><b>putFloat: float</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putFloat:at:"><b>putFloat: float at: offset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putLong:"><b>putLong: long</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putLong:at:"><b>putLong: long at: offset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putShort:"><b>putShort: short</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putShort:at:"><b>putShort: short at: offset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putString:"><b>putString: string</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putString:at:"><b>putString: string at: offset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putString:expectingLinePrompt:"><b>putString: request expectingLinePrompt: prompt</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putStringNL:"><b>putStringNL: string</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putStringNL:at:"><b>putStringNL: string at: offset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#release"><b>release</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#retain"><b>retain</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#rexec:onHost:asUser:withPassword:"><b>rexec: command onHost: host asUser: username withPassword: password</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#rexecVision:onHost:asUser:withPassword:andOptions:"><b>
+
+
+
+rexecVision: executable onHost: host asUser: user withPassword: password andOptions: options</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#rexecVisionOnHost:asUser:withPassword:"><b>rexecVisionOnHost: host asUser: user withPassword: password</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#rexecVisionOnHost:asUser:withPassword:andOptions:"><b>rexecVisionOnHost: host asUser: user withPassword: password andOptions: options</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#seekOffset"><b>seekOffset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setBinaryFormatTo:"><b>setBinaryFormatTo: value</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setBinaryFormatToIntel"><b>setBinaryFormatToIntel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setBinaryFormatToPARisc"><b>setBinaryFormatToPARisc</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setBinaryFormatToSparc"><b>setBinaryFormatToSparc</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setBinaryFormatToUntranslated"><b>setBinaryFormatToUntranslated</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setBoundHandlerTo:"><b>setBoundHandlerTo: block</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setDescriptionTo:"><b>setDescriptionTo: string</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setErrorInputTo:"><b>setErrorInputTo:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setErrorOutputTo:"><b>setErrorOutputTo:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setHandlerTo:"><b>setHandlerTo:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setOptionTo:"><b>setOptionTo:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setOptionToBinaryFormat"><b>setOptionToBinaryFormat</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setOptionToPromptFormat"><b>setOptionToPromptFormat</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setOptionToTrimFormat"><b>setOptionToTrimFormat</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setOptionValueTo:"><b>setOptionValueTo:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setPromptFormatTo:"><b>setPromptFormatTo: value</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setPromptFormatToEditor"><b>setPromptFormatToEditor</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setPromptFormatToNormal"><b>setPromptFormatToNormal</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setSeekOffsetTo:"><b>setSeekOffsetTo:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setTrimFormatTo:"><b>setTrimFormatTo: value</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setTrimFormatToBoundingBlanks"><b>setTrimFormatToBoundingBlanks</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setTrimFormatToLeadingBlanks"><b>setTrimFormatToLeadingBlanks</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setTrimFormatToTrailingBlanks"><b>setTrimFormatToTrailingBlanks</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setTrimFormatToUntrimmed"><b>setTrimFormatToUntrimmed</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#socketName"><b>socketName</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#state"><b>state</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#status"><b>status</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#submitVisionRequest:"><b>submitVisionRequest: request</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#syncOutput"><b>syncOutput</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#trimFormat"><b>trimFormat</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#wait"><b>wait</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#wait:"><b>wait: aNumberOfSeconds</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (ToolKit)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (OpenVision)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (OpenVision Channel)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (OpenVision Constant)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (OpenVision Channel State)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (OpenVision Channel Status)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (OpenVision Channel Error)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (OpenVision Channel ChannelType)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (OpenVision Channel Option)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (OpenVision OptionValue)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (OpenVision Channel PromptFormat)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (OpenVision Channel BinaryFormat)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (OpenVision Channel TrimFormat)</i><br>
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Messages</font>
+<p><img src="instdot.gif" align="middle" alt="o "><A name="ActiveChannel"></A><b>ActiveChannel</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision ActiveChannel</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="BinaryFormat"></A><b>BinaryFormat</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel BinaryFormat</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel BinaryFormat
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="BinaryFormat"></A><b>BinaryFormat</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Option BinaryFormat</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel Option
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Blocked"></A><b>Blocked</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Status Blocked</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel Status
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Channel"></A><b>Channel</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="ChannelType"></A><b>ChannelType</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel ChannelType</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel ChannelType
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Closed"></A><b>Closed</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Status Closed</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel Status
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Closing"></A><b>Closing</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel State Closing</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel State
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Completed"></A><b>Completed</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Status Completed</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel Status
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Constant"></A><b>Constant</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Constant</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Constant
+<p><b>Also Defined At: </b><br>
+ | <A href="mInterface.htm#Constant">Interface</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Editor"></A><b>Editor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel PromptFormat Editor</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel PromptFormat
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Error"></A><b>Error</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Error</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel Error
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Failed"></A><b>Failed</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Status Failed</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel Status
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="File"></A><b>File</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel ChannelType File</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel ChannelType
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="HostName"></A><b>HostName</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision HostName</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Intel"></A><b>Intel</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel BinaryFormat Intel</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel BinaryFormat
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="NoError"></A><b>NoError</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Error NoError</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel Error
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="None"></A><b>None</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Option None</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel Option
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Normal"></A><b>Normal</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel PromptFormat Normal</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel PromptFormat
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Null"></A><b>Null</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel ChannelType Null</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel ChannelType
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Option"></A><b>Option</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Option</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel Option
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="OptionValue"></A><b>OptionValue</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision OptionValue</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision OptionValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="PARisc"></A><b>PARisc</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel BinaryFormat PARisc</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel BinaryFormat
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="PromptFormat"></A><b>PromptFormat</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel PromptFormat</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel PromptFormat
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="PromptFormat"></A><b>PromptFormat</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Option PromptFormat</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel Option
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Ready"></A><b>Ready</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel State Ready</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel State
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Restarting"></A><b>Restarting</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel State Restarting</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel State
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Running"></A><b>Running</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel State Running</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel State
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="SeekOffset"></A><b>SeekOffset</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Option SeekOffset</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel Option
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Service"></A><b>Service</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel ChannelType Service</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel ChannelType
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Sparc"></A><b>Sparc</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel BinaryFormat Sparc</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel BinaryFormat
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Starting"></A><b>Starting</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel State Starting</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel State
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="State"></A><b>State</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel State</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel State
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Status"></A><b>Status</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Status</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel Status
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Stream"></A><b>Stream</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel ChannelType Stream</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel ChannelType
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="TrimBoundingBlanks"></A><b>TrimBoundingBlanks</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel TrimFormat TrimBoundingBlanks</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel TrimFormat
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="TrimFormat"></A><b>TrimFormat</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel TrimFormat</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel TrimFormat
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="TrimFormat"></A><b>TrimFormat</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Option TrimFormat</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel Option
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="TrimLeadingBlanks"></A><b>TrimLeadingBlanks</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel TrimFormat TrimLeadingBlanks</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel TrimFormat
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="TrimTrailingBlanks"></A><b>TrimTrailingBlanks</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel TrimFormat TrimTrailingBlanks</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel TrimFormat
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Untranslated"></A><b>Untranslated</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel BinaryFormat Untranslated</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel BinaryFormat
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Untrimmed"></A><b>Untrimmed</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel TrimFormat Untrimmed</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel TrimFormat
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="Unused"></A><b>Unused</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel State Unused</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel State
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__ActiveChannel"></A><b>__ActiveChannel</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision __ActiveChannel</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__acceptConnection"></A><b>__acceptConnection</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel __acceptConnection</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__channelType"></A><b>__channelType</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel __channelType</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__fixReference"></A><b>__fixReference</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel __fixReference</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#__fixReference">Date</A> | <A href="mOffset.htm#__fixReference">DateOffset</A> | <A href="mObject.htm#__fixReference">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__fixReference"></A><b>__fixReference</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel State __fixReference</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#__fixReference">Date</A> | <A href="mOffset.htm#__fixReference">DateOffset</A> | <A href="mObject.htm#__fixReference">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__fixReference"></A><b>__fixReference</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Status __fixReference</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#__fixReference">Date</A> | <A href="mOffset.htm#__fixReference">DateOffset</A> | <A href="mObject.htm#__fixReference">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__fixReference"></A><b>__fixReference</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Error __fixReference</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#__fixReference">Date</A> | <A href="mOffset.htm#__fixReference">DateOffset</A> | <A href="mObject.htm#__fixReference">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__fixReference"></A><b>__fixReference</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel ChannelType __fixReference</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#__fixReference">Date</A> | <A href="mOffset.htm#__fixReference">DateOffset</A> | <A href="mObject.htm#__fixReference">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__fixReference"></A><b>__fixReference</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Option __fixReference</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#__fixReference">Date</A> | <A href="mOffset.htm#__fixReference">DateOffset</A> | <A href="mObject.htm#__fixReference">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__fixReference"></A><b>__fixReference</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel PromptFormat __fixReference</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#__fixReference">Date</A> | <A href="mOffset.htm#__fixReference">DateOffset</A> | <A href="mObject.htm#__fixReference">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__fixReference"></A><b>__fixReference</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel BinaryFormat __fixReference</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#__fixReference">Date</A> | <A href="mOffset.htm#__fixReference">DateOffset</A> | <A href="mObject.htm#__fixReference">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__fixReference"></A><b>__fixReference</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel TrimFormat __fixReference</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#__fixReference">Date</A> | <A href="mOffset.htm#__fixReference">DateOffset</A> | <A href="mObject.htm#__fixReference">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__instanceListCount"></A><b>__instanceListCount</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel __instanceListCount</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__lastError"></A><b>__lastError</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel __lastError</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__option"></A><b>__option</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel __option</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__optionValue"></A><b>__optionValue</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel __optionValue</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__state"></A><b>__state</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel __state</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__status"></A><b>__status</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel __status</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__wait:"></A><b>__wait:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel __wait:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="acceptConnection"></A><b>acceptConnection</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel acceptConnection</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asOpenVisionChannel"></A><b>asOpenVisionChannel</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel asOpenVisionChannel</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mString.htm#asOpenVisionChannel">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">ToolKit asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object, stripped of extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object, stripped of extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object, stripped of extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Constant asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object, stripped of extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel State asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object, stripped of extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Status asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object, stripped of extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Error asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object, stripped of extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel ChannelType asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object, stripped of extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Option asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object, stripped of extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision OptionValue asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object, stripped of extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel PromptFormat asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object, stripped of extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel BinaryFormat asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object, stripped of extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel TrimFormat asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object, stripped of extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="becomeErrorOutputOf:"></A><b>becomeErrorOutputOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel becomeErrorOutputOf: primaryChannel</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="becomeOptionOf:"></A><b>becomeOptionOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Option becomeOptionOf: channel</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="becomeOptionValueOf:"></A><b>becomeOptionValueOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision OptionValue becomeOptionValueOf: channel</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="binaryFormat"></A><b>binaryFormat</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel binaryFormat</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="byteCount"></A><b>byteCount</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel byteCount</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="channelType"></A><b>channelType</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel channelType</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">ToolKit classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Schema ClassDescriptor
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Schema ClassDescriptor
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Schema ClassDescriptor
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Constant classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Schema ClassDescriptor
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel State classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Schema ClassDescriptor
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Status classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Schema ClassDescriptor
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Error classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Schema ClassDescriptor
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel ChannelType classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Schema ClassDescriptor
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Option classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Schema ClassDescriptor
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision OptionValue classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Schema ClassDescriptor
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel PromptFormat classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Schema ClassDescriptor
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel BinaryFormat classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Schema ClassDescriptor
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel TrimFormat classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Schema ClassDescriptor
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="close"></A><b>close</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel close</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="consumeVisionPrompt"></A><b>consumeVisionPrompt</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel consumeVisionPrompt</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">ToolKit defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance for the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>ToolKit
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance for the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="tkOpenVision.htm">OpenVision</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance for the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Constant defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance for the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Constant
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel State defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance for the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel State
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Status defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance for the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel Status
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Error defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance for the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel Error
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel ChannelType defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance for the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel ChannelType
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Option defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance for the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel Option
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision OptionValue defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance for the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision OptionValue
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel PromptFormat defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance for the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel PromptFormat
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel BinaryFormat defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance for the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel BinaryFormat
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel TrimFormat defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance for the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>OpenVision Channel TrimFormat
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="description"></A><b>description</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">ToolKit description</font></blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="description"></A><b>description</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel State description</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="description"></A><b>description</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Status description</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="description"></A><b>description</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Error description</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="description"></A><b>description</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel ChannelType description</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="description"></A><b>description</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Option description</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="description"></A><b>description</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel PromptFormat description</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="description"></A><b>description</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel BinaryFormat description</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="description"></A><b>description</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel TrimFormat description</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="disableHandler"></A><b>disableHandler</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel disableHandler</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="displayInfo"></A><b>displayInfo</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel displayInfo</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays a single line summary of the object terminated with a new line.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mEntity.htm#displayInfo">Entity</A> | <A href="mObject.htm#displayInfo">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="enableHandler"></A><b>enableHandler</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel enableHandler</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="endReception"></A><b>endReception</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel endReception</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="endTransmission"></A><b>endTransmission</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel endTransmission</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="errorInput"></A><b>errorInput</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel errorInput</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="errorOutput"></A><b>errorOutput</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel errorOutput</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getByte"></A><b>getByte</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getByte</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getByteAt:"></A><b>getByteAt:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getByteAt: offset</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getDouble"></A><b>getDouble</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getDouble</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getDoubleAt:"></A><b>getDoubleAt:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getDoubleAt: offset</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getFloat"></A><b>getFloat</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getFloat</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getFloatAt:"></A><b>getFloatAt:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getFloatAt: offset</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getLine"></A><b>getLine</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getLine</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getLineAt:"></A><b>getLineAt:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getLineAt: offset</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getLong"></A><b>getLong</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getLong</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getLongAt:"></A><b>getLongAt:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getLongAt: offset</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getShort"></A><b>getShort</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getShort</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getShortAt:"></A><b>getShortAt:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getShortAt: offset</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getString"></A><b>getString</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getString</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getString:"></A><b>getString:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getString:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getString:at:"></A><b>getString:at:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getString: ofLength at: offset</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getStringAt:"></A><b>getStringAt:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getStringAt: offset</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getStringThroughPrompt:"></A><b>getStringThroughPrompt:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getStringThroughPrompt: prompt</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getUnsignedByte"></A><b>getUnsignedByte</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getUnsignedByte</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getUnsignedByteAt:"></A><b>getUnsignedByteAt:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getUnsignedByteAt: offset</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getUnsignedShort"></A><b>getUnsignedShort</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getUnsignedShort</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getUnsignedShortAt:"></A><b>getUnsignedShortAt:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel getUnsignedShortAt: offset</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="handler"></A><b>handler</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel handler</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="index"></A><b>index</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel index</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="instanceList"></A><b>instanceList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel instanceList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the set of instances in the recipient object's class.  Only 
+meaningful for classes that define meaningful instances.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#instanceList">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isAFileChannel"></A><b>isAFileChannel</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel isAFileChannel</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isAServiceChannel"></A><b>isAServiceChannel</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel isAServiceChannel</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isAStreamChannel"></A><b>isAStreamChannel</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel isAStreamChannel</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isAtEndOfInput"></A><b>isAtEndOfInput</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel isAtEndOfInput</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isClosing"></A><b>isClosing</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel isClosing</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isConstant"></A><b>isConstant</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Constant isConstant</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isConstant">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isOpenVision"></A><b>isOpenVision</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision isOpenVision</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isOpenVision">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isOpenVisionChannel"></A><b>isOpenVisionChannel</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel isOpenVisionChannel</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isOpenVisionChannel">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isOptionValue"></A><b>isOptionValue</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision OptionValue isOptionValue</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isOptionValue">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isReady"></A><b>isReady</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel isReady</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isRestarting"></A><b>isRestarting</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel isRestarting</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isRunning"></A><b>isRunning</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel isRunning</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isStarting"></A><b>isStarting</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel isStarting</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isToolKit"></A><b>isToolKit</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">ToolKit isToolKit</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE when sent to any ToolKit.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isToolKit">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isUnused"></A><b>isUnused</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel isUnused</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isntAtEndOfInput"></A><b>isntAtEndOfInput</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel isntAtEndOfInput</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="lastError"></A><b>lastError</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel lastError</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="nameInstances:"></A><b>nameInstances:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Constant nameInstances: count</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="option"></A><b>option</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel option</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="peerName"></A><b>peerName</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel peerName</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="print"></A><b>print</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel print</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints the recipient object using a default format.  This message is
+typically redefined at the class level for class-specific printing style.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#print">Block</A> | <A href="mDate.htm#print">Date</A> | <A href="mOffset.htm#print">DateOffset</A> | <A href="mDate.htm#print">DateRange</A> | <A href="mEntity.htm#print">Entity</A> | <A href="mIList.htm#print">IndexedList</A> | <A href="mList.htm#print">List</A> | <A href="mObject.htm#print">Object</A> | <A href="mString.htm#print">String</A> | <A href="mTS.htm#print">TimeSeries</A> | <A href="mNA.htm#print">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="print"></A><b>print</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Constant print</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints the recipient object using a default format.  This message is
+typically redefined at the class level for class-specific printing style.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#print">Block</A> | <A href="mDate.htm#print">Date</A> | <A href="mOffset.htm#print">DateOffset</A> | <A href="mDate.htm#print">DateRange</A> | <A href="mEntity.htm#print">Entity</A> | <A href="mIList.htm#print">IndexedList</A> | <A href="mList.htm#print">List</A> | <A href="mObject.htm#print">Object</A> | <A href="mString.htm#print">String</A> | <A href="mTS.htm#print">TimeSeries</A> | <A href="mNA.htm#print">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="print:"></A><b>print:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Constant print: aWidth</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints the recipient object using the supplied format.  By default,
+classes ignore the format and send the unary print message.  Classes
+that can sensibly use the format will redefine the print: message.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBoolean.htm#print:">Boolean</A> | <A href="mDate.htm#print:">Date</A> | <A href="mEntity.htm#print:">Entity</A> | <A href="mNumber.htm#print:">Number</A> | <A href="mObject.htm#print:">Object</A> | <A href="mString.htm#print:">String</A> | <A href="mNA.htm#print:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="promptFormat"></A><b>promptFormat</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel promptFormat</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putByte:"></A><b>putByte:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel putByte: byte</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putByte:at:"></A><b>putByte:at:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel putByte: byte at: offset</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putDouble:"></A><b>putDouble:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel putDouble: double</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putDouble:at:"></A><b>putDouble:at:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel putDouble: double at: offset</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putFloat:"></A><b>putFloat:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel putFloat: float</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putFloat:at:"></A><b>putFloat:at:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel putFloat: float at: offset</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putLong:"></A><b>putLong:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel putLong: long</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putLong:at:"></A><b>putLong:at:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel putLong: long at: offset</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putShort:"></A><b>putShort:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel putShort: short</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putShort:at:"></A><b>putShort:at:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel putShort: short at: offset</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putString:"></A><b>putString:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel putString: string</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putString:at:"></A><b>putString:at:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel putString: string at: offset</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putString:expectingLinePrompt:"></A><b>putString:expectingLinePrompt:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel putString: request expectingLinePrompt: prompt</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putStringNL:"></A><b>putStringNL:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel putStringNL: string</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putStringNL:at:"></A><b>putStringNL:at:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel putStringNL: string at: offset</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="release"></A><b>release</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel release</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="retain"></A><b>retain</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel retain</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="rexec:onHost:asUser:withPassword:"></A><b>rexec:onHost:asUser:withPassword:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision rexec: command onHost: host asUser: username withPassword: password</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="rexecVision:onHost:asUser:withPassword:andOptions:"></A><b>rexecVision:onHost:asUser:withPassword:andOptions:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision 
+
+
+
+rexecVision: executable onHost: host asUser: user withPassword: password andOptions: options</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="rexecVisionOnHost:asUser:withPassword:"></A><b>rexecVisionOnHost:asUser:withPassword:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision rexecVisionOnHost: host asUser: user withPassword: password</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="rexecVisionOnHost:asUser:withPassword:andOptions:"></A><b>rexecVisionOnHost:asUser:withPassword:andOptions:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision rexecVisionOnHost: host asUser: user withPassword: password andOptions: options</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="seekOffset"></A><b>seekOffset</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel seekOffset</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setBinaryFormatTo:"></A><b>setBinaryFormatTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setBinaryFormatTo: value</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setBinaryFormatToIntel"></A><b>setBinaryFormatToIntel</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setBinaryFormatToIntel</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setBinaryFormatToPARisc"></A><b>setBinaryFormatToPARisc</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setBinaryFormatToPARisc</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setBinaryFormatToSparc"></A><b>setBinaryFormatToSparc</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setBinaryFormatToSparc</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setBinaryFormatToUntranslated"></A><b>setBinaryFormatToUntranslated</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setBinaryFormatToUntranslated</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setBoundHandlerTo:"></A><b>setBoundHandlerTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setBoundHandlerTo: block</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setDescriptionTo:"></A><b>setDescriptionTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">ToolKit setDescriptionTo: string</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setErrorInputTo:"></A><b>setErrorInputTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setErrorInputTo:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setErrorOutputTo:"></A><b>setErrorOutputTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setErrorOutputTo:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setHandlerTo:"></A><b>setHandlerTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setHandlerTo:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setOptionTo:"></A><b>setOptionTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setOptionTo:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setOptionToBinaryFormat"></A><b>setOptionToBinaryFormat</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setOptionToBinaryFormat</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setOptionToPromptFormat"></A><b>setOptionToPromptFormat</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setOptionToPromptFormat</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setOptionToTrimFormat"></A><b>setOptionToTrimFormat</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setOptionToTrimFormat</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setOptionValueTo:"></A><b>setOptionValueTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setOptionValueTo:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setPromptFormatTo:"></A><b>setPromptFormatTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setPromptFormatTo: value</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setPromptFormatToEditor"></A><b>setPromptFormatToEditor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setPromptFormatToEditor</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setPromptFormatToNormal"></A><b>setPromptFormatToNormal</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setPromptFormatToNormal</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setSeekOffsetTo:"></A><b>setSeekOffsetTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setSeekOffsetTo:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setTrimFormatTo:"></A><b>setTrimFormatTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setTrimFormatTo: value</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setTrimFormatToBoundingBlanks"></A><b>setTrimFormatToBoundingBlanks</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setTrimFormatToBoundingBlanks</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setTrimFormatToLeadingBlanks"></A><b>setTrimFormatToLeadingBlanks</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setTrimFormatToLeadingBlanks</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setTrimFormatToTrailingBlanks"></A><b>setTrimFormatToTrailingBlanks</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setTrimFormatToTrailingBlanks</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setTrimFormatToUntrimmed"></A><b>setTrimFormatToUntrimmed</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel setTrimFormatToUntrimmed</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="socketName"></A><b>socketName</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel socketName</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="state"></A><b>state</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel state</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="status"></A><b>status</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel status</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="submitVisionRequest:"></A><b>submitVisionRequest:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel submitVisionRequest: request</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="syncOutput"></A><b>syncOutput</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel syncOutput</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="trimFormat"></A><b>trimFormat</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel trimFormat</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="wait"></A><b>wait</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel wait</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="wait:"></A><b>wait:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel wait: aNumberOfSeconds</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">ToolKit whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the name of the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the name of the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the name of the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Constant whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the name of the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel State whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the name of the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Status whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the name of the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Error whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the name of the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel ChannelType whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the name of the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel Option whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the name of the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision OptionValue whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the name of the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel PromptFormat whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the name of the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel BinaryFormat whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the name of the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">OpenVision Channel TrimFormat whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the name of the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+
+<p><hr>
+<table border=0 width=100%>
+<tr>
+<td align=left>
+<font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated May 7, 1997</font>
+</table>
+</body>
+</html>

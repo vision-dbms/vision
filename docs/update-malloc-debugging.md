@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 ## Build a reproducer
 
 First, to reproduce the error, we had to find the `limit datasize` from the job that malloc-ed and then run it in a session connected to the appropriate version of the database.

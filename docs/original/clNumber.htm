@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Class: Number </title>
+</head>
+<body bgcolor = white>
+
+<h2>Vision Class: Number</h2>
+<p>
+     | <a href="FHome.htm">Home</a> | <a href="mNumber.htm">Messages</a> | <a href="clXRef.htm">Class XRef</a> |
+<hr> 
+<h3>Topics Covered:</h3> 
+<ul type=square> 
+<li><a href="#overview">Overview</a>
+<li><a href="#compute">Computation Messages</a>
+<li><a href="#convert">Conversion Messages</a>
+<li><a href="#other">Other Number Messages</a>
+</ul>
+<p>
+<hr>
+<h3><a name="overview">Overview</a></h3> 
+<p> 
+<b>Numbers</b> are
+objects that represent numerical values and respond to messages that
+compute mathematical results.  The literal representation of a number
+is a sequence of digits that may be preceded by a minus sign and/or
+followed by a decimal point and another sequence of digits.  
+<p>
+The classes <i>Integer</i>, <i>Double</i>, and <i>Float</i>
+are subclasses of the class <i>Number</i>.
+The class <i>Number</i> defines the general protocol for all numeric
+classes.  Most numbers are either integers
+or doubles.  The <i>Float</i> class is used for efficiency in
+certain cases.  All arithmetic operations between numbers return
+instances of the class <i>Double</i>.  It is not meaningful to create
+new instances of the <i>Number</i> classes.
+<p>
+The <i>Number</i> class is a direct subclass of the class <i>Ordinal</i>:
+<font size=+1><pre>
+          <a href="clObject.htm">Object</a>
+             |
+             Ordinal
+                |
+                <b>Number</b>
+                   |
+                   |-- Double
+                   |
+                   |-- Float
+                   |
+                   |-- Integer
+
+</pre></font>
+<p>
+<hr>
+<h3><a name="compute">Computation Messages</a></h3>
+<p>
+Many messages defined for the class <i>Number</i> and its subclasses
+provide a way to perform standard mathematical computations.  
+<p>
+The following messages perform the basic <b>arithmetic</b> operations.
+These messages can be sent to an instance of any <i>Number</i> subclass
+and return an instance of the <i>Double</i> class.  The parameter
+can be an instance of any <i>Number</i> subclass.
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><i>+</i>
+<td>Add <i>parameter</i> to <i>recipient</i>
+<td>2 + 3
+<tr>
+<td><i>-</i>
+<td>Subtract <i>parameter</i> from <i>recipient</i>
+<td>3 - 2
+<tr>
+<td><i>*</i>
+<td>Multiply <i>recipient</i> by <i>parameter</i>
+<td>3 * 2
+<tr>
+<td><i>/</i>
+<td>Divide <i>recipient</i> by <i>parameter</i>
+<td>3 / 2
+<tr>
+<td><i>toThe:</i>
+<td>Raise <i>recipient</i> to the <i>parameter</i> power
+<td> 2 toThe: 3 .
+
+</tr>
+</table></Center>
+<p>
+<a name="comparison"> </a>
+The following messages perform the basic <b>relational</b> operations.
+These messages can be sent to an instance of any <i>Number</i> subclass
+and return an instance of the 
+<a href="clBoolean.htm"><i>Boolean</i></a> class.  
+Parameters are an instance of any <i>Number</i> subclass
+except where explicitly noted.
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><i>=</i>
+<td>Is <i>recipient</i> equal to <i>parameter</i>?
+<td>2 = 2.0
+<tr>
+<td><i>==</i>
+<td>Is <i>recipient</i> 
+<a href="Navigate.htm#equiv">identical</a>
+to <i>parameter</i>?
+<td>2 == 2.0
+<tr>
+<td><i>!=</i>
+<td>Is <i>recipient</i> not equal to <i>parameter</i>?
+<td>2 != 2.0
+<tr>
+<td><i>!==</i>
+<td>Is recpient not identical to <i>parameter</i>?
+<td>2 !== 2.0
+<tr>
+<td><i>&lt</i>
+<td>Is recpient less than <i>parameter</i>?
+<td>1 < 2.0
+<tr>
+<td><i>&lt=</i>
+<td>Is recpient less than or equal to <i>parameter</i>?
+<td>1 <= 2.0
+<tr>
+<td><i>&gt</i>
+<td>Is recpient greater than <i>parameter</i>?
+<td>1 > 2.0
+<tr>
+<td><i>&gt=</i>
+<td>Is recpient greater than or equal to <i>parameter</i>?
+<td>1 >= 2.0
+<tr>
+<td><a href="mNumber.htm#between:and:"><i>between:and:</i></a>
+<td>Is recpient value between two <i>parameter</i> values?
+<td>5 between: 3 and: 7 .
+<tr>
+<td><a href="mNumber.htm#inRange:"><i>inRange:</i></a>
+<td>Is recpient value in the range implied by the <i>parameter</i>,
+a list of two elements representing the start and end of the
+range inclusively?
+<td>5 inRange: 3,7 .
+<tr>
+<td><a href="mNumber.htm#inSet:"><i>inSet:</i></a>
+<td>Is recpient equal to one of the values in the <i>parameter</i>,
+a list containing one or more elements?
+<td>5.0 inSet: 1,3,5,7,9 .
+<tr>
+<td><a href="mNumber.htm#notBetween:and:"><i>notBetween:and:</i></a>
+<td>Is recpient value not between two <i>parameter</i> values?
+<td>5 notBetween: 3 and: 7 .
+<tr>
+<td><a href="mNumber.htm#within:percentOf:"><i>within:percentOf:</i></a>
+<td>Is recpient value within <i>parameter1</i> percent of <i>parameter2</i>?
+<td>100 within: 10 percentOf: 105 .
+
+</tr>
+</table></Center>
+<p>
+The following messages perform other <b>standard computations</b>.
+These messages can be sent to an instance of any <i>Number</i> subclass.
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><a href="mNumber.htm#absoluteValue"><i>absoluteValue</i></a>
+<td>Absolute value of <i>recipient</i>
+<td>-2 absoluteValue
+<tr>
+<td><a href="mNumber.htm#asAPowerOf:"><i>asAPowerOf:</i></a>
+<td>Raise <i>parameter</i> to the <i>recipient</i> power
+<td>3 asAPowerOf: 2 .
+<tr>
+<td><a href="mNumber.htm#exp"><i>exp</i></a>
+<td>Raise the constant <i>e</i> (~ 2.7183) to the <i>recipient</i> power
+<td>3 exp
+<tr>
+<td><a href="mNumber.htm#log"><i>log</i></a>
+<td>Compute natural log of <i>recipient</i>
+<td> 3 log
+<tr>
+<td><a href="mNumber.htm#log:"><i>log:</i></a>
+<td>Compute log of <i>recipient</i> using numeric <i>parameter</i> as base
+<td> 3 log: 10 .
+<tr>
+<td><a href="mNumber.htm#max:"><i>max:</i></a>
+<td>Returns the larger of <i>recipient</i> and <i>parameter</i> value
+<td> 3 max: 4 . 
+<tr>
+<td><a href="mNumber.htm#min:"><i>min:</i></a>
+<td>Returns the smaller of <i>recipient</i> and <i>parameter</i> value
+<td> 3 min: 4 . 
+<tr>
+<td><a href="mNumber.htm#negated"><i>negated</i></a>
+<td>Multiplies <i>recipient</i> by -1
+<td> 3 negated
+<tr>
+<td><a href="mNumber.htm#pctChangeTo:"><i>pctChangeTo:</i></a>
+<td>Computes percentage change between <i>recipient</i> and <i>parameter</i>
+relative to <i>parameter</i>
+<td> 3 pctChangeTo: 2 .
+<tr>
+<td><a href="mNumber.htm#round"><i>round</i></a>
+<td>Round <i>recipient</i> to nearest integer
+<td> 3.3 round
+<tr>
+<td><a href="mNumber.htm#round:"><i>round:</i></a>
+<td>Round <i>recipient</i> to <i>parameter</i> number of decimals places
+<td> 3.333 round: 2 .
+<tr>
+<td><a href="mNumber.htm#sign"><i>sign</i></a>
+<td>Returns -1, 0, or 1 based on sign of <i>recipient</i>
+<td> 3 sign
+<tr>
+<td><a href="mNumber.htm#sqrt"><i>sqrt</i></a>
+<td>Square root of <i>recipient</i>
+<td> 3 sqrt
+
+</tr>
+</table></Center>
+<p>
+The following messages perform other <b>standard computations</b>.
+These messages are only defined for <i>Integers</i>.
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><a href="mNumber.htm#adjustedMod:"><i>adjustedMod:</i></a>
+<td><i>Recipient modulo parameter</i>, 
+returning an integer between 1 and <i>parameter</i>
+<td> 10 adjustedMod: 5 .
+<tr>
+<td><a href="mNumber.htm#mod:"><i>mod:</i></a>
+<td><i>Recipient modulo parameter</i>, 
+returning an integer between 0 and <i>parameter - 1</i>
+<td> 10 mod: 5 .
+<tr>
+<td><a href="mNumber.htm#numberOfDigits"><i>numberOfDigits</i></a>
+<td>Integer number of digits in <i>recipient</i>
+<td> 3 numberOfDigits
+
+</tr>
+</table></Center>
+<p>
+The following messages perform the basic <b>trigonometric</b> operations.
+These messages can be sent to an instance of any <i>Number</i> subclass
+and return an instance of the class <i>Double</i>.
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><i>cosine</i>, <i>sine</i>, <i>tangent</i>
+<td>0 cosine
+<tr>
+<td><i>arcCosine</i>, <i>arcSine</i>, <i>arcTangent</i>
+<td>1 arcCosine
+<tr>
+<td><i>hyperbolicCosine</i>, <i>hyperbolicSine</i>, <i>hyperbolicTangent</i>
+<td>0 hyperbolicCosine
+
+</tr>
+</table></Center>
+<p>
+<hr>
+<h3><a name="convert">Conversion Messages</a></h3>
+<p>
+Several messages have been defined to convert an instance of <i>Number</i>
+to an instance of another class.
+<p>
+The following messages <b>convert</b> from one numeric class to another.
+These messages can be sent to an instance of any <i>Number</i> subclass.
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><i>asDouble</i>
+<td>Convert <i>recipient</i> to a double
+<td>3 asDouble
+<tr>
+<td><i>asFloat</i>
+<td>Convert <i>recipient</i> to a float
+<td>3 asFloat
+<tr>
+<td><i>asInteger</i>
+<td>Convert <i>recipient</i> to an integer
+<td>3.0 asInteger
+
+</tr>
+</table></Center>
+<p>
+The following messages <b>convert</b> numbers to instances of other classes.
+These messages can be sent to an instance of any <i>Number</i> subclass.
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><a href="mNumber.htm#asDate"><i>asDate</i></a>
+<td>Convert <i>recipient</i> in form YYYYMMDD to a <i>Date</i> object
+<td>19960315 asDate
+<tr>
+<td><a href="mNumber.htm#asString"><i>asString</i></a>
+<td>Convert <i>recipient</i> to a <i>String</i> object
+<td>123 asString
+<tr>
+<td><a href="mNumber.htm#sequence"><i>sequence</i></a>
+<td>Create list of <i>recipient</i> elements from 1 to <i>recipient</i>
+<td>10 sequence
+<tr>
+<td><a href="mNumber.htm#sequence0"><i>sequence0</i></a>
+<td>Create list of <i>recipient</i> elements from 0 to <i>recipient - 1</i>
+<td>10 sequence0
+
+</tr>
+</table></Center>
+<p>
+
+<hr>
+<h3><a name="other">Additional Information</a></h3>
+<p>
+For additional information see:
+<p>
+<ul type=square>
+<li><a href="clDate.htm#creation">Creating Dates from Integers</a>
+<li><a href="Output.htm#printInteger">Printing Integers</a>
+<li><a href="Output.htm#printDouble">Printing Doubles</a>
+<li><a href="Navigate.htm#message">General Message Information</a>
+<li><a href="tuBasic.htm#Working with Numbers and Strings">Vision Basics Tutorial</a>
+</ul>
+<p>
+<p>
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated June 19, 1996</font>
+</table>
+
+</body>
+</html>

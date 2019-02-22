@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html>
+<head><title>Vision Release  6.1.3 Notes</title></head>
+<body bgcolor=white>
+<h2>Vision Release 6.1.3 Notes</h2>
+
+
+<hr><h3>Topics Covered:</h3>
+<ul type=square>
+<h4><p>PMA Release</h4>
+<ul type=square>
+<li><a href="#pmadescription">Description</a>
+<br><li><a href="#patch19core">patch.1.9core</a>
+<br><li><a href="#patch19estimates">patch.1.9estimates</a>
+<br><li><a href="#classmatrix">classMatrix.vis</a>
+</ul>
+<h4>Batchvision Release</h4>
+<ul type=square>
+<li><a href="#batchvisiondescription">Description</a>
+<br><li><a href="#signal">Signal Handling on NT </a>
+<br><li><a href="#dbupdate">Miscellaneous Fixes to DBupdate Tools </a>
+<br><li><a href="#tuning">Update Default Values for Tuning Parameters  </a>
+<br><li><a href="#enhancement">Minor Enhancements to <i>batchvision</i> </a>
+<br><li><a href="#bugfixes">Miscellaneous Bug Fixes in <i>batchvision</i></a>
+</ul>
+</ul><p><hr><p>
+
+<h3><a name=pmadescription>PMA Release Description</a></h3><p>
+<p>This PMA Release includes miscellaneous bug fixes and enhancements that have been assembled since the previous release.  
+
+<p>
+Additionally, this release includes the creation of <b>Summary</b> and <b>Detail EstimateBridge</b> classes and protocol as well as enhances <b>EstimateFeed</b> processing  to support tracking individual estimates for multiple brokers for an entity/period/measure.  The class <b>VendorEntity</b> has been added to provide an organization for retaining external data about entities that have not been identified in a common class such as <b>Security</b> or <b>Company</b>.  The class <b>Matrix</b> and protocol have been added to manipulate matrix objects.
+<p>
+
+
+<b>Software Requirements</b>: These patches have been defined to work with batchvision release 6.1.3, but can be installed with any release starting with 6.1.1.
+
+<p> 
+<b>Installation:</b>
+Three Vision scripts have been included with this release:
+<p>
+<ul type=disc><table cellspacing=4>
+<tr align=left valign=top><td>patch.1.9core<td>contains messages that have been added to or modified in
+the core classes
+<tr align=left valign=top><td>patch.1.9estimates<td>creates <b>Summary</b> and <b>Detail EstimateBridge</b> subclasses and supporting protocol
+<tr align=left valign=top><td>classMatrix.vis<td>defines the <b>Matrix</b> class and its protocol
+</table></ul>
+
+<p>
+The script <i>cleanupDataRecords.S</i> is provided as a production-ready script
+that can be used to delete instances in all DataRecord subclasses that have
+been flagged for deletion but not yet removed from the database.  In future releases, this script will be included in the directory:
+<pre>     /localvision/production/Updates/workArea/Cleanup/scripts</pre>
+<p>
+These scripts can be installed using VAdmin.  The script <i>classMatrix.vis</i>  can be installed into any Vision database, independent of this release.
+
+
+<hr>
+<h3><a name=patch19core>patch.1.9core</a></h3><p>
+<p>
+This script contains messages that have been added to or modified in
+the core classes.  These changes are summarized below:
+<ul type=disc>
+<p><li>Modified the <i>asDateFromYearForMonth:andDay:</i> message at Integer
+     to make sure that the supplied year (recipient) is non-negative,
+     that the supplied month is between 1 and 12, and that the supplied
+     day is between 1 and 31 before attempting the conversion.
+<p>
+<li>Modified the <i>asNumber</i> method at String to return a double precision
+     value when the supplied string does not include a decimal point but
+     is too large to convert to an integer.  Prior to this change the
+     method would return NA when the recipient was a large number with
+     no decimal point in the supplied string.
+<p>
+<li>Modified the methods <i>asHighResolutionTime</i> and <i>asLowResolutionTime</i>
+     at the class <b>Utility UnixSeconds</b> to assume that the internal year
+     count starts at 1900, not 0.  Prior to this fix, these methods were
+     returning current dates in the year 100 instead of the year 2000.
+     The methods <i>localTimeNow</i> and <i>gmTimeNow</i> at the class <b>Time</b> were
+     similarly modified.
+<p>
+<li>Modified the <i>getMessageFor:</i> method at <b>Schema MessageDescriptor</b>
+     to locate the correct version of a message implementation for
+     messages that start with the _ character and are presented in all
+     upper case characters.
+<p>
+<li>Modified the <i>run</i> method at <b>Interface ApplicationWS</b> to eliminate
+     the possibility that someone running web applications could bypass
+     security and use a listener to run unsuitable methods.
+<p>
+<li>Modified the data inspection reports in navigator to display
+     a custom format for <b>EstimateBridge</b> instances.
+<p>
+<li>Modified the <i>updateNetworkIfSpaceIsLow</i> method at <b>AdminTools</b> to handle the degenerate situation where an update does not drop the total network allocation value below the threshold.
+<p>
+<li>Added the fixed property <i>lastModifiedByFeed</i> to <b>Object</b>.
+<p>
+<li>Added the class <b>VendorEntity</b> as a subclass of <b>Entity</b> to provide
+     protocol to manage links to instances of a related entity class.
+<p>
+<li>Added the class <b>Matrix</b> and protocol to manipulate matrix objects.
+<p>
+<li>Added the method <i>extractValuesForDateRange:within:</i> to the <b>TimeSeries</b>
+     class.  This method returns a time series for each date in the supplied
+     date range.  The value of the time series on the date is returned
+     if it is within the supplied offset, otherwise the default value is
+     returned for the date.  The method <i>extractUniqueForDateRange:</i>
+     uses the offset in the date range to determine if the point is
+     within the correct duration.  This prevents returning the same value
+     from the underlying time series for more than one date.  In other
+     words, the <i>as of </i>logic which could return the same underlying record 
+     for different dates, will return the default value instead of the <i>as of</i>
+     value.  For example:
+
+<pre>         !ts <- TimeSeries new ;
+         ts asOf: 98 put: 98 ;
+         ts asOf: 99 put: 99 ;
+         !dr <- 98 to: 99 by: 1 monthEnds ;
+    
+         #--  this sample returns the value 98 for 12/98 to 11/99
+         dr evaluate: [ ^date print: 15 ; ^my ts value printNL ]  ;
+    
+         #--  this sample returns the value 98 for 12/98 only
+         ts extractUniqueForDateRange: dr . do: [ ^date print: 15 ; printNL ] ;</pre>
+  <p>  
+<li>Added the method <i>extractTSOf: block overDateRange: drange</i> to the
+     <b>Collection</b> class to extract data using the block over a date range
+     for a collection.  The method returns a time series of lists of
+     the data element with the points corresponding to the dates in the
+     date range.  The method <i>getTotals:</i> uses this method to compute
+     the total for the list for each date.  Note that other variations such
+     as <i>getAverages:</i> can be implemented as well.
+<p>
+<li>Added the method <i>redefineAsFixedProperty:withDefault:</i> at the class
+     <b>Object</b> to convert an existing time series property to a fixed property.
+     The value in the original time series as of the evaluation date is
+     copied into the fixed property for each instance of the recipient
+     class and any of its subclasses that inherit the property.
+<p>
+<li>Added the method <i>redefineAsTSProperty:withDefault:</i> at the class
+     <b>Object</b> to convert an existing fixed property to a time series property.
+     The default value is stored in the new time series property as of
+     the earliest possible date.  The value in the original fixed property
+     is stored in the new time series property as of the evaluation date.
+<p>
+<li>Added the method <i>removeDeletedRecords</i> to the <b>DataRecord</b> class
+     to delete all instances in all stores that have been flagged for
+     deletion.  This method is used in conjunction with the new cleanup
+     script <i>cleanupDataRecords.S</i> described above.
+
+
+</ul>
+The script <b>patch1.9core</b> also contains the following changes to DataFeed and related classes:
+<p>
+<ul type=disc>
+<li>Modified <i>setUpdateBlocks</i> at <b>DataFeed</b> class to fix interpretation of headers containing the text "date".  Prior to this fix, all
+     fields starting with the characters "date" were interpreted as
+     the date, leading to a random condition which caused the date assignment
+     to be random.  This patch enforces that the date field used is the one
+     explicitly named "date", "DATE", or any other upper/lower case combination.
+<p>
+<li>Modified the <i>naTest</i> option in the configuration file to accept
+     a list of strings that represent the NA value.  The NAs should
+     be separated by the ',' character. For example:
+<pre>         naTest | NA, NM </pre>
+<p>
+<li>A new configuration file option, <i>naPatternTest</i> has been added
+     which will convert data to NAs based on the existence of the
+     pattern in the data.  The pattern can include the special pattern
+     matching symbols supported as <i>regular expressions</i>.  For example:
+<pre>         naPatternTest | 999, -999 </pre>
+     converts any value containing the characters 999 or -999 to the
+     NA value.  To restrict the list to values starting with 999, use:
+<pre>         naPatternTest | ^999, -999 </pre>
+
+<p>
+<li>Modified the <i>displayExceptionSummary</i> report to allow subclasses to
+     perform their own test on whether to include <i>isProcessed</i> in the
+     <i>Other Status</i> section; modified <i>hasStatusInfo</i> at MasterFeed so that
+     new creations would be counted even if they are not processed because
+     they are duplicates.
+<p>
+<li>Modified the general <i>runUpdateStats</i> to set the timestamp of modification
+     in the underlying object associated with each feed instance processed.
+<p>
+<li>Modified the <i>initializeDate</i> at <b>DataFeed</b> to support a new date
+     format,  YYYYMMXX, which converts the supplied date in YYYYMMDD format
+     to end-of-month format by dropping the DD and returning the last
+     date in the year/month.  This provides a way to convert fields
+     containing the last business day of the month into the last day of the month.
+<p>
+<li>Added a switch that allows you to update time series properties in an EntityExtenderFeed only if the value is a change.  This works with EntityExtenderFeeds that are used to update fields that are time series properties, not feeds that
+     update time series of records.  You can set the switches
+     <i>enableOnlyUpdateOnChange</i> and <i>disableOnlyUpdateOnChange</i>
+     to control the behavior of the next update for the feed.
+     This value is reset to <i>disableOnlyUpdateOnChange</i> after each update.
+<p>
+<li>Modified the <i>purgeEntityTSDataRecordsFor:</i> message at the
+     EntityExtenderFeed class to automatically delete the records that
+     are purged.  Prior to this, the records were detached from their active
+     entities or bridges but left around for deletion at a future time.
+<p>
+<li>Modified the <i>isApplicationClass</i> method to include <b>ToolKit</b> as
+     a valid class.
+<p>
+<li>Modified the <i>processAdjustments</i> method at PropertySetup to
+     prefix adjustment method with <i>^self</i>.
+<p>
+<li>Modified <i>getUploadProperties</i> at AliasFeed to eliminate a <i>Selector Not Found</i> in the <i>describeFeed</i> display.
+<p>
+<li>Modified the GlobalsFeed initialization to ignore the record
+     containing the header.  The fields are always assumed to be in
+     the order <i>option</i>, <i>setting</i>, and optional <i>settingType</i>.
+<p>
+<li>Modified the method <i>createDataRecordClass:</i> defined at
+     Interface ExternalFeedManager to only create a feed if the
+     path to an entity is supplied.
+<p>
+<li>Added a configuration file option to set the currency for any records
+     loaded in the feed that do not provide an explicit value.  The
+     option <i>currency</i> can be set to a valid currency code (e.g., USD,
+     CAD).  This is the equivalent of including the field <i>currencyId</i>
+     and setting its value explicitly for each record.  Note that if
+     this field is included, the configuration value will only be used when the
+     value for a particular record is blank or NA.
+<p>
+<li>Added a switch that enables/disables the <i>new ones</i> report from
+     displaying.  By default, the <i>new ones</i> report will display except
+     for EntityExtenderFeeds where the default is to disable this report.
+     This setting is permanent for the feed (i.e., you do not need to 
+     enable/disable each time you run the feed) and can be changed
+     using the <i>enableDisplayNewOnes</i> or <i>disableDisplayNewOnes</i> message.
+  <p>   
+<li>Added an option to specify a configuration file when loading a
+     file directly with <b>DataFeed</b>. The new method at <b>DataFeed</b> is
+     <i>loadFromFile: withConfig:</i>.
+<p>
+<li>Modified the <b>DataFeed</b> method <i>loadFromFile:</i> to return an update
+     status indicating success or failure (TRUE or FALSE).  The value
+     FALSE is returned if the specified file is missing or empty.
+<p>
+<li>Added rejection file generation to <i>loadFromFile:</i>, <i>bulkLoadFromFile:</i>,
+     and <i>Interface BatchFeedManager upload:usingFile:withConfig:</i>.  Any
+     rejected records are written to a file with the same name as the
+     input file with the <i>.rejects</i> extension.  The first line of
+     this file will be the field order list used to process the feed.
+     Subsequent records will be the records that were not processed
+     by the feed, followed by a rejection reason where possible.
+<p>
+<li>Added the configuration file option <i>rejectFileName</i> which 
+     allows you to override the default reject file name (which adds
+     the <i>.rejects</i> extension to the name of the file loaded).
+<p>
+<li>Added a configuration file option to <i>bulkLoadFromFile:</i>.  The
+     new method defined at <b>DataFeed</b> is:
+<pre>            bulkLoadFromFile: fname 
+                  withConfig: cfgName
+                andBatchSize: bsize 
+                   fromBatch: bnum to: enum</pre> 
+     where <i>fname</i> is the name of the file to load, <i>cfgName</i> is the
+     name of a configuration file, <i>bsize</i> is the approximate size of
+     a batch in characters, and <i>bnum</i> and <i>enum</i> are the beginning and
+     ending batch numbers with 0 representing the first batch.  The
+     configuration file is read in once and preserved for each batch
+     processed. If the configuration file contains a <i>fieldOrderList</i>
+     it applies to the entire file; otherwise, the line specified in
+     the configuration file as the <i>headerLineNumber</i> is used to set
+     the <i>fieldOrderList</i>.  If no line is specified, the first non-blank,
+     non-comment line of the feed file is assumed to contain the field names.
+
+     Several configuration file options are not meaningful after the header line
+     is identified and are disabled in subsequent iterations, these are: 
+        <i>skipTop</i>, <i>skipBottom</i>, <i>maxRecords</i>, and <i>asOfdateLineNumber</i>.
+     All lines up to and including the <i>headerLineNumber</i> are skipped
+     during the bulk load.
+<p>
+<li>An old bug that was occasionally losing blank characters has been fixed
+     in this version of the bulk loader.
+<p>
+<li>Added a check for duplicates to MasterFeed loads; if duplicate
+     underlying records exist, neither will process and they will be
+     included in the exception report and reject file.
+</ul>
+<p> 
+The following changes to investment layer messages have been included
+in <b>patch.1.9core</b>:
+<p>
+<ul type=disc>
+<li>Modified <i>setCusipTo:</i> and <i>setSedolTo:</i> at <b>Security</b> to detect if the cusip (sedol) matches the 8 or 9 (6 or 7) character code
+     and if so, resets the code along with the cusip (sedol) change.
+<p>
+<li>Added the <i>_primaryCompany</i> property to <b>Company</b> which can be
+     used to set a parent company when it is different from the
+     company (e.g., GMH's primaryCompany is GM).  The method
+     <i>primaryCompany</i> returns the <i>_primaryCompany</i> if it exits,
+     the company itself otherwise.  This property can be updated
+     using the CompanyMaster feed.
+<p>
+<li>Modified <i>createHoldingsFrom:</i> method at <b>Account</b> to eliminate the cash <i>roll up</i> step.  Prior to this patch, all securities
+     flagged as type <i>cash equiv</i> were rolled into a single security
+     to prevent the creation of many extraneous cash instruments.
+     Since this rollup is now handled by the accounting feeds and/or
+     a preprocessing step, the assumption is that all cash securities
+     supplied by the feed should be created as individual cash holdings.
+<p>
+<li>Modified <i>addAlias:</i> and <i>deleteAlias:</i> for the <b>Account</b> class so
+     that aliases added/deleted from specific subclass instances are
+     maintained in both the subclass' naming dictionary (i.e., Named Portfolio)
+     and in the <b>Account</b> naming dictionary (i.e., Named Account).
+<p>
+<li>Added the method <i>removeDeletedRecords</i> to the <b>PriceTools</b> class
+     to delete all instances in all pricing stores that have been flagged 
+     for deletion.  This method is used in conjunction with the new cleanup
+     script <i>cleanupDataRecords.S</i> describe above.
+</ul><p>
+The script <b>patch1.9core</b> also contains the following changes to investment
+layer <b>DataFeed</b> classes:
+<p>
+<ul type=disc><li>Modified SecurityMaster feed to only post a cusip or sedol change
+     if it is not currently associated with a different security;
+     this prevents accidentally moving IDs from one security (and its
+     company) to another; to cause a change, first change the cusip or
+     sedol in the security that currently <i>owns</i> the id.
+<p>
+<li>Added options to SecurityMaster to enable/disable posting cusip,
+     sedol, and or company changes; update exception report to display
+     changes made (if enabled) or skipped (if disabled).
+     The messages <i>enableCusipChanges</i>, <i>disableCusipChanges</i>, 
+     <i>enableSedolChanges</i>, <i>disableSedolChanges</i>, <i>enableCompanyChanges</i>, 
+     and <i>disableCompanyChanges</i> can be used to enable/disable these
+     options.  All three  options are reset to enable after each run.
+<p>
+<li>Modified SplitsFeed to use <i>locateId:</i> instead of <i>Named Security</i>
+     to lookup supplied <i>entityId</i>.
+<p>
+<li>Modified PriceFeed to use <i>locateId:</i> instead of <i>Named Security</i>
+     to lookup supplied <i>entityId</i>.
+<p>
+<li>Modified PriceFeed to remove all purged records as part of the
+     purging process.
+<p>
+<li>Modified PriceFeed to process the items <i>open</i>, <i>bid</i>, and <i>ask</i> if present in the feed header.
+<p>
+<li>Modified HoldingsFeed <i>runWrapup</i> to more efficiently update the
+     aggregate accounts.
+<p>
+<li>Modified <i>rejectReason</i> in SplitsFeed to flag if a bad date is supplied.
+
+<p><li>Modified <i>rejectReason</i> in PriceFeed to flag if a bad date is supplied.
+
+<p><li>Modified <i>rejectReason</i> in HoldingsFeed to flag if a bad account, security, or date is supplied.
+</ul>
+<p>
+<h3><a name=patch19estimates>patch.1.9estimates</a></h3><p>
+<p>
+This script creates <b>Summary</b> and <b>Detail EstimateBridge</b> subclasses and
+supporting protocol and contains the method modifications needed to 
+support these new subclasses.  The following changes are included
+in this script:
+<p>
+<ul type=disc>
+<li>Modified <b>EstimateBridge</b> subclass creation to initialize the
+     <i>observation</i> and <i>actualRecord</i> with the parent class' default.
+<p>
+<li>Modified <i>actualRecord</i> to be a time series property at <b>EstimateBridge</b>.
+     Note that this redefinition will move values at existing instances
+     from the fixed property to the time series.  This update needs to
+     be reviewed for individual classes.
+<p>
+<li>The method <i>setActualFlagTo:</i> at <b>EstimateRecord</b> has been modified
+     to track the actual records over time.  Only changed values are
+     added to the time series.
+<p>
+<li>The methods <i>actual</i> and <i>actualDate</i> at <b>EstimateBridge</b> have been
+     modified to return the last actual observation.
+<p>
+<li>Reorganized the <i>_estimate</i> and <i>estimate</i> definitions for 
+     <b>EstimateRecord</b> and its subclasses and redefined <i>currencyFactor</i>
+     to use the <i>baseCurrency</i> of its underlying <i>baseEntity</i> when its
+     own <i>baseCurrency</i> is the default.
+<p>
+<li>Modified the <i>priorPeriod</i> and <i>nextPeriod</i> methods at <b>EstimateBridge</b>
+     to correctly work with subclasses.
+<p>
+<li>Modified the <b>EstimateRecordFeed</b> to process the actuals in the
+     correct order.
+<p>
+<li>Modified <b>EstimateRecordFeed</b> to support detail level and static
+     <i>periodEndDate</i> updates.  
+<p>
+<li>Added the switch, <i>enableActualFlag</i> which can be set prior
+     to processing an <b>EstimateRecordFeed</b> to indicate that all records
+     in the feed should be flagged as actuals.
+<p>
+<li>Added a method to create an <b>EstimateBridge</b> summary class and associated
+     detail bridge class and feed to Interface ExternalFeedManager:
+<table cellspacing=4>
+<tr align=left valign=top>
+<tr><td>Parameters:
+       
+<tr><td valign=top><i>createEstimateBridgeClass</i>:    
+                             <td>name of <b>SummaryEstimateBridge</b> class to
+                             create; if name already defines
+                             a Bridge, it will not be recreated;
+                             a corresponding <b>EstimateRecordFeed</b> for updating
+                             Estimates is created
+<tr><td valign=top><i>from</i>:               <td>existing <b>SummaryBridge</b> or subclass from which 
+                             to create new subclass 
+<tr><td valign=top><i>linkedTo</i>:           <td>name of existing class that new class 
+                             links to; this class should be an existing
+                             <b>Entity</b> or another <b>Bridge</b> class; to create
+                             an "unaffiliated" Bridge, use a blank string
+                             as the parameter
+<tr><td valign=top><i>via</i>:                <td>name of the message to define at "linkedTo"
+                             class; the type of message is determined by
+                             the <i>andFreq:</i> value
+<tr><td valign=top><i>withEstimateRecordClass</i>:
+                             <td>subclass of <b>EstimateRecord</b> used to store
+                             summary estimate information
+<tr><td valign=top><i>andFreq</i>:            <td>the duration of an estimate period, expressed
+                             as a date offset such as "3 monthEnds"; note
+                             that estimates made on fiscal quarter and
+                             year boundaries should be expressed as 3 or
+                             12 monthEnds rather than 1 quarterEnds or 1
+                             yearEnds so that the fiscal boundaries are
+                             preserved;
+                             an NA value implies that this estimate bridge
+                             tracks estimates over time, but not for specific
+                             period-end-dates (e.g., long-term growth)
+<tr><td valign=top><i>withDetailEstimateRecordClass</i>:
+                             <td>subclass of <b>EstimateRecord</b> used to store
+                             detail estimate information; note that the
+                             <b>DetailBridge</b> is created when the supplied
+                             bridge class creates a new <b>SummaryBridge</b>;
+                             a corresponding <b>EstimateRecordFeed</b> for updating
+                             <b>DetailEstimates</b> is created
+</table>
+</ul>
+<h3><a name=classmatrix>classMatrix.vis</a></h3><p>
+<p>
+This script defines the Matrix class and its protocol.  Documentation
+for creating, accessing, updating, and transforming matrices is provided
+within the script file.  This script can be installed into any release of batchvision.
+
+
+<hr>
+<h3><a name=batchvisiondescription>Batchvision Release Description</a></h3><p>
+Batchvision Release 6.1.3 is a minor upgrade, providing some enhancements and fixes to recently discovered bugs, which are described below.
+<p>
+<hr>
+<h3><a name=signal>Signal Handling on NT</a></h3><p>
+<ul type=disc>
+<li>Some signals which in prior versions would cause a batchvision
+     process to exit are now caught and reported as a <i>read-eval-print</i>
+     error (becoming more like the signal handling on the various unix
+     platforms).
+<p>
+<li><i>Control-C</i> can now be used to interrupt a vision execution without
+     causing the batchvision process to exit.
+</ul>
+<hr>
+<h3><a name=dbupdate>Miscellaneous Fixes to DBupdate Tools</a></h3><p>
+<ul type=disc>
+<li>The inability to correctly handle layout files with large
+     field descriptions has been fixed.
+<p>
+<li>Under AIX, empty input files can now be incorporated, 
+     as is possible on our other supported platforms.
+<p>
+<li>Additional information is provided for some error messages.
+
+</ul>
+<hr>
+<h3><a name=tuning>Update Default Values for Tuning Parameters</a></h3><p>
+<ul type=disc>
+
+<pre>   Parameter			Old Default	New Default
+   ---------			-----------	-----------
+
+   LargeTaskSize		50,000		500,000
+   VisionAddressThreshold	0		0x80000000 (solaris only)
+   VisionMaxSegSize		0x7fffffff	0x2000000</pre>
+
+</ul>
+<hr>
+<h3><a name=enhancement>Minor Enhancements to <i>batchvision</i></a></h3><p>
+<ul type=disc>
+<li>Referential alignments to unmodified reference uvectors are now deferred
+     when possible. This can sometimes result in substantial reductions in the
+     heap size of a batchvision process. Also optimized the case where all the
+     changes to the referenced range are beyond the end of the current range.
+<p>
+<li>A maximum number of serious errors allowed in a session has been established.
+     The first serious error beyond that maximum results in the session exiting.
+     The default maximum is 25, but this value can be modified in two ways:  the environment variable <i>VisionMaxSeriousErrors</i> can be set, or the <i>Utility</i>
+     <i>SessionAttribute</i> feature can be used.  For example:
+
+<pre>	   Utility SessionAttribute
+	   define: 'visionMaxSeriousErrors'
+	     toBe: (271 asPointerTo: Utility SessionAttribute).</pre>
+
+     would install <i>VisionMaxSeriousErrors</i> as a settable
+     <i>SessionAttribute</i>.  The parameter can then be modified via the
+     following:
+
+<pre>	   Utility SessionAttribute visionMaxSeriousErrors <- 0;</pre>
+
+     This would result in the session exiting at the next serious error.
+<p>
+<li><i>substituteOutputOf:</i>, <i>appendOutputOf:</i>, <i>filterOutputOf:</i> now return errno
+     if an error was encountered in an interface with the file system. In previous
+     versions, errno left-shifted by 16 bits was returned. 
+
+</ul>
+<hr>
+<h3><a name=bugfixes>Miscellaneous Bug Fixes in <i>batchvision</i></a></h3><p>
+<ul type=disc>
+
+<li>LIO buffer usage is now included in memory allocation statistics.
+<p>
+<li>The Vision compiler now explicitly reports an 
+     error when the size of a block's string space is exceeded.
+     This is a rare occurence, which previously resulted in undefined behavior;
+     usually a <i>Selector Not Found</i> error.
+<p>
+<li>Primitives implementing <i>substituteOutputOf:</i> and <i>appendOutputOf:</i> 
+     are now more efficient regarding memory usage when run in scalar mode.
+<p>
+<li>Under HPUX, <i>0 log</i> now returns NA, making it consistent with behavior
+     on other platforms. Previously it returned the largest negative double.
+<p>
+<li>An error printing the largest negative double value is fixed.
+<p>
+<li>Some read-eval-print error messages modified to provide more detail.
+<p>
+<li>String comparisons now work with extended strings.
+<p>
+<li>Ability to print doubles with exactly 10 digits to the right of the decimal
+     point has been added.
+<p>
+<li>Improved memory usage on non HP platforms by applying an HP 
+     specific error recovery technique only to the HP version. Similarly
+     removed recovery mechanisms only beneficial to Solaris and NT from
+     the HP and AIX versions.
+<p>
+<li>The NDF rebuilder, running under the <i>fromOSD</i> mode, now ignores any
+     numeric file names outside the range of possible spaces (1-1023) when
+     encountered in the supplied object space directory.
+<p>
+<li>The NDF rebuilder, running under <i>fromNDF</i> mode, will insert the supplied
+     object space directory into the <i>NDF.new</i> file which it creates. 
+<p>
+<li>Segments recognized as not matching the transaction id recorded in the 
+     NDF are now unmapped immediately to prevent their being accessed again
+     later in the session when no check for validity is done.
+<p>
+<li>Under NT, a limit is now in effect on the amount of data that is written
+     to the console in a single operation. The limit is 32 kilobytes. If that
+     limit is not enforced, then the process will hang.
+<p>
+<li>User defined handlers for OpenVision channels are now cleared from the
+     channel upon close. Prior to this version, a handler would persist
+     across open/close cycles of the channel until explicitly reset.
+<p>
+<li>Arguments to the numeric value comparison primitives are now checked to
+      that they are indeed numeric; an error is reported if they are not.
+<p>
+<li>The primitive implementing <i>whileTrue:</i> now leaves a FALSE result for all
+     data threads when run inside a list operation.
+<p>
+<li>Fixed a memory leak occurring when an interrupt (control-C) is signaled
+     in a session.
+<p>
+<li>Fixed AlignStore/CleanStore primitive for IndexedList/TimeSeries.
+<p>
+<li>Introduced sanity check to catch erroneous configurations of an
+     incorporator string store.
+<p>
+<li>A rarely encountered bug in <i>LIO_reset</i> is fixed. A segmentation fault 
+     occured if a <i>malloc error</i> happened during the allocation of an LIO buffer.
+<p>
+<li>The primitive found at <i>AdminTools ObjectSpace totalSpaceAllocation</i> no
+     longer causes container table allocation in a previously unaccessed space.
+
+</ul>
+<p><hr><table border=0 width="100%">
+
+<tr>
+
+<td align=left><font size=-1>Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated December 15, 2000</font>
+</body></html>

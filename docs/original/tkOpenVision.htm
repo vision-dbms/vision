@@ -1,0 +1,2164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>The Vision OpenVision ToolKit Class</title>
+</head>
+
+<body bgcolor=white>
+<h2>The Vision OpenVision ToolKit Class</h2>
+
+<p>
+| <a href="FHome.htm">Home</a> | <a href="vifaces.htm">Interfaces</a> |
+<hr>
+
+<p>
+<h3>Topics Covered:</h3>
+<ul type="square">
+<li><a href="#overview">An Overview Of The OpenVision Tool Kit</a>	
+<li><a href="#introduction">An Introduction To Sockets</a>
+<li><a href="#fundamentals">Fundamentals Of The OpenVision Tool Kit</a>	
+<li><a href="#Creating Channels">Creating Channels -- The <i>asOpenVisionChannel</i> Message</a>	
+<li><a href="#Accessing Files">Accessing Files</a>	
+<li><a href="#Starting Processes">Starting Processes</a>	
+<li><a href="#Creating Sockets">Creating Sockets</a>	
+<li><a href="#detail">A Detail You May Never Need</a>	
+<li><a href="#Reading And Writing Data">Reading And Writing Data</a>	
+<li><a href="#Reading Data Sequentially">Reading Data Sequentially</a>	
+<li><a href="#Writing Data Sequentially">Writing Data Sequentially</a>	
+<li><a href="#Reading and Writing Data Randomly">Reading and Writing Data Randomly</a>	
+<li><a href="#Controlling Data Formats">Controlling Data Formats</a>	
+<li><a href="#The Binary Format Option">The Binary Format Option</a>
+<li><a href="#The Trim Format Option">The Trim Format Option</a>
+<li><a href="#Reading, Writing, and List Operations">Reading, Writing, and List Operations</a>	
+<li><a href="#Offering Services and Creating Handlers">Offering Services and Creating Handlers</a>	
+<li><a href="#Offering a Simple Service">Offering a Simple Service</a>	
+<li><a href="#Writing Your Own Handlers">Writing Your Own Handlers</a>	
+<li><a href="#Exiting Vision">Exiting Vision</a>	
+<li><a href="#Closing Channels">Closing Channels</a>	
+<li><a href="#Detecting Errors">Detecting Errors</a>	
+<li><a href="#Using the Remaining Messages">Using the Remaining Messages</a>	
+<li><a href="#applications">Applications Of The Open Vision Tool Kit</a>	
+<li><a href="#A Text File Reader">A Text File Reader</a>	
+<li><a href="#A Flat File Reader">A Flat File Reader</a>	
+<li><a href="#A Remote Execution Daemon Client">A Remote Execution Daemon Client</a>	
+<li><a href="#A Passive Real-Time Data Base">A Passive Real-Time Data Base</a>	
+<li><a href="#A Peer-To-Peer Vision Connection">A Peer-To-Peer Vision Connection</a>	
+</ul>
+<hr>
+
+<a name="overview"><h3>An Overview of the OpenVision ToolKit</h3></a>
+
+The OpenVision ToolKit is a collection of Vision methods
+and primitives that allows you to write Vision programs that 
+function as clients, servers, and peers of other programs.  
+Using the Open Vision Tool Kit, a Vision program can read and 
+write files, start and control other programs, and create and manage sockets.
+The OpenVision ToolKit has been a standard component of Vision releases since release 5.9.
+<p>
+The Open Vision Tool Kit provides a single abstraction -- an <i>Open Vision Channel</i> 
+-- that unifies and encapsulates the mechanisms used for communication and data sharing.  
+A channel represents Vision's end of a potentially bi-directional 'connection' to data.  
+The Open Vision Tool Kit supports three kinds of channels -- 
+<i>file channels</i>, <i>stream channels</i>, and <i>service channels</i>.
+<p>
+
+Files are the oldest and most traditional form of data communication.  
+They offer high capacity, persistence, random access, and convenience.  
+As implemented by the Open Vision Tool Kit, they can also be memory mapped. 
+Memory mapped files implement persistent shared memory and provide an extremely 
+efficient way for programs running on the same computer to share large quantities of data.  
+The Section <a href="#A Remote Execution Daemon Client">A Remote Execution Daemon Client</a> 
+shows how to use memory mapped files to build a simple, persistent, Real-Time data repository.
+<p>
+
+While files have the capacity to hold and share large amounts of data, they are passive. 
+Files never send messages that report changes to their content or other events of interest. 
+<i>File channels</i> simply model communication between a program -- Vision in this case -- and data 
+on disk.  <i>Stream channels</i>, on the other hand, model communication between two programs. 
+They are inherently active and support a richer set of data sharing and communication possibilities.
+<p>
+
+A stream channel represents a full-duplex, ordered sequence of data.  
+Data written by Vision is passed to the program at the other end of the stream.  
+Data written by the other program is passed to Vision. Every Vision session that is talking to an 
+editor or executing a batch script has at least one stream open -- 
+the one from which it reads expressions and to which it writes output. 
+A Vision program that uses the Open Vision Tool Kit to start another program uses a 
+stream channel to communicate with that program.  
+A Vision program that creates a socket or accepts a connection from another program, 
+uses a stream channel to manage the flow of data on that socket or connection.
+<p>
+
+A Vision program can always read or write a stream explicitly. When Vision reads a stream without knowing whether 
+data is available, it is polling the stream.  Since polling can waste time and only looks at a single source of input, 
+it is not always the best input processing strategy. As an alternative, a stream can trigger an event every time new data arrives.  
+When used this way, a stream is event driven.  The event handler of an event driven stream can be a built-in handler that supplies 
+the classic <i>V></i> prompt.  It can also be a custom handler implemented by a Vision program.  
+The sections <a href="#Writing Your Own Handlers">Writing Your Own Handlers</a> and 
+<a href="#A Peer-To-Peer Vision Connection">A Peer-To-Peer Vision Connection</a>
+illustrate some of the possibilities.
+<p>
+
+While streams that talk to an editor exchange ASCII text, the Open Vision Tool Kit 
+can also read and write binary data. Unlike ASCII text, binary data does not have a 
+standard representation across all processors. Currently, the Open Vision Tool Kit 
+understands two binary formats -- the <i>big endian</i> format used by Hewlett Packard PA/Risc 
+and Sun Sparc processors and the <i>little endian</i> format used by Intel and DEC.  
+Binary data can be read and written in either form.
+<p>
+
+So far, this overview has focused on reading and writing. The last Open Vision Tool Kit channel 
+type -- <i>Service channels</i> -- are neither read nor written. Service channels accept connections 
+from new clients. They are the primary building block of all Vision based servers.
+<p>
+
+The remainder of this document describes The Open Vision Tool Kit in greater detail:
+<a href="#introduction">An Introduction to Sockets</a> defines sockets and describes how to 
+use them to implement distributed applications. 
+<a href="#fundamentals">Fundamentals of The Open Vision Tool Kit</a> describes the operations
+needed to apply The Vision Tool Kit to a variety of communication and data sharing problems.
+<a href="#applications">Applications of The Open Vision Tool Kit</a> shows how to use the 
+tool kit to do some useful things.  Among other things, the examples in this 
+section demonstrate how to read and write files, how to implement a Real-Time data 
+repository, and how to develop simple and custom Vision servers.
+<hr>
+
+<a name="introduction"><h3>An Introduction To Sockets</h3></a>
+The Open Vision Tool Kit uses sockets to make network communication possible using Vision. 
+This section describes sockets. 
+If you are already familiar with sockets, you can skip to the next section, <a href="#fundamentals">Fundamentals Of The Open Vision Toolkit</a>.
+<p>
+
+Berkeley UNIX introduced sockets as a way to provide a standard way for independent programs, 
+usually running on a network, to talk to each other.
+<p>
+
+In the beginning, at least on UNIX systems, pipes were the most common way for two programs to exchange data.  
+Using a pipe, the output of one program becomes the input of another.  
+Pipes provide a simple, connection oriented way to exchange data between two programs. 
+They also require a common parent that starts both programs and sets up the appropriate plumbing.
+<p>
+
+On a network, two arbitrary programs do not generally have a common ancestor. 
+Programs on a network find each other by address. Furthermore, while connection oriented protocols remain powerful, 
+easily understood, and widely preferred, they are not the only model for interprocess communication. 
+Programs can also communicate by sending messages without establishing a fixed connection.  
+Sockets provide a model for dealing with these issues and possibilities.
+<p>
+
+A socket is a communication endpoint.  Any program can create a socket.  
+When a program creates a socket,  it declares several attributes of the socket.  
+It declares the address format used by the socket.  It declares how it plans to use the socket 
+and the type of support it expects from the communication subsystem. 
+It also assigns an address to the socket.  Depending on the socket's address format and intended use, 
+the program responsible for creating the socket may choose an address itself or it may ask the system to assign one.  
+The program that created the socket may also need to connect the socket to a service offered by another program.  
+Alternatively, it may initialize the socket as a listener for incoming service requests.  
+It may also do none of the above and simply go straight to work sending and receiving messages.
+<p>
+
+All of these concepts have a formal, technical vocabulary associated with them.  
+The following is a brief glossary of some of those terms:
+<p>
+
+<i>Address Family:</i> An address family is a particular style of address along with the software to support it. 
+The Internet or ARPA address family is the most widely used address family.  
+It is home to the famous TCP/IP protocol and not so famous UDP/IP and is the basis for the Internet. 
+It is not the only address family. The UNIX and CCITT address families are others.
+<p>
+
+Internet addresses consist of two parts -- a 32 bit host number and a 16 bit port number.  
+System administrators assign <i>host</i> numbers to computers.  
+<i>Port</i> numbers are assigned by your program or by the operating system when binding a socket to its address. 
+How the socket will be used generally determines how the port number is chosen.  
+If the socket implements the client side of a client-server connection, the port number does not matter.  
+The usual strategy for assigning client ports is to ask the operating system to do it.  
+If the socket acts as a server, the port must be known to its clients. 
+The usual strategy for assigning server ports involves well-known ports.  
+A well-known port is simply a port number determined and advertised in advance of its use.  
+For example, the remote execution daemon (rexecd) always listens on port 512. 
+Usually, the operating system is not asked to assign an unused port to a server socket.  
+Without an address distribution mechanism such as the port mapping service, the OSF/DCE location broker, or 
+some application defined mechanism, there is no way for a client to discover the address of its server.
+<p>
+
+Port numbers less than 1024 are reserved and generally require special privilege to assign.  
+All other port numbers are potentially available.
+<p>
+
+<i>Bound:</i> A <i>bound</i> socket is simply a socket that has an address.  
+A socket must have an address before it can be used.
+<p>
+
+<i>Connected:</i> A <i>connected</i> socket is a socket that has arranged to exchange data only with a specific other socket or peer.  
+This term usually applies to stream sockets.  Stream sockets must be connected before they can be used.
+<p>
+
+<i>Datagram:</i> A <i>datagram</i> is a style of communication and is one of the standard types of communication available in most address families. 
+Datagram sockets are connectionless and can be used to send and receive messages to and from any other datagram socket.  
+A datagram socket must be bound before it can be used; it does not require connection. 
+All data sent on a datagram socket includes a destination address.  
+Similarly, all incoming messages are accompanied by the address of their sender.
+<p>
+
+<i>Datagram</i> sockets are usually subject to restrictions that make their use complicated.  
+The Internet datagram protocol, UDP/IP, does not guarantee the delivery of datagrams.  
+Further, it does not guarantee that they will be delivered in the order they were sent.  
+Finally, it limits their maximum size.
+<p>
+
+While <i>Datagram</i> sockets are connectionless, they can be connected to a single peer to simulate, some but not all, 
+properties of connection based protocols.
+<p>
+
+<i>Passive:</i> A <i>passive</i> socket is a <i>Stream</i> socket that is listening for incoming connection requests. 
+Before data can be sent or received using a Stream socket, the socket must be connected to a peer.  
+A <i>passive</i> socket advertises its willingness to become that peer. A passive socket must be bound before it can listen for connections.
+<p>
+
+Programs that create passive sockets respond to incoming connection requests by accepting them.  
+When a program accepts a connection, it gets a new socket whose peer is the client that made the request.  
+The original passive socket remains free to receive additional requests.  
+Passive sockets can not be used to send or receive data; they can only be used to advertise connection oriented services.
+<p>
+
+<i>Peer:</i> The <i>peer</i> of a connected socket is simply the address of the other socket.
+<p>
+
+<i>Protocol:</i> A <i>protocol</i> is the way a particular address family implements a particular type of communication. 
+If an address family supports a communication type, it must supply at least one protocol to implement it.  
+In practice, it supplies exactly one.  For example, the Internet address family provides the TCP/IP protocol to implement streams and the UDP/IP protocol to implement datagrams.
+<p>
+
+<i>Stream:</i> A stream is a style of communication and is one of the standard communication types available in most address families. 
+Streams are reliable, two way communication channels between fixed sockets.  
+Streams guarantee the accuracy and order of all data they deliver.
+<p>
+
+A <i>stream</i> socket must be in one of two states before it can be used -- 
+it must be listening for incoming connections or it must be connected to the specific other socket to whom it speaks. 
+In client-server parlance, a <i>listening</i> or <i>passive stream</i> implements a server while a <i>connected</i> or 
+<i>active</i> stream implements a client. These choices are mutually exclusive.  A stream socket cannot do both.
+<hr>
+
+<a name="fundamentals"><h3>Fundamentals Of The OpenVision Toolkit</h3></a>
+This section describes the classes and messages that implement The OpenVision ToolKit.  
+Most of the protocol associated with the tool kit is defined at the class <i>OpenVision</i> or one of its subclasses.  
+The most important of those subclasses is <i>OpenVision Channel</i>.  
+Its instances provide access to files, child processes, and sockets.  
+Getting an instance of an <i>OpenVision Channel</i> object is the subject of the next section.
+<p>
+
+<a name="Creating Channels"><h4>Creating Channels -- The 'asOpenVisionChannel' Message</h4></a>
+You obtain an <i>OpenVision Channel</i> object by sending the <i>asOpenVisionChannel</i> message to a string.  
+The string contains a channel specification in the form:
+<ul>
+<b>type,options:resource</pre></b>
+</ul>
+
+<center><b>Table 1 describes the three components of a specification.</b></center>
+<p>
+<center><table border>
+<th>Specification Component
+<th>Component Description
+<tr>
+<td valign=top><i>type</i>
+<td>This component declares the kind of resource being accessed or created. 
+The <i>asOpenVisionChannel</i> message understands three types of resource -- files, processes, and sockets.  
+Files and processes are specified using the <i>file</i> and <i>process</i> keywords. 
+Sockets use a general syntax, described in the section <a href="#Creating Sockets">Creating Sockets</a> 
+that specifies the address family, communication type, and protocol of the socket.
+<tr>
+<td valign=top><i>options</i>
+<td>This component supplies the values of any parameters required to access or create the resource.  
+The specific options are dependent on the type of resource and are described in one of the following sections.  
+If no options are needed, this component, including its leading <b>,</b> must be omitted.  
+If options are needed, they consist of a series of concatenated option letters.  
+If an option requires a value, such as a file size, the value follows its option letter.  
+The examples given in the sections that follow illustrate.
+<tr>
+<td valign=top><i>resource</i>
+<td>This component supplies the name of the resource being accessed or created.  
+As is the case with the <i>options</i> component of a specification, the format of this component is dependent on the resource type.
+</table></center>
+<p>
+<center><b>Table 1. Components of an Open Vision Channel Specification</b></center>
+<p>
+
+<a name="Accessing Files"><b>Accessing Files</b></a>
+<p>
+To create a file channel, you supply the <i>file</i> as the <i>type</i> and a file name as the 
+<i>resource</i> in an <i>asOpenVisionChannel</i> specification string. If the file exists and you do not 
+supply any options, you get a channel with read only access to the file.  
+If the file does not exist, if you want to write to the file, or if you want to enable features such as memory mapping, 
+you need to specify one or more options.  These options are described in Table 2.
+<p>
+
+<center><b>Table 2</b></center>
+<p>
+<center><table border>
+<th>Option<th>Option Format<th>Option Description
+<tr>
+<td valign=top><i>Read</i>
+<td valign=top><i>r</i>
+<td>A flag that requests read access to a file.  If this option is specified without the <i>Write</i> option, 
+the file will be opened <i>read-only</i>. To request read and write access, both this and the <i>Write</i> 
+option must be specified. If neither option is specified, this option is assumed.
+<tr>
+<td valign=top><i>Write</i>
+<td valign=top><i>w</i>
+<td>A flag that requests write access to a file.  If this option is specified without the <i>Read</i> option, the file will be opened <i>write-only</i>.
+<tr>
+<td valign=top><i>Append</i>
+<td valign=top><i>a</i>
+<td>A flag that requests that all data written using this channel be appended to the end of the file. 
+A channel created using this option cannot be used to write data at random locations.  
+This flag implicitly selects the <i>Write</i> option.
+<tr>
+<td valign=top><i>Create</i>
+<td valign=top><i>cpermission</i>
+<td>A flag that requests that the file be created if it does not exist.  
+The <i>permission</i> field is optional.  If it is supplied, it is interpreted as an octal permission mask 
+in the style expected by the local host's <i>open</i> function or <i>chmod</i> command.  
+If permissions are not supplied, all users are granted read and write access to the file.  
+If the file exists, the creation permissions supplied with this option are ignored.  
+This option is modified by the <i>Exclusive</i> option described below. 
+This flag implicitly selects the <i>Write</i> option.
+<tr>
+<td valign=top><i>Truncate</i>
+<td valign=top><i>tsizeinbytes</i>
+<td>A flag that requests that the file be truncated to the size specified by <i>sizeinbytes</i>. 
+If the <i>Truncate</i> option is specified for a file that already exists, all data in the file is discarded. 
+The <i>sizeinbytes</i> parameter is assumed to be zero if omitted. 
+This flag implicitly selects the <i>Write</i> option.
+<tr>
+<td valign=top><i>Exclusive</i>
+<td valign=top><i>x</i>
+<td>A flag that modifies the operation of the <i>Create</i> option.  
+If this flag is specified along with the <i>Create</i> option and the file exists, the open will fail.  
+This flag has no effect if the <i>Create</i> option is not specified.
+<tr>
+<td valign=top><i>Synchronous</i>
+<td valign=top><i>s</i>
+<td>A flag that requires all write operations to be successfully committed to disk before they return to Vision. 
+This call guarantees the integrity of data on disk, but at a cost in performance.  
+It should be used only when absolutely necessary.
+<tr>
+<td valign=top><i>Mapped</i>
+<td valign=top><i>m</i>
+<td>A flag that requests that a file be accessed as a memory mapped file. 
+Memory mapped files are a powerful tool that are described in greater detail in this section. 
+Memory mapped files cannot be used to append data to existing files. 
+This flag is ignored if the <i>Append</i> option is selected.
+</table></center>
+<p>
+<center><b>Table 2. File Options</b></center>
+<p>
+
+The following examples illustrate some Vision expressions used to access files.  
+The expression:
+<ul>
+<pre><b>"file:/tmp/file1.dat" asOpenVisionChannel</b></pre>
+</ul>
+opens the file <i>/tmp/file1.dat</i> using the default read-only, non-mapped access.  
+In contrast:
+<ul>
+<pre><b>"file,m:/tmp/file1.dat" asOpenVisionChannel</b></pre>
+</ul>
+opens the same file using read-only, memory mapped access, while:
+<ul>
+<pre><b>"file,rwm:/tmp/file1.dat" asOpenVisionChannel</b></pre>
+</ul>
+uses memory mapping to access the file for reading and writing.
+<p>
+The next two expressions show how to create files.
+<ul>
+<pre><b>
+"file,c644t:/tmp/file1.dat" asOpenVisionChannel
+</b></pre>
+</ul>
+creates an empty, write-only file which grants UNIX style read-write permission to its owner and read-only permission to all other users.  
+Because the optional size argument to the truncate option has been omitted, it assumes its default value of zero.  
+Finally,
+<ul>
+<pre><b>
+"file,rct20000000m:/tmp/file1.dat" asOpenVisionChannel
+</b></pre>
+</ul>
+creates a 20 megabyte memory-mapped file that can be read and written.  
+If <i>file1.dat</i> does not exist, it will be created with permissions that attempt to grant all users read and write access to the file.
+<p>
+
+Several of the preceding examples use memory mapped files.  
+Memory mapped files are extremely efficient. Memory mapping works by associating a range of virtual addresses with a region of the file. 
+Accesses to those virtual addresses are translated into read and write operations on the underlying file.  
+The translation does not use the traditional strategy of software disk caching. 
+Instead, it uses the processor's virtual memory management hardware. 
+If the requested data is in memory, the hardware detects that and translates the virtual address directly into a physical address.  
+There is no software overhead of any sort. If the data is not in memory, the hardware generates a page fault. 
+Only at that point does the operating system become involved by reading the appropriate page from the underlying file. 
+<p>
+
+Mapping a file into the virtual address space of a process is not the same thing as reading it into memory. 
+Data is not read from disk until a page fault requires it.  When the disk is accessed, it is only for the page or pages needed to resolve the fault.  
+Pages that are not used are not read from disk.
+<p>
+
+Because of their efficiency, memory mapped files should be used whenever you expect that your use of the file will involve a large number of random reads or writes.  
+They should also be used whenever the data in the file will be shared by multiple processes running on the same computer. 
+Because they rely on the memory of a computer, they cannot be used to share updates across a network.  
+They can be used to access read-only data from multiple hosts, however.  
+As implemented by The Open Vision Tool Kit, they cannot be used to append data to an existing file or to create a file whose size you do not know in advance.  
+The Open Vision Tool Kit maps the entire initial size of the file into the virtual address space of your Vision session.  
+For efficiency reasons, the mapped portion of the file does not grow when the file grows.  
+For that reason, you need to know how large the file will be before you map it.  
+When you know in advance, as illustrated above, you can pre-allocate the file using the <i>Truncate</i> option.
+<p>
+
+<a name="Starting Processes"><b>Starting Processes</b></a>
+<p>
+A <i>process</i> is an independent program you start and control.  
+You create a process by specifying process as the <i>type</i> in an <i>asOpenVisionChannel</i> specification string.  
+The <i>resource</i> field of a <i>process</i> specification contains the command to run. 
+The channel returned is a stream channel that talks to the process. 
+Data written to the stream is passed to the process as its standard input.  
+Data written by the process to its standard output and, by default, its standard error, is available for reading from the channel.  
+Channels created to access a process understand one option.  
+That option is described in Table 3.
+<p>
+
+
+<center><b>Table 3</b></center>
+<p>
+<center><table border>
+<th>Option<th>Option Format<th>Option Description
+<tr>
+<td valign=top><i>Error Input</i>
+<td valign=top><i><b>e</b>
+<td>A flag that requests the creation of a separate stream channel that receives data written to standard error by the process.  
+Normally, standard output and standard error are combined into a single output received on the channel returned by <i>asOpenVisionChannel</i>.   
+If this option is specified, that channel responds to the <i>errorInput</i> message by returning the secondary channel created by this option. 
+The channel returned by <i>errorInput</i> is read only.
+</table></center>
+<p>
+<center><b>Table 3. Process Options</b></center>
+<p>
+
+The following examples show how to create process channels.  
+The expression:
+<ul>
+<pre><b>
+"process:/vision/bin/batchvision -U19" asOpenVisionChannel
+</b></pre>
+</ul>
+
+creates a channel talking to an independently executing <i>batchvision</i> session.  
+The expression:
+<ul>
+<pre><b>
+"process,e:/vision/bin/batchvision -U19" asOpenVisionChannel
+</b></pre>
+</ul>
+creates an independent <i>batchvision</i> process that sends Vision error messages to a separate channel.
+<p>
+
+<a name="Creating Sockets"><b>Creating Sockets</b>
+<p>
+
+The final form of channel specification is socket format.
+<p>
+
+Unlike file and process specifications, socket specifications correspond to a family of types.  
+The <i>type</i> component of a socket specification consists of two and possibly three fields, separated by /'s:
+<ul>
+<pre><b>
+address_family/socket_type
+address_family/socket_type/socket_protocol
+</b></pre>
+</ul>
+
+In these type specifications, the <i>address_family</i> field understands two keywords 
+<i>inet</i> and <i>unix</i>. The <i>socket_type</i> field also understands two keywords 
+<i>stream</i> and <i>dgram</i>.  These keywords allow Internet and UNIX domain stream and datagram sockets to be specified symbolically.  
+For other address families and socket types, these fields must contain the integer associated with the address family or socket type.  
+The value for that integer is probably found in the <i>C</i> or <i>C++</i> include file that declares the family or type.
+<p>
+
+The <i>socket_protocol</i> field is usually redundant.  Since there is usually exactly one protocol per address family and socket type combination, the protocol is unambiguous.  
+The field exists strictly for completeness.  There are no symbolic constants associated with the 
+<i>socket_protocol</i> field.  Its value must be the integer associated with the protocol in the C or C++ include file that declares the address family.
+<p>
+
+The format of the <i>resource</i> component of a socket specification depends on the address family.  
+For <i>inet</i> family addresses, the <i>resource</i> component consists of a string in one of the following forms:
+
+<ul>
+<pre><b>
+host:port
+host:service
+port
+service
+</pre></b>
+</ul>
+In these forms, <i>host</i> is the symbolic name of a host or its IP address in dotted quad format (e.g., 204.32.67.99), 
+<i>service</i> is the name of a service in <i>/etc/services</i> or its equivalent, and <i>port</i> is a port number. 
+When connecting to a service on another host, a format that includes the host must be used. 
+When connecting to a service running on the same computer, any format can be used. 
+When binding the address of a socket, a format that omits the host must be used. 
+You can use zero as the port number when binding a socket.  
+If you do, the operating system will assign an unused port to your socket.  
+You are responsible for communicating that port number to any programs that need it.
+<p>
+
+For <i>unix</i> family addresses, the <i>resource</i> component is simply the UNIX path name associated with the socket.  
+For all other address families, the <i>resource</i> component  consists of a series of integers separated by '.s'. 
+Each integer in the sequence specifies a byte of the address.  
+The total length of an address specified in this way is limited to 256 bytes.
+<p>
+
+Socket format specifications understand two options. Both options are used to create servers. 
+Table 4 describes them.
+<p>
+<center><b>Table 4</b></center>
+<p>
+<center><table border>
+<th>Option<th>Option Format<th>Option Description
+<tr>
+<td valign=top><i>Bind</i>
+<td valign=top><i>b</i>
+<td>A flag that requests that the socket be bound but not connected.  
+Although this option applies to any type of socket, it has utility only for <i>dgram</i> sockets.
+<tr>
+<td valign=top><i>Passive</i>
+<td valign=top><i>p</i>
+<td>A flag that requests that the socket be initialized to listen for connections. 
+This option only applies to <i>stream</i> sockets. 
+It causes the creation of a Service channel bound to the address specified in the <i>resource</i> field of the specification. 
+This option automatically implies the <i>Bind</i> option.
+</table></center>
+<p>
+<center><b>Table 4. Socket Options</b></center>
+<p>
+
+It is easier to specify socket channels than it might appear.  
+For example, to contact the remote execution daemon on host <i>fester</i>, 
+you use the expression:
+<ul>
+<pre><b>
+"inet/stream:fester:exec" asOpenVisionChannel
+</b></pre>
+</ul>
+
+To create a service listening on port 7000, you use:
+<ul>
+<pre><b>
+"inet/stream,p:7000" asOpenVisionChannel
+</b></pre>
+</ul>
+
+To contact that service from a Vision session running on the same host, you enter:
+<ul>
+<pre><b>
+"inet/stream:7000" asOpenVisionChannel
+</b></pre>
+</ul>
+
+If the service created above was started on host <i>fred</i>, you could also use:
+<ul>
+<pre><b>
+"inet/stream:fred:7000" asOpenVisionChannel
+</b></pre>
+</ul>
+
+As you can see from the last three examples, the only difference between a socket that acts as a server and one that acts as a client is whether the socket is passive. 
+Sockets used to implement servers do not know to whom they are talking until somebody calls.  
+They need to advertise their address and wait.  That is the purpose and meaning of <i>passive</i>.  
+Sockets used to access services already know to whom they will speak 
+they just need to supply the address.
+<p>
+
+<a name="detail"><b>A Detail You May Never Need</b></a>
+<p>
+
+At the beginning of this section, the <i>asOpenVisionChannel</i> message was defined to return a channel. 
+That is not quite accurate.  Channels are internal objects. 
+Instances of the class <i>OpenVision Channel</i> are actually objects that point to channels. 
+Most of the time you can ignore the distinction; however, it is exploited in one significant way.
+<p>
+
+Responsibility for implementing a channel is divided between the external object you see and an internal object managed by Vision. 
+In particular, several channel properties are maintained at the external object and passed to the underlying internal channel when the external instance is used. 
+From the channel's point of view, these are parameters to, not properties of, the channel. 
+Because several instances of the external <i>OpenVision Channel</i> class can refer to the same internal channel, each can supply different settings for their local properties.
+<p>
+
+Currently, only two properties are stored in the external <i>OpenVision Channel</i> object - the <i>seek offset</i> property used to randomly access files and the <i>trim format</i> property used to remove extraneous blanks from strings.  
+To accommodate future enhancements to the Tool Kit, you should assume that any property may be relocated to the external object.  
+To simplify your use of channel properties, the Open Vision Tool Kit returns a modified copy of the original, unchanged <i>OpenVision Channel</i> whenever it changes one of its properties.  
+If you use the original copy, you get the behavior called for by the original property values; if you use the copy, you get the behavior associated with the new settings.  
+In general, a number of methods already hide this detail for you.
+<p>
+
+<a name="Reading And Writing Data"><h4>Reading And Writing Data</h4></a>
+
+Now that you have a channel, you need to use it.  For file and stream channels, that means reading and writing data.  
+The Open Vision Tool Kit supports two ways to read and write data <i>sequentially</i> and <i>randomly</i>.
+<p>
+
+<i>Stream</i> channels view data as a <i>flow</i>. Stream channels require <i>sequential</i> access.  
+Data is read from a stream in the order of its arrival.  
+Data is always appended to the end of a stream.  
+Furthermore, because new data is produced by another program, you must be able to detect its presence or if necessary, wait for its arrival.
+<p>
+
+In contrast, <i>file</i> channels view data as an <i>array</i>.  Except for files accessed in append mode, there is no notion of an endpoint or a flow.  
+As a result, it is usually necessary to specify an offset within the file for each read or write operation.  
+File channels simulate sequential access by remembering the position of the next byte in the file; 
+however, in Vision's parallel execution environment, it is not a good idea to make assumptions about what that position might be.  
+That is especially true when file read and write operations are performed inside a list operation like <i>do:</i> 
+the results will almost certainly surprise you.
+<p>
+
+<p>
+
+<center><b>Table 5</b></center>
+<p>
+<center><table border>
+<th>Message<th>Description
+<tr>
+<td valign=top><i>getByte</i>
+<td>Return an <i>Integer</i> obtained by reading a single byte from the channel and interpreting it as the binary representation of an integer between -128 and 127, inclusive.
+<tr>
+<td valign=top><i>getDouble</i>
+<td>Return a <i>Double</i> obtained by reading the binary representation of a double precision number from the channel.
+<tr>
+<td valign=top><i>getFloat</i>
+<td>Return a <i>Float</i> obtained by reading the binary representation of a single precision number from the channel.
+<tr>
+<td valign=top><i>getLine</i>
+<td>Return a <i>String</i> obtained by reading the next line from the channel.  
+The line is assumed to end at the next <i>newLine</i>, at the end of the file if reading from a file channel, or at the end of input if reading from a stream channel.  
+Any terminating <i>newLine</i> read from the channel is returned as part of the string.
+<tr>
+<td valign=top><i>getLong</i>
+<td>Return an <i>Integer</i> obtained by reading the binary representation of a 4 byte integer from the channel.
+<tr>
+<td valign=top><i>getShort</i>
+<td>Return an <i>Integer</i> obtained by reading two bytes from the channel and interpreting them as the binary representation of an integer between -32768 and 32767, inclusive.
+<tr>
+<td valign=top><i>getString</i>
+<td>Return a <i>String</i> containing all characters available for reading from the channel.
+<tr>
+<td valign=top><i>getString: aLength</i>
+<td>Return a <i>String</i> containing exactly the number of characters specified in <i>aLength</i>.
+<tr>
+<td valign=top><i>getUnsignedByte</i>
+<td>Return an <i>Integer</i> obtained by reading a single byte from the channel and interpreting it as the binary representation of an integer between 0 and 255, inclusive.
+<tr>
+<td valign=top><i>getUnsignedShort</i>
+<td>Return an <i>Integer</i> obtained by reading two bytes from the channel and interpreting them as the binary representation of an integer between 0 and 65535, inclusive.
+</table></center>
+<p>
+<center><b>Table 5. Sequential Read Operations</b></center>
+<p>
+
+<a name="Reading Data Sequentially"><b>Reading Data Sequentially</b></a>
+<p>
+
+The Open Vision Tool Kit provides ten messages, described in Table 5, that read data sequentially. 
+Three of these messages read and return strings; the remaining seven read and return binary numbers. 
+All return <i>NA</i> if too few bytes are available.  For stream channels, these messages read data from the only place they can -- the end of the stream.  
+For file channels, these messages read data at the seek offset recorded in the <i>OpenVision Channel</i> object. 
+Seek offsets are discussed in detail later in this document.
+<p>
+
+The Open Vision Tool Kit provides three messages that query the availability of data on a channel - 
+<i>byteCount</i>, <i>isAtEndOfInput</i> and <i>isntAtEndOfInput</i>.
+<p>
+
+The <i>byteCount</i> message returns the minimum number of bytes currently available for reading.  It may not be the maximum. 
+Some operating systems do not see new data until existing data has been read a report.  report the number of bytes available in the first data block in the stream's read queue. 
+That block must be read before the next data block is examined.
+<p>
+
+The <i>isAtEndOfInput</i> and <i>isntAtEndOfInput</i> messages both return a Boolean that indicates whether the channel has exhausted its input.  
+If a channel reports that its input is exhausted, its peer has probably closed the connection and will never write to the channel again.  
+In response, you should clean-up by closing your end of the connection. 
+At the very least, you should plan to stop reading data from the channel you will not get any more.
+<p>
+
+As the previous discussion suggests, it is possible for a read to fail for lack of data. 
+If the read is from a stream, and the stream is still open, the data may be available soon.  
+If the data must be read by a block or method before it returns, you will have to wait for the data to arrive.
+<p>
+By default, all Open Vision read operations return immediately. 
+No read operation will ever wait for data on its own. 
+If an operation cannot satisfy a request immediately, it returns <i>NA</i>. 
+Deciding how to wait for data is a policy decision you make. 
+To help you implement your policy, all channels respond to two messages that wait for data to arrive:
+
+<ul type=disc>
+<li>
+<i>wait</i> waits indefinitely for new data or for its recipient channel to return <i>TRUE</i> in response to <i>isAtEndOfInput</i>. 
+<p>
+<li>
+<i>wait:</i> waits for input for up to a maximum number of seconds specified by its single Integer parameter.
+</ul>
+
+Both messages only wait for new data.  Stream channels can and do buffer input. 
+The wait messages assume that you have already tried to use the buffered data and that you need to wait for more.  
+For example, if you try to read a four byte string when only three bytes are available, you need to know when the fourth byte arrives.  
+You already know that three bytes are available for reading.
+<p>
+
+It is possible for a wait message to return even if no new data is available.  
+It is never correct to assume that just because you waited, the data you expect is present.  
+The wait may return because the stream's peer has closed the connection.  
+The wait may also return because of internal parameters in The Open Vision Tool Kit Data or because the operating system 
+has erred on the side of delivering an extra notification instead of missing a needed notification. 
+Your code should be suitably prepared.
+<p>
+
+You will inevitably develop an idiomatic style to wait for data. A useful form of the idiom involves:
+
+<ul>
+1. Attempting to read whatever data you expect to find.
+<p>
+2. Constructing a <i>whileTrue:</i> condition that tries again if the expected data has not arrived and the channel is still open.
+<p>
+3. Constructing a <i>whileTrue:</i> body that first waits for new input and then retries the read operation.
+<p>
+4. Assuming that any read operation can return an NA.
+</ul>
+
+The following method, included with the Open Vision Tool Kit as part of a package that submits requests to other Vision sessions, 
+illustrates these points. This particular method collects data from a stream until it receives a prompt indicating the end of a block of output:
+<ul>
+<pre><b>
+OpenVision Channel
+defineMethod:
+[ | getStringThroughPrompt: prompt |
+    !string <- ^self <i>getString</i> else: "";
+    [ string take: prompt count negated. != prompt
+      && [ ^self isntAtEndOfInput ]
+    ] whileTrue: [
+                  ^self <i>wait;</i>
+                  :string <- string concat: (^self <i>getString</i> else: "");
+                 ];
+                 string
+];
+</b></pre>
+</ul>
+
+Note that:
+<ul>
+1. The <i>getString</i> is tried once before the method even thinks about waiting.
+<p>
+2. The loop body is executed only while the result is incomplete and <i>isntAtEndOfInput</i> reports that the channel is still readable.
+<p>
+3. The <i>wait</i> message is sent before retrying the read.
+<p>
+4. The <i>getString</i> result is always tested for validity.
+</ul>
+
+<a name="Writing Data Sequentially"><b>Writing Data Sequentially</b></a>
+<p>
+
+<center><b>Table 6</b></center>
+<p>
+<center><table border>
+<th>Message<th>Description
+<tr>
+<td valign=top><b>putByte:</b> <i>aNumber</i>
+<td>Write the 1 byte binary integer representation of <i>aNumber</i> to the channel.
+<tr>
+<td valign=top><b>putDouble:</b> <i>aNumber</i>
+<td>Write the double precision binary representation of <i>aNumber</i> to the channel.
+<tr>
+<td valign=top><b>putFloat:</b> <i>aNumber</i>
+<td>Write the single precision binary representation of <i>aNumber</i> to the channel.
+<tr>
+<td valign=top><b>putLong:</b> <i>aNumber</i>
+<td>Write the 4 byte binary integer representation of <i>aNumber</i> to the channel.
+<tr>
+<td valign=top><b>putShort:</b> <i>aNumber</i>
+<td>Write the 2 byte binary integer representation of <i>aNumber</i> to the channel.
+<tr>
+<td valign=top><b>putString:</b> <i>aString</i>
+<td>Write the character string representation of <i>aString</i> to the channel.
+<tr>
+<td valign=top><b>putStringNL:</b> <i>aString</i>
+<td>Write the character string representation of <i>aString</i> followed by a newLine to the channel.
+</table></center>
+<p>
+<center><b>Table 6. Sequential Write Operations</b></center>
+<p>
+
+The Open Vision Tool Kit provides eight messages, described in Table 6, that write data sequentially.  
+For <i>stream channels</i>, these messages write data at the only place they can, the end of the stream.  
+For <i>file channels</i>, these messages write data at the seek offset recorded in the <i>OpenVision Channel</i> object.
+<p>
+
+All write operations in The Open Vision Tool Kit return the number of bytes written to the channel. 
+Normally, that count will match the size of the object sent.  
+If it is smaller, an error has occurred. An error is probably the result of an attempt to write beyond the end of a mapped file 
+or an indication that a stream's peer has closed the connection.
+<p>
+
+Beyond the messages described in Table 6, the only other message you may need is <i>syncOutput</i>. 
+Both stream and file channels can buffer data in memory before delivering it.  
+The <i>syncOutput</i> message requests that the data be sent immediately.  
+Normally, you do not need this message.  Depending on the channel, either 
+The Open Vision Tool Kit or the operating system will execute it periodically.
+<p>
+<a name="Reading and Writing Data Randomly"><b>Reading and Writing Data Randomly</b></a>
+<p>
+<center><b>Table 7</b></center>
+<p>
+<center><table border>
+<th>Sequential Access Message<th>Random Access Message
+<tr><td><b>getByte</b>
+<td><b>getByteAt:</b> anOffset
+<tr>
+<td><b>getDouble</b>
+<td><b>getDoubleAt:</b> anOffset
+<tr>
+<td><b>getFloat</b>
+<td><b>getFloatAt:</b> anOffset
+<tr>
+<td><b>getLine</b>
+<td><b>getLineAt:</b> anOffset
+<tr>
+<td><b>getLong</b>
+<td><b>getLongAt:</b> anOffset
+<tr>
+<td><b>getShort</b>
+<td><b>getShortAt:</b> anOffset
+<tr>
+<td><b>getString</b>
+<td><b>getStringAt:</b> anOffset
+<tr>
+<td><b>getString:</b> aLength
+<td><b>getString:</b> aLength at: anOffset
+<tr>
+<td><b>getUnsignedByte</b>
+<td><b>getUnsignedByteAt:</b> anOffset
+<tr>
+<td><b>getUnsignedShort</b>
+<td><b>getUnsignedShortAt:</b> anOffset
+<tr>
+<td><b>putByte:</b> aNumber
+<td><b>putByte:</b> aNumber <b>at:</b> anOffset
+<tr>
+<td><b>putDouble:</b> aNumber
+<td><b>putDouble:</b> aNumber <b>at:</b> anOffset
+<tr>
+<td><b>putFloat:</b> aNumber
+<td><b>putFloat:</b> aNumber <b>at:</b> anOffset
+<tr>
+<td><b>putLong:</b> aNumber
+<td><b>putLong:</b> aNumber <b>at:</b> anOffset
+<tr>
+<td><b>putShort:</b> aNumber
+<td><b>putShort:</b> aNumber <b>at:</b> anOffset
+<tr>
+<td><b>putString:</b> aString
+<td><b>putString:</b> aString <b>at:</b> anOffset
+<tr>
+<td><b>putStringNL:</b> aString
+<td><b>putStringNL:</b> aString <b>at:</b> anOffset
+</table></center>
+<p>
+
+<center><b>Table 7.  Random Channel Access Operations</b></center>
+<p>
+
+For channels that view data as an array, you can access data from any location in the array, not just at an endpoint.  
+Currently, only file channels support this capability.  As you might expect, you need to supply the offset of the data you are accessing.  
+Each sequential access message defined in Table 5 or Table 6 has an equivalent random access counterpart that takes that offset as a parameter. 
+Table 7 lists those messages and their sequential cousins.
+<p>
+
+All random access messages expect their offset to be an integer. 
+Positive offsets access specific locations, negative offsets are always an error, and zero is equivalent to using the corresponding sequential access message. 
+The offset of the first byte in the array is always 1.
+<p>
+
+<a name="Controlling Data Formats"><b>Controlling Data Formats</b></a>
+<p>
+
+The Open Vision Tool Kit supplies two options that control the format of the data read and written on a channel, 
+<i>binary</i> format and <i>trim</i> format.
+<p>
+
+<a name="The Binary Format Option"><b>The <i>Binary Format</i> Option</b></a>
+<p>
+The <i>binary</i> format option selects the representation used for all binary data read and written using a channel.  
+The Open Vision Tool Kit names binary data formats after processor architectures.  
+Currently, the Open Vision Tool Kit understands three architectures -- Hewlett-Packard PA/Risc, Sun/Sparc, and Intel.  
+These architectures actually correspond to two distinct representations -- 
+the big-endian format used by Hewlett-Packard PA/Risc, Sun/Sparc, and Motorola processors and the little-endian format used by Intel and DEC processors. 
+Although the Open Vision Tool Kit distinguishes between PA/Risc and Sun/Sparc architectures, there is no difference in their format.  
+You can use them interchangeably.
+<p>
+
+If you do not specify a binary format, all binary data is read and written using the native format of the processor running your Vision session.  
+This corresponds to the special format <i>Untranslated</i>.  
+You specify an explicit format by sending one of the following messages to your channel before using it to read or write binary data:
+<ul>
+<pre><b>
+setBinaryFormatToUntranslated
+
+setBinaryFormatToIntel
+
+setBinaryFormatToPARisc
+
+setBinaryFormatToSparc
+</b></pre>
+</ul>
+
+To query a channel's binary format, you send the message <i>binaryFormat</i> to the channel.  
+In reply, you receive an <i>OpenVision Channel BinaryFormat</i> object. 
+That object can print itself, return a string describing itself in response to the message <i>description</i>, 
+or compare itself to one of the symbolic constants defined at <i>OpenVision Channel BinaryFormat</i>.
+<p>
+
+In the context of the section <a href="#detail">A Detail You May Never Need</a>,
+<i>binary</i> format is an internal channel option. You do not need to capture the channel returned by a 
+<i>setBinaryFormat...</i> message, your setting applies to your original channel as well as the one returned from the 
+<i>setBinaryFormat...</i> message.
+<p>
+
+<a name="The Trim Format Option"><b>The Trim Format Option</b></a>
+<p>
+
+The <i>trim</i> format option controls the removal of leading and trailing blanks from strings.
+<p>
+
+By default, all strings read from a channel are unchanged.  
+To select a different behavior, you send one of the following messages to your channel:
+<ul>
+<pre><b>
+setTrimFormatToBoundingBlanks
+
+setTrimFormatToLeadingBlanks
+
+setTrimFormatToTrailingBlanks
+
+setTrimFormatToUntrimmed
+</b></pre>
+</ul>
+
+You must capture and use the <i>OpenVision Channel</i> returned. 
+The setting applies only to the returned <i>OpenVision Channel</i>.  
+The following example illustrates the correct way to specify and use the trim format option:
+<ul>
+<pre><b>
+!channel <- "file:mydata.txt"
+      asOpenVisionChannel
+      setTrimFormatToTrailingBlanks;
+!string1 <- channel getString: 23 at: 1;
+!string2 <- channel
+      setTrimFormatToBoundingBlanks
+      getString: 20 at: 41;
+!string3 <- channel getString: 17 at: 24;
+!string4 <- channel
+      setTrimFormatToUntrimmed 
+      getString: 20 at: 61;
+</b></pre>
+</ul>
+
+Trailing blanks are trimmed from <i>string1</i> and <i>string3</i> because they are read using the channel returned by <i>setTrimFormatToTrailingBlanks</i>.  
+Both leading and trailing blanks are removed from <i>string2</i> because it is read with the channel returned by <i>setTrimFormatToBoundingBlanks</i>. 
+No blanks are removed from <i>string4</i> because it is read using the channel returned by <i>setTrimFormatToUntrimmed</i>.  
+These messages do not interfere with one another; instead, they create copies of the channels that differ only in their trim format option.  
+If you are curious, look at section <a href="#detail">A Detail You May Never Need</a> for a brief discussion of how this all works.
+<p>
+
+While <i>trim</i> format applies to all channels capable of reading and writing data, you should be careful when using it with <i>getString</i> and <i>stream</i> channels.  
+Stream channels do not guarantee that the data you expect will all arrive at the same time. 
+You may have to call <i>getString</i> several times to collect your data. 
+Since every string returned by <i>getString</i> will be trimmed independently, blanks found at communication boundaries will be removed in addition to those found at the ends of the string. 
+The same is not true of <i>getString:</i> which does not return a string until it can return one of the length you specified.
+<p>
+
+To query a channel's <i>trim</i> format, you send it the message <i>trimFormat</i>.  
+In reply, you receive an <i>OpenVision Channel TrimFormat</i> object. 
+That object can print itself, describe itself in response to the message <i>description</i>, and compare itself to one of the symbolic constants 
+defined at <i>OpenVision Channel TrimFormat</i>.
+<p>
+
+<a name="Reading, Writing, and List Operations"><b>Reading, Writing, and List Operations</b></a>
+<p>
+
+Combining The Open Vision Tool Kit's sequential read and write operations with Vision's list operations requires care; 
+the result may not always be what you expect.  Vision chooses the execution order of all list operations based on its own optimization criteria.  
+Normally, you cannot detect the effects of those criteria; 
+however, you can when an operation has a global side effect.  
+Unfortunately, reading and writing data sequentially has a global side effect, it moves a stream pointer.  
+Vision makes no attempt to determine where in a stream your data should go and, harder still, from whence it should come.  
+If you attempt an operation such as:
+<ul>
+<pre><b>
+!stream <- "file:mydata.txt" asOpenVisionChannel;
+Company masterList do: [ ^my stream getLine ];
+</b></pre>
+</ul>
+you can not predict or control the association of file lines with data base companies.
+<p>
+
+In contrast, random read and write operations do not have a similar problem. 
+You can use random read and write operations safely and predictably inside all list operations.  
+In fact, these operations are the basis for a number of data examples presented later in this document.
+<p>
+
+<a name="Offering Services and Creating Handlers"><h4>Offering Services and Creating Handlers</h4></a>
+The previous sections of this document have focused on the mechanics of creating channels and the basics of reading and writing data.  
+The material covered in those sections is the material you need to act as a client of another program. 
+This section focuses on the issues associated with creating and managing servers using the Open Vision Tool Kit.  
+Because servers respond to unsolicited input, most of those issues deal with writing handlers.
+<p>
+
+<a name="Offering a Simple Service"><b>Offering a Simple Service</b></a>
+<p>
+
+The simplest service you can offer is a service that supplies a Vision prompt to its clients.  
+To create that service, you simply create and enable a passive socket.  
+<p>
+
+As discussed in the section <a href="#Creating Sockets">Creating Sockets</a>, every passive socket must have an address known to its clients.  
+If the service will be offered on a network, that address is the name of the host running your Vision session coupled with a TCP/IP port number on that host.  
+You have no choice for the host name.  You need to choose an unused TCP/IP port number. 
+For this example, 7000 is a good choice. There is nothing magic about the port number.  
+It is simply a number not already in use and usually chosen from the range of port numbers that can be allocated without special privileges (like super-user on a UNIX system). 
+The following expression creates that socket along with the Open Vision Tool Kit service channel that manages it:
+
+<ul>
+<pre><b>
+!Service <- "inet/stream,p:7000" <i>asOpenVisionChannel</i>
+</b></pre>
+</ul>
+
+Once created, a service must be enabled before it can accept connections. 
+The following Vision expression enables the service just created:
+<ul>
+<pre><b>
+Service <i>enableHandler</i>
+</b></pre>
+</ul>
+
+Enabling a service instructs Vision to look for and process incoming connection requests. 
+Vision processes those requests using a handler.  
+A handler supplies the rules that automatically execute whenever new data arrives on a channel.  
+For service channels, new data takes the form of connection requests. 
+For stream channels, new data takes the form of numbers and strings. 
+By default, Vision does nothing when new data arrives.  
+It is your responsibility to look for it. When you enable a handler, you instruct Vision to do the looking for you.
+<p>
+
+You can write your own handler.  That is the topic of the next section, <a href="#Writing Your Own Handlers">Writing Your Own Handlers</a>.  
+If you do not supply a handler, Vision uses one of its own.  
+Vision has two default handlers, one that processes incoming connections on service channels and one that processes incoming data on stream channels.  
+The default Vision service channel handler creates a stream connected to the client making the connection request and enables the default handler on that stream.  
+The default Vision stream handler supplies a <i>V></i> prompt and executes Vision expressions.  
+Together, these handlers provide the functionality needed to offer a simple Vision based server.
+<p>
+
+<a name="Writing Your Own Handlers"><b>Writing Your Own Handlers</b></a>
+<p>
+
+<center><b>Table 8</b></center>
+<p>
+<center><table border>
+<th>Message<th>Description
+<tr>
+<td valign=top><i>acceptConnection</i>
+<td>Return a new stream connected to the next connection request waiting on a service channel.  
+<i>acceptConnection</i> is the only input operation supported by a service channel.
+<tr>
+<td valign=top><i>enableHandler</i>
+<td>Enable operation of a channel's handler. The arrival of new data causes the handler to be called. 
+If a user defined handler does not exist, Vision supplies an appropriate default handler.  
+The default stream handler implements the batchvision <i>V></i> prompt interface.  
+The default service handler accepts all clients and connects them to streams running the default stream handler.  
+The default file handler does nothing.
+<tr>
+<td valign=top><i>disableHandler</i>
+<td>Disable operation of a handler. Sending the <i>enableHandler</i> message re-enables the handler.
+<tr>
+<td valign=top><i>setHandlerTo:</i> aBlock
+<td>Set the handler for a channel. If the argument to this message is a block, that block becomes the new handler.  
+If the argument to this message is <i>NA</i>, the channel reverts to its default handler.  
+A user defined handler installed with this message must remember its channel or evaluate the expression <i>^global OpenVision ActiveChannel</i> to obtain it.
+<tr>
+<td valign=top><i>setBoundHandlerTo:</i> aBlock
+<td>Set the handler for a channel.  The argument to this message must be a block. 
+The block will be run with <i>^self</i> bound to the handler's channel.  
+This may simplify the implementation of some handlers.
+<tr>
+<td><i>handler</i>
+<td>Return the handler for a channel. This message returns the user defined handler if it exists; otherwise, it returns <i>NA</i>.
+<tr>
+<td><i>isStarting</i>
+<td>Detect a handler's first execution. The Open Vision Tool Kit invokes all newly enabled handlers, even if they have no data to read.  
+This message returns <i>TRUE</i> during that invocation. 
+The startup invocation is an appropriate place to greet or validate a new client or to negotiate startup parameters.
+<tr>
+<td><i>isRestarting</i> 
+<td>Detect the restart of a handler after a hard error such as a segmentation violation.  
+The Open Vision Tool Kit restarts all handlers interrupted by a hard Vision error.  
+This message returns <i>TRUE</i> during that invocation.
+</table></center>
+<p>
+
+<center><b>Table 8.  Handler Definition and Installation Messages</b></center>
+<p>
+
+<a name="Writing Your Own Handlers"><b>Writing Your Own Handlers</b></a>
+<p>
+
+This section deals with the mechanics and methodology of writing and installing your own input handler.
+<p>
+
+The mechanics are straightforward.  A user defined handler is a block called whenever new data arrives.  
+It has responsibility for reading and processing that data. 
+The Open Vision Tool Kit provides a small number of messages that install and support user defined handlers. 
+Table 8 describes them.
+<p>
+
+The remainder of this section illustrates the methodology used to develop a handler.  
+It uses an interactive balance sheet server as an example.  
+The following telnet session shows a sample interaction with the server:
+<ul>
+<pre><b>
+% telnet fester 7100
+Trying 204.32.67.16 ...
+Connected to fester.
+Escape character is <i>^]</i>.
+
+Welcome to the Vision Balance Sheet Server.
+
+Enter Ticker Symbol: ibm
+INTL BUSINESS MACHINES CORP 		Prepared: 10/11/1995Industry: COMPUTER & OFFICE EQUIPMENT
+Currency: United States Dollar
+
+                          BALANCE SHEET
+
+
+                               12/93    12/92    12/91
+                               -----    -----    -----
+
+...
+
+Enter Ticker Symbol: <i>gm</i>
+GENERAL MOTORS CORP 			Prepared: 10/11/1995
+Industry: MOTOR VEHICLES & CAR BODIES
+Currency: United States Dollar
+
+                          BALANCE SHEET
+
+
+                               12/93    12/92    12/91
+                               -----    -----    -----
+
+...
+
+Enter Ticker Symbol: bye
+Connection closed by foreign host.
+</b></pre>
+</ul>
+
+Creating a custom server is a three step process:
+<ul>
+1. Create a service channel.
+<p>
+2. Define a handler.
+<p>
+3. Enable the handler.
+</ul>
+
+Except for the fact that this server listens on port 7100, the first step is the same as it was for the simple server described in the previous section. 
+The last step is completely identical.  Defining the service handler is only slightly more complicated. 
+When it is called, the service handler must accept connection requests until there are no more requests to accept. 
+Each request it accepts creates a new stream that is connected to a new client for the service. 
+To process requests from that client, the service handler must define and enable a handler for that stream.  
+That handler must read and write data on the stream in the form expected by the client.
+<p>
+
+The following Vision code shows the implementation of the service channel handler for this server.  
+For clarity, the stream handler's implementation is omitted:
+
+<ul>
+<pre><b>
+!BServer <- "inet/stream,p:7100" <i>asOpenVisionChannel</i>;
+
+BServer <i>setBoundHandlerTo:</i> [
+   !client <- ^self <i>acceptConnection</i>;
+   [ client <i>isReady</i> ] whileTrue: [
+      client <i>setBoundHandlerTo:</i> [
+
+      ###  ... this part temporarily omitted...
+
+      ];
+      client <i>enableHandler</i>
+      :client <- ^self <i>acceptConnection</i>
+   ]
+];
+
+BServer <i>enableHandler;</i>
+</b></pre>
+</ul>
+
+The omitted stream handler's implementation is:
+<ul>
+<pre><b>
+client <i>setBoundHandlerTo:</i> [
+   !prompt <- "Enter Ticker Symbol: ";
+
+   ^self isStarting ifTrue: [
+      newLine print;
+      "Welcome to the Vision Balance Sheet Server." 
+         printNL;
+      newLine print;
+      prompt print;
+   ]. elseIf: [ ^self <i>isRestarting</i> ] then: [
+      prompt print;
+   ];
+
+   !inputLine <- ^self <i>getLine;</i>
+   [ inputLine isntNA ] whileTrue: [
+      :inputLine <- inputLine
+          stripChar: newLine .
+          stripBoundingBlanks
+          toUpper;
+
+      inputLine = "BYE" ifTrue: [
+         ^self <i>endTransmission</i>
+      ] ifFalse: [
+         !company <-
+            ^global Named Company at: inputLine;
+         company isntNA ifTrue: [
+            company CompustatData balanceSheet;
+         ] ifFalse: [
+            "Sorry, "
+               concat: inputLine.
+               concat: " isn't a valid company".
+               printNL
+         ];
+         prompt print;
+      ];
+      :inputLine <- ^self <i>getLine;</i>
+   ];
+
+   ^self isAtEndOfInput ifTrue: [ ^self <i>close</i> ];
+];
+</b></pre>
+</ul>
+
+Obviously, most of this code deals with the details of writing prompts and retrieving data.  
+There is one important fact which you should note about those details. 
+This handler uses the standard Vision print methods to generate its output.  
+When a handler is running, all output produced by any of the Vision print methods is written to the channel associated with the handler.
+<p>
+
+From the perspective of The Open Vision Tool Kit, this handler must satisfy two requirements:
+<ul type=disc>
+<li>
+It must read and consume all the data it can before exiting.  
+After it exits, it will not be called again until new data arrives. 
+The section <a href="#Reading Data Sequentially">Reading Data Sequentially</a> also discussed this constraint and introduced an idiom for dealing with it.  
+A similar idiom applies here:
+<ul>
+<pre><b>
+!inputLine <- ^self getLine;
+[ inputLine isntNA ] whileTrue: [
+
+   # ... do something useful here...
+
+   :inputLine <- ^self <i>getLine;</i>
+];
+</b></pre>
+</ul>
+<li>It must detect the end of input and close or disable itself when it does.
+</ul>
+
+Beyond these requirements, this handler implements several optional features:
+<ul type = disc>
+<li>It uses the <i>isStarting</i> message to determine when to greet its new client.
+<p>
+<li>It uses the <i>isRestarting</i> message to insure that the client always gets a prompt, even if an error has occurred.
+<p>
+<li>It uses the <i>endTransmission</i> message to implement a graceful exit protocol. 
+Using <i>close</i> for the same purpose leaves unprocessed data in operating system buffers waiting for a timeout.  
+The <i>endTransmission</i> and <i>close</i> messages are discussed further in the next section.
+</ul>
+
+<a name="Exiting Vision"><b>Exiting Vision</b></a>
+<p>
+
+Before Open Vision handlers, closing the one and only input channel to a Vision session caused the session to terminate.  
+Closing the one and only source of Vision input meant that Vision had no more work to do and should therefore exit.  
+Now that handlers exist, a single Vision session can service multiple sources of input with each enabled handler representing an independent source of Vision input.  
+The new rule is that as long as at least one enabled handler exists, its Vision session will stay alive.  
+The session will not exit until all channels with enabled handlers have been closed, all enabled handlers have been disabled, or a termination signal is sent to the session.
+<p>
+
+For a Vision session explicitly created to provide a service, this is normally not an issue.  
+The service needs to stay alive.  It can be unexpected when a client session creates a handled channel to receive notifications from the outside world. 
+The Section <a href="#A Peer-To-Peer Vision Connection">A Peer-To-Peer Vision Connection</a> provides an example of just such a service.
+<p>
+
+<a name="Closing Channels"><h4>Closing Channels</h4></a>
+The Open Vision Tool Kit provides three messages for closing a channel. They are described in Table 9.
+<p>
+
+<center><b>Table 9</b></center>
+<p>
+<center><table border>
+<th>Message<th>Description
+<tr>
+<td valign=top><i>close</i>
+<td>Immediately close a channel.  Once you close a channel, you cannot use it to read or write data. 
+If the channel is a service channel, you cannot use it to accept new connections.  
+If the channel is attached to a socket, data written by the socket's peer will be discarded; 
+data written by you will be delivered to your peer if possible.
+<tr>
+<td valign=top><i>endTransmission</i>
+<td>Gracefully inform a channel attached to a socket of your intent to write no more data to the socket.  
+After you send this message, the socket's peer will receive an end-of-input indication and you will not be allowed to write to the socket.
+<tr>
+<td valign=top><i>endReception</i>
+<td>Gracefully inform a channel attached to a socket of your intent to read no more data from the socket.  
+After you send this message, data sent by your peer will be discarded.  
+You will receive an end-of-input indication the next time you try to read data from the socket.
+</table></center>
+<p>
+<center><b>Table 9.  Channel Shutdown Messages</b></center>
+
+<a name="Detecting Errors"><h4>Detecting Errors</h4></a>
+
+Other than closed streams, the examples of the previous sections ignore errors.  
+No robust program ever does that.  The ones you write with the Open Vision Tool Kit should not either.
+<p>
+
+All <i>OpenVision Channel</i> objects remember their last error.  
+They will return it to you as an <i>OpenVision Channel Error</i> object in response to the message <i>lastError</i>. 
+If no errors have occurred, <i>lastError</i> returns the object <i>OpenVision Channel Error NoError</i>. 
+An error object can print itself, return a string describing itself in response to the description message, and be compared to other instances of its class.
+<p>
+
+<a name="Using the Remaining Messages"><h4>Using the Remaining Messages</h4></a>
+
+The Open Vision Tool Kit defines a number of other messages at <i>OpenVision Channel</i> that are useful and occasionally necessary.  
+They are described in Table 10.
+<p>
+<center><b>Table 10</b></center>
+<p>
+<center><table border>
+<th>Message<th>Description
+<tr>
+<td valign=top><i>errorInput</i>
+<td>Return the secondary channel that receives error messages from this channel's peer.
+<tr>
+<td valign=top><i>setErrorInputTo:</i>
+<td>Set the error input secondary channel of a channel.  
+Construction of a remote execution client is the only current use for this message. 
+<tr>
+<td valign=top><i>errorOutput</i>
+<td>Return the secondary channel that receives error messages written to this channel.
+<tr>
+<td valign=top><i>setErrorOutputTo:</i>
+<td>Set the error output secondary channel of a channel.  
+The channel specified as the argument to this message becomes the destination for all error messages written to the recipient of this message.
+<tr>
+<td valign=top><i>socketName</i>
+<td>Return the local address of a channel attached to a socket.
+<tr>
+<td valign=top><i>peerName</i>
+<td>Return the peer address of a channel attached to a connected socket.
+<tr>
+<td><i>submitVisionRequest: aString</i>
+<td>Submit <i>aString</i> as an expression to be evaluated to the <i>batchvision</i> peer of this channel.  
+This message returns the output generated during the execution of <i>aString</i>.
+</table></center>
+<p>
+<center><b>Table 10.  Additional OpenVision Channel Messages</b></center>
+<p>
+
+The Open Vision Tool Kit also defines two utility messages at <i>OpenVision</i>. 
+Those messages are summarized in Table 11.
+<p>
+<center><b>Table 11</b></center>
+<p>
+<center><table border>
+<th>Message<th>Description
+<tr>
+<td valign=top><i>ActiveChannel</i>
+<td>Returns the channel whose input triggered the Vision program that sent this message.  
+All output produced by that program is sent to this channel.  
+The channel returned by this message is always associated with an enabled handler.  
+Minimally, it is the default channel Vision uses to talk to your terminal, script, or editor.  
+In Vision sessions that create services, it can be a service channel responding to a connection 
+request or a stream channel servicing client input.
+<tr>
+<td valign=top><i>HostName</i>
+<td>Returns a character string containing the name of the computer executing your Vision session.
+</table></center>
+<p>
+<center><b>Table 11.  Additional OpenVision Messages</b></center>
+<p>
+Finally, the Open Vision Tool Kit includes a number of other messages not documented here.  
+Among other things, these messages access the remote execution daemon, deal with prompt oriented input, and provide additional channel status and descriptive data.  
+While the section <a href="#A Remote Execution Daemon Client">A Remote Execution Daemon Client</a>
+describes one of the remote execution messages, you should examine the Open Vision Tool Kit installation scripts for more information and other examples.
+
+<hr>
+
+<a name="applications"><h3>Applications of The Open Vision Tool Kit</h3></a>
+
+<a name="A Text File Reader"><h4>A Text File Reader</h4></a>
+
+The sample is an implementation of the <i>asFileContents</i> method using The Open Vision Tool Kit:
+
+<ul>
+<pre><b>
+String defineMethod: [ | asFileContents |
+    !file <- "file:" concat: ^self. asOpenVisionChannel;
+    !result <- file getString;
+    file close;
+    result
+];
+</b></pre>
+</ul>
+
+<a name="A Flat File Reader"><h4>A Flat File Reader</h4></a>
+
+This sample uses The Open Vision Tool Kit to manufacture a collection of Vision objects from the data contained in a flat, ASCII file.
+<ul>
+<pre><b>
+Object specializeAs: 'SampleData';
+SampleData
+  defineFixedProperty: 'name'.
+  defineFixedProperty: 'code'.
+  defineFixedProperty: 'assets'.
+  defineFixedProperty: 'sales'.
+  defineFixedProperty: 'eps';
+
+!file <- "file,m:/tmp/sample.dat"
+		asOpenVisionChannel
+		setTrimFormatToTrailingBlanks;
+!fsize  <- file byteCount;
+!fline  <- file getLine;
+!rsize  <- fline count;
+!rcount <- (fsize / rsize) asInteger;
+
+"+++ File Size . . . ." print;   fsize printNL;
+"+++ Record Size . . ." print;   rsize printNL;
+"+++ Record Count. . ." print;   rcount printNL;
+"+++ First Line. . . ." printNL; fline printNL;
+
+rcount sequence0 do: [
+   !offset <- ^self * ^my rsize;
+   !record <- ^my SampleData new;
+   record :name   <- ^my file getString: 35 at: offset + 1;
+   record :code   <- ^my file getString: 10 at: offset + 36;
+   record :assets <- ^my file getString: 12 at: offset + 46 
+						. asNumber;
+   record :sales  <- ^my file getString: 12 at: offset + 58 
+						. asNumber;
+   record :eps    <- ^my file getString: 12 at: offset + 70 
+						. asNumber;
+];
+
+file close;
+</b></pre>
+</ul>
+
+<a name="A Remote Execution Daemon Client"><h4>A Remote Execution Daemon Client</h4></a>
+
+This sample uses The Open Vision Tool Kit to access the remote execution daemon (rexecd) on a host.  
+This method implements the full protocol, including the secondary error socket defined in the documentation for the <i>rexecd</i> service. 
+This method is a standard part of The Open Vision Tool Kit.
+
+<ul>
+<pre><b>
+OpenVision defineMethod:
+[ | rexec: command onHost: host
+                   asUser: username
+             withPassword: password |
+    !errorService <- "inet/stream,p:0" asOpenVisionChannel;
+    !errorPort    <- errorService socketName breakOn: ":". at: 2;
+
+    !primaryChannel <- "inet/stream:" concat: host
+    . concat: ":exec"
+    . asOpenVisionChannel;
+
+    primaryChannel do: [
+       ^self putString: ^my errorPort; ^self putByte: 0;
+       ^self putString: ^my username ; ^self putByte: 0;
+       ^self putString: ^my password ; ^self putByte: 0;
+       ^self putString: ^my command  ; ^self putByte: 0;
+    ];
+
+    !errorChannel <- errorService acceptConnection;
+    [ errorChannel isReady isFalse && errorService isReady
+    ] whileTrue: [
+       errorService wait;
+       :errorChannel <- errorService acceptConnection;
+    ];
+    errorService close;
+
+    primaryChannel setErrorInputTo: errorChannel;
+    errorChannel release;
+
+    !status <- primaryChannel getByte;
+    [ status isNA && [ primaryChannel isntAtEndOfInput ]
+    ] whileTrue: [
+       primaryChannel wait;
+       :status <- primaryChannel getByte;
+    ];
+
+    status = 0 ifTrue: [
+       primaryChannel
+    ] ifFalse: [
+       !message <- primaryChannel getString else: "";
+       [ primaryChannel isntAtEndOfInput ] whileTrue: [
+          primaryChannel wait;
+          :message <- message concat: (
+             primaryChannel getString else: ""
+          );
+       ];
+       primaryChannel close;
+       message
+    ]
+];
+</b></pre>
+</ul>
+
+<a name="A Passive Real-Time Data Base"><h4>A Passive Real-Time Data Base</h4></a>
+
+This example illustrates a more complex application of the Open Vision Tool Kit,
+the access and maintenance of a collection of real time data.  
+The Vision code that implements this example is divided into three parts -- 
+code that creates an initial version of the real time data base, 
+code that defines the classes that model it, and code that attaches it to a Vision session.
+<p>
+
+A memory mapped file holds the data discussed in this example. 
+That file contains a 9 character security code, a price, and a flag that indicates if the price is valid.  
+The price and price validity flag are binary numbers.  
+Any program can construct and maintain this file.  
+This example uses Vision to do it.  
+The following Vision code constructs an initial version of the file from the securities already present in the Vision data base:
+<ul>
+<pre><b>
+!slist <- Security masterList;
+
+!channelSpec <- "file,mcrwt"
+    concat: (slist count * 18) asInteger asString.
+    concat: ":/tmp/pricedb.dat";
+
+!channel <- channelSpec asOpenVisionChannel;
+
+slist numberElements do: [
+    !pvalue <- ^self price;
+    !pvalid <- 1;
+    pvalue isNA ifTrue: [
+        :pvalue <- 0.0;
+        :pvalid <- 0;
+    ];
+
+    !roffset <- (position - 1) * 18;
+
+    ^my channel putString: (code take: 9) at: roffset + 1;
+    ^my channel putByte:   pvalid         at: roffset + 10;
+    ^my channel putDouble: pvalue         at: roffset + 11;
+];
+</b></pre>
+</ul>
+
+Note that this file is constructed as a memory mapped file created with enough space to contain as many 18 byte 
+data records as there are securities. 
+<p>
+
+The data file constructed above is designed to be accessed and updated by any Vision session that has an interest in it. 
+The following code defines the first of two classes to help:
+<ul>
+<pre><b>
+Object specializeAs: "MemoryRecord";
+
+MemoryRecord
+defineFixedProperty: 'offset'.
+;
+</b></pre>
+</ul>
+
+The class <i>MemoryRecord</i> is designed to be an abstract superclass of any class used to model data contained in a memory mapped file. 
+As implemented here, it defines a single property used to remember the file offset of the first byte of a data record in a file. A complete implementation of the capabilities illustrated here would add functionality to this class. 
+That functionality is omitted here to keep this example simple.
+<p>
+
+The class <i>RealTimePriceRecord</i> models the data in the file illustrated in this example. 
+In particular, this class defines cover methods that access code and that access and update price. 
+The following Vision code defines the class:
+<ul>
+<pre><b>
+MemoryRecord specializeAs: "RealTimePriceRecord";
+
+RealTimePriceRecord
+defineFixedProperty: 'security'.
+
+defineMethod:
+[ | code |
+   ^global RealTimePriceRecordFile getString: 9 at: offset + 1
+].
+
+defineMethod:
+[ | price |
+   ^global RealTimePriceRecordFile
+   getByteAt: offset + 10 . != 0 ifTrue: [
+      ^global RealTimePriceRecordFile getDoubleAt:offset + 11
+   ]
+].
+
+defineMethod:
+[ | setPriceTo: newValue |
+   newValue isntNA ifTrue: [
+      ^global RealTimePriceRecordFile 
+         putByte: 1 at: offset + 10;
+      ^global RealTimePriceRecordFile
+         putDouble: newValue at: offset + 11;
+    ] ifFalse: [
+	^global RealTimePriceRecordFile
+         putByte: 0 at: offset + 10;
+    ];
+    ^self
+];
+</b></pre>
+</ul>
+
+In the preceding code, the object <i>^global RealTimePriceRecordFile</i> is expected to return a channel object that accesses the data file.  
+That channel object is defined in the final block of Vision code included in this example. 
+<p>
+
+To facilitate the use of real time price records from the rest of the Vision data base, the following code defines an access path and cover methods at <i>Security:</i>
+<ul>
+<pre><b>
+Security
+defineFixedProperty: 'realTimePriceRecord'.
+
+defineMethod:
+[ | realTimePrice |
+    realTimePriceRecord isntNA ifTrue: [ realTimePriceRecord price ]
+].
+
+defineMethod:
+[ | setRealTimePriceTo: newValue |
+    realTimePriceRecord isntNA ifTrue: [
+	realTimePriceRecord setPriceTo: newValue
+    ];
+    ^self
+];
+</b></pre>
+</ul>
+
+With the real time data file created and modeled, the final step is its access. 
+The following code makes that possible:
+
+<ul>
+<pre><b>
+^global
+  define: 'RealTimePriceRecordFile'
+    toBe: "file,rwm:/tmp/pricedb.dat" asOpenVisionChannel;
+
+(^global RealTimePriceRecordFile byteCount / 18) sequence0 do: [
+    !record <- ^my RealTimePriceRecord new;
+    record :offset <- (^self * 18) asInteger;
+    !security <- ^global Named Security at: record code;
+    security isntNA ifTrue: [
+	security :realTimePriceRecord <- record;
+	record :security <- security;
+    ];
+];
+</b></pre>
+</ul>
+
+The first Vision expression simply opens the data file and defines the value of <i>^global RealTimePriceRecordFile</i>
+used in the cover methods defined at <i>RealTimePriceRecord</i>.  
+The second expression performs a mini-reconcile of the data records contained in the file, 
+attaching each record to the appropriate security.
+<p>
+
+Once attached, accessing the data contained in this file is as simple as:
+<ul>
+<pre><b>
+Named Security IBM realTimePrice
+</b></pre>
+</ul>
+
+Changing the data is also simple:
+
+<ul>
+<pre><b>
+Named Security IBM setRealTimePriceTo: 68.75
+</b></pre>
+</ul>
+
+Because the change is made directly to the file, it is immediately visible to all other programs running on the same computer. 
+The interaction between two Vision sessions running at the same time on the same computer is illustrated by the following example:
+<p>
+
+<pre><b>
+Session 1                       Session 2
+
+Named Security IBM realTimePrice
+68.5
+
+                                Named Security IBM realTimePrice
+                                68.5
+
+Named Security IBM setRealTimePriceTo: 68.75
+459200101
+
+                                Named Security IBM realTimePrice
+                                68.75
+</b></pre>
+
+In this example, expressions displayed further down the page are executed after those preceding them on the page.
+<p>
+
+Most of the steps in this section only need to be run once.  
+Because this example does not change the set of securities in the data file after the file exists, reconciled instances of the class <i>RealTimePriceRecord</i> 
+can be created and saved at the same time the initial data file is created. 
+Only one expression needs to be run by each Vision session that accesses the file:
+
+<ul>
+<pre><b>
+^global
+  define: 'RealTimePriceRecordFile'
+    toBe: "file,rwm:/tmp/pricedb.dat" asOpenVisionChannel;
+</b></pre>
+</ul>
+
+Although this example does not do so, writing a method at either <i>MemoryRecord</i> or <i>RealTimePriceRecord</i> 
+to automate access to the file is a straightforward exercise.
+
+<a name="A Peer-To-Peer Vision Connection"><h4>A Peer-To-Peer Vision Connection</h4></a>
+
+Most client-server interactions are asymmetric.  Generally, a server cannot send unsolicited requests to its clients.  
+The client-server examples presented up to this point in this document are no exception. 
+This section breaks the mold by introducing an example of symmetric peer-to-peer communication.
+<p>
+
+If the messages passed between a client and its server constitute a language, the client does not usually speak the same subset of the language as the server.  
+Normally, the server understands the subset that deals with requests for data or actions while the client understands the subset that deals with replies to those requests.  
+If both the client and its server are Vision sessions, however, both are capable of speaking the same language.  
+This example creates a communication protocol between two Vision sessions that allows each to pass Vision expressions to the other.
+<p>
+
+This example defines a new Vision class <i>OpenVision PeerToPeerChannel</i>. 
+The Vision code that implements this class appears in its entirety at the end of this section.  
+Rather than dissecting that code on a line-by-line basis, this discussion focuses on the salient features of its design.
+<p>
+
+The class <i>OpenVision PeerToPeerChannel</i> defines four messages that are its external interface:
+<ul type=disc>
+<li><i>setOpenVisionChannelTo:</i> aStringOrChannel
+<p>
+<li><i>children</i>
+<p>
+<li><i>close</i>
+<p>
+<li><i>submitRequest:</i> aString
+</ul>
+
+The <i>setOpenVisionChannelTo:</i> message initializes an <i>OpenVision PeerToPeerChannel</i> object.  
+Its argument can be a string suitable for use with <i>asOpenVisionChannel</i> or a channel that already exists. 
+Usually, you use the first form.  If <i>setOpenVisionChannelTo:</i> is passed a stream or a specification for one, 
+it starts a handler on that stream that implements the symmetric protocol discussed later in this section. 
+If <i>setOpenVisionChannelTo:</i> is passed a service channel or a specification for one, it starts a handler that waits for connection requests.  
+The service handler creates a new <i>OpenVision PeerToPeerChannel</i> for each incoming connection request that it accepts.
+<p>
+
+The only asymmetry in the implementation of <i>OpenVision PeerToPeerChannel</i> is the asymmetry required by sockets, 
+one side of a socket connection must advertise its address before the other side can connect to it. 
+Because many clients can connect to a service, you need a way to enumerate those clients. 
+Every <i>OpenVision PeerToPeerChannel</i> instance that manages a service channel keeps a list of the open connections made to that service.  
+The message children returns that list.
+<p>
+
+Once you have an <i>OpenVision PeerToPeerChannel</i>, you can do two things with it.  
+One of those things, <i>close</i>, is necessary but not very interesting.  
+The other thing you can do is send the <i>submitRequest:</i> message. 
+<i>submitRequest:</i> delivers its argument string to the channel's peer for evaluation. 
+If all is well with the network and the peer, at some point the peer will return the output generated by that request. 
+<i>submitRequest:</i> does not wait for that to happen, however. 
+It returns immediately, leaving the collection of output to another part of the protocol.  
+As implemented in this example, that output is simply displayed.
+<p>
+
+The following code illustrates how <i>OpenVision PeerToPeerChannel</i> objects are used.  
+To kick things off, a peer-to-peer service listening on port 7100 is started on <i>fester</i>:
+<ul>
+<pre><b>
+!ptps <- OpenVision PeerToPeerChannel new
+    setOpenVisionChannelTo: "inet/stream,p:7100";
+</b></pre>
+</ul>
+
+With the service started, two clients separately connect to it -- one also running on <i>fester</i>:
+<ul>
+<pre><b>
+!ptpc <- OpenVision PeerToPeerChannel new
+    setOpenVisionChannelTo: "inet/stream:7100"
+</b></pre>
+</ul>
+
+and the other on a different host:
+<ul>
+<pre><b>
+!myptp <- OpenVision PeerToPeerChannel new
+    setOpenVisionChannelTo: "inet/stream:fester:7100"
+</b></pre>
+</ul>
+
+Either client can execute a Vision expression using the service provided on <i>fester</i>:
+<ul>
+<pre><b>
+ptpc submitRequest: "(2 + 2) print"
+
++++ Got Reply:
+     4.00
+
+myptp submitRequest: "(2 + 2) print"
+
++++ Got Reply:
+     4.00
+</ul>
+</b></pre>
+Unlike traditional client-server protocols, the connection is symmetric. 
+As a result, the server can make use of the computational resources of its clients:
+<ul>
+<pre><b>
+ptps children do: [
+    ^self submitRequest: "OpenVision HostName print"
+];
+
++++ Got Reply:
+fester
++++ Got Reply:
+sonbeem
+</b></pre>
+</ul>
+
+Although this example is simple, the capability is potent.  
+Among other things, server initiated execution can be used to transparently deliver data changes and other notifications to clients. 
+Although an example is beyond the scope of this section, the capability illustrated here combined with the passive real time data 
+example of the section <a href="#A Passive Real-Time Data Base">A Passive Real-Time Data Base</a>
+can be the basis of a full fledged real time data management system.
+<p>
+
+The implementation of <i>OpenVision PeerToPeerChannel</i> is not complex. 
+All data going in both directions over an <i>OpenVision PeerToPeerChannel</i> is represented as a sequence of structured messages.  
+In this example, all messages have the same format.  
+In order of their appearance, every message consists of three fields:
+<ul type=disc>
+1. a one byte message type field.
+<p>
+2. a four byte message text size field.
+<p>
+3. a variable length message text field whose size equals the value transmitted in the message text size field.
+</ul>
+
+Both the type and size fields are transmitted as binary numbers.  
+As should be the case with all custom protocol handlers, errors are diverted to a different channel to protect the integrity of the messages in the protocol.  
+For simplicity, no attempt is made to recover from errors, however.
+<p>
+
+Two message types exist.  Expressions are sent for execution using a request message. 
+The output generated by each request message is returned using a reply message. 
+The implementation of the <i>submitRequest:</i> method illustrates the concept.
+<p>
+
+Messages are received and interpreted using a simple table driven dispatch mechanism.  
+That mechanism can be generalized but has been kept simple for this example.
+<p>
+
+At any point, an <i>OpenVision PeerToPeerChannel</i> is in one of four states:
+
+<ul>
+1. expecting a message type field.
+<p>
+2. expecting a message size field.
+<p>
+3. expecting a message text field.
+<p>
+4. processing a message.
+</ul>
+
+When new input arrives, the channel advances to the next state.  
+After processing a message, the channel returns to the first state. 
+This loop is implemented using a list of blocks containing the processing rules for each state:
+<ul>
+<pre><b>
+OpenVision PeerToPeerChannel define: 'InputStates' toBe:
+ [ :messageType <- channel getByte ],
+ [ :messageSize <- channel getLong ],
+ [ :messageText <- channel getString: messageSize ],
+ [ !messageProcessor <- MessageProcessors at: messageType;
+    messageProcessor isntNA ifTrue: [
+        ^self send: messageProcessor
+    ];
+    :inputState <- 0;
+    TRUE
+ ];
+</b></pre>
+</ul>
+
+an input handler that cycles through the states as long as the channel remains open:
+
+<ul>
+<pre><b>
+OpenVision PeerToPeerChannel defineMethod:
+[ | acceptInput |
+    [ ^self send: (InputStates at: inputState). isntNA
+    ] whileTrue: [
+        :inputState <- (inputState + 1) asInteger
+    ];
+    channel isAtEndOfInput ifTrue: [ ^self close ];
+];
+</b></pre>
+</ul>
+
+and a dispatch table that contains a processing rule for each type of message:
+<ul>
+<pre><b>
+OpenVision PeerToPeerChannel
+define: 'MessageProcessors' toBe:
+[ ^self returnReply: [
+        messageText evaluateIn: ^global
+    ] divertOutput;
+],
+[ channel errorOutput putString: [
+        "+++ Got Reply:" printNL;
+        messageText printNL;
+    ] divertOutput;
+];
+</pre></b>
+</ul>
+
+All of this is explicit in the complete implementation that follows:
+
+<ul>
+<pre><b>
+################
+####
+####  OpenVision PeerToPeerChannel
+####
+################
+
+OpenVision specializeAs: "PeerToPeerChannel" at: OpenVision;
+
+OpenVision PeerToPeerChannel
+
+################
+####  Class Variables
+################
+
+define: 'MessageTypeRequest'	toBe: 1 .
+define: 'MessageTypeReply'	toBe: 2 .
+
+define: 'MessageProcessors' toBe:
+[  ^self returnReply: [
+       messageText evaluateIn: ^global
+   ] divertOutput;
+],
+[  channel errorOutput putString: [
+       "+++ Got Reply:" printNL;
+       messageText printNL;
+   ] divertOutput;
+].
+
+define: 'InputStates' toBe:
+[  :messageType <- channel getByte ],
+[  :messageSize <- channel getLong ],
+[  :messageText <- channel getString: messageSize ],
+[  !messageProcessor <- MessageProcessors at: messageType;
+   messageProcessor isntNA ifTrue: [
+       ^self send: messageProcessor
+   ];
+   :inputState <- 0;
+   TRUE
+].
+
+################
+####  Instance Variables
+################
+
+defineFixedProperty: 'channel'.
+defineFixedProperty: 'children'.
+defineFixedProperty: 'parent'.
+
+defineFixedProperty: 'inputState'.
+
+defineFixedProperty: 'messageType'.
+defineFixedProperty: 'messageSize'.
+defineFixedProperty: 'messageText'.
+
+
+################
+####  Channel Initialization
+################
+
+defineMethod:
+[ | setOpenVisionChannelTo: channelOrSpecification |
+    ^self channel isOpenVisionChannel ifTrue: [
+        ^self close;
+    ];
+    ^self :channel <- channelOrSpecification
+        asOpenVisionChannel
+        setBinaryFormatToSparc;
+    ^self channel setErrorOutputTo: (
+        ActiveChannel errorOutput else: ActiveChannel
+    );
+    ^self channel isAServiceChannel ifTrue: [
+        ^self channel setHandlerTo: ^self :acceptConnection;
+        ^self channel enableHandler
+    ]. elseIf: [ ^self channel isAStreamChannel ] then: [
+        ^self channel setHandlerTo: ^self :acceptInput;
+        ^self channel enableHandler
+    ];
+    ^self
+].
+
+################
+####  Input Processing
+################
+
+defineMethod:
+[ | acceptConnection |
+    !newChannel <- ^self channel acceptConnection;
+    [ newChannel isReady ] whileTrue: [
+        ^self clusterNew
+            setOpenVisionChannelTo: newChannel.
+            attachToParent: ^self;
+        :newChannel <- ^self channel acceptConnection;
+    ];
+].
+
+defineMethod:
+[ | acceptInput |
+    [ ^self send: (InputStates at: inputState). isntNA
+    ] whileTrue: [
+        :inputState <- (inputState + 1) asInteger
+    ];
+    channel isAtEndOfInput ifTrue: [ ^self close ];
+].
+
+
+################
+####  Request Submission
+################
+
+defineMethod:
+[ | submitRequest: requestString |
+    ^self channel isAServiceChannel ifTrue: [
+        ^self children do: [
+            ^self submitRequest: ^my requestString
+        ]
+    ] ifFalse: [
+        channel putByte: MessageTypeRequest;
+        channel putLong: requestString count;
+        channel putString: requestString;
+    ];
+].
+
+################
+####  Reply Generation
+################
+
+defineMethod:
+[ | returnReply: replyString |
+    channel putByte: MessageTypeReply;
+    channel putLong: replyString count;
+    channel putString: replyString;
+].
+
+################
+####  Channel Shutdown
+################
+
+defineMethod:
+[ | close |
+    ^self detachFromParent;
+    children do: [ ^self detachFromParent ];
+    channel close;
+    ^self
+].
+
+################
+####  Parent/Child Linkage
+################
+
+defineMethod:
+[ | attachToParent: newParent |
+    ^self detachFromParent;
+    :parent <- newParent;
+    parent children at: ^self childIndex put: ^self;
+    ^self
+].
+
+defineMethod:
+[ | detachFromParent |
+    parent isntNA ifTrue: [
+        parent children delete: ^self childIndex;
+        :parent <- NA;
+    ];
+    ^self
+].
+
+defineMethod:
+[ | childIndex |
+    channel index
+].
+
+################
+####  Instance Initialization
+################
+
+defineMethod:
+[ | clusterNew |
+    ^super clusterNew do: [
+        :children <- ^my children else: [
+            ^global IndexedList newPrototype
+        ]. clusterNew;
+        :inputState <- 1;
+    ]
+].
+
+defineMethod:
+[ | initializeClusterPrototype |
+    ^self do: [
+        :children <- ^global IndexedList new;
+        :inputState <- 1;
+    ]
+].
+
+initializeClusterPrototype
+;
+</b></pre>
+</ul>
+
+
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated January 28, 1999</font>
+
+</table>
+
+
+</body>
+</html>

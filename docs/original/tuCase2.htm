@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Case Study 2: Basic Tabular Reporting</title>
+</head>
+<body>
+<body bgcolor=white>
+
+<h2>Case Study 2: Basic Tabular Reporting</h2>
+
+<p>| <a href="FHome.htm">Home</a> 
+   | <a href="vtutor.htm">Tutorials</a> | 
+<hr>
+
+<blockquote><hr>
+<center><b><font size+1>Reminder!</font></b> </a></center>
+To run these examples, you should first start a new session and then load the sample database using:
+<pre><tt><b>     "/localvision/samples/general/sample.load" asFileContents evaluate ; 
+</b></tt></pre>
+Any other files referenced can be read from the <i>/localvision/samples/general/</i>
+directory.
+<p>
+<b>Note:</b> The <i>sample.load</i> file runs by default on a <i>Unix</i> environment.  If you are using a <i>Windows NT</i> platform, this location may be prefixed by a drive  and optional path (e.g. <i>d:/visiondb/localvision/samples/general/sample.load</i>).  Check with your Vision Administrator for further details.<hr></blockquote>
+<p>
+
+<hr>
+<p>
+It is often useful to display many data items for a list of entities.  Read 
+the file <i>example2.a</i> you should see:
+
+<pre><b>
+ !testList <- Company masterList 
+    rankDown: [ sales ] . 
+    select: [ rank <= 20 ] ; </b></pre>
+
+Execute this program.  This variable <i>testList</i> will now contain the list 
+of top 20 companies by sales.
+<p>
+<hr>
+
+The file <i>example2.b</i> displays sample data for each company in this list:
+<ul>
+<Pre><b>
+ "***  Multiple Company Data Sheet  ***" centerNL: 70 . print; 
+ newLine print ; 
+
+ "Ticker" print: 10 ; 
+ "Name" print: 30 ; 
+ "Industry" print: 10 ; 
+ "Sales" print: -10 ; 
+ "P-E" print: -8 ; 
+ newLine print ; 
+ "-" fill: 70 . printNL ; 
+
+ testList 
+ do: [ 
+     ticker print: 10 ; 
+     name print: 30 ; 
+     industry code print: 10 ; 
+     sales print: 10 ; 
+     price / earningsPerShare print: 8 ; 
+     newLine print ; 
+     ] ; 
+
+</b></pre>
+</ul>
+Execute this program.  You should see:
+
+<ul>
+<Pre><b>
+             ***  Multiple Company Data Sheet  ***
+
+Ticker  Name                    Industry   Sales      P-E
+<hr width = "90%" align="left">
+AET     Aetna Life & Cas        INSUR      22114.11    5.46
+T       American Tel & Tel      TEL        51209.02   23.20
+AN      Amoco Corp              OIL        20174.00   19.91
+ARC     Atlantic Richfield      OIL        16282.00   18.15
+CI      CIGNA Corp              INSUR      16909.30    6.90
+...
+</b></Pre>
+</ul>
+
+The first line of the program centers a title over the report.  The next 
+lines display column headings.  Notice that the print format uses negative 
+values for columns that contain numbers so that the heading is 
+right-justified in these columns.  Five data items including the computed 
+price-earnings ratio are then displayed for each company.
+<hr>
+
+<p>
+The file <i>example2.c</i> groups the companies into industries and displays the industry code and name followed by the companies in the industry for each industry present in the list:
+
+<ul>
+<Pre><b>
+ "***  Multiple Company Data Sheet  ***" centerNL: 70 . print; 
+ newLine print ; 
+ "Ticker" print: 10 ; 
+ "Name" print: 30 ; 
+ "Industry" print: 10 ; 
+ "Sales" print: -10 ; 
+ "P-E" print: -8 ; 
+ newLine print ; 
+ "-" fill: 70 . printNL ; 
+
+ testList groupedBy: [ industry ] .  #-- group into industry 
+ do: [ code print: 10 ;              #-- industry code 
+       name print: 30 ;              #-- industry name 
+       newLine print ; 
+       groupList                     #-- company list 
+            do: [ ticker print: 10 ; 
+                  name print: 30 ; 
+                  industry code print: 10 ; 
+                  sales print: 10 ; 
+                  price / earningsPerShare print: 8 ; 
+                  newLine print ; 
+           ] ; 
+       newLine print ;                #-- skip line between industries 
+      ] ; 
+
+</b></pre>
+</ul>
+Execute this program.  You should see:
+<ul>
+<Pre><B>
+               ***  Multiple Company Data Sheet  ***
+
+Ticker  Name                      Industry     Sales     P-E
+<hr width = "90%" align="left">
+FBT     Food, Beverage, Tobacco
+MO      Philip Morris Cos         FBT       22279.00   43.69
+
+HH      Household Products
+PG      Procter & Gamble Co       HH        17000.00  105.05
+
+AUTO    Automotive
+C       Chrysler Corp             AUTO      26276.51    3.92
+F       Ford Motor Company        AUTO      71643.38    4.36
+GM      General Motors Corp       AUTO      10178.00    6.39
+
+RETAIL  Retail Store
+KM      K Mart Corp               RETAIL    24046.00   17.96
+S       Sears Roebuck & Co        RETAIL    48439.61   10.29
+...
+</b></pre>
+</ul>
+
+This report displays the code and name for each industry 
+followed by a carriage return.  The <i>groupList</i> message returns the 
+list of companies in the original list that are in the current industry.  
+The <i>ticker</i>, <i>name</i>, <i>industry code</i>, <i>sales</i>, and 
+<i>price-earnings ratio</i> for each company in the industry are then 
+displayed.  Notice that the industry code is the same for
+all companies in a given industry group.  An extra line is 
+skipped between industries.
+<hr>
+
+<p>
+
+The next variation of this report includes summary information for each 
+industry.  The total industry sales is defined as the sum of the sales for 
+each company in the industry.  The industry price-earnings ratio is 
+defined as the average ratio for the companies in the industry.  The 
+file <i>example2.d</i> includes the summary information:
+
+<ul>
+<Pre><b>
+ "***  Multiple Company Data Sheet  ***" centerNL: 70 . print; 
+ newLine print ; 
+ "Ticker" print: 10 ; 
+ "Name" print: 30 ; 
+ "Industry" print: 10 ; 
+ "Sales" print: -10 ; 
+ "P-E" print: -8 ; 
+ newLine print ; 
+ "-" fill: 70 . printNL ; 
+
+ testList groupedBy: [ industry ] . 
+ do: [ code print: 10 ; 
+       name print: 30 ; 
+       &quot; &quot; print: 10 ; 
+       groupList total: [ sales ] . print: 10 ;    #-- total sales 
+       groupList                                   #-- average pe 
+           average: [ price / earningsPerShare ] . print: 8 ; 
+       newLine print ; 
+       groupList 
+       do: [ ticker print: 10 ; 
+             name print: 30 ; 
+             industry code print: 10 ; 
+             sales print: 10 ; 
+             price / earningsPerShare print: 8 ; 
+             newLine print ; 
+           ] ; 
+       newLine print ; 
+     ] ; 
+</b></pre>
+</ul>
+
+Execute this program.  You should see:
+<ul>
+<pre><b>
+               ***  Multiple Company Data Sheet  ***
+
+Ticker  Name                 Industry   Sales          P-E
+<hr width = "90%" align="left">
+FBT     Food, Beverage, Tobacco         22279.00       43.69
+MO      Philip Morris Cos       FBT     22279.00       43.69
+
+HH      Household Products              17000.00      105.05
+PG      Procter & Gamble Co     HH      17000.00      105.05
+
+AUTO    Automotive                     221376.67        4.89
+C       Chrysler Corp           AUTO    26276.51        3.92
+F       Ford Motor Company      AUTO    71643.38        4.36
+GM      General Motors Corp     AUTO    10178.00        6.39
+
+RETAIL  Retail Store                    72485.61       14.12
+KM      K Mart Corp             RETAIL  24046.00       17.96
+S       Sears Roebuck & Co      RETAIL  48439.61       10.29
+. . .
+</b></pre>
+</ul>
+After grouping by industry, this program displays the industry's code 
+and name followed by 10 blanks.  These blanks correspond to industry 
+column in the report which is meaningless to subtotal.  The 
+<a href="mlist.htm#total"><i>total:</i></a> message is used to sum all the sales values for companies in the current 
+industry's groupList.  The <a href="mlist.htm#average"> <i>average:</i></a> message is 
+used to compute the average value of the price-earnings ratio for all 
+the companies in the current industry's <i>groupList</i>.
+<hr>
+
+<p>
+The next version of this report removes the column displaying the 
+industry code which is now redundant.  Each company's contribution to 
+total industry sales is printed instead.  To perform this calculation, the 
+individual company's sales value is divided by the total industry sales 
+value.  This result is multiplied by 100.  Read in the file <i>example2.e</i>:
+<ul>
+<pre><b>
+ "***  Multiple Company Data Sheet  ***" centerNL: 70 . print;
+ newLine print ; 
+ "Ticker" print: 10 ; 
+ "Name" print: 30 ; 
+ "% of Ind" print: -10 ;         #-- change this heading 
+ "Sales" print: -10 ; 
+ "P-E" print: -8 ; 
+ newLine print ; 
+ "-" fill: 70 . printNL ; 
+
+ testList groupedBy: [ industry ] . 
+ do: [ 
+ #-- save the summary stats as local variables 
+     !industrySales &lt;- groupList total: [ sales ] ; 
+     !industryPE &lt;- groupList average: [ price / earningsPerShare ] ; 
+
+     code print: 10 ; 
+     name print: 30 ; 
+     " "  print: 10 ; 
+     industrySales print: 10 ;   #-- print the stored value 
+     industryPE print: 8 ;       #-- print the stored value 
+     newLine print ; 
+     groupList 
+     do: [ ticker print: 10 ; 
+           name print: 30 ; 
+     #-- compute the percent contribution 
+           sales / ^my industrySales * 100 print: 10 ; 
+           sales print: 10 ; 
+           price / earningsPerShare print: 8 ; 
+           newLine print ; 
+         ] ; 
+    newLine print ; 
+     ] ; 
+</b></pre>
+</ul>
+
+Execute this program.  You should see:
+<ul>
+<pre><b>
+               ***  Multiple Company Data Sheet  ***
+
+Ticker  Name                   % of Ind    Sales     P-E
+<hr width = "90%" align="left">
+FBT     Food, Beverage, Tobacco          22279.00    43.69
+MO      Philip Morris Cos       100.00   22279.00    43.69
+
+HH      Household Products               17000.00   105.05
+PG      Procter & Gamble Co     100.00   17000.00   105.05
+
+AUTO    Automotive                      199700.89     4.89
+C       Chrysler Corp            13.16   26276.51     3.92
+F       Ford Motor Company       35.88   71643.38     4.36
+GM      General Motors Corp      50.97   10178.00     6.39
+
+RETAIL  Retail Store                     72485.61    14.12
+KM      K Mart Corp              33.17   24046.00    17.96
+S       Sears Roebuck & Co       66.83   48439.61    10.29
+
+BANK    Banks                            27988.01     3.67
+CCI     Citicorp                100.00   27988.01     3.67
+. . .
+</b></pre>
+</ul>
+After grouping by industry, two temporary variables are created 
+<i>industrySales</i> and <i>industryPE</i>.  These values are printed 
+as part of each industry's subtotal line.  The expression:
+
+<ul>
+<pre><b>sales / ^my industrySales * 100 print: 10</b></tt></b></pre>
+</ul>
+
+<p>
+appears inside the <i>grouplist</i> <a href="mlist.htm#do:"><i>do:</i></a> block.  This expression divides the current
+company's sales by the <i>industrySales</i> value defined for the industry.  
+The <i>^my</i> preceding the <i>industrySales</i> message indicates that this 
+message is not a <i>Company</i> message and that Vision should locate the message
+"one-level-out" (i.e., in the environment that invoked the <i>do:</i> block).  
+Note that the same value is accessed for each company in an industry.  
+For example, the value of <i>industrySales</i> for all companies in the <i>Auto</i> 
+industry is 199700.89.
+<hr>
+<p>
+
+The file <i>example2.f</i> modifies this report by moving the subtotals 
+after the company detail.  The sales values are also printed with 
+commas.  The industry <i>code</i> and <i>name</i> continue to print, followed by 
+the company data:
+
+<ul>
+<pre><b>
+ "***  Multiple Company Data Sheet  ***" centerNL: 70 . print; 
+ newLine print ; 
+ "Ticker" print: 10 ; 
+ "Name" print: 30 ; 
+ "% of Ind" print: -10 ; 
+ "Sales" print: -10 ; 
+ "P-E" print: -8 ; 
+ newLine print ; 
+ "-" fill: 70 . printNL ; 
+
+ testList groupedBy: [ industry ] . 
+ do: [ !industrySales <- groupList total: [ sales ] ; 
+       !industryPE <- groupList average: [ price / earningsPerShare ] ; 
+       code print: 10 ; 
+       name print: 30 ; 
+       newLine print ; 
+       groupList 
+       do: [ ticker print: 10 ; 
+             name print: 30 ; 
+             sales / ^my industrySales * 100 print: 10 ; 
+             sales printWithCommas: 10.0 ;           # print commas 
+             price / earningsPerShare print: 8 ; 
+             newLine print ; 
+           ] ; 
+
+       "--> Industry Totals: "  print: 40 ;          #-- General label 
+      100.00 print: 10 ;                             #-- industry % 
+      industrySales printWithCommas: 10 ;           #-- Industry Sales 
+      industryPE print: 8 ;                          #-- Industry PE 
+      newLine print ; 
+      newLine print ; 
+ ] ; 
+</b></pre>
+</ul>
+Execute this program.  You should see:
+<ul>
+<pre><b>
+               ***  Multiple Company Data Sheet  ***
+
+Ticker  Name                  % of Ind   Sales    P-E
+<hr width = "90%" align="left">
+FBT     Food, Beverage, Tobacco
+MO      Philip Morris Cos       100.00   22,279   43.69
+--> Industry Totals:            100.00   22,279   43.69
+
+HH      Household Products
+PG      Procter & Gamble Co     100.00   17,000  105.05
+--> Industry Totals:            100.00   17,000  105.05
+
+AUTO    Automotive
+C       Chrysler Corp            13.16   26,277    3.92
+F       Ford Motor Company       35.88   71,643    4.36
+GM      General Motors Corp      50.97   101781    6.39
+--> Industry Totals:            100.00   199701    4.89
+
+RETAIL  Retail Store
+KM      K Mart Corp              33.17   24,046   17.96
+S       Sears Roebuck & Co       66.83   48,440   10.29
+--> Industry Totals:            100.00   72,486   14.12
+
+. . .
+</b></pre>
+</ul>
+
+The subtotals are now displayed after each industry's company detail.
+<hr>
+<p>
+
+The file <i>example2.g</i> is used to group the initial list of companies
+into sectors, then industries within sector.  Each company displays its 
+percentage of sector and percentage of industry sales.  Sales and 
+price-earnings ratio are subtotalled at the industry and sector levels:
+
+<ul>
+<pre><b>
+ "***  Multiple Company Data Sheet  ***" centerNL: 70 . print; 
+ newLine print ; 
+ "Ticker" print: 10 ; 
+ "Name" print: 30 ; 
+ "% of Sec/Ind" print: -12 ;                 #-- change the heading 
+ "Sales" print: -10 ; 
+ "P-E" print: -8 ; 
+ newLine print ; 
+ "-" fill: 70 . printNL ; 
+
+
+ testList groupedBy: [ industry sector ] . 
+ do: [  #-- for each sector 
+
+  #-- compute summary values 
+     !sectorSales <- groupList total: [ sales ] ; 
+     !sectorPE <- groupList average: [ price / earningsPerShare ] ; 
+
+  #-- display sector code and name 
+     "Sector" print: 10 ; code print: 10 ; name printNL ; 
+     newLine print ; 
+     groupList groupedBy: [ industry ] . 
+     do: [  #-- for each industry 
+         !industrySales <- groupList total: [ sales ] ; 
+         !industryPE <- groupList average: [ price / earningsPerShare ] ; 
+         !sectorSales <- ^my sectorSales ; 
+         "Industry" print: 10 ; code print: 10 ; name printNL ; 
+
+         groupList 
+         do: [ ticker print: 10 ; 
+               name print: 30 ; 
+               sales / ^my sectorSales * 100 print: 6.1 ; 
+               sales / ^my industrySales * 100 print: 6.1 ; 
+               sales printWithCommas: 10.0 ; 
+               price / earningsPerShare print: 8 ; 
+               newLine print ; 
+             ] ; 
+         "Industry Totals: " print: 40 ; 
+         industrySales / sectorSales * 100 print: 6.1 ; 
+         100.0 print: 6.1 ; 
+         industrySales printWithCommas: 10.0 ; 
+         industryPE printNL: 8 ; 
+         newLine print ; 
+         ] ; 
+  #-- sector subtotals start here 
+    "Sector " concat: code . concat: " Totals:" . print: 40 ; 
+    100.0 print: 6.1 ; 
+    100.0 print: 6.1 ; 
+    sectorSales printWithCommas: 10.0 ; 
+    sectorPE print: 8 ; 
+    newLine print ; 
+    newLine print ; 
+    ] ; 
+</b></pre>
+</ul>
+
+Execute this program.  You should see:
+
+<ul>
+<pre><b>
+               ***  Multiple Company Data Sheet  ***
+
+Ticker    Name                  % of    Sec/Ind    Sales    P-E
+<hr width = "90%" align="left">
+Sector    NONDUR  Non-durables
+
+Industry  FBT     Food, Beverage, Tobacco
+MO        Philip Morris Cos    56.7    100.0       22,279   43.69
+Industry Totals:               56.7    100.0       22,279   43.69
+
+Industry HH       Household Products
+PG        Procter & Gamble Co  43.3    100.0       17,000  105.05
+Industry Totals:               43.3    100.0       17,000  105.05
+
+Sector NONDUR Totals:         100.0    100.0       39,279   74.37
+
+Sector DUR      Durables
+
+Industry AUTO      Automotive
+C        Chrysler Corp         13.2     13.2       26,277    3.92
+F        Ford Motor Company    35.9     35.9       71,643    4.36
+GM       General Motors Corp   51.0     51.0       101781    6.39
+Industry Totals:              100.0    100.0       199701    4.89
+
+Sector DUR Totals:            100.0    100.0       199701    4.89
+                              ...   
+</b></pre>
+</ul>
+
+After grouping by sector, two temporary variables are created <i>sectorSales</i> 
+and <i>sectorPE</i>.  These values are printed as part of each sector's 
+subtotal line and are used to compute each industry's and company's 
+percentage of sector sales.  The message <i>groupList</i> at the sector 
+level returns the list of companies in the current sector.  This list is 
+then grouped into industry.  The temporary variable <i>sectorSales</i> is defined 
+at industry to just copy the value from the environment that invoked this 
+<i>do:</i> block.  Since the magic word <i>^my</i> can only "reach back" one
+level, this variable is copied here to make it available to the next <i>do:</i> block.
+
+The message <i>groupList</i> at the industry level returns the list of 
+companies in the current industry.  The expression:
+
+<ul>
+<pre><b>
+ sales / ^my sectorSales * 100 print: 10 
+</b></pre>
+</ul>
+
+computes the percentage contribution each company makes to its total sector sales.  
+Because you defined <i>sectorSales</i> in the previous block, it is available
+to each company via the <i>^my</i> message.
+<hr>
+<p>
+
+The next version of the report restricts the output to the top 2 sectors 
+based on total sector sales.  Read in the file <i>example2.h</i>.
+<ul>
+<pre><b>
+ "***  Multiple Company Data Sheet  ***" centerNL: 70 . print; 
+ "Sector-Industry Breakdown" centerNL: 70 . print; 
+ "Top 2 Sectors By Sales" centerNL: 70 . print;   #-- modify title 
+ newLine print ; 
+ "Ticker" print: 10 ; 
+ "Name" print: 30 ; 
+ "% of Sec/Ind" print: -12 ; 
+ "Sales" print: -10 ; 
+ "P-E" print: -8 ; 
+ newLine print ; 
+ "-" fill: 70 . printNL ; 
+
+ testList groupedBy: [ industry sector ] . 
+ extendBy:             #-- make variables available for rank and select 
+    [ 
+    !sectorSales <- groupList total: [ sales ] ; 
+    !sectorPE <- groupList average: [ price / earningsPerShare ] ; 
+    ] . 
+ rankDown: [ sectorSales ]  .                #-- rank by sector sales 
+ select: [ rank &lt;= 2 ] .                      #-- select top 2 
+ do: [ 
+       "Sector" print ; code print: 10 ; name printNL ; 
+       newLine print ; 
+       groupList groupedBy: [ industry ] . 
+       do: [ !industrySales <- groupList total: [ sales ] ; 
+             !industryPE <- groupList average: [ price / earningsPerShare ] ; 
+             !sectorSales <- ^my sectorSales ; 
+             "Industry" print ; code print: 10 ; name printNL ; 
+             groupList 
+             do: [ ticker print: 10 ; 
+                   name print: 30 ; 
+                   sales / ^my sectorSales * 100 print: 6.1 ; 
+                   sales / ^my industrySales * 100 print: 6.1 ; 
+                   sales printWithCommas: 10.0 ; 
+                   price / earningsPerShare print: 8 ; 
+                   newLine print ; 
+                 ] ; 
+             "Industry Totals:" print: 40 ; 
+             industrySales / sectorSales * 100 print: 6.1 ; 
+             100.0 print: 6.1 ; 
+             industrySales printWithCommas: 10.0 ; 
+             industryPE printNL: 8 ; 
+             newLine print ; 
+           ] ; 
+       "Sector " concat: code . concat: " Totals:"  . print: 40 ; 
+       100.0 print: 6.1 ; 
+       100.0 print: 6.1 ; 
+       sectorSales printWithCommas: 10.0 ; 
+       sectorPE print: 8 ; 
+       newLine print ; 
+       newLine print ; 
+     ] ; 
+</b></pre>
+</ul>
+
+Execute this program.  You should see:
+<ul>
+<pre><b>
+               ***  Multiple Company Data Sheet  ***
+                      Sector-Industry Breakdown
+                        Top 2 Sectors By Sales
+
+Ticker   Name                    % of    Sec/Ind  Sales   P-E
+<hr width = "90%" align="left">
+Sector DUR       Durables
+
+Industry AUTO       Automotive
+C        Chrysler Corp           13.2    13.2      26,277  3.92
+F        Ford Motor Company      35.9    35.9      71,643  4.36
+GM       General Motors Corp     51.0    51.0      101781  6.39
+Industry Totals:                100.0   100.0      199701  4.89
+
+Sector DUR Totals:              100.0   100.0      199701  4.89
+
+Sector MAT        Materials
+
+Industry OIL        Oil and Gas
+AN       Amoco Corp               9.1    10.6    20,174  19.91
+ARC      Atlantic Richfield       7.4     8.6    16,282  18.15
+CHV      Chevron Corp            11.8    13.7    26,015  25.21
+XON      Exxon Corp              34.6    40.2    76,416  18.62
+MOB      Mobil Corporation       23.2    26.9    51,223  21.32
+Industry Totals:                 86.2   100.0   190,110  20.64
+
+Industry CHEM        Chemicals
+DD       DuPont EI de Nemours    13.8   100.0    30,468  19.16
+Industry Totals:                 13.8   100.0    30,468  19.16
+
+Sector   MAT Totals:            100.0   100.0   220,578  20.40
+</ul>
+</b></pre>
+
+This report is only displayed for the sectors MAT (Materials) and 
+DUR (Durables), the two largest sectors.  Because the 
+<a href="mlist.htm#rankDown:"><i>rankDown:</i></a>, 
+<a href="mlist.htm#select:"><i>select:</i></a>, and <a href="mlist.htm#do:"<i>do:</i></a> messages all 
+need to use the variable <i>sectorSales</i>, it is defined once, in the
+<a href="mlist.htm#extendBy:"><i>extendBy:</i></a> block.
+
+<hr>
+<p>
+
+The file <i>example2.i</i> defines a method at Company that requires one 
+parameter, the list to which the method is applied.  This basically 
+requires changing the <i>do:</i> message to a <i>defineMethod:</i> 
+message and naming the method.  The contents of the program itself need not 
+change, except in defining the name of the list to use:
+<ul>
+<pre><b>
+ Company defineMethod: 
+ [ | sectorIndustryReportFor: list | 
+ #-- list  is a list of company objects 
+
+ "***  Multiple Company Data Sheet  ***" centerNL: 70 . print; 
+ "Sector-Industry Breakdown" centerNL: 70 . print; 
+ "Top 2 Sectors By Sales" centerNL: 70 . print; 
+ newLine print ; 
+ "Ticker" print: 10 ; 
+ "Name" print: 30 ; 
+ "% of Sec/Ind" print: -12 ; 
+ "Sales" print: -10 ; 
+ "P-E" print: -8 ; 
+ newLine print ; 
+ "-" fill: 70 . printNL ; 
+
+ #---  list is the list Supplied as a Parameter to this Method 
+ list groupedBy: [ industry sector ] . 
+ extendBy: 
+    [ !sectorSales <- groupList total: [ sales ] ; 
+      !sectorPE <- groupList average: [ price / earningsPerShare ] ; 
+    ] . 
+ rankDown: [ sectorSales ] . 
+ select: [ rank <= 2 ] . 
+ do: [ "Sector" print ; code print: 10 ; name printNL ; 
+       newLine print ; 
+       groupList groupedBy: [ industry ] . 
+       do: [ !industrySales <- groupList total: [ sales ] ; 
+             !industryPE <- groupList average: [ price / earningsPerShare ] ; 
+             !sectorSales <- ^my sectorSales ; 
+             "Industry " print ; code print: 10 ; name printNL ; 
+             groupList 
+             do: [ ticker print: 10 ; 
+                   name print: 30 ; 
+                   sales / ^my sectorSales * 100 print: 6.1 ; 
+                   sales / ^my industrySales * 100 print: 6.1 ; 
+                   sales printWithCommas: 10.0 ; 
+                   price / earningsPerShare print: 8 ; 
+                   newLine print ; 
+                 ] ; 
+
+
+             "Industry Totals: " print: 40 ; 
+             industrySales / sectorSales * 100 print: 6.1 ; 
+             100.0 print: 6.1 ; 
+             industrySales printWithCommas: 10.0 ; 
+             industryPE printNL: 8 ; 
+             newLine print ; 
+           ] ; 
+       "Sector " concat: code . concat: " Totals: " . print: 40 ;
+       100.0 print: 6.1 ; 100.0 print: 6.1 ; 
+       sectorSales printWithCommas: 10.0 ; 
+       sectorPE print: 8 ; 
+       newLine print ;  newLine print ; 
+     ] ; 
+ ] ; 
+
+ #--  Run this New Method 
+ Company sectorIndustryReportFor: testList ; 
+</b></pre>
+</ul>
+
+Execute this program.  This report should be identical to the previous one.
+<hr>
+<p>
+
+The next version adds an additional parameter to this method that allows 
+you to vary the cutoff for the number of sectors to display.  Read in the 
+file <i>example2.j:</i>
+
+<ul>
+<pre><b>
+ Company 
+ defineMethod: 
+ [ | sectorIndustryReportFor: list forTop: cutoff | 
+ #-- list    is a list of company objects 
+ #-- cutoff  specifies number of sectors to display where 
+ #--         sectors are ranked by largest total sales 
+
+ "***  Multiple Company Data Sheet  ***" centerNL: 70 . print ; 
+ "Sector-Industry Breakdown" centerNL: 70 . print ; 
+ "Top " concat: cutoff asString .                      #--  Title includes cutoff value 
+        concat: " Sectors By Sales" . centerNL: 70 . print ; 
+ newLine print ; 
+ "Ticker" print: 10 ; 
+ "Name" print: 30 ; 
+ "% of Sec/Ind" print: -12 ; 
+ "Sales" print: -10 ; 
+ "P-E" print: -8 ; 
+ newLine print ; 
+ "-" fill: 70 . printNL ; 
+
+ list groupedBy: [ industry sector ] . 
+ extendBy: 
+    [ 
+    !sectorSales <- groupList total: [ sales ] ; 
+    !sectorPE <- groupList average: [ price / earningsPerShare ] ; 
+    ] . 
+ rankDown: [ sectorSales ] . 
+ select: [ rank <= ^my cutoff ] .        #--  rank <= supplied cutoff 
+ do: [ 
+       "Sector " print ; code print: 10 ; name printNL ; 
+       newLine print ; 
+       groupList groupedBy: [ industry ] . 
+       do: [ !industrySales <- groupList total: [ sales ] ; 
+             !industryPE <- groupList average: [ price / earningsPerShare ] ; 
+             !sectorSales <- ^my sectorSales ; 
+             "Industry " print ; code print: 10 ; name printNL ; 
+             groupList 
+             do: [ ticker print: 10 ; 
+                   name print: 30 ; 
+                   sales / ^my sectorSales * 100 print: 6.1 ; 
+                   sales / ^my industrySales * 100 print: 6.1 ; 
+                   sales printWithCommas: 10.0 ; 
+                   price / earningsPerShare print: 8 ; 
+                   newLine print ; 
+                 ] ; 
+             "Industry Totals: " print: 40 ; 
+             industrySales / sectorSales * 100 print: 6.1 ; 
+             100.0 print: 6.1 ; 
+             industrySales printWithCommas: 10.0 ; 
+             industryPE printNL: 8 ; 
+             newLine print ; 
+           ] ; 
+       "Sector " concat: code . concat: " Totals: " . print: 40 ; 
+       100.0 print: 6.1 ; 
+       100.0 print: 6.1 ; 
+       sectorSales printWithCommas: 10.0 ; 
+       sectorPE print: 8 ; 
+       newLine print ; newLine print ; 
+     ] ; 
+  ] ; 
+
+ #--  Run this New Method 
+ Company sectorIndustryReportFor: testList forTop: 1 ; 
+</b></pre>
+</ul>
+
+Execute this program.  You should see:
+<ul>
+
+<pre><b>                ***  Multiple Company Data Sheet  ***                 
+                      Sector-Industry Breakdown                       
+                        Top 1 Sectors By Sales                        
+
+Ticker    Name                          % of Sec/Ind     Sales     P-E
+----------------------------------------------------------------------
+Sector MAT       Materials
+
+Industry OIL       Oil and Gas
+AN        Amoco Corp                       9.1  10.6    20,174   19.91
+ARC       Atlantic Richfield               7.4   8.6    16,282   18.15
+CHV       Chevron Corp                    11.8  13.7    26,015   25.21
+XON       Exxon Corp                      34.6  40.2    76,416   18.62
+MOB       Mobil Corporation               23.2  26.9    51,223   21.32
+Industry Totals:                          86.2 100.0   190,110   20.64
+
+Industry CHEM      Chemicals
+DD        DuPont EI de Nemours            13.8 100.0    30,468   19.16
+Industry Totals:                          13.8 100.0    30,468   19.16
+
+Sector MAT Totals:                       100.0 100.0   220,578   20.40</b></pre>
+</ul>
+
+The title now includes the cutoff supplied as a parameter.  The 
+<i>concat:</i> message is used to create a single string that can be 
+centered over the report.  Since parameters to the <i>concat:</i> message 
+must be strings, the cutoff value is converted to a string and then 
+concatenated.  The selection criteria block now selects sectors whose 
+rank (based on sectorSales) is less than or equal to the supplied cutoff
+value.  The expression <i>^my cutoff</i> in this block sends the <i>cutoff</i> 
+message to the environment outside the selection block.  In this case, 
+the value located is the input value.
+<hr>
+<p>
+
+The file <i>example2.k</i> produces a similar report.  In this report the top two sectors are chosen from <i>masterList</i> not <i>testList</i>:
+
+<ul>
+<pre><b>
+ Company sectorIndustryReportFor: Company masterList forTop: 2 ; 
+</b></pre>
+</ul>
+
+Execute this program.  You should see:
+
+<ul>
+<pre><b>
+      ***  Multiple Company Data Sheet  ***
+           Sector-Industry Breakdown
+            Top 2 Sectors By Sales
+
+Ticker    Name                   % of    Sec/Ind Sales      P-E
+<hr width = "90%" align="left">
+Sector DUR          Durables
+
+Industry AUTO           Automotive
+C         Chrysler Corp          11.9    11.9    26,277      3.92
+F         Ford Motor Company     32.4    32.4    71,643      4.36
+GM        General Motors Corp    55.8    55.8    123,457     6.39
+Industry Totals:                100.0   100.0    221,377     4.89
+
+Sector DUR Totals:              100.0   100.0    221,377     4.89
+
+Sector RETAIL      Retail
+
+Industry RETAIL       Retail Store
+DH        Dayton-Hudson           8.5     8.5      9,259    26.62
+KM        K Mart Corp            22.2    22.2     24,046    17.96
+JCP       Penney JC Co           13.6    13.6     14,740    19.97
+S         Sears Roebuck & Co     44.7    44.7     48,440    10.29
+WMT       Wal-Mart Stores        11.0    11.0     11,909   147.81
+Industry Totals:                100.0   100.0    108,394    44.53
+
+Sector RETAIL Totals:           100.0   100.0    108,394    44.53
+</b></pre>
+</ul>
+
+The report displays the top 2 sectors using all companies in the database.
+<hr>
+<p>
+
+This report can be executed using data from a different point in time just 
+like any other Vision program.  The file <i>example2.l</i> produces the 
+report for the top 2 sectors in 1989 for the entire company universe:
+
+<ul>
+<pre><b>
+ 89 evaluate: 
+   [ Company sectorIndustryReportFor: Company masterList forTop: 2 ] ; 
+</b></pre>
+</ul>
+
+Execute this program.  You should see:
+<ul>
+<Pre><b>
+                ***  Multiple Company Data Sheet  ***                 
+                      Sector-Industry Breakdown                       
+                        Top 2 Sectors By Sales                        
+
+Ticker    Name                          % of Sec/Ind     Sales     P-E
+----------------------------------------------------------------------
+Sector DUR       Durables
+
+Industry AUTO      Automotive
+C         Chrysler Corp                   13.2  13.2    26,277    3.92
+F         Ford Motor Company              35.9  35.9    71,643    4.36
+GM        General Motors Corp             51.0  51.0   101,781    6.39
+Industry Totals:                         100.0 100.0   199,701    4.89
+
+Sector DUR Totals:                       100.0 100.0   199,701    4.89
+
+Sector MAT       Materials
+
+Industry OIL       Oil and Gas
+AN        Amoco Corp                       8.2  10.0    20,174   19.91
+ARC       Atlantic Richfield               6.7   8.1    16,282   18.15
+CHV       Chevron Corp                    10.6  13.0    26,015   25.21
+XON       Exxon Corp                      31.2  38.0    76,416   18.62
+MOB       Mobil Corporation               20.9  25.5    51,223   21.32
+P         Phillips Petroleum               4.4   5.3    10,721  458.33
+Industry Totals:                          82.1 100.0   200,831   93.59
+
+Industry CHEM      Chemicals
+DOW       Dow Chemical Co                  5.5  30.5    13,377   12.96
+DD        DuPont EI de Nemours            12.5  69.5    30,468   19.16
+Industry Totals:                          17.9 100.0    43,845   16.06
+
+Sector MAT Totals:                       100.0 100.0   244,676   74.21</b></pre>
+</ul>
+<hr>
+
+| <a href="tuBasic.htm">Vision Basics</a>  
+| <a href="tuLoad.htm">Creating a Demo Database</a>
+| <a href="tuSingle.htm">Single Object Access</a> 
+| <a href="tuList.htm">Using Lists</a> 
+| <a href="tuTS.htm">Using Dates and TimeSeries</a> |
+
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated January 25, 1999</font>
+</tr>
+</table>
+
+</body>
+</html>

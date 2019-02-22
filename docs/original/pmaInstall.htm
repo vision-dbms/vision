@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Portfolio Management Application Layer: Installation</title>
+</head>
+<body bgcolor=white>
+<h2>Vision Portfolio Management Application Layer: Installation</h2>
+
+<p>
+| <a href="pmaApps.htm">Headstart Applications</a> 
+| <a href="pmaFeeds.htm">Uploading Data</a> 
+| <a href="pmaStarting.htm">Getting Started</a>
+| <a href="vpma.htm">Application Overview</a> 
+| <a href="pmaXRef.htm">Application Cross Reference</a>
+|
+<hr>
+<h3>Topics Covered:</h3>
+<ul type=square>
+<li><a href="#overview">Overview</a>
+<li><a href="#runtime">Run-Time Environment</a>
+<li><a href="#software">Software Components</a>
+<li><a href="#install">Software Installation</a>
+<li><a href="#methodology">Tailoring the Product</a>
+<li><a href="#nextsteps">Next Steps</a>
+<li><a href="#feeds">Starter Feeds</a>
+<li><a href="#feeds-summary">Starter Feeds - Summary</a>
+</ul>
+<p>
+<hr>
+<h3><a name="overview">Overview</a></h3>
+<p>
+The Vision <b>Portfolio Management Application Layer</b> provides
+an initial set of application and data feed templates that support
+the needs of the portfolio management function.  These templates provide
+a good starting point for all installations.  Because of varying 
+application, data, and support requirements, the basic product is
+normally tailored to meet the specific needs of your organization.
+Insyte works with you to implement these customizations and to
+develop an on-going production process that suits your environment.
+<p>
+A successful implementation requires several key ingredients:
+<p><ul type=disc>
+<li>small initial group of end users who are eager for information and want
+a role in tailoring the initial applications
+<li>strong individual to liaison between users and IT
+<li>IT support
+</ul>
+<p>
+Once the software has been installed,
+Insyte recommends a three month phased implementation process to
+tailor the product to reflect the specific requirements of your organization.  
+In addition to introducing end-users
+to the capabilities, a key objective during this period is to get
+the internal group supporting the product acclimated with the software,  
+data integration, and maintenance issues.  Because this installation methodology
+involves end users, IT, and support personnel, it encourages
+basic knowledge transfer as part of the implementation, which
+plays a big role in creating a successful environment.
+<p>
+<hr>
+<h3><a name="runtime">The Vision Run-Time Environment</a></h3>
+<p>
+The <i>Vision Run-Time Environment</i> provides the tools needed to
+build and maintain a Vision database designed to 
+deliver Web-based applications to users via an internal intranet.
+Basic capabilities provided in this environment include:
+<p>
+<ul type=disc>
+<li>Starter Suite of Web-based Applications
+<li>Initial Data Feed Templates
+<li>Analyst tools for making temporary modifications to the database
+<li>Administrator tools for committing permanent changes to the database
+</ul>
+<p>
+This environment addresses the needs of many organizations.
+Additional capabilities are provided via the <i>Vision Development
+Environment</i>, which offers language access, production scheduling
+and other facilities that are useful as your Vision usage expands.  
+<p>
+The <i>Vision Run-Time Environment</i>
+is designed to support three classes of user:
+<p>
+<ul type=disc>
+<li>Browser
+<li>Analyst
+<li>Administrator
+</ul>
+<p>
+A <i>Browser</i> uses a web browser to run applications
+via an organization's intranet.  In addition to the
+browsing capabilities, an <i>Analyst</i> can
+generate temporary modifications to the database.  These modifications
+will be reflected in the analyst's private versions of browser reports,
+although they will not be saved permanently.  An <i>Administrator</i>
+has the ability to commit permanent changes to the database including
+data modifications and database extensions that are seen by all users.
+
+<p>
+<hr>
+<h3><a name="software">Software Components</a></h3>
+<p>
+The <i>Vision Run-Time Environment</i> includes the Vision Application
+Server, one or more Vision Application Clients, and a Vision Administrator
+Client.  Since applications are delivered via a user's web browser,
+components need to be installed on your internal Web Server as well.
+Your Vision Server can be installed on a 
+Unix or NT platform.  Your Vision Clients can be installed on an
+NT or Windows platform.  A single user environment can be created
+using NT as the server and the client.
+<p>
+The Vision software is available for a number of different 
+client/server configurations.  The minimal requirements for each 
+configuration are outlined below:
+<p>
+<b>Server Configuration Requirements</b>
+<p>
+<ul type=disc>
+<li><i>Hardware/Operating System:</i>
+<ul>
+<li>HP/PA-RISC --- HP-UX 10.x
+<li>Sun/Sparc --- Solaris 5.5.1
+<li>IBM/RS-6000 --- AIX 4.2
+<li>Intel Pentium or Pentium/Pro --- 
+Windows/NT 4.0 Service Pack 3 (Workstation or Server)
+</ul>
+
+<li><i>Minimum Main Memory (RAM):</i>
+64MB Minimum / 128MB Recommended, more may be required based on user or
+application load
+
+<li><i>Minimum Disk Space (exclusive of swap space):</i>
+2.5 times average data base size (NTFS formatted disks recommended for
+Windows/NT installations); Recommend starting with 1 GB
+
+<li><i>Minimum Swap Space:</i>
+2-3 times the installed main memory, more may be required based on user
+or application load
+
+<li><i>Other Requirements:</i>
+<p>
+The following components should be operational prior to installation of
+your Vision system:
+<ul>
+<li><a href="#tcpip">TCP/IP</a>
+must be installed and operational in environments where its use
+is optional (Windows/NT).
+<li><a href="#web">Web server</a>
+supporting the Common Gateway Interface (CGI) protocol standard.
+</ul>
+</ul>
+
+
+<p>
+<b>Client Configuration Requirements</b>
+<ul type=disc>
+<li>Web Browser (with Java support for graphics) 
+<li>Microsoft Excel 95 or 97
+</ul
+
+<p>
+<b><a name="tcpip">Remote Execution Service on Windows NT</a></b>
+<p>
+TCP/IP must be installed and operational.  In Unix environments,
+this service is standard.  You may need to install remote execution
+service software if you are using an NT server.
+<p>
+The only remote execution service software for NT that we have found and
+tested at this time is Ataman Software's ATRLS. 
+They can be reached at http://www.ataman.com.
+Version 2.4 of Ataman's ATRLS will need the switch set that tells the
+rexecd service to leave child processes running after the parent
+process logs out. This feature can be found in section 9.3.4 of the
+<i>userman.doc</i> file they provide.
+Version 1.5 (which is no longer supported by Ataman) works as is with no
+additional settings required.
+
+<p>
+<b><a name="web">Web Server Information</a></b>
+<p><table width=90%><tr><td><ul type=disc><li>Web documents provided in the installation are HTML <i>version 3.2 compliant</i>.  Components utilized include <i>HTML Forms</i>,
+<i>HTML Tables</i>, and <i>Java Applets</i>.
+<tr><td><ul type=disc><li>The CGI application provided in the installation is
+<i>CGI version 1.1</i> compliant.
+<tr><td><ul type=disc><li>Known Web servers that have hosted these components in the past include:<p>
+<ul>
+NCSA HTTPd server<br>
+Microsoft Peer-Web-Services 2.0 & 3.0<br>
+Microsoft IIS 2.0 & 3.0<br>
+Oracle Web Server<br>
+Netscape SuiteSpot 3.5 Web Server<br>
+</ul><p><tr>
+<tr><td><ul type=disc><li>Any Web browser capable of HTML 3.2 should be compatible with the
+supplied applications and documents including:
+Netscape Navigator 3.1 & 4.0 and Microsoft Explorer 3.x & 4.0.
+<tr><td><ul type=disc><li>Some applications utilize Java class libraries from Visual Mining Inc. 
+Prior to the applet running in your browser window you will receive a
+reminder to purchase the NetCharts server license. The license can be 
+obtained from <a href="http://www.netcharts.com">Visual Mining</a>.
+
+</table></ul>
+<p>
+<p>
+<hr>
+<h3><a name="install">Software Installation</a></h3>
+<p>
+The Vision software installation is fairly straightforward.  Prior to
+sending you a release, you will be contacted by an Insyte technical
+consultant who will review your hardware configuration and answer
+any specific installation questions you may have.  You will then
+receive a release on the medium you requested including basic installation
+notes.  Your technical consultant will be available to assist you
+over the phone as you install the software and will help you to confirm
+that the various components are operating as expected.
+Applications are delivered to users via an internal intranet.  If
+you do not currently have an intranet running, Insyte can assist
+you in installing this software as well.  
+<p>
+Wherever possible, the installation process has been automated.
+A <i>ReadMe</i> file is included at the root level of your distribution
+providing instructions for installing the components on different
+hardware configurations.  You will need to install:
+<p>
+<ul type=disc>
+<li>The <a href="#serverInstall">Vision Application Server</a>
+<li>One or more <a href="#clientInstall">Vision Application Clients</a>
+<li>One <a href="#admClientInstall">Vision Administrator Client</a>
+<li><a href="#webInstall">Miscellaneous Web Server Components</a>
+</ul>
+<p>
+All users must have user codes defined on the Vision Server machine.
+One user should be designated as the <i>Vision Administrator</i>.
+You will need to know this user code to install the 
+<a href="#serverInstall">Vision Server</a> and the
+<a href="#admClientInstall">Vision Administrator Client</a>.
+<p>
+A number of <a href="pmaInstallTests.htm">installation tests</a>
+have been designed to help you confirm that all the pieces are
+working and integrated correctly.
+<p>
+<h4><a name="serverInstall">Vision Server Installation</a></h4>
+<p>
+
+Your Vision Server can be installed on Unix or NT
+hardware.  The installation instructions differ based on the target hardware.
+If possible, you should install the Vision Server while logged in as the
+Vision Administrator User.  In this way, the file ownership
+and permissions will be established correctly.
+<p>
+When you have completed the Vision Server installation, you will have
+two new directories on your server machine:  <i>vision/</i> and
+<i>localvision/</i>.  The <i>vision/</i> directory requires less than
+10MB of space and should not grow much larger over time.  The
+<i>localvision/</i> directory includes the database itself and should
+be located on a disk with sufficient space for growth over time.  
+<p>
+You will need to contact Insyte to get a valid license file entry
+for your server in order to commit updates to the database.
+You will need to provide the IP address or host ID for each
+server being licensed.  
+<p>
+Please refer to the document
+<a href="admInstUServer.htm"><i>Vision Installation: Unix Server</i></a>
+for Unix server installation instructions.
+Please refer to the document
+<a href="admInstNServer.htm"><i>Vision Installation: NT Server</i></a>
+for NT server installation instructions.
+
+<p>
+<h4><a name="clientInstall">Vision Application Clients</a></h4>
+<p>
+
+Vision Clients can be installed on NT or Windows platforms.  
+A single user environment can be created using NT as the server and the client.
+Users who access Vision entirely via the web-based applications do
+not need the Client software installed on their machine.  However, analysts
+that want to extract and/or temporarily modify Vision data from Excel 
+must have the Vision Application Client software installed on their machines. Please refer to the document <a href="admInstClient.htm"><i>Vision Installation: Client</i></a>
+for Vision client installation instructions.
+
+<p>
+<h4><a name="admClientInstall">Vision Administrator Client</a></h4>
+<p>
+
+One client should be designated as the Vision Administrator.
+The Vision Administrator can be installed on an NT or Windows machine
+and connects to the administrator's user code on the Vision Server
+machine.  Please refer to the document
+<a href="admInstAdmClient.htm"><i>Vision Installation: Administrator 
+Client</i></a>
+for Vision administrator installation instructions.
+<p>
+After a client installation is complete, you will want to install the MS Excel
+Add-ins for clients that wish to access the Vision Application Server 
+via Excel.  Please refer to the document
+<a href="admInstExcel.htm"><i>Vision Installation: Excel Add-Ins</i></a>
+for installation instructions.
+<p>
+You may optionally want to install the Windows-based Vision editor for
+Vision developers.  A separate setup program is included in the directory
+<i>{fill in the blank}/Session</i>.
+<p>
+<h4><a name="webInstall">Web Browser Interface Setup</a></h4>
+<p>
+
+Vision Applications can be delivered to users via a Web-based browser
+running on an internal intranet.  
+Please refer to the document
+<a href="admInstWebConfig.htm"><i>Vision Installation: Web Configuration</i></a>
+for instructions.
+<p>
+To use Vision's web-based applications, there needs to be at least
+one running Vision session waiting for browser requests.  These Vision
+sessions are known as <i>listeners</i>.  Two types of listener can
+be started.  The Vision Administrator can start one or more master
+listeners which are available for all browser users.  Master listeners
+are started using the <a href="pmaDBA.htm#web">Vision Administrator</a>
+module.  Analysts using the Excel add-ins automatically start a
+private listener.  When a private listener is running, that user's
+browser requests communication with that private session and reflect
+any temporary modifications made.  More information
+about private listeners <a href="pmaAnalyst.htm#browser">is available</a>.
+<p>
+<hr>
+<h3><a name="methodology">Tailoring the Product</a></h3>
+<p>
+Once your software has been installed, you are ready to start
+loading your portfolio data and viewing reports via
+your intranet browser.  Placing the proper emphasis on end user involvement,
+data feed design, and on-going 
+data management issues during the implementation process
+helps to ensure a successful rollout.
+<p>
+We recommend the following three month installation methodology:
+<p>
+<b>Month 1: <i>Getting Started with Internal Data</i></b>
+<p>
+The major objective in the first month is to define and load a subset
+of your internal data so that portfolio managers can view their own
+portfolios via their browser.  This month includes defining the
+process for extracting the basic data sets from internal systems
+and manually loading the data into your Vision environment.  The
+initial data sets should include security, portfolio, and company
+masters, holdings data, and supplemental data such as industry and
+sector.  The recommended starter feeds are
+<a href="#feeds">described in detail below</a>.  These feeds
+provide enough information to use most of the starter portfolio reports
+without modification.  
+<p>
+<b>Month 2: <i>Basic Report Customizations and Additional Data</i></b>
+<p>
+The major objective in the second month is to incorporate links to some
+external data feeds, tailor existing applications to meet your
+needs, and introduce one or two custom reports.  By
+the end of this month, we should have a complete functional system
+that includes all the initial data feeds and applications you require
+for rollout.
+<p>
+<b>Month 3: <i>Productionization</i></b>
+<p>
+The major objective in the third month is to productionize the data
+upload process, address cusip/sedol change and split adjustment issues,
+and define exception reporting and data error resolution strategies.
+Part of this month is used to define a process that best fits into your
+organization's current operating environment.
+By the end of this month, we should have procedures in place that
+enable you to manage the day-to-day operation of your Vision system.
+
+<p>
+<hr>
+<h3><a name="nextsteps">Next Steps</a></h3>
+<p>
+Congratulations, you now have a system in production and many happy
+users.  Over time, you will probably want to add new reports and
+expand the set of internal and external data feeds you incorporate.
+You will be able to do many of these enhancements on your own using
+the techniques you learned during the installation process.  Insyte's
+consultants are available to design, develop, and install
+additional applications
+with you.  At this point you may choose to begin learning the Vision
+language so that you can develop new reports and applications on your
+own.  General Vision language training is available if and when you
+decide to embark on this path.
+<p>
+More information
+about "next steps" <a href="pmaNextSteps.htm">is available</a>.
+
+
+<p>
+<hr>
+<h3><a name="feeds">Starter Feeds</a></h3>
+<p>
+
+To initialize your Vision database, you will minimally want to supply
+the following feeds:
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>Feed<th>Recommended Fields
+<tr>
+<td><a href="pma_CompanyMaster.htm"><b>CompanyMaster</b></a>
+<td><i>entityId</i>, <i>name</i>
+<tr>
+<td><a href="pma_SecurityMaster.htm"><b>SecurityMaster</b></a>
+<td><i>entityId</i>, <i>name</i>, <i>ticker</i>, <i>companyId</i>
+<tr>
+<td><a href="pma_PortfolioMaster.htm"><b>PortfolioMaster</b></a>
+<td><i>entityId</i>, <i>name</i>
+<tr>
+<td><a href="pma_HoldingsFeed.htm"><b>HoldingsFeed</b></a>
+<td><i>acctId</i>, <i>secId</i>, <i>date</i>, <i>shares</i>, <i>mval</i>
+</table></center>
+<p>
+You should supply one or more tab-delimited files for each of these feeds.
+<p>
+<b>Hints:</b>
+<p>
+<ul type=disc>
+<li>Any security referenced in your <b>HoldingsFeed</b> should be included
+in your <b>SecurityMaster</b>.  Any number of additional securities can
+be included.
+<p>
+<li>If you do not have a <b>CompanyMaster</b>, use your <b>SecurityMaster</b>
+for both feeds.
+</ul>
+<p><hr align=center width=70%><p>
+<h4>Consideration: Multiple Asset Types</h4>
+<p>
+<b>Question:</b>
+<ul>
+What types of assets are included in your <b>HoldingsFeed</b>?:
+</ul>
+<p>
+<b>Answer: </b>
+<i>Only equity holdings are included (i.e., no cash or other asset types)</i>
+<ul>
+You are all set.
+</ul>
+<p>
+<b>Answer: </b>
+<i>Holdings include equity plus cash</i>
+<ul>
+You have several options:
+<p><ul type=disc>
+<li>use the string <i>CashUS</i> as the value of <i>secId</i> in the
+<b>HoldingsFeed</b> to indicate a cash holding.
+<li>identify aliases that are used to indicate a cash holding in the
+<b>HoldingsFeed</b> and add them to the <i>CashUS</i> security using
+the <a href="pma_SecurityAliases.htm"><b>SecurityAliases</b></a> feed.
+<li>use general multiple asset type rules, described below.
+</ul></ul>
+<p>
+<b>Answer: </b>
+<i>Holdings potentially include multiple asset types</i>
+<ul>
+You need to add a security type indicator for the securities in your 
+master.  You should:
+<p><ul type=disc>
+<li>supply the
+<a href="pma_SecurityTypeMaster.htm"><b>SecurityTypeMaster</b></a>
+feed with the fields <i>entityId</i>, <i>name</i>, and <i>assetCategory</i>.
+<li>add the field <i>type</i> to your <b>SecurityMaster</b> with values that
+correspond to the security types you have defined.
+</ul>
+<p>
+</ul>
+
+<p><hr align=center width=70%><p>
+<h4>Considerations: International Security Universe</h4>
+<p>
+<b>Question:</b>
+<ul>
+Does your universe include international companies? 
+Do you want to be able to present US information in foreign currencies?
+</ul>
+<p>
+<b>Answer: </b> <i>Yes</i>
+<ul>
+You should consider adding country and currency information
+to your database.  This requires that you:
+<p><ul type=disc>
+<li>supply a 
+<a href="pma_CurrencyMaster.htm"><b>CurrencyMaster</b></a> feed with the
+fields <i>entityId</i> and <i>name</i>; a sample feed is available.
+<li>add the field <i>currencyId</i> to the <b>SecurityMaster</b>
+feed with values that correspond to the currencies in your master.
+<li>supply an 
+<a href="pma_ExchangeRateFeed.htm"><b>ExchangeRateFeed</b></a> feed with the
+fields <i>entityId</i>, <i>date</i>, and <i>usExchange</i>.
+<li>supply a 
+<a href="pma_CountryMaster.htm"><b>CountryMaster</b></a> feed with the
+fields <i>entityId</i>, <i>name</i>, and <i>currencyId</i>;
+a sample feed is available.
+
+<li>supply a 
+<a href=pma_CompanyToCountry.htm"><b>CompanyToCountry</b></a> feed 
+to map your companies to their countries.
+</ul></ul>
+
+<p><hr align=center width=70%><p>
+<h4>Considerations: Industry Scheme</h4>
+<p>
+<b>Question:</b>
+<ul>
+Do you want to be able to see your data grouped into industries and sectors?
+</ul>
+<p>
+<b>Answer: </b> <i>Yes</i>
+<ul>
+You should consider adding industry and sector information
+to your database.  This requires that you:
+<p><ul type=disc>
+<li>supply the
+<a href="pma_SectorMaster.htm"><b>SectorMaster</b></a> and
+<a href="pma_IndustryMaster.htm"><b>IndustryMaster</b></a> 
+feeds with the fields
+<i>entityId</i> and <i>name</i>.
+<li>supply the 
+<a href="pma_IndustryToSector.htm"><b>IndustryToSector</b></a> feed
+to map industries into sectors.
+<li>supply the <a href="pma_CompanyToIndustry.htm"><b>CompanyToIndustry</b></a>
+feed to map companies into industries.
+</ul></ul>
+<p>
+
+<hr>
+<p>
+<h3><a name="feeds-summary">Starter Feeds - Summary</a></h3>
+<p>
+The following table summarizes the basic data feeds you may need to
+supply to get started:
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>Feed<th>Recommended Fields
+<tr>
+<tr><th align=center colspan=2>--- Standard  ---
+<tr>
+<td><a href="pma_CompanyMaster.htm"><b>CompanyMaster</b></a>
+<td><i>entityId</i>, <i>name</i>
+<tr>
+<td><a href="pma_SecurityMaster.htm"><b>SecurityMaster</b></a>
+<td><i>entityId</i>, <i>name</i>, <i>ticker</i>, <i>companyId</i>,
+<i>type</i>, <i>currencyId</i>
+<tr>
+<td><a href="pma_PortfolioMaster.htm"><b>PortfolioMaster</b></a>
+<td><i>entityId</i>, <i>name</i>
+<tr>
+<td><a href="pma_HoldingsFeed.htm"><b>HoldingsFeed</b></a>
+<td><i>acctId</i>, <i>secId</i>, <i>date</i>, <i>mval</i>, <i>shares</i>
+<tr>
+<tr><th align=center colspan=2>--- Non-Equity Assets  ---
+<tr>
+<td><a href="pma_SecurityTypeMaster.htm"><b>SecurityTypeMaster</b></a>
+<td><i>entityId</i>, <i>name</i>, <i>assetCategory</i>
+
+<tr>
+<tr><th align=center colspan=2>--- International  ---
+<tr>
+<td><a href="pma_CurrencyMaster.htm"><b>CurrencyMaster</b></a>
+<td><i>entityId</i>, <i>name</i>
+<tr>
+<td><a href="pma_CountryMaster.htm"><b>CountryMaster</b></a>
+<td><i>entityId</i>, <i>name</i>, <i>currencyId</i>
+<tr>
+<td><a href="pma_ExchangeRateFeed.htm"><b>ExchangeRateFeed</b></a>
+<td><i>entityId</i>, <i>date</i>, <i>usExchange</i>
+<tr>
+<td><a href="pma_CompanyToCountry.htm"><b>CompanyToCountry</b></a>
+<td><i>memberId</i>, <i>groupId</i>
+
+<tr>
+<tr><th align=center colspan=2>--- Industry Groupings  ---
+<tr>
+<td><a href="pma_SectorMaster.htm"><b>SectorMaster</b></a>
+<td><i>entityId</i>, <i>name</i>
+<tr>
+<td><a href="pma_IndustryMaster.htm"><b>IndustryMaster</b></a>
+<td><i>entityId</i>, <i>name</i>
+<tr>
+<td><a href="pma_IndustryToSector.htm"><b>IndustryToSector</b></a>
+<td><i>memberId</i>, <i>groupId</i>
+<tr>
+<td><a href="pma_CompanyToIndustry.htm"><b>CompanyToIndustry</b></a>
+<td><i>memberId</i>, <i>groupId</i>
+
+<tr>
+<tr><th align=center colspan=2>--- Security/Company Characteristic Data  ---
+<tr>
+<td><a href="pma_PriceFeed.htm"><b>PriceFeed</b></a>
+<td><i>entityId</i>, <i>date</i>, <i>currencyId</i>, <i>close</i>
+<tr>
+<td><a href="pma_FundamentalA.htm"><b>FundamentalA</b></a>
+<td><i>entityId</i>, <i>date</i>, <i>currencyId</i>, ...
+<tr>
+<td><a href="pma_FundamentalQ.htm"><b>FundamentalQ</b></a>
+<td><i>entityId</i>, <i>date</i>, <i>currencyId</i>, ...
+<tr>
+<td><a href="pma_FundamentalM.htm"><b>FundamentalM</b></a>
+<td><i>entityId</i>, <i>date</i>, <i>currencyId</i>, ...
+
+</table></center>
+<p>
+Once you have assembled an initial set of feeds, you may wish to
+use the document, <a href="pmaStarting.htm"><i>Getting Started</i></a>
+to test load this information.
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated December 15, 2000</font>
+</table>
+
+</body>
+</html>

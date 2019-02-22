@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 ## Symptoms
 
 These errors [can look like this](VdbScan-error-message-lookup.html#cartesian-space-exceeded).

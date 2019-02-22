@@ -1,0 +1,2877 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Messages: IndexedList</title>
+</head>
+<body bgcolor=white>
+<p>
+<center> | <A href="FHome.htm">Home</A>
+ | <A href="clIList.htm">IndexedList Class  </A>
+ | <A href="mXRef.htm">Message XRef</A>
+ | <A href="Messages.htm">Messages (General)</A>
+ | 
+</center><hr>
+
+<center>
+<font face="Arial" color="darkblue" size=3 >
+<h3>Profile of Class <i>IndexedList</i></h3>
+</center>
+</font><p>
+<blockquote><center><hr width=70%><p>
+Includes Classes: <i>Collection, EnumeratedFunction, Function, IndexedCollection, IndexedList</i>
+<p><hr width=70%></center></blockquote><p>
+<pre>
+
+<A href="clObject.htm">Object</A>
+  | 
+Function
+  | 
+EnumeratedFunction
+  | 
+<A href="clCollect.htm">Collection</A>
+  | 
+IndexedCollection
+  | 
+  +--- <b>IndexedList</b>
+</pre>
+<p><hr align=left width=70% ><p>
+
+An IndexedList contains a set of elements that can be viewed as a
+unit or referenced individually by index.  
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Message Index</font>
+<p><img src="instdot.gif" align="middle" alt="o "><A href="#all:"><b>all: booleanBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#anElement"><b>anElement</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#any:"><b>any: booleanBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#append:"><b>append: aList</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Function)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (EnumeratedFunction)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Collection)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (IndexedCollection)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (IndexedList)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#at:"><b>at: index</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#at:put:"><b>at: index put: aValue</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#average"><b>average</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#average:"><b>average: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#average:withWeights:"><b>average: aBlock withWeights: bBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#basicAverage:"><b>basicAverage:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#basicMax:"><b>basicMax:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#basicMin:"><b>basicMin:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#basicProduct:"><b>basicProduct:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#basicRankDown:usingCollector:"><b>basicRankDown:usingCollector:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#basicRankUp:usingCollector:"><b>basicRankUp:usingCollector:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#basicRunningTotal:usingCollector:"><b>basicRunningTotal:usingCollector:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#basicSortDown:"><b>basicSortDown: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#basicSortUp:"><b>basicSortUp: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#basicTotal:"><b>basicTotal:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Function)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (EnumeratedFunction)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Collection)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (IndexedCollection)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (IndexedList)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#collect:"><b>collect: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#collect:with:"><b>collect: aBlock with: input </b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#collectGroupsForCriteria:atLevel:in:withKeys:"><b>collectGroupsForCriteria: blocks atLevel: level in: list withKeys: keys</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#collectListElementsFrom:"><b>collectListElementsFrom: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#compound"><b>compound</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#compound:"><b>compound: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#copyListElements"><b>copyListElements</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#correlate:with:"><b>correlate: blockX with: blockY</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#count"><b>count</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#decileDown:"><b>decileDown: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#decileDown:by:"><b>decileDown: aBlock by: bBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#decileDown:by:by:"><b>decileDown: aBlock by: bBlock by: cBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#decileDown:using:"><b>decileDown: aBlock using: variableName</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#decileUp:"><b>decileUp: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#decileUp:by:"><b>decileUp: aBlock by: bBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#decileUp:by:by:"><b>decileUp: aBlock by: bBlock by: cBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#decileUp:using:"><b>decileUp: aBlock using: variableName</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Function)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (EnumeratedFunction)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Collection)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (IndexedCollection)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (IndexedList)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#delete:"><b>delete: anObject</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#deleteColumn:"><b>deleteColumn:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#difference:"><b>difference: aList</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#do:"><b>do: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#exclude:"><b>exclude: aList</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#exclude:using:"><b>exclude: aList using: aBlock </b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#excludesElement:"><b>excludesElement: anObject</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#extendBy:"><b>extendBy: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#first:"><b>first: n</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#gMean"><b>gMean</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#gMean:"><b>gMean: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#groupPrintUsing:"><b>groupPrintUsing: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#groupedBy:"><b>groupedBy: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#groupedBy:and:"><b>groupedBy: block1 and: block2</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#groupedBy:in:"><b>groupedBy: block in: list</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#groupedBy:intersect:"><b>groupedBy: block intersect: list</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#groupedBy:union:"><b>groupedBy: block union: list</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#groupedBy:usingCollector:"><b>groupedBy: block1 usingCollector: block2</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#groupedBy:usingCutoffs:"><b>groupedBy: aBlock usingCutoffs: aList</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#groupedByCriteria:"><b>groupedByCriteria: aBlockList</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#groupedByString:"><b>groupedByString: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#harmonicMean"><b>harmonicMean</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#harmonicMean:"><b>harmonicMean: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#harmonicMean:withWeights:"><b>harmonicMean: aBlock withWeights: bBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#histogram:title:"><b>histogram: aBlock title: aString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#includesElement:"><b>includesElement: anObject</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#intersect:"><b>intersect: aList</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#intersect:using:"><b>intersect: aList using: aBlock </b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isCollection"><b>isCollection</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isDefault"><b>isDefault</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isEnumeratedFunction"><b>isEnumeratedFunction</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isEquivalentTo:"><b>isEquivalentTo: object</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isFunction"><b>isFunction</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isIndexedCollection"><b>isIndexedCollection</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isIndexedList"><b>isIndexedList</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#iterate:"><b>iterate: block</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#iterate:by:"><b>iterate: aBlock by: anInteger</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#last:"><b>last: n</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#linkElements"><b>linkElements</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#max"><b>max</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#max:"><b>max: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#median"><b>median</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#median:"><b>median: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#mgroupedBy:"><b>mgroupedBy: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#min"><b>min</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#min:"><b>min: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#mode"><b>mode</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#mode:"><b>mode: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#ncount:"><b>ncount:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#new"><b>new</b></A><i> (Function)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#new"><b>new</b></A><i> (Collection)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#newValueCell:"><b>newValueCell:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#nonDefaults"><b>nonDefaults</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#normalize"><b>normalize</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#normalize:"><b>normalize: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#normalize:by:"><b>normalize: aBlock by: bBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#normalize:by:by:"><b>normalize: aBlock by: bBlock by: cBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#numberElements"><b>numberElements</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#numberElementsInReverse"><b>numberElementsInReverse</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#percentileDown:"><b>percentileDown: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#percentileDown:by:"><b>percentileDown: aBlock by: bBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#percentileDown:by:by:"><b>percentileDown: aBlock by: bBlock by: cBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#percentileDown:using:"><b>percentileDown: aBlock using: variableName</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#percentileUp:"><b>percentileUp: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#percentileUp:by:"><b>percentileUp: aBlock by: bBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#percentileUp:by:by:"><b>percentileUp: aBlock by: bBlock by: cBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#percentileUp:using:"><b>percentileUp: aBlock using: variableName</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#print"><b>print</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#product"><b>product</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#product:"><b>product: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#quintileDown:"><b>quintileDown: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#quintileDown:by:"><b>quintileDown: aBlock by: bBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#quintileDown:by:by:"><b>quintileDown: aBlock by: bBlock by: cBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#quintileDown:using:"><b>quintileDown: aBlock using: variableName</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#quintileUp:"><b>quintileUp: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#quintileUp:by:"><b>quintileUp: aBlock by: bBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#quintileUp:by:by:"><b>quintileUp: aBlock by: bBlock by: cBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#quintileUp:using:"><b>quintileUp: aBlock using: variableName</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#rankCorrelate:with:"><b>rankCorrelate: blockX with: blockY</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#rankDown:"><b>rankDown: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#rankDown:by:"><b>rankDown: aBlock by: bBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#rankDown:by:by:"><b>rankDown: aBlock by: bBlock by: cBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#rankDown:usingCollector:"><b>rankDown: block1 usingCollector: block2</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#rankUp:"><b>rankUp: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#rankUp:by:"><b>rankUp: aBlock by: bBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#rankUp:by:by:"><b>rankUp: aBlock by: bBlock by: cBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#rankUp:usingCollector:"><b>rankUp: block1 usingCollector: block2</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#regress:"><b>regress: list2</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#runningAverage:"><b>runningAverage: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#runningTotal:"><b>runningTotal: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#runningTotal:usingCollector:"><b>runningTotal: block1 usingCollector: block2</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#select:"><b>select: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#send:"><b>send: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#send:with:"><b>send: aBlock with: aValue </b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sortDown:"><b>sortDown: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sortDownBy:then:"><b>sortDownBy: block1 then: block2 </b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sortDownBy:then:then:"><b>sortDownBy: block1 then: block2 then: block3</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sortDownBy:then:then:then:"><b>sortDownBy: block1 then: block2 then: block3 then: block4</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sortUp:"><b>sortUp: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sortUpBy:then:"><b>sortUpBy: block1 then: block2 </b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sortUpBy:then:then:"><b>sortUpBy: block1 then: block2 then: block3</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sortUpBy:then:then:then:"><b>sortUpBy: block1 then: block2 then: block3 then: block4</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#standardize"><b>standardize</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#stdDev"><b>stdDev</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#stdDev:"><b>stdDev: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#tileDown:tiles:"><b>tileDown: block1 tiles: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#tileDown:using:tiles:"><b>tileDown: block using: variableName tiles: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#tileDown:usingCollector:tiles:"><b>tileDown: block1 usingCollector: block2 tiles: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#tileUp:tiles:"><b>tileUp: block1 tiles: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#tileUp:using:tiles:"><b>tileUp: block using: variableName tiles: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#tileUp:usingCollector:tiles:"><b>tileUp: block1 usingCollector: block2 tiles: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#toList"><b>toList</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#total"><b>total</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#total:"><b>total: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#union:"><b>union: aList</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#union:using:"><b>union: aList using: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#unique"><b>unique</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#valueCell:"><b>valueCell:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#weightedDecile:"><b>weightedDecile: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#weightedQuintile:"><b>weightedQuintile: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Function)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (EnumeratedFunction)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Collection)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (IndexedCollection)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (IndexedList)</i><br>
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Messages</font>
+<p><img src="instdot.gif" align="middle" alt="o "><A name="all:"></A><b>all:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection all: booleanBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns TRUE if all elements in recipient respond to supplied block with
+the value TRUE.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="anElement"></A><b>anElement</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection anElement</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Extracts a single element from the recipient List.  The last element in the 
+List is returned.  Useful when dealing with single element lists to strip of 
+the last level of protocol.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clTS.htm">TimeSeries</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="any:"></A><b>any:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection any: booleanBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns TRUE if any element in recipient respond to supplied block with
+the value TRUE.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="append:"></A><b>append:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection append: aList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Appends the supplied List to a copy of the recipient List.  The original 
+list is not altered.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Function asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Function
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">EnumeratedFunction asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>EnumeratedFunction
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedCollection asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>IndexedCollection
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clIList.htm">IndexedList</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="at:"></A><b>at:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedCollection at: index</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value of the recipient IndexedCollection stored at the 
+supplied index.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDict.htm#at:">Dictionary</A> | <A href="mList.htm#at:">List</A> | <A href="mString.htm#at:">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="at:put:"></A><b>at:put:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedCollection at: index put: aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Stores the supplied value at the supplied index in the recipient 
+IndexedCollection.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+2 - Object<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDict.htm#at:put:">Dictionary</A> | <A href="mList.htm#at:put:">List</A> | <A href="mString.htm#at:put:">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="average"></A><b>average</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection average</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the average for the collection assuming the collection contains
+numeric values.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="average:"></A><b>average:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection average: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in supplied Block for each element in the list 
+and computes the average value.  NA values are not included in the average.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="average:withWeights:"></A><b>average:withWeights:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection average: aBlock withWeights: bBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the weighted average using the formula in bBlock to weight
+the formula supplied in aBlock.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="basicAverage:"></A><b>basicAverage:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList basicAverage:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#basicAverage:">List</A> | <A href="mTS.htm#basicAverage:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="basicMax:"></A><b>basicMax:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList basicMax:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#basicMax:">List</A> | <A href="mTS.htm#basicMax:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="basicMin:"></A><b>basicMin:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList basicMin:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#basicMin:">List</A> | <A href="mTS.htm#basicMin:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="basicProduct:"></A><b>basicProduct:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList basicProduct:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#basicProduct:">List</A> | <A href="mTS.htm#basicProduct:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="basicRankDown:usingCollector:"></A><b>basicRankDown:usingCollector:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList basicRankDown:usingCollector:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clIList.htm">IndexedList</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+2 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#basicRankDown:usingCollector:">List</A> | <A href="mTS.htm#basicRankDown:usingCollector:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="basicRankUp:usingCollector:"></A><b>basicRankUp:usingCollector:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList basicRankUp:usingCollector:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clIList.htm">IndexedList</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+2 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#basicRankUp:usingCollector:">List</A> | <A href="mTS.htm#basicRankUp:usingCollector:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="basicRunningTotal:usingCollector:"></A><b>basicRunningTotal:usingCollector:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList basicRunningTotal:usingCollector:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clIList.htm">IndexedList</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+2 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#basicRunningTotal:usingCollector:">List</A> | <A href="mTS.htm#basicRunningTotal:usingCollector:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="basicSortDown:"></A><b>basicSortDown:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList basicSortDown: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the statements provided in the supplied block and sorts the list in 
+descending order.  Sort is highest to lowest for numbers.  Sort is ZZZ 
+through A for strings.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clIList.htm">IndexedList</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#basicSortDown:">List</A> | <A href="mTS.htm#basicSortDown:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="basicSortUp:"></A><b>basicSortUp:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList basicSortUp: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the statements provided in the supplied block and sorts the list in 
+ascending order.  Sort is lowest to highest for numbers.  Sort is A through Z 
+for strings.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clIList.htm">IndexedList</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#basicSortUp:">List</A> | <A href="mTS.htm#basicSortUp:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="basicTotal:"></A><b>basicTotal:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList basicTotal:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#basicTotal:">List</A> | <A href="mTS.htm#basicTotal:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Function classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">EnumeratedFunction classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedCollection classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information is 
+stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="collect:"></A><b>collect:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection collect: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Uses supplied block to create an extension of recipient List.  The value of 
+the block is assigned to the variable value.  The returned extension responds 
+to the value message.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#collect:">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="collect:with:"></A><b>collect:with:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection collect: aBlock with: input </font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Uses supplied block to create an extension of recipient List extended by 
+the variable 'value'.  The block is evaluated using the supplied input
+parameter.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="collectGroupsForCriteria:atLevel:in:withKeys:"></A><b>collectGroupsForCriteria:atLevel:in:withKeys:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection collectGroupsForCriteria: blocks atLevel: level in: list withKeys: keys</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="collectListElementsFrom:"></A><b>collectListElementsFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection collectListElementsFrom: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the statements provided in supplied block for each element in 
+the list and produces a new list containing these elements.  Used to combine 
+a list of lists.  The supplied block must evaluate to a list.  For example,
+the expression:
+                5 sequence collectListElementsFrom: [ ^self sequence ] 
+returns the list elements 1, 1, 2, 1, 2, 3, 1, 2, 3, 4, 1, 2, 3, 4, 5 </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="compound"></A><b>compound</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection compound</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the compounded value for the collection assuming the collection
+contains numeric values.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="compound:"></A><b>compound:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection compound: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in the supplied block for each element in the 
+list and computes the compounded value.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="copyListElements"></A><b>copyListElements</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection copyListElements</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Produces a copy of the recipient list.  Should be used to avoid modifying 
+the recipient List.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="correlate:with:"></A><b>correlate:with:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection correlate: blockX with: blockY</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the correlation of all points in the recipient based on evaluation
+of the formula provided by the two supplied blocks.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="count"></A><b>count</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList count</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Counts the number of elements in the IndexedList.  Returns a non-negative 
+integer.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#count">List</A> | <A href="mString.htm#count">String</A> | <A href="mTS.htm#count">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="decileDown:"></A><b>decileDown:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection decileDown: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in the supplied block for each element in the 
+list and computes its decile (highest values = 1; lowest values = 10).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="decileDown:by:"></A><b>decileDown:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection decileDown: aBlock by: bBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient by the criteria in bBlock and generates a decile value
+for each element relative to its group. The result object is the original
+collection extended by the variable 'decile'.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="decileDown:by:by:"></A><b>decileDown:by:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection decileDown: aBlock by: bBlock by: cBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient by the criteria in bBlock and cBlock and generates a
+decile value for each element relative to its group. The result object 
+is the original collection extended by the variable 'decile'.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="decileDown:using:"></A><b>decileDown:using:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection decileDown: aBlock using: variableName</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in the supplied block for each element in the 
+list and computes its decile (highest values = 1; lowest values = 10).
+The decile value is returned as an extension to the recipient named
+by the supplied variableName</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="decileUp:"></A><b>decileUp:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection decileUp: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in the supplied block for each element in the 
+list and computes its decile (lowest values = 1; highest = 10).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="decileUp:by:"></A><b>decileUp:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection decileUp: aBlock by: bBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient by the criteria in bBlock and generates a decile value
+for each element relative to its group. The result object is the original
+collection extended by the variable 'decile'.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="decileUp:by:by:"></A><b>decileUp:by:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection decileUp: aBlock by: bBlock by: cBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient by the criteria in bBlock and cBlock and generates a
+decile value for each element relative to its group. The result object 
+is the original collection extended by the variable 'decile'.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="decileUp:using:"></A><b>decileUp:using:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection decileUp: aBlock using: variableName</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in the supplied block for each element in the 
+list and computes its decile (highest values = 1; lowest values = 10).
+The decile value is returned as an extension to the recipient named
+by the supplied variableName</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Function defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance of the recipient object's class</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Function
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">EnumeratedFunction defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance of the recipient object's class</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>EnumeratedFunction
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance of the recipient object's class</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedCollection defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance of the recipient object's class</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>IndexedCollection
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance of the recipient object's class</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clIList.htm">IndexedList</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="delete:"></A><b>delete:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList delete: anObject</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Removes element stored at supplied parameter from recipient IndexedList.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clIList.htm">IndexedList</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDict.htm#delete:">Dictionary</A> | <A href="mTS.htm#delete:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="deleteColumn:"></A><b>deleteColumn:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList deleteColumn:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="difference:"></A><b>difference:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection difference: aList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This message returns a list of two elements: the first element contains<br>
+the list of elements that are in list 1 and not in list 2; the second<br>
+element contains the list of elements that are in list 2 and not list 1.  <br>
+For example:<br>
+<br>
+     !diffs <- (1,2,3,4,5) difference: (3,4,5,6) ;<br>
+     "In 1 not 2" print ; diffs at: 1 . do: [ print ] ; newLine print; <br>
+     "In 2 not 2" print ; diffs at: 2 . do: [ print ] ;<br>
+</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="do:"></A><b>do:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList do: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the statements provided in the supplied block for each element 
+in the IndexedList.  The block is evaluated in the context of each element in 
+the list.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clIList.htm">IndexedList</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#do:">List</A> | <A href="mObject.htm#do:">Object</A> | <A href="mTS.htm#do:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="exclude:"></A><b>exclude:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection exclude: aList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Finds the elements in the recipient list that are NOT in the supplied list.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="exclude:using:"></A><b>exclude:using:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection exclude: aList using: aBlock </font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Excludes elements in aList from recipient using rules supplied by block
+to strip any extensions from elements before comparing for equality.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="excludesElement:"></A><b>excludesElement:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection excludesElement: anObject</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns TRUE if recipient List does not include supplied object.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="extendBy:"></A><b>extendBy:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList extendBy: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the supplied block for each element in the list, where the supplied 
+block specifies a set of new properties to which each element in the list can 
+respond.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clIList.htm">IndexedList</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#extendBy:">List</A> | <A href="mObject.htm#extendBy:">Object</A> | <A href="mTS.htm#extendBy:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="first:"></A><b>first:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection first: n</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Selects the first 'n' non-NA, non-Default elements from the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Integer<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="gMean"></A><b>gMean</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection gMean</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the geometric mean of the time series</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="gMean:"></A><b>gMean:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection gMean: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in supplied Block for each element in the list 
+and computes the geometric mean.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="groupPrintUsing:"></A><b>groupPrintUsing:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection groupPrintUsing: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups recipient List by supplied block and displays a report showing the
+count in each group.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="groupedBy:"></A><b>groupedBy:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection groupedBy: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient list based on the criteria specified by the supplied 
+block.  After the groupedBy: message is sent, each element in the resultant 
+list responds to the message groupList which returns the list of elements in 
+that group.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="groupedBy:and:"></A><b>groupedBy:and:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection groupedBy: block1 and: block2</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient list based on the criteria specified by the two
+supplied criteria.  Each element in the resultant list responds to the
+message 'groupList' which returns the list of elements in that group.
+The value of each group is defined as the string formed by:
+     first criteria value.second critria value</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="groupedBy:in:"></A><b>groupedBy:in:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection groupedBy: block in: list</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient collection based on the criteria specified by supplied 
+blocks. The resultant list contains one element for each value that
+is included in supplied list.  Unlike 'groupedBy:union:', groups
+that do not appear in supplied list are eliminated.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="groupedBy:intersect:"></A><b>groupedBy:intersect:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection groupedBy: block intersect: list</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient collection based on the criteria specified by supplied 
+blocks. The resultant list contains one element for each value that
+is included in both the supplied list AND the result of applying the
+supplied block to the recipient collection.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="groupedBy:union:"></A><b>groupedBy:union:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection groupedBy: block union: list</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient collection based on the criteria specified by supplied 
+blocks. The resultant list contains one element for each value that
+is included in supplied list OR that results from applying the
+supplied block to the recipient collection.  For example,
+    companyList groupedBy: [ country ] union: Country masterList
+will return a list with one entry for each Country including 
+countries not represented in 'companyList' (where groupList count
+will be 0.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="groupedBy:usingCollector:"></A><b>groupedBy:usingCollector:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList groupedBy: block1 usingCollector: block2</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient collection based on the criteria specified by block1.  
+The second block provides the name of the extension. The 'groupedBy:' message 
+is implemented using groupList as the collector.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clIList.htm">IndexedList</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#groupedBy:usingCollector:">List</A> | <A href="mTS.htm#groupedBy:usingCollector:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="groupedBy:usingCutoffs:"></A><b>groupedBy:usingCutoffs:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection groupedBy: aBlock usingCutoffs: aList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups recipient List into partitions specified in aList, based on criteria 
+specified in aBlock.  The supplied list should be a list of Numbers.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="groupedByCriteria:"></A><b>groupedByCriteria:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection groupedByCriteria: aBlockList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient collection based on the criteria specified by supplied 
+list of blocks. The resultant list contains one element for each 
+combination of values present from processing the supplied blocks.  Each
+element in the resultant list responds to the message 'keyList' which
+is the list of values associated with this group, one per supplied
+block.  Each element in the resultant list responds to the message 
+'groupList' which returns the list of elements in the specific combination
+of block values.  For example,
+    Company masterList groupedByCriteria: [ sector ] , [ country ] 
+returns a list of sector/country pairs.  To display the name of
+each key and the group count, use:
+    Company masterList groupedByCriteria: [ sector ] , [ country ] .
+    do: [ keyList do: [ name print: 20 ] ;     #-- print keys
+          groupList count printNL ;              #-- print count
+        ] ;
+</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="groupedByString:"></A><b>groupedByString:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection groupedByString: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Used as an alternative to 'groupedBy:' when the supplied block returns
+string values, this version guarantees that strings with identical 
+content will be in the same group.  The standard 'groupedBy:' will
+place unique string in separate groups even if they have identical
+content.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="harmonicMean"></A><b>harmonicMean</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection harmonicMean</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the harmonicMean for the collection assuming the collection contains
+numeric values.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="harmonicMean:"></A><b>harmonicMean:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection harmonicMean: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in supplied Block for each element in the list 
+and computes the harmonicMean value.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="harmonicMean:withWeights:"></A><b>harmonicMean:withWeights:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection harmonicMean: aBlock withWeights: bBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the weighted harmonic mean using the formula in bBlock to weight
+the value supplied in aBlock.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="histogram:title:"></A><b>histogram:title:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection histogram: aBlock title: aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Produces a distribution chart based on each element's value of the
+supplied block.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="includesElement:"></A><b>includesElement:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection includesElement: anObject</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns TRUE if the recipient list does include the supplied object.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="intersect:"></A><b>intersect:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection intersect: aList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Finds the elements that are in BOTH the recipient list and supplied list</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="intersect:using:"></A><b>intersect:using:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection intersect: aList using: aBlock </font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Finds intersection of elements in aList and recipient  using rules supplied
+by block to strip any extensions from elements before comparing for 
+equality.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isCollection"></A><b>isCollection</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection isCollection</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a TRUE value when sent to any collection.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isCollection">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isDefault"></A><b>isDefault</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection isDefault</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns TRUE if recipient collection is empty.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#isDefault">Date</A> | <A href="mObject.htm#isDefault">Object</A> | <A href="mString.htm#isDefault">String</A> | <A href="mNA.htm#isDefault">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isEnumeratedFunction"></A><b>isEnumeratedFunction</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">EnumeratedFunction isEnumeratedFunction</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a TRUE value when sent to any EnumeratedFunction.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isEnumeratedFunction">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isEquivalentTo:"></A><b>isEquivalentTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection isEquivalentTo: object</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns TRUE if the recipient collection contains the same elements as
+the supplied collection.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isEquivalentTo:">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isFunction"></A><b>isFunction</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Function isFunction</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a TRUE value when sent to any Function.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isFunction">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isIndexedCollection"></A><b>isIndexedCollection</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedCollection isIndexedCollection</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a TRUE value when sent to any IndexedCollection.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isIndexedCollection">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isIndexedList"></A><b>isIndexedList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList isIndexedList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE when sent to any IndexedList.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isIndexedList">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="iterate:"></A><b>iterate:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection iterate: block</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This message is used to consider each element in the recipient collection
+or date range one at a time in sequential order.  Unlike the 'do:' message
+which operates in parallel, this message works sequentially and may be
+much slower.  It is useful in cases where you need to use the results of
+a prior element in each iteration and where the size of the structures 
+generated by parallel execution consumes more memorry resource than desired.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#iterate:">DateRange</A> | <A href="mTS.htm#iterate:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="iterate:by:"></A><b>iterate:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList iterate: aBlock by: anInteger</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Similar to the 'do:' message.  The supplied integer is used to process
+recipient indexedList as a series of sublists.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Integer<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#iterate:by:">List</A> | <A href="mTS.htm#iterate:by:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="last:"></A><b>last:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection last: n</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Selects the last 'n' non-NA, non-Default elements from the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Integer<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="linkElements"></A><b>linkElements</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection linkElements</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Extends each element in the collectionby the variables 'prior' and 'next'<br>
+which corresponds to the elements in the recipient lilst that are before<br>
+and after each element.  For example:<br>
+<br>
+     5 sequence linkElements<br>
+     do: [ print ; prior print ; next printNL ] ;<br>
+<br>
+</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="max"></A><b>max</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection max</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the maximum for the collection assuming the collection contains
+numeric values.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="max:"></A><b>max:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection max: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in the supplied block for each element in the 
+list and returns the maximum value.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#max:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="median"></A><b>median</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection median</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the median value of the recipient time series.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="median:"></A><b>median:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection median: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in the supplied block for each element in the 
+list and computes the median (middle) value.  NA values are not included.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="mgroupedBy:"></A><b>mgroupedBy:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection mgroupedBy: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient list using result of block, where supplied block should<br>
+generate a list as its result.  Elements in the original list will be<br>
+included in one or more groupLists.  For example, if instances of the class<br>
+EntityCategory respond to the message 'entities' with the list of entities<br>
+included in the instance, then the expression:<br>
+<br>
+     EntityCategory masterList mgroupedBy: [ entities ] <br>
+<br>
+returns a list of the entities included in any EntityCategory where each<br>
+element of this new list responds to the 'groupList' message with the<br>
+list of EntityCategories that include the element.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="min"></A><b>min</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection min</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the minimum for the collection assuming the collection contains
+numeric values.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="min:"></A><b>min:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection min: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in the supplied block for each element in the 
+list and returns the minimum value.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#min:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="mode"></A><b>mode</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection mode</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the mode for the collection assuming the collection contains
+numeric values.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="mode:"></A><b>mode:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection mode: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in aBlock for each element in the list and 
+computes the mode (most frequently occurring value).  NA values are not 
+included.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="ncount:"></A><b>ncount:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList ncount:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#ncount:">List</A> | <A href="mTS.htm#ncount:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="new"></A><b>new</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Function new</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Disables the 'new' message.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Function
+<p><b>Also Defined At: </b><br>
+ | <A href="mBoolean.htm#new">Boolean</A> | <A href="mCollect.htm#new">Collection</A> | <A href="mDate.htm#new">DateRange</A> | <A href="mDict.htm#new">Dictionary</A> | <A href="mObject.htm#new">Object</A> | <A href="mNA.htm#new">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="new"></A><b>new</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection new</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates a new instance of the recipient object's class.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBoolean.htm#new">Boolean</A> | <A href="mDate.htm#new">DateRange</A> | <A href="mDict.htm#new">Dictionary</A> | <A href="mObject.htm#new">Object</A> | <A href="mNA.htm#new">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="newValueCell:"></A><b>newValueCell:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList newValueCell:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#newValueCell:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="nonDefaults"></A><b>nonDefaults</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection nonDefaults</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Selects any element in the recipient collection that is not a default.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="normalize"></A><b>normalize</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection normalize</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the recipient extended by the property 'norm' assuming the recipient
+is a collectin of numbers.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="normalize:"></A><b>normalize:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection normalize: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in the supplied block for each element in the 
+collection and computes its normalized value based on the mean and standard
+deviation of the collection.   Returns the recipient extended by the property
+'norm'.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="normalize:by:"></A><b>normalize:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection normalize: aBlock by: bBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient by the criteria in bBlock and generates a normalized<br>
+value for each element relative to its group. The result object is the original<br>
+collection extended by the variable 'norm'.  For example:<br>
+     Company masterList normalize: [ sales ] by: [ country ] <br>
+</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="normalize:by:by:"></A><b>normalize:by:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection normalize: aBlock by: bBlock by: cBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient by the criteria in bBlock and cBlock and generates a<br>
+normalized value for each element relative to its group. The result object <br>
+is the original collection extended by the variable 'norm'.  For example:<br>
+     Company masterList<br>
+        normalize: [ sales ] by: [ country ] by: [ industry ] <br>
+</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="numberElements"></A><b>numberElements</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection numberElements</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Extends each element in the list by the variable 'position' which 
+corresponds to its position number in the list.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="numberElementsInReverse"></A><b>numberElementsInReverse</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection numberElementsInReverse</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Extends each element in the list by the variable 'position' which 
+corresponds to its position number in the list when the list is
+sorted in reverse order.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="percentileDown:"></A><b>percentileDown:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection percentileDown: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in the supplied block for each element in the 
+list and computes its percentile (highest values = 1; lowest values = 100).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="percentileDown:by:"></A><b>percentileDown:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection percentileDown: aBlock by: bBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient by the criteria in bBlock and generates a percentile value
+for each element relative to its group. The result object is the original
+collection extended by the variable 'percentile'.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="percentileDown:by:by:"></A><b>percentileDown:by:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection percentileDown: aBlock by: bBlock by: cBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient by the criteria in bBlock and cBlock and generates a
+percentile value for each element relative to its group. The result object 
+is the original collection extended by the variable 'percentile'.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="percentileDown:using:"></A><b>percentileDown:using:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection percentileDown: aBlock using: variableName</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in the supplied block for each element in the 
+list and computes its percentile (highest values = 1; lowest values = 100).
+The percentile value is returned as an extension to the recipient named
+by the supplied variableName</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="percentileUp:"></A><b>percentileUp:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection percentileUp: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in the supplied block for each element in the 
+list and computes its percentile (lowest values = 1; highest = 100).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="percentileUp:by:"></A><b>percentileUp:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection percentileUp: aBlock by: bBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient by the criteria in bBlock and generates a percentile value
+for each element relative to its group. The result object is the original
+collection extended by the variable 'percentile'.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="percentileUp:by:by:"></A><b>percentileUp:by:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection percentileUp: aBlock by: bBlock by: cBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient by the criteria in bBlock and cBlock and generates a
+percentile value for each element relative to its group. The result object 
+is the original collection extended by the variable 'percentile'.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="percentileUp:using:"></A><b>percentileUp:using:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection percentileUp: aBlock using: variableName</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in the supplied block for each element in the 
+list and computes its percentile (lowest values = 1; highest values = 100).
+The percentile value is returned as an extension to the recipient named
+by the supplied variableName</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="print"></A><b>print</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList print</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Redefines the standard print message.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clIList.htm">IndexedList</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#print">Block</A> | <A href="mDate.htm#print">Date</A> | <A href="mOffset.htm#print">DateOffset</A> | <A href="mDate.htm#print">DateRange</A> | <A href="mEntity.htm#print">Entity</A> | <A href="mList.htm#print">List</A> | <A href="mObject.htm#print">Object</A> | <A href="mString.htm#print">String</A> | <A href="mTS.htm#print">TimeSeries</A> | <A href="mNA.htm#print">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="product"></A><b>product</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection product</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the product for the collection assuming the collection contains
+numeric values.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="product:"></A><b>product:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection product: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in the supplied block for each element in the 
+list and computes the product of the values.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="quintileDown:"></A><b>quintileDown:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection quintileDown: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in aBlock for each element in the list and 
+computes its quintile (highest values = 1; lowest values = 5)</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="quintileDown:by:"></A><b>quintileDown:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection quintileDown: aBlock by: bBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient by the criteria in bBlock and generates a quintile value
+for each element relative to its group. The result object is the original
+collection extended by the variable 'quintile'.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="quintileDown:by:by:"></A><b>quintileDown:by:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection quintileDown: aBlock by: bBlock by: cBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient by the criteria in bBlock and cBlock and generates a
+quintile value for each element relative to its group. The result object 
+is the original collection extended by the variable 'quintile'.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="quintileDown:using:"></A><b>quintileDown:using:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection quintileDown: aBlock using: variableName</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in the supplied block for each element in the 
+list and computes its quintile (highest values = 1; lowest values = 5).
+The quintile value is returned as an extension to the recipient named
+by the supplied variableName</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="quintileUp:"></A><b>quintileUp:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection quintileUp: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in aBlock for each element in the list and 
+computes its quintile (lowest values = 1; highest = 5).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="quintileUp:by:"></A><b>quintileUp:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection quintileUp: aBlock by: bBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient by the criteria in bBlock and generates a quintile value
+for each element relative to its group. The result object is the original
+collection extended by the variable 'quintile'.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="quintileUp:by:by:"></A><b>quintileUp:by:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection quintileUp: aBlock by: bBlock by: cBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient by the criteria in bBlock and cBlock and generates a
+quintile value for each element relative to its group. The result object 
+is the original collection extended by the variable 'quintile'.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="quintileUp:using:"></A><b>quintileUp:using:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection quintileUp: aBlock using: variableName</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in the supplied block for each element in the 
+list and computes its quintile (lowest values = 1; highest values = 5).
+The quintile value is returned as an extension to the recipient named
+by the supplied variableName</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="rankCorrelate:with:"></A><b>rankCorrelate:with:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection rankCorrelate: blockX with: blockY</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the correlation between the relative ranks of the data items
+defined by the two blocks.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="rankDown:"></A><b>rankDown:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection rankDown: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in the supplied block for each element in the 
+list and computes its rank (highest value = 1).  Returns the recipient list 
+extended by the property 'rank'.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="rankDown:by:"></A><b>rankDown:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection rankDown: aBlock by: bBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient by the criteria in bBlock and generates a rank value
+for each element relative to its group. The result object is the original
+collection extended by the variable 'rank'.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="rankDown:by:by:"></A><b>rankDown:by:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection rankDown: aBlock by: bBlock by: cBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient by the criteria in bBlock and cBlock and generates a
+rank value for each element relative to its group. The result object 
+is the original collection extended by the variable 'rank'.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="rankDown:usingCollector:"></A><b>rankDown:usingCollector:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection rankDown: block1 usingCollector: block2</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Ranks down the recipient List based on the criteria specified by block1.  
+The second block provides the name of the extension. </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="rankUp:"></A><b>rankUp:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection rankUp: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in the supplied block for each element in the 
+list and computes its rank (lowest value = 1). Returns a copy of the recipient 
+list extended by the property 'rank'.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="rankUp:by:"></A><b>rankUp:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection rankUp: aBlock by: bBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient by the criteria in bBlock and generates a rank value
+for each element relative to its group. The result object is the original
+collection extended by the variable 'rank'.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="rankUp:by:by:"></A><b>rankUp:by:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection rankUp: aBlock by: bBlock by: cBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Groups the recipient by the criteria in bBlock and cBlock and generates a
+rank value for each element relative to its group. The result object 
+is the original collection extended by the variable 'rank'.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="rankUp:usingCollector:"></A><b>rankUp:usingCollector:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection rankUp: block1 usingCollector: block2</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Ranks up the recipient List based on the criteria specified by block1.  
+The second block provides the name of the extension. </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="regress:"></A><b>regress:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection regress: list2</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Performs a standard linear regression between the recipient collection<br>
+(the dependent variable) and the supplied parameter (the independent <br>
+variable).  The returned object responds to the messages 'beta', 'alpha', <br>
+'pearson', 'rsq', and 'stdErr'.  If either collection contains non-numeric<br>
+values or the two collections are not the same size, the returned values will<br>
+be NA.  For example:<br>
+<br>
+     (2,3,9,1,8,7,5) regress: (6,5,11,7,5,4,4) .<br>
+     do: [ beta print ; alpha print ; <br>
+           pearson print ; rsq print ; stdErr printNL ;<br>
+         ] ;<br>
+<br>
+runs the regression and displays the results of the various computations.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Collection<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="runningAverage:"></A><b>runningAverage:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection runningAverage: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Extends each element in the list by the variable 'runningAverage' which 
+is the computed running average for the element based on the supplied block.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="runningTotal:"></A><b>runningTotal:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection runningTotal: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the running total for each element in the list based on the 
+supplied block.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="runningTotal:usingCollector:"></A><b>runningTotal:usingCollector:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection runningTotal: block1 usingCollector: block2</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the running total for the recipient timeSeries based on the criteria 
+specified by block1.  The second block provides the name of the extension. </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clTS.htm">TimeSeries</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="select:"></A><b>select:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList select: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the statements provided in the supplied block for each element in the 
+list and selects those elements that evaluate to TRUE.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clIList.htm">IndexedList</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#select:">List</A> | <A href="mTS.htm#select:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="send:"></A><b>send:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList send: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the statements provided in the supplied block for each element in the 
+IndexedList.  The IndexedList returned has the same number of elements as the 
+recipient, with each element being the result of evaluating the block.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clIList.htm">IndexedList</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#send:">List</A> | <A href="mObject.htm#send:">Object</A> | <A href="mTS.htm#send:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="send:with:"></A><b>send:with:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection send: aBlock with: aValue </font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Sends the block to each element of the recipient.  The block is evaluated
+with aValue as a parameter</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Object<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#send:with:">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sortDown:"></A><b>sortDown:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection sortDown: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the statements provided in the supplied block and sorts the list in 
+descending order.  Sort is highest to lowest for numbers.  Sort is ZZZ 
+through A for strings.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sortDownBy:then:"></A><b>sortDownBy:then:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection sortDownBy: block1 then: block2 </font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Two-level descending sort.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sortDownBy:then:then:"></A><b>sortDownBy:then:then:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection sortDownBy: block1 then: block2 then: block3</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Three-level descending sort.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+3 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sortDownBy:then:then:then:"></A><b>sortDownBy:then:then:then:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection sortDownBy: block1 then: block2 then: block3 then: block4</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Four-level descending sort.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+3 - Block<br>
+4 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sortUp:"></A><b>sortUp:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection sortUp: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the statements provided in the supplied block and sorts the list in 
+ascending order.  Sort is lowest to highest for numbers.  
+Sort is A through Z for strings.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sortUpBy:then:"></A><b>sortUpBy:then:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection sortUpBy: block1 then: block2 </font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Two-level ascending sort.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sortUpBy:then:then:"></A><b>sortUpBy:then:then:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection sortUpBy: block1 then: block2 then: block3</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Three-level ascending sort.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+3 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sortUpBy:then:then:then:"></A><b>sortUpBy:then:then:then:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection sortUpBy: block1 then: block2 then: block3 then: block4</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Four-level ascending sort.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+3 - Block<br>
+4 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="standardize"></A><b>standardize</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection standardize</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Strips off one layer of extension from recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="stdDev"></A><b>stdDev</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection stdDev</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the standard deviation of the values in the
+recipient time series.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="stdDev:"></A><b>stdDev:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection stdDev: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in aBlock for each element in the list and 
+computes the standard deviation of the values.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="tileDown:tiles:"></A><b>tileDown:tiles:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection tileDown: block1 tiles: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Divides recipient list into number of tiles specified based on criteria 
+provided in block1; extends recipient by its tile value with the extension 
+'tile'.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="tileDown:using:tiles:"></A><b>tileDown:using:tiles:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection tileDown: block using: variableName tiles: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Divides recipient list into number of tiles specified based on criteria 
+provided in block; extends recipient by its tile value with the extension 
+being named by the string provided in variableName.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - String<br>
+3 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="tileDown:usingCollector:tiles:"></A><b>tileDown:usingCollector:tiles:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection tileDown: block1 usingCollector: block2 tiles: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Divides recipient list into number of tiles specified based on criteria 
+provided in block1; extends recipient by its tile value with the extension 
+being named by the collector provided in block2.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+3 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="tileUp:tiles:"></A><b>tileUp:tiles:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection tileUp: block1 tiles: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Divides recipient list into number of tiles specified based on criteria 
+provided in block1; extends recipient by its tile value with the extension 
+'tile'.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCollect.htm">Collection</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="tileUp:using:tiles:"></A><b>tileUp:using:tiles:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection tileUp: block using: variableName tiles: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Divides recipient list into number of tiles specified based on criteria 
+provided in block; extends recipient by its tile value with the extension 
+being named by the string provided in variableName.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - String<br>
+3 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="tileUp:usingCollector:tiles:"></A><b>tileUp:usingCollector:tiles:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection tileUp: block1 usingCollector: block2 tiles: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Divides recipient list into number of tiles specified based on criteria 
+provided in block1; extends recipient by its tile value with the extension 
+being named by the collector provided in block2.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Block<br>
+3 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="toList"></A><b>toList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList toList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts an IndexedList into a standard List.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#toList">List</A> | <A href="mString.htm#toList">String</A> | <A href="mTS.htm#toList">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="total"></A><b>total</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection total</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the sum for the collection assuming the collection contains
+numeric values.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="total:"></A><b>total:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection total: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in the supplied block for each element 
+in the list and computes the total value.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="union:"></A><b>union:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection union: aList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Finds the elements that are in EITHER or BOTH the recipient list and aList.  
+Only unique elements are returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="union:using:"></A><b>union:using:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection union: aList using: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Finds union of elements in aList and recipient  using rules supplied
+by block to strip any extensions from elements before comparing for 
+equality.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+2 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="unique"></A><b>unique</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection unique</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Finds the unique elements in the list.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="valueCell:"></A><b>valueCell:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList valueCell:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#valueCell:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="weightedDecile:"></A><b>weightedDecile:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection weightedDecile: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in aBlock for each element in the list and 
+computes its weighted decile (lowest values = 1; highest values = 10).  The 
+result is each decile contains approximately the same total value for the block 
+provided.  The recipient list is returned sorted from lowest to highest based 
+on supplied Block.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="weightedQuintile:"></A><b>weightedQuintile:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection weightedQuintile: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the formula provided in the supplied block for each element in the 
+list and computes its weighted quintile (lowest values = 1; highest values = 5).  
+The result is each quintile contains approximately the same total value for the 
+block provided.  The recipient list is returned sorted from lowest to highest 
+based on the supplied block</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Function whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string 'Function'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">EnumeratedFunction whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string 'EnumeratedFunction'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Collection whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string 'Collection'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedCollection whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string 'IndexedCollection'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexedList whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string 'IndexedList'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+
+<p><hr>
+<table border=0 width=100%>
+<tr>
+<td align=left>
+<font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated May 7, 1997</font>
+</table>
+</body>
+</html>

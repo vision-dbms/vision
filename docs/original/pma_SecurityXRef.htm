@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Upload Format: SecurityXRef </title>
+
+</head>
+<body>
+<body bgcolor=white>
+<h2>Vision Portfolio Management Application Layer: Data Feeds</h2>
+<p>
+| <a href="pmaFeeds.htm">Application Feeds</a> |
+<hr><p>
+<font size=+2><b>Data Feed: </b><i>SecurityXRef</i></font><p>
+<font size=+1><b>Category: </b><i>XRefFeed</i></font><p>
+
+<h3>Summary:</h3>
+<p>
+<ul>
+The <i>SecurityXRef</i> feed is used to load alternative identifiers for a <b>Security</b>.  Alternative identifiers are stored in <a href="clDict.htm#xref"> cross reference dictionaries (<i>XRef's</i></a>) defined for the <b>Security</b> class.  XRef's provide a convenient way to track identifiers that are uniquely assigned by a specific source but may overlap with identifiers assigned by other sources.  Depending on the source, this feed may also update the identifier in the primary naming dictionary as well.  The related feed, <a href="pma_SecurityAliases.htm"><i>Security Aliases</i></a>, adds ids to the primary naming dictionary only.
+</ul>
+<p>
+
+<h3>Available Fields:</h3>
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>Field<th>Type<th>Description
+<tr>
+<tr><th align=center colspan=4>--- Required Fields ---
+<tr>
+<td><i>entityId</i>
+<td>String
+<td>any valid security identifier
+<tr>
+<td><i>sourceId</i>
+<td>String
+<td>valid identifier of an IdSource
+<tr>
+<td><i>symbol</i>
+<td>String
+<td>the symbol supplied by this source for this security
+<tr>
+</table></center>
+<p>
+
+<h3>Special Processing Rules:</h3>
+<p>
+<ul type=disc>
+  <li>The <i>entityId</i> must correspond to an existing <b>Security</b> instance.  Any primary    security alias can be used to identify the security.  <p>
+  <li>The <i>sourceId</i> must correspond to an existing <b>IdSource</b> instance.<p>
+  <li>Each <i>symbol</i> is added to the <b>XRef</b> dictionary defined by the supplied    <i>sourceID</i> and associated with the security defined by the supplied <i>entityId</i>. If the source is flagged as a primary source, the symbol is also added to the <b>Named Security</b> dictionary.<p>
+  <li>When the <i>symbol</i> for an entity/source changes, the old value is deleted from the cross reference unless the source is flagged to retain old values. If the source is flagged as a    primary identifier, the old value is deleted from the <b>Named Security</b> dictionary, unless    the source is flagged to retain old values.<p>
+  <li>If the supplied <i>symbol</i> is already defined for another security, that security's value is reset to&nbsp <i>NA</i>. If the symbol is supplied as a blank or <i>NA</i> value, the symbol is deleted from the cross reference and the associated property value is reset to <i>NA</i>.<p>
+  <li>If multiple <i>symbols</i> are supplied for an <i>entityId/SourceId</i> combination, only the first occurrence is used.  If the same <i> sourceId/symbol</i> combination is supplied for more than one <i>entityId</i>, only the first occurrence is used.<p>
+</ul><p>
+
+<a name="related"><h3>Related Feeds:</h3>
+<p>
+<ul type=disc>
+  <li><a href="pma_SecurityMaster.htm"><i>SecurityMaster</i></a>: defines Security instances     referenced by this feed<p>
+  <li><a href="pma_IdSourceMaster.htm"><i>IdSourceMaster</i></a>: defines IdSource instances     referenced by this feed<p>
+  <li><a href="pma_SecurityAliases.htm"><i>SecurityAliases</i></a>: defines aliases independent     of source<p>
+</ul><p>
+<h3>Sample Upload:</h3><p>
+The following tab-delimited feed could be used to update security cross references:
+
+<pre><tt><b>
+   Interface ExternalFeedManager upload: "SecurityXRef" using:
+     "entityId      sourceId      symbol
+      1             CUSIP         16161010
+      2             CUSIP         69846210
+      3             TICKERUS      XYZ
+     " ;
+</b></tt></pre>
+
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated December 23, 1998</font>
+</tr>
+</table>
+
+</body>
+</html>

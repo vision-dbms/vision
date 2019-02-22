@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Messages: LinkRecord</title>
+</head>
+<body bgcolor=white>
+<p>
+<center>
+ | <a href="vpma.htm">Portfolio Management Application Overview</a> 
+ | <A href="appClasses.htm">Application Class  </A>
+ | <A href="mXRef.htm">Message XRef</A>
+ | <A href="Messages.htm">Messages (General)</A>
+ | 
+</center><hr>
+
+<center>
+<font face="Arial" color="darkblue" size=3 >
+<h3>Profile of Class <i>LinkRecord</i></h3>
+</center>
+</font><p>
+<blockquote><center><hr width=70%><p>
+Includes Classes: <i>CompositeAccount Component, Holding, LinkRecord</i>
+<p><hr width=70%></center></blockquote><p>
+<pre>
+
+<A href="clObject.htm">Object</A>
+  | 
+  +--- <b>LinkRecord</b>
+  |      |
+  |      +--- <A href="clpmaAccount.htm">CompositeAccount Component</A>
+  |      |
+  |      +--- <A href="clpmaAccount.htm">Holding</A>
+</pre>
+<p><hr align=left width=70% ><p>
+
+This abstract class is used to define subclasses that symmetrically
+related two or more entities to other data.
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Message Index</font>
+<p><img src="instdot.gif" align="middle" border=0 alt="o "><A href="#_accountingPrice"><b>_accountingPrice</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#_shares"><b>_shares</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#_totalCost"><b>_totalCost</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#_totalMarketValue"><b>_totalMarketValue</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#account"><b>account</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#account"><b>account</b></A><i> (CompositeAccount Component)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#accountingPrice"><b>accountingPrice</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#addKeyOfType:"><b>addKeyOfType: type</b></A><i> (LinkRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#adjustmentFactor"><b>adjustmentFactor</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (LinkRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (CompositeAccount Component)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (LinkRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (CompositeAccount Component)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#cleanupClassStructures"><b>cleanupClassStructures</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#compositeAccount"><b>compositeAccount</b></A><i> (CompositeAccount Component)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createInSecurity:andAccount:"><b>createInSecurity: sec andAccount: port</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createNewStoreAsOf:"><b>createNewStoreAsOf: date</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createNewStoreAsOf:at:"><b>createNewStoreAsOf: date at: ospace</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#currencyFactor"><b>currencyFactor</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#date"><b>date</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#date"><b>date</b></A><i> (CompositeAccount Component)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (LinkRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (CompositeAccount Component)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#displayInfo"><b>displayInfo</b></A><i> (LinkRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getKeyValues"><b>getKeyValues</b></A><i> (LinkRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#id"><b>id</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeCashFrom:"><b>initializeCashFrom: list</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeFrom:"><b>initializeFrom: list</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeGlobalSubclassProperties"><b>initializeGlobalSubclassProperties</b></A><i> (LinkRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeKeys:"><b>initializeKeys: keys</b></A><i> (LinkRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeKeys:"><b>initializeKeys: keys</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isComponent"><b>isComponent</b></A><i> (CompositeAccount Component)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isHolding"><b>isHolding</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isLinkRecord"><b>isLinkRecord</b></A><i> (LinkRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#keyList"><b>keyList</b></A><i> (LinkRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#keyList"><b>keyList</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#keyList"><b>keyList</b></A><i> (CompositeAccount Component)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#percentOfEquity"><b>percentOfEquity</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#percentOfPort"><b>percentOfPort</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#print"><b>print</b></A><i> (LinkRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#profile"><b>profile</b></A><i> (LinkRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#security"><b>security</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#shares"><b>shares</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#storeXRef"><b>storeXRef</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#totalCost"><b>totalCost</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#totalMarketValue"><b>totalMarketValue</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#updateBlocks"><b>updateBlocks</b></A><i> (LinkRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#updateBlocks"><b>updateBlocks</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#updateBlocks"><b>updateBlocks</b></A><i> (CompositeAccount Component)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#weight"><b>weight</b></A><i> (CompositeAccount Component)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (LinkRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Holding)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (CompositeAccount Component)</i><br>
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Messages</font>
+<p><img src="instdot.gif" align="middle" border=0 alt="o "><A name="_accountingPrice"></A><b>_accountingPrice</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding _accountingPrice</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Actual price supplied to compute market value.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="_shares"></A><b>_shares</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding _shares</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Actual shares held by account in security on date.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="_totalCost"></A><b>_totalCost</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding _totalCost</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Cost of shares held by account in security on
+date (in baseCurrency of account).</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="_totalMarketValue"></A><b>_totalMarketValue</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding _totalMarketValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Market value of shares held by account in security on
+date (in baseCurrency of account).</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="account"></A><b>account</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding account</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Account represented by holding.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaAccount.htm">Account</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="account"></A><b>account</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount Component account</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Account object represented by component</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaAccount.htm">Account</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="accountingPrice"></A><b>accountingPrice</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding accountingPrice</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Price supplied to compute market value (adjusted
+for splits and currency override).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="addKeyOfType:"></A><b>addKeyOfType:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">LinkRecord addKeyOfType: type</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds supplied object to 'keyList' and defines a fixed
+property for recipient's class using this object's whatAmI (initial letter
+is lowercase) if it does not already exist.  If defined, the property
+will return the supplied object by default.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaLinkRecord.htm">LinkRecord</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="adjustmentFactor"></A><b>adjustmentFactor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding adjustmentFactor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Split adjustment factor since date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">LinkRecord asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaLinkRecord.htm">LinkRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaAccount.htm">Holding</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount Component asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaAccount.htm">CompositeAccount Component</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">LinkRecord classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Class descriptor for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Class descriptor for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount Component classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Class descriptor for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="cleanupClassStructures"></A><b>cleanupClassStructures</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding cleanupClassStructures</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Aligns complex structures.  This method is invoked as
+part of a production cleanup process.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>DBAdmin&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="compositeAccount"></A><b>compositeAccount</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount Component compositeAccount</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+CompositeAccount object represented by component</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaAccount.htm">CompositeAccount</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createInSecurity:andAccount:"></A><b>createInSecurity:andAccount:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding createInSecurity: sec andAccount: port</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates a new Holding and initializes
+'security' and 'account' properties with supplied values.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaAccount.htm">Holding</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Security<br>
+2 - Account<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createNewStoreAsOf:"></A><b>createNewStoreAsOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding createNewStoreAsOf: date</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates new physical store for Holding instances
+and updates the 'storeXRef' time series as of supplied date with the
+new store.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>DBAdmin&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaAccount.htm">Holding</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createNewStoreAsOf:at:"></A><b>createNewStoreAsOf:at:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding createNewStoreAsOf: date at: ospace</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates new physical store for Holding instances
+and updates the 'storeXRef' time series as of supplied date with the
+new store.  The message 'Holding' is deifned at the supplied object
+to return the new store as well.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>DBAdmin&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaAccount.htm">Holding</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+2 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="currencyFactor"></A><b>currencyFactor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding currencyFactor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Factor to convert monetary values in recpient to
+the current 'currency'</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="date"></A><b>date</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding date</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Date represented by holding.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="date"></A><b>date</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount Component date</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Date represented by component.  This date
+corresponds to the date in the underlying CompositeAccount's 
+componentList on which this component is a member.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">LinkRecord defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default LinkRecord instance.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaLinkRecord.htm">LinkRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default Holding instance.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaAccount.htm">Holding</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount Component defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default CompositeAccount Component 
+instance.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaAccount.htm">CompositeAccount Component</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="displayInfo"></A><b>displayInfo</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">LinkRecord displayInfo</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays a single line summary of the object terminated with a new line.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getKeyValues"></A><b>getKeyValues</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">LinkRecord getKeyValues</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns list of values for the recipient's 'key'
+properties.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of <A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="id"></A><b>id</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding id</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Formatted string containing securityId---accountId.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Format&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeCashFrom:"></A><b>initializeCashFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding initializeCashFrom: list</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates the '_totalMarketValue', '_shares', and
+'_totalCost' properties in recipients using the total 'totalMarketValue'
+of the supplied list if non-NA, otherwise using the total
+'shares' of the supplied list if non-NA, otherwise using the total
+'totalCost' of the supplied list.  The recipient is assumed to be
+a holding in a cash security and the supplied is list is assumed to
+respond to the 'totalMarketValue', 'shares', and 'totalCost' messages.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaAccount.htm">Holding</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeFrom:"></A><b>initializeFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding initializeFrom: list</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates the '_shares' property in recipient using
+the total 'shares' in supplied list, updates the '_totalMarketValue'
+property in recipient using the total 'totalMarketValue' in supplied
+list, and updates the '_totalCost' property in recipient using the total
+'totalCost' in supplied list.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaAccount.htm">Holding</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeGlobalSubclassProperties"></A><b>initializeGlobalSubclassProperties</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">LinkRecord initializeGlobalSubclassProperties</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This method is run as part of the 'specialized' method and is used to 
+initialize properties in the default row of the new class.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaLinkRecord.htm">LinkRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeKeys:"></A><b>initializeKeys:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">LinkRecord initializeKeys: keys</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This method is run as part of the 'createInstance:' process.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaLinkRecord.htm">LinkRecord</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeKeys:"></A><b>initializeKeys:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding initializeKeys: keys</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes the recpient with values supplied in
+parameter.  Parameter should be a list containing a Security object as
+its first element and an Account object as its second element.  These
+values are used to update the 'security' and 'account' properties in 
+recipient.  The recipient's 'baseCurrency' is set to the account's
+base currency value and the 'date' is set to the current ^date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaAccount.htm">Holding</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isComponent"></A><b>isComponent</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount Component isComponent</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isHolding"></A><b>isHolding</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding isHolding</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isLinkRecord"></A><b>isLinkRecord</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">LinkRecord isLinkRecord</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="keyList"></A><b>keyList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">LinkRecord keyList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of 'key' types defined for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>List of <A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="keyList"></A><b>keyList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding keyList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the list: Security, Account, Date -
+the keys for the Holding class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>List of <A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="keyList"></A><b>keyList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount Component keyList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the list: CompositeAccount, Account, Date -
+the keys for the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>List of <A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="percentOfEquity"></A><b>percentOfEquity</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding percentOfEquity</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Percent of equity portion of account represented
+by recipient on recipient's 'date'.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="percentOfPort"></A><b>percentOfPort</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding percentOfPort</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Percent of account's market value represented
+by recipient on recipient's 'date'.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="print"></A><b>print</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">LinkRecord print</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints the recipient's keys.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaLinkRecord.htm">LinkRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="profile"></A><b>profile</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">LinkRecord profile</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays a multi-line description of the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="security"></A><b>security</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding security</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Security represented by holding.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="shares"></A><b>shares</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding shares</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Shares (or unit amount) of recipient's 'security'
+held by recipient's 'account' on recipient's date, adjusted for splits.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="storeXRef"></A><b>storeXRef</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding storeXRef</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+TimeSeries of physical storage structures created for 
+recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>DBAdmin&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>TimeSeries of <A href="clpmaAccount.htm">Holding</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="totalCost"></A><b>totalCost</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding totalCost</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Cost of shares held (adjusted for currency override).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="totalMarketValue"></A><b>totalMarketValue</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding totalMarketValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Market value of shares held (adjusted for currency
+override).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="updateBlocks"></A><b>updateBlocks</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">LinkRecord updateBlocks</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of blocks that can be sent to recipient
+to retrieve value of each key.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>List of <A href="clBlock.htm">Block</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="updateBlocks"></A><b>updateBlocks</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding updateBlocks</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of blocks that can be sent to recipient
+to retrieve value of each key (Security, Account and Date).</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>List of <A href="clBlock.htm">Block</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="updateBlocks"></A><b>updateBlocks</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount Component updateBlocks</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of blocks that can be sent to recipient
+to retrieve value of each key (CompositeAccount, Account and Date).</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>List of <A href="clBlock.htm">Block</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="weight"></A><b>weight</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount Component weight</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Weight to use when accessing holdings for account
+object represented by component</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">LinkRecord whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string "LinkRecord".</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Holding whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string "Holding".</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount Component whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string "CompositeAccount Component".</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+
+<p><hr>
+<table border=0 width=100%>
+<tr>
+<td align=left>
+<font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated March 19, 1998</font>
+</table>
+</body>
+</html>

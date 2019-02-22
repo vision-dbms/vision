@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>The Vision Editors</title>
+</head>
+<body>
+<body bgcolor=white>
+
+<h2>The Vision Editors</h2>
+
+| <a href="FHome.htm">Home</a>  
+| <a href="vtutor.htm">Tutorials</a> 
+| <a href="Running.htm">Running Vision</a> |
+<hr>
+
+<a href="#vt100">Vision VT100 Editor Summary</a><br>
+<a href="#windows">Windows Editor Summary</a>
+
+<hr>
+
+<a name="vt100"></a><h3>Vision VT100 Editor Summary</h3>
+
+The vt100-based editor can be used in environments that house the Vision database on a Unix
+machine. It can be used to access Vision from Unix or Windows workstations. Your display should
+be simulating a vt100 style terminal and your TERM environment variable should be set to vt100. 
+To start Vision with this editor, log into the Unix environment and enter:
+
+<ul>
+<pre><b>vision</b></pre>
+</ul>
+
+Once the editor is displayed, you can enter any Vision request. To submit the request, press the
+F2 function key.
+
+<h4>Vision Editor Commands By Function</h4>
+<b>Note:</b> Words inside {} are symbols, not keyboard commands
+<pre><b><font size=+2>      Cursor Positioning</font>
+
+	-> (^F)         <i>Move cursor one character to the right</i>
+	<- (^B)	        <i>Move cursor one character to the left</i>
+        {up} (^P)       <i>Move cursor one line up</i>
+        {down}(^N)      <i>Move cursor one line down</i>
+	PgUp (^U)	<i>Move cursor one page up</i>
+	PgDn (^D)	<i>Move cursor one page down</i>
+	^A	        <i>Move cursor to beginning of current line</i>
+	^E	        <i>Move cursor to end of current line</i>
+	Esc <	        <i>Move cursor to beginning of window</i>
+	Esc >	        <i>Move cursor to end of window</i>
+	F3 s (^T)	<i>Move cursor to other window</i>
+
+                <font size =+2> Deletion</font>
+
+	Backspace	<i>Erase character to the left of the cursor
+		        (Only in Edit Window)</i>
+	^G	        <i>Erase character at the cursor
+		        (Only in Edit Window)</i>
+	^K	        <i>Erase (kill) the remainder of the line
+		        (Only in Edit Window)</i>
+	F3 e (^X e)	<i>Erase entire window</i>
+
+<font size =+2>        Display Reorientation</font>
+
+	Esc h	        <i>Move the line containing the cursor so it becomes
+ 		        the top line of the visible display</i>
+	F3 o (^X 1)	<i>Use the entire screen to display the current window
+ 		        (edit or output)</i>
+	F3 t (^X 2)	<i>Split the screen to display both windows 
+                        (default mode)</i>
+ 
+<font size =+2>        Retrieving, Saving, And Printing</font>
+
+	Esc r	        <i>Retrieve the contents of last edit window submitted
+ 		        to VISION (used in edit window only)</i>
+	F5 r (^X r)	<i>Read a previously saved file into the edit window
+ 		        (you will be asked for a file name)</i>
+	F5 s (^X w)	<i>Save the current window to a file 
+                        (you will be asked to provide a file name)</i>
+	^X s	        <i>Save the current window to the last file used</i>
+	F6 s	        <i>Save the current region to a file 
+                        (you will be asked to provide a file name)</i>
+	
+<font size = +2>       Search And Replace</font>
+
+	Esc s	        <i>Search for next occurrence of supplied string</i>
+	Esc n	        <i>Search for next occurrence of current string</i>
+	Esc p	        <i>Search for prior occurrence of current string</i>
+	Esc c	        <i>Change all occurrences of supplied string</i>
+	Esc q	        <i>Query and change selected occurrences of string</i>
+
+<font size =+2>        Cut And Paste</font>
+
+	F6 b (Esc b)	<i>Marks a beginning or ending point in the window.</i> 
+	F6 e (Esc e)	<i>Marks an ending part in the window</i>
+	F6 i (Esc i)	<i>Insert the "marked" region at the current cursor position</i>
+	F6 d (Esc d)	<i>Delete the "marked" region</i>
+	F6 s	        <i>Save the current region to a file 
+                        (you will be asked to provide a file name)</i>
+	F6 p	        <i>Print the current region to a printer 
+                        (you will be asked to specify the printer)</i>
+ 
+<font size =+2>         Other</font>
+
+	Esc # ___	<i>Repeat the next command # times</i>
+	F1	        <i>Help</i>
+	F2	        <i>Execute</i>
+	F9	        <i>Quit</i></b></pre>
+<hr>
+<p>
+<h4>Vision Editor Commands By Key Type</h4>
+<b>Note:</b>Words inside {} are symbols, not keyboard commands.
+
+<pre><b><font size=+2>           Special Keys</font>
+
+	<-	        <i>Move Cursor Back 1 Character (same as ^B)</i>
+	->	        <i>Move Cursor Forward 1 Character (same as ^F)</i>
+	^	        <i>Move Cursor to Prior Line (same as ^P)
+		        Move Cursor to Next Line (same as ^N)</i>
+	PgUp	        <i>Move Cursor Up 1 Page (same as ^U)</i>
+	PgDn	        <i>Move Cursor Down 1 Page (same as ^D)</i>
+	Backspace	<i>Erase Previous Character</i>
+ 
+<Font Size= +2>       Control Key Commands</font>
+
+	^A	        <i>Move Cursor to Start of Line</i>
+	^B	        <i>Move Cursor Back 1 Character (same as <- key)</i>
+	^C	        <i>Stop Execution of Current Request</i>
+  	^D	        <i>Move Cursor Down 1 Page (same as PgDn key)</i>
+	^E	        <i>Move Cursor to End of Line</i>
+	^F	        <i>Move Cursor Forward 1 Character (same as -> key)</i>
+    	^G	        <i>Erase Character at Cursor</i>
+	^H	        <i>Erase Character to Left of Cursor (same as backspace)</i>
+	^I	        <i>Insert Tab Character at Cursor</i>
+	^K	        <i>Erase Line Starting at Cursor</i>
+	^L	        <i>Move Cursor to the Left 1 Page</i>
+	^N	        <i>Move Cursor to Next Line (same as {down} key)</i>
+	^P	        <i>Move Cursor to Prior Line (same as {up} key)</i>
+	^R	        <i>Move Cursor to the Right 1 Page</i>
+	^T	        <i>Toggle between Windows</i>
+	^U	        <i>Move Cursor Up 1 Page (same as PgUp key)</i>
+	^V	        <i>Take the Next Character as a Literal</i>
+	^W	        <i>Redisplay the Screen</i>
+	^X	        <i>Wait for a Subcommand</i>
+
+	<Font size =+2>         Function Keys</font>
+
+	F1	        <i>Help</i>
+	F2	        <i>Execute</i>
+	F3	        <i>Display Window Menu</i>
+	F5	        <i>Display File Menu</i>
+	F6	        <i>Display Region Menu</i>
+	F9	        <i>Quit</i>
+ 
+	<Font size = +2>         Menu Commands</font>
+
+	F3 S	        <i>Window Switch: Move Cursor to other Window</i>
+	F3 O	        <i>Window One: Enlarge Current Window to Full Screen</i>
+	F3 T	        <i>Window Two: Split Screen into Two Windows</i>
+	F3 E	        <i>Window Erase: Erase Current Window</i>
+	F5 R	        <i>File Read: Read File into Edit Window</i>
+	F5 S	        <i>File Save: Save Current Window to File</i>
+	F5 P	        <i>File Print: Print Current Window to Printer</i>
+	F5 L	        <i>File Last: Save Last Output Buffer to File</i>
+	F5 D	        <i>File Directory: List Files in Specified Directory</i>
+	F6 B	        <i>Region Begin: Mark Beginning of Region</i>
+	F6 E	        <i>Region End: Mark End of Region</i>
+	F6 C	        <i>Region Clear: Clear Current Region</i>
+	F6 D	        <i>Region Delete: Delete Marked Region</i>
+	F6 I	        <i>Region Insert: Insert Marked Region</i>
+	F6 R	        <i>Region Run: Execute Marked Region</i>
+	F6 S	        <i>Region Save: Save Marked Region</i>
+	F6 P	        <i>Region Print: Print Marked Region</i>
+ 
+	<font size =+2>          Escape Commands</font>
+
+	Esc <	        <i>Move Cursor to Beginning of Window</i>
+	Esc >	        <i>Move Cursor to End of Window</i>
+	Esc ###	        <i>Repeat Next Command ### Times</i>
+	Esc b	        <i>Mark Begin Region</i>
+	Esc c	        <i>Change All Occurrences of Supplied String</i>
+	Esc d	        <i>Delete Marked Region</i>
+	Esc e	        <i>Mark End Region</i>
+	Esc f #	        <i>Use Function Key # (if function keys do not work)</i>
+	Esc h	        <i>Move Line Containing Cursor to Top of Window</i>
+	Esc i	        <i>Insert Region</i>
+	Esc n	        <i>Search For Next Occurrence of Current String</i>
+	Esc p	        <i>Search For Previous Occurrence of Current String</i>
+	Esc q	        <i>Query and Change Occurrences of Supplied String</i>
+	Esc r	        <i>Recall Last Request Submitted</i>
+	Esc s	        <i>Search For Next Occurrence of Supplied String</i>
+
+	<font size =+2>           ^X Commands</font> 
+
+	^X ^B	        <i>Move Back 1 Word</i>
+	^X ^F	        <i>Move Forward 1 Word</i>
+	^X ^G	        <i>Delete Current Word</i>
+	^X ^N	        <i>Scroll Down 1 Line</i>
+	^X ^P	        <i>Scroll Up 1 Line</i>
+	^X Backspace	<i>Delete Previous Word</i>
+	^X 1      	<i>Enlarge Current Window to Full Screen (same as F3 o)</i>
+	^X 2	        <i>Split Screen into Two Windows (same as F3 t)</i>
+	^X e	        <i>Erase Current Window (same as F3 e)</i>
+	^X r	        <i>Read from file (same as F5 r)</i>
+	^X s	        <i>Save to Current File</i>
+	^X w	        <i>Write to file (same as F5 s)</i>
+	^X ^X	        <i>Create an Operating System Subshell</i>
+	^X ?	        <i>Describe Key</i>
+</b></pre>
+<hr>
+<a name="windows"></a><h3>Windows Editor Summary</h3>
+The Windows-based editor can be used with Vision databases housed on any hardware platform.
+This interface is part of the <a href="ifVLink.htm#concepts">VLink OLE Server</a> module and appears as the Vision Session icon in
+the Team Vision program group. 
+
+<p>
+
+To start Vision, click the Vision Session icon. Enter the display area 
+at the top and enter a Vision request. To submit the request, press 
+the <i>Run icon</i> in the middle of the tool bar or select 
+<i>Session / Submit</i> from the menu bar.
+
+<ul>
+<img src="session.jpg" lowsrc="session.jpg" alt="Vision Session Interface" >
+</ul>
+
+
+<h4>   Menu Commands</h4>
+
+<pre><b><font size=+2>           File Menu</font>
+
+       New... (ctrl N)     <i>Creates a new file</i>
+       Open... (ctrl O)    <i>Opens an existing file</i>
+       Save(ctrl S)        <i>Saves active file</i>
+       Save As...          <i>Saves active file as a new name or file type</i>
+       Print...(ctrl P)    <i>Prints the active file using current defaults</i>
+       Page Setup...       <i>Sets report style options</i> 
+       Print Setup...      <i>Sets printing style options</i>
+       Exit                <i>Closes Session</i>
+
+<font size=+2>           Edit Menu</font>
+   
+       Undo(ctrl Z)        <i>Reverses the last action</i>
+       Redo(ctrl A)        <i>Restores the last undone action</i>
+       Cut(ctrl X)         <i>Cuts selected text and puts it on clipboard</i>
+       Copy(ctrl C)        <i>Copies selected text and puts it on clipboard</i>
+       Clear(Delete)       <i>Clears any selected text in current input buffer</i>
+       Clear All           <i>Clears any text in current buffer</i>
+       Paste(ctrl V)       <i>Inserts the clipboard contents at the insertion point</i>
+       Paste File...       <i>Pastes an existing file into current input buffer</i>
+       Select All          <i>Selects all of the text in the current input buffer</i>  
+       Find... (ctrl F)    <i>Searches for a user entered string in the text</i>
+       Find Next(F3)       <i>Searches for the next reference to a previously entered search string</i>
+       Replace...(ctrl R)  <i>Replaces string with a new string</i>
+       GoTo Line...(ctrl G)<i>Finds a specific line number of the current input buffer</i>
+
+<font size = +2>         Options Menu</font>
+
+       Standard Toolbar    <i>Displays the Standard Toolbar</i> 
+       Review Toolbar      <i>Dispalys the Review Toolbar</i>
+       Font...             <i>Changes Font, and size</i>
+       Foreground Color... <i>Changes Font Color</i>
+       Background Color... <i>Changes Background Color</i>
+
+<font size = +2>         Session Menu</font>
+
+       Submit(F2)         <i>Submits the current input or selected text</i>
+       Select...          <i>Recalls a list of currently opened Vision sessions.</i>
+
+<font size = +2>         Review</font>
+
+       Newest             <i>Recalls the most recent request made in this Vision session</i>
+       Foreward           <i>Recalls the request made immediately after the 
+                          currently displayed request</i>
+       Backward           <i>Recalls the request made immediately before the
+                          currently diplayed request</i>
+       Oldest             <i>Recalls the first request made in this Vision session</i>
+       Select...          <i>Recalls a specific request made in this Vision session</i>
+       Freeze Output      <i>Freezes the output window on recall(recall to input only)</i>
+
+<font size = +2>         Window Menu</font>
+
+       Cascade            <i>Overlaps windows</i> 
+       Tile Horizontally  <i>Horizontally arranges open windows to fit next to each other</i>
+       Tile Vertically    <i>Vertically arranges open windows to fit next to each other</i>                           
+       Arrange Icons      <i>Arranges application icons</i>
+       Auto Arrange       <i></i>
+       Close All          <i>Closes current input buffer</i>
+       Output             <i>Places the insertion point in the Output buffer</i></b></pre>
+<hr>
+
+<h4>   Toolbars</h4>
+
+<pre><b><font size =+2>        Standard Toolbar</font>
+
+       New (ctrl N)       <i>Creates a new file</i>
+       Open(ctrl O)       <i>Opens an existing file</i>
+       Save(ctrl S)       <i>Saves active file</i>
+       Print(ctrl P)      <i>Prints the active file using current defaults</i>
+       Cut(ctrl X)        <i>Cuts selected text and puts it on the clipboard</i>
+       Copy(ctrl C)       <i>Copies selected text and puts it on the clipboard</i> 
+       Paste(ctrl V)      <i>Inserts the clipboard contents at the insertion point</i>
+       Undo(ctrl Z)       <i>Reverses the last action</i>
+       Redo(ctrl A)       <i>Restores the last undone action</i>
+
+<font size =+2>        Review Toolbar</font>
+
+       Run Button         <i>Submits the current input or selected text(Submit Request)</i>
+       Oldest Request     <i>Recalls the first request made in this Vision session</i>
+       Older Request      <i>Recalls the request made immediately before the
+                          currently diplayed request</i>
+       Newer Request      <i>Recalls the request made immediately after the 
+                          currently displayed request</i>
+       Newest Request     <i>Recalls the most recent request made in this Vision session</i> 
+       Select Request     <i>Recalls a specific request made in this Vision Session</i>
+       Freeze Display     <i>Freeze the output window on recall(recall to input only)</i></b></pre>
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated June 19, 1997</font>
+</table>
+
+</body>
+</html>

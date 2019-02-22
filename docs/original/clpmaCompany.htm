@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Application Classes: Company and Security </title>
+
+</head>
+
+<body bgcolor=white>
+<h2>Vision Application Classes: Company and Security</h2>
+
+<p>
+| <a href="vpma.htm">Application Overview</a> 
+| <a href="pmaIssues.htm">Data Issues</a>
+| <a href="pmaClasses.htm">Application Classes</a>
+| <a href="mpmaCompany.htm">Company Messages</a> 
+| <a href="mpmaSecurity.htm">Security Messages</a> 
+| <a href="pmaXRef.htm">Application Cross Reference</a>
+|
+<hr>
+<h3>Topics Covered:</h3>
+<ul type=square>
+<li><a href="#overview">Overview</a>
+<li><a href="#basic">Basic Access</a>
+<li><a href="#company-security">The Company-Security Connection</a>
+<li><a href="#messages">Company and Security Message Summary </a>
+<li><a href="#datarec">Prices and Dividends </a>
+<li><a href="#splits">Split Adjustments </a>
+<li><a href="#updates">Updating Company and Security Data</a>
+<li><a href="#related">Related Classes</a>
+</ul>
+<hr>
+<h3><a name="overview">Overview</a></h3>
+<p>
+The instances of the class <b>Company</b> 
+represent the individual  corporate
+entities  for which you track information.  Information maintained for
+a company typically includes country, industry, sales, and earnings.
+The  instances  of  the  class  <b>Security</b>  represent   the   individual
+securities  issued by a company or equivalent entity such as the government.
+A variety of security  types  exist  including cash,  common  and  preferred
+stocks,  convertible and non-convertible bonds,  and put and call
+options.  Data maintained for a  security  typically  includes  price,
+dividend and shares/amount outstanding information.  Portfolios hold specific
+amounts of one or more securities.  
+<p>
+The following subset of the class hierarchy displays the classes
+directly related to <b>Company</b> and <b>Security</b>:
+<pre>
+          Object
+             |
+             Entity
+             |  |
+             |  |-- Company
+             |  |
+             |  |-- Security
+             |  |
+             |  |-- Classification
+             |         |
+             |         |-- <a href="#related">Country</a>
+             |         |
+             |         |-- <a href="#related">Industry</a>
+             |         |
+             |         |-- <a href="#related">Sector</a>
+             |         |
+             |         |-- <a href="#related">SecurityType</a>
+             |         |
+             |         |-- <a href="#related">AssetCategory</a>
+             |    
+             DataRecord
+                |
+                |-- <a href="#datarec">DivRecord</a>
+                |
+                |-- <a href="#datarec">PriceRecord</a>
+
+</pre>
+
+<p>
+<hr>
+<p>
+<h3><a name="basic">Basic Access</a></h3>
+<p>
+The 
+<a href="clDict.htm#named">naming dictionaries</a>
+<b>Named Company</b> and <b>Named Security</b> are the primary
+dictionaries for accessing individual company and security instances.
+For example:<pre><tt><b>
+     Named Company IBM
+</b></tt></pre>
+accesses the company representing the corporate entity IBM and:<pre><tt><b>
+     Named Security IBM
+</b></tt></pre>
+accesses the security representing the common stock IBM.
+<p>
+
+All company and security instances will have at least one identifier.
+Unique identifiers are stored as
+aliases in the <b>Named Company</b> and <b>Named Security</b> 
+dictionaries.  By default, the value of the <i>code</i> 
+property is used as the first alias created.
+Additional aliases are usually created for security and company
+access.  For domestic securities, the <i>cusip</i> and <i>ticker</i> are
+normally defined as aliases.  For international securities, the
+<i>sedol</i> is normally defined as an alias.  Any alias that is 
+added for a security is automatically added as an alias for its
+<a href="#company-security">associated company</a> as well.
+<p>
+To display all the aliases associated with a specific entity you can 
+display the list of strings stored in the <i>aliases</i> property.  For
+example, to see the aliases defined for the company IBM use:<pre><tt><b>
+     Named Company IBM aliases do: [ printNL ] ;
+</b></tt></pre>
+More information about company and security identification schemes
+is available in the document
+<a href="pmaIssues.htm#ids"><i>Portfolio Management Application Issues</i></a>.
+<p>
+Securities and companies respond to all <b>Entity</b> and
+<b>Object</b> messages such as <i>code</i>, <i>name</i>, and
+<i>baseCurrency</i>.
+The message <i>displayInfo</i>
+has been redefined to display the <i>code</i>, <i>ticker</i>, and <i>name</i>
+for <b>Security</b> and <b>Company</b>.
+The message <i>profile</i> has also been redefined for these classes
+to display additional information.  For example:<pre><tt><b>
+     Named Company IBM displayInfo ;
+</b></tt></pre>
+displays a summary line of information about the company IBM and:<pre><tt><b>
+     Named Security IBM profile ;
+</b></tt></pre>
+displays key information about the security IBM.
+<p>
+The message <i>masterList</i>
+can be used to return the list of non-default companies or
+securities.  For example, to display the <i>code</i> and <i>name</i> for each
+<b>Company</b> instance, use:<pre><tt><b>
+     Company masterList
+     do: [ code print: 10 ; 
+           name printNL ;
+         ] ;
+
+</b></tt></pre>
+To display the number of <b>Security</b> instances, use:<pre><tt><b>
+     Security masterList count 
+
+</b></tt></pre>
+<p>
+<h3><a name="company-security">The Company-Security Connection</a></h3>
+<p>
+The security <i>IBM Common Stock</i> is a Vision object whose
+properties include pricing, dividend, and split information.  This
+object is distinct from the company <i>IBM</i> whose properties
+include sales, earnings, and industry information.  Although
+<b>Company</b>
+and <b>Security</b> are distinct classes in the Vision hierarchy, there is
+obviously a close relationship between related instances of the two
+classes since most securities are associated with a specific company
+and companies issue one or more securities.
+<p>
+When you refer to the price earnings ratio for a security,  you  are
+really  asking  for  the  current price of the security divided by the
+earnings per share for the corporate entity that issued the  security.
+The  property  <i>company</i> is defined at 
+<b>Security</b> to return the value of
+the  company  associated  with  the  security.   The   actual   object
+representing  the  company  is  returned.   For  example,  the  Vision
+expression:<pre><tt><b>
+     Named Security IBM company
+</b></tt></pre>
+returns the object representing the company IBM and the expression:<pre><tt><b>
+     Named Security IBM company = Named Company IBM
+</b></tt></pre>
+yields the result TRUE.  Note that several  securities  may  have  the
+same value for <i>company</i> since more than one security can be issued by a
+single company entity.  By default,  the  value  of  <i>company</i>  for  a
+security  is  the default company instance. Automated and manual rules
+can be used to link a security to its "real" company instance.
+<p>
+When you refer to the price earnings ratio  for  a  company,  you  are
+really  asking for the current price of the company's primary security
+divided by the earnings per  share  for  the  company.   The  property
+<i>primarySecurity</i>  is  defined  at <b>Company</b>
+to return the value of the
+security defined as the primary security for the company.  The  actual
+object representing the security is returned.  For example, the Vision
+expression:<pre><tt><b>
+     Named Company IBM primarySecurity 
+</b></tt></pre>
+returns the object representing IBM's common  stock  security  and  the
+expression:<pre><tt><b>
+     Named Company IBM primarySecurity = Named Security IBM
+</b></tt></pre>
+yields the result TRUE.  Note that only one security can  be  assigned
+as  the  <i>primarySecurity</i>  for  a  company.  By default, the value of
+<i>primarySecurity</i> for a company  is  the  default  security  instance.
+Automated and manual rules can be used to link a company to its "real"
+primary security instance.
+<p>
+The <i>peRatio</i> method could therefore be defined for <b>Security</b>
+and <b>Company</b> as follows:<pre><tt><b>
+     Security defineMethod: [ | peRatio | 
+          price / company eps
+     ] ;
+     Company defineMethod: [ | peRatio | 
+          primarySecurity price / eps 
+     ] ;
+</b></tt></pre>
+where <i>eps</i> would need to be defined as a
+<b>Company</b> message that returns the company's
+earnings per share.
+<p>
+The property <i>securityList</i> is defined at <b>Company</b> to
+return the list of securities associated with a company. 
+To look at the securities associated with a company, use:<pre><tt><b>
+     Named Company IBM securityList
+     do: [ displayInfo ] ;
+
+</b></tt></pre>
+
+<p>
+<hr>
+<p>
+<h3><a name="messages">Company and Security Message Summary </a></h3>
+<p>
+The following messages return basic <b>Company</b> information:
+<p>
+<center><table width=80% border=1 cellspacing=2 cellpadding=8>
+<tr><th>Message <th>Return Class <th>Description
+<tr><td><i>baseCurrency</i><td>Currency
+<td>default currency for storing and accessing monetary data for the company
+<tr><td><i>code</i><td>String<td>primary identifier
+<tr><td><i>country</i><td>Country <td>primary country of operations
+<tr><td><i>creationDate</i><td>Date<td>date instance was created
+<tr><td><i>cusip</i><td>String <td>cusip associated with primary security
+<tr><td><i>fiscalYearEnd</i><td>Integer <td>month of fiscal year end (1-12)
+<tr><td><i>id</i><td>String <td>ticker if defined, code otherwise
+<tr><td><i>industry</i><td>Industry <td>primary industry
+<tr><td><i>isMemberOf:</i><td>Boolean <td>is company in supplied universe or classification?
+<tr><td><i>isin</i><td>String <td>isin associated with primary security
+<tr><td><i>name</i><td>String<td>company name
+<tr><td><i>primarySecurity</i><td>Security <td>primary security issued by company
+<tr><td><i>sector</i><td>Sector <td>sector associated with industry
+<tr><td><i>securityList</i><td>List <td>list of securities issued by company
+<tr><td><i>sedol</i><td>String <td>sedol associated with primary security
+<tr><td><i>ticker</i><td>String <td>ticker associated with primary security
+<tr><td><i>universes</i><td>List <td>list of universes containing company
+<tr><td><i>valor</i><td>String <td>valor associated with primary security
+</table></center>      
+<p>
+Messages such as <i>industry</i> and <i>primarySecurity</i>
+return an object of another entity class.  You can therefore navigate
+to that object and request any of its information.  For example,
+the expression:<pre><tt><b>
+     Named Company GM primarySecurity name
+</b></tt></pre>
+returns the name of GM's primary security and the expression:<pre><b>
+     Named Company GM industry showMessages
+</b></tt></pre>
+displays the messages defined for the <b>Industry</b> class.
+<p>
+Company instances return instances of the
+classes <b>Country</b>, <b>Industry</b>, and <b>Sector</b>
+via the messages <i>country</i>, <i>industry</i>, and <i>sector</i>.
+These classes are <a href="#related">described below</a>.
+<p>
+For general descriptions of all the <b>Company</b> messages, see the
+document <a href="mpmaCompany.htm">
+<i>Vision Application Messages: Company</i></a>.
+A number of  messages have been defined to address company identification
+and the relationship between a company and the securities issued by it.
+These messages are described in more detail in the document
+<a href="pmaIssues.htm#ids"><i>Portfolio Management Application Issues</i></a>.
+<p>
+The following messages return basic <b>Security</b> information:
+<p>
+<center><table width=80% border=1 cellspacing=2 cellpadding=8>
+<tr><th>Message <th>Return Class <th>Description
+<tr><td><i>adjustmentFactor</i><td>Number <td>cumulative adjustment factor
+<tr><td><i>baseCurrency</i><td>Currency
+<td>default currency for storing and accessing monetary data for the security
+<tr><td><i>canCusip</i><td>String <td>canadian cusip id
+<tr><td><i>company</i><td>Company <td>issuing company
+<tr><td><i>code</i><td>String<td>primary identifier
+<tr><td><i>creationDate</i><td>Date<td>date instance was created
+<tr><td><i>cusip</i><td>String <td>cusip id
+<tr><td><i>dividend</i><td>Number <td>latest cash dividend (relative to ^date)
+<tr><td><i>dividends</i><td>TimeSeries <td>time series of all dividends
+<tr><td><i>getDivsFrom:to:</i><td>Number <td>total cash dividends in period
+<tr><td><i>getPriceRecord</i><td>PriceRecord <td>latest price record (relative to ^date)
+<tr><td><i>id</i><td>String <td>ticker if defined, otherwise code
+<tr><td><i>isMemberOf:</i><td>Boolean <td>is security in supplied universe or classification?
+<tr><td><i>isin</i><td>String <td>isin id
+<tr><td><i>name</i><td>String<td>security name
+<tr><td><i>price</i><td>Number <td>latest closing price (relative to ^date)
+<tr><td><i>priceChangeFrom:to:</i><td>Number <td>percent change in price
+<tr><td><i>prices</i><td>TimeSeries <td>time series of all prices
+<tr><td><i>rawSplitFactor</i><td>Number <td>raw split factor
+<tr><td><i>sedol</i><td>String <td>sedol id
+<tr><td><i>sharesOut</i><td>Number <td>latest shares outstanding (relative to ^date)
+<tr><td><i>ticker</i><td>String <td>ticker symbol id
+<tr><td><i>totalReturnFrom:to:</i><td>Number <td>total return for period
+<tr><td><i>type</i><td>SecurityType <td>security type
+<tr><td><i>universes</i><td>List <td>list of universes containing security
+<tr><td><i>valor</i><td>String <td>valor id
+<tr><td><i>volume</i><td>Number <td>latest trading volume (relative to ^date)
+</table></center>      
+<p>
+Messages such as <i>securityType</i> and <i>company</i>
+return an object of another entity class.  You can therefore navigate
+to that object and request any of its information.  For example,
+the expression:<pre><tt><b>
+     Named Security GM company name
+</b></tt></pre>
+returns the name of GM's company and the expression:<pre><b>
+     Named Security GM type showMessages
+</b></tt></pre>
+displays the messages defined for the <b>SecurityType</b> class.
+<p>
+Security instances return instances of the classes 
+<b>SecurityType</b> and <b>AssetCategory</b>
+via the message <i>type</i> and the expression <i>type assetCategory</i>
+<a href="#related">described below</a>.
+Messages that access pricing and dividend information 
+such as <i>price</i> and <i>dividend</i> interact with the
+<b>PriceRecord</b> and <b>DivRecord</b>, classes, also
+<a href="#datarec">described below</a> .  Messages that are used to support
+<a href="#splits">split adjustment</a> are also described later in
+this document.
+<p>
+A number of messages are defined at <b>Security</b>
+to return related <b>Account</b> and <b>Holding</b>
+information.  These messages are described in the document
+<a href="clpmaAccount.htm#secXRef">
+<i>Vision Application Classes: The Account Classes</i></a>.
+<p>
+For general descriptions of all the <b>Security</b> messages, see the document
+<a href="mpmaSecurity.htm"><i>Vision Application Messages: Security</i></a>.
+A number of  messages have been defined to address 
+security identification and the relationship
+between a <b>Security</b> and its issuing company.
+These messages are described in more detail in the document
+<a href="pmaIssues.htm#ids"><i>Portfolio Management Application Issues</i></a>.
+
+<p>
+<hr>
+<p>
+<h3><a name="datarec">Prices and Dividends </a></h3>
+<p>
+The instances of the class <b>PriceRecord</b> contain a single date's
+pricing information for a specific <b>Security</b> instance.  The
+time series property <i>pricingSeries</i> is used to manage the
+relationship between <b>Security</b> instances and their <b>PriceRecord</b>
+instances over time.  The instances of the class <b>DivRecord</b>
+contains total cash dividends paid by a security for a single date.
+The time series property <i>dividendSeries</i> is used to manage the
+relationship between <b>Security</b> instances and their <b>DivRecord</b>
+instances over time.  
+<p>
+The messages <i>price</i> and <i>volume</i> are
+defined at <b>Security</b> to return the most recent closing price 
+and trading volume for the security as of the current evaluation date
+(i.e., <i>^date</i>).  The price and volume are adjusted for any splits
+that have happened since the data was stored.  The price is returned
+in the security's <i>baseCurrency</i> by default.  For example:  <pre><tt><b>
+     Named Security GM price
+</b></tt></pre>
+returns GM's latest price value in GM's base currency,<pre><tt><b>
+     Named Security GM :price asOf: 9702 .
+</b>or<b>
+     9702 evaluate: [ Named Security GM price ] 
+</b></tt></pre>
+returns the latest price as of Feb 28, 1997 in GM's base currency, 
+and<pre><tt><b>
+    "CAN" asCurrency evaluate: [ Named Security GM  price ]
+</b></tt></pre>
+returns GM's latest price in Canadian dollars.  The expression:<pre><tt><b>
+     Named Security GM volume
+</b></tt></pre>
+returns GM's latest trading volume and the expressions:<pre><tt><b>
+     Named Security GM :volume asOf: 9702 .
+</b>or<b>
+     9702 evaluate: [ Named Security GM volume ] 
+</b></tt></pre>
+returns the latest volume as of Feb 28, 1997.
+<p>
+All values are split-adjusted through the current date.  
+<p>
+The following messages are defined for the class <b>PriceRecord</b>:
+<p>
+<center><table width=80% border=1 cellspacing=2 cellpadding=8>
+<tr><th>Message <th>Return Class <th>Description
+<tr><td><i>_ask</i><td>Number <td>actual ask value provided
+<tr><td><i>_bid</i><td>Number <td>actual bid value provided
+<tr><td><i>_high</i><td>Number <td>actual high value provided
+<tr><td><i>_low</i><td>Number <td>actual low value provided
+<tr><td><i>_open</i><td>Number <td>actual open value provided
+<tr><td><i>_price</i><td>Number <td>actual closing price value provided
+<tr><td><i>_volume</i><td>Number <td>actual trading volume value provided
+<tr><td><i>adjustmentDate</i><td>Date <td>date pricing data adjusted through
+<tr><td><i>adjustmentFactor</i><td>Number <td>split adjustment factor
+<tr><td><i>ask</i><td>Number <td>split/currency adjusted ask
+<tr><td><i>baseCurrency</i><td>Currency <td>currency pricing data stored in
+<tr><td><i>bid</i><td>Number <td>split/currency adjusted bid
+<tr><td><i>currencyFactor</i><td>Number <td>currency adjustment relative to recordDate
+<tr><td><i>high</i><td>Number <td>split/currency adjusted high
+<tr><td><i>low</i><td>Number <td>split/currency adjusted low
+<tr><td><i>open</i><td>Number <td>split/currency adjusted open
+<tr><td><i>price</i><td>Number <td>split/currency adjusted closing
+<tr><td><i>recordDate</i><td>Date <td>date of price record 
+<tr><td><i>security</i><td>Number <td> underlying security
+<tr><td><i>volume</i><td>Number <td>split adjusted trading volume
+</table></center>      
+<p>
+To access a full price record as of a specific date, use the message
+<i>getPriceRecord</i>.  For example, the expression:<pre><tt><b>
+     Named Security GM getPriceRecord
+     do: [ price print ; _price printNL ] ;
+</b></tt></pre>
+displays the latest adjusted and unadjusted closing prices.
+The expressions:<pre><tt><b>
+     Named Security GM :getPriceRecord asOf: 9709 .
+       do: [ price print ; _price printNL ] ;
+</b>and<b>     
+     9709 evaluate: 
+       [ Named Security GM getPriceRecord
+             do: [ price print ; _price printNL ] ;
+       ] ;
+</b></tt></pre>
+both display the latest adjusted and unadjusted closing prices as of
+September 30, 1997.
+<p>
+The message <i>prices</i> returns a <b>TimeSeries</b> of all 
+<b>PriceRecord</b> instances associated with a <b>Security</b>.
+For example, to display the adjusted and unadjusted prices
+and volumes for all points in GM's time series, you could use:<pre><tt><b>
+     Named Security GM prices
+     do: [ ^date print: 12 ;       #-- date in time series
+           recordDate print: 12 ;  #-- date in record - should match
+           price print ;           #-- adjusted value
+           _price print ;          #-- unadjusted value
+           volume print ;          #-- adjusted value
+           _volume print ;         #-- unadjusted value
+           currencyFactor print ;  #-- should be 1
+           newLine print ;
+         ] ;
+
+</b></tt></pre>
+Note that the <i>prices</i> message returns an actual time series
+object so you need not prepend the ":"  to the message name.  
+<p>
+For general descriptions of all the 
+<b>PriceRecord</b> messages, see the document
+<a href="mpmaDataRecord.htm">
+<i>Vision Application Messages: DataRecord</i></a>.
+Special issues involved with managing the storage of pricing data
+are described in the document
+<a href="pmaIssues.htm#prices">
+<i>Portfolio Management Application Issues</i></a>.
+
+<p>
+The message <i>dividend</i> is 
+defined at <b>Security</b> to return the most recent cash dividend
+for the security as of the current evaluation date
+(i.e., <i>^date</i>).  The dividend is adjusted for any splits
+that have happened since the data was stored and is returned
+in the security's <i>baseCurrency</i> by default.  For example:  <pre><tt><b>
+     Named Security GM dividend
+</b></tt></pre>
+returns GM's latest dividend value in GM's base currency,<pre><tt><b>
+     Named Security GM :dividend asOf: 9702 .
+</b>or<b>
+     9702 evaluate: [ Named Security GM dividend ] 
+</b></tt></pre>
+returns the latest dividend as of Feb 28, 1997 in GM's base currency, 
+and<pre><tt><b>
+    "CAN" asCurrency evaluate: [ Named Security GM dividend ]
+</b></tt></pre>
+returns GM's latest dividend in Canadian dollars.  
+<p>
+All values are split-adjusted through the current date.  
+<p>
+The following messages are defined for the class <b>DivRecord</b>:
+<p>
+<center><table width=80% border=1 cellspacing=2 cellpadding=8>
+<tr><th>Message <th>Return Class <th>Description
+<tr><td><i>_div</i><td>Number <td>actual cash dividend value provided
+(same as <i>recordValue</i>)
+<tr><td><i>adjustmentDate</i><td>Date <td>date dividend adjusted through
+<tr><td><i>adjustmentFactor</i><td>Number <td>split adjustment factor
+<tr><td><i>baseCurrency</i><td>Currency <td>currency dividend data stored in
+<tr><td><i>currencyFactor</i><td>Number <td>currency adjustment relative to recordDate
+<tr><td><i>div</i><td>Number <td>split/currency adjusted dividend
+<tr><td><i>paymentDate</i><td>Date <td>payment date of dividend
+<tr><td><i>recordDate</i><td>Date <td>ex-date of dividend record 
+<tr><td><i>security</i><td>Number <td> underlying security
+</table></center>      
+<p>
+The message <i>dividends</i> returns a <b>TimeSeries</b> of all 
+<b>DivRecord</b> instances associated with a <b>Security</b>.
+For example, to display the adjusted and unadjusted dividend values
+for each of GM's dividends, you could use:<pre><tt><b>
+     Named Security GM dividends
+     do: [ ^date print: 12 ;       #-- date in time series
+           recordDate print: 12 ;  #-- date in record - should match
+           div print ;             #-- adjusted value
+           _div print ;            #-- unadjusted value
+           currencyFactor print ;  #-- should be 1
+           newLine print ;
+         ] ;
+</b></tt></pre>
+Note that the <i>dividends</i> message returns an actual time series
+object so you need not prepend the ":"  to the message name.  
+<p>
+For general descriptions of all the 
+<b>PriceRecord</b> messages, see the document
+<a href="mpmaDataRecord.htm">
+<i>Vision Application Messages: DataRecord</i></a>.
+Special issues involved with managing the storage of pricing data
+are described in the document
+<a href="pmaIssues.htm#divs">
+<i>Portfolio Management Application Issues</i></a>.
+
+<p>
+<hr>
+<p>
+<h3><a name="splits">Split Adjustments </a></h3>
+<p>
+To adjust per share data it is necessary to know what splits have
+occurred between the date the data is known to be adjusted through
+(adjustment date) and the current date.  To accomplish this, Vision
+tracks splits for each security in a time series called
+<i>rawSplitFactor</i>.  The actual factors are stored in this time series
+as of their ex-date.  For example, if a 2-for-1 split in GM
+Corporation occurred on January 15, 1995, the value 2 would be stored
+in GM's <i>rawSplitFactor</i> as of this date.  
+Vision tracks a second time series called <i>adjustmentFactor</i> that
+represents the running product of these raw factors.  This variable has
+an initial value of 1.  Each time a split occurs, a new point
+representing the product of the new raw factor and the last
+adjustment factor is stored in the adjustment factor as of the
+ex-date.  
+<p>
+In general, methods have been created that automatically return
+adjusted values by default.  For example, the
+message <i>_price</i> is defined to return a <i>PriceRecord's</i> unadjusted
+price (i.e., the original value) and the message <i>price</i> is defined
+to return a <i>PriceRecord's</i> price adjusted for any splits.  
+<p>
+The split adjustment process is described in detail in the document
+<a href="pmaIssues.htm#splits">
+<i>Portfolio Management Application Issues</i></a>.
+
+<p>
+<hr>
+<p>
+<h3><a name="updates">Updating Company and Security Data</a></h3>
+<p>
+The <b>Interface</b> class 
+<a href="clDataFeed.htm"><b>ExternalFeedManager</b></a>
+has been created to provide a 
+uniform way to create and update any entity-related information.
+<b>DataFeed</b> subclasses are defined to translate one or more
+rows of information into the appropriate structures in your Vision
+database.  Data can be supplied from a file, a spreadsheet,
+a relational database, or any other table-based source.  You can 
+also supply data directly as a string, using the tab character to
+delimit columns and the carriage return to delimit rows.
+<p>
+Several <b>DataFeed</b> classes have been defined to load data for
+<b>Company</b>, <b>Security</b>, and related classes:
+<p><center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>DataFeed <th>Description
+<tr>
+<td><a href="pma_CompanyMaster.htm">CompanyMaster</a>
+<td>creates <b>Company</b> instances and refreshes basic properties
+<tr>
+<td><a href="pma_SecurityMaster.htm">SecurityMaster</a>
+<td>creates <b>Security</b> instances and refreshes basic properties
+<tr>
+<td><a href="pma_PriceFeed.htm">PriceFeed</a>
+<td>updates pricing data for <b>Security</b> instances
+<tr>
+<td><a href="pma_DivFeed.htm">DivFeed</a>
+<td>updates dividend data for <b>Security</b> instances
+<tr>
+<td><a href="pma_SplitsFeed.htm">SplitsFeed</a>
+<td>updates stock split data for <b>Security</b> instances
+<tr>
+<td><a href="pma_SecurityAliases.htm">SecurityAliases</a>
+<td>establishes aliases for <b>Security</b> instances
+<tr>
+<td><a href="pma_CountryMaster.htm">CountryMaster</a>
+<td>creates <b>Country</b> instances and refreshes basic properties
+<tr>
+<td><a href="pma_IndustryMaster.htm">IndustryMaster</a>
+<td>creates <b>Industry</b> instances and refreshes basic properties
+<tr>
+<td><a href="pma_SectorMaster.htm">SectorMaster</a>
+<td>creates <b>Sector</b> instances and refreshes basic properties
+<tr>
+<td><a href="pma_SecurityTypeMaster.htm">SecurityTypeMaster</a>
+<td>creates <b>SecurityType</b> instances and refreshes basic properties
+<tr>
+<td><a href="pma_AssetCatMaster.htm">AssetCatMaster</a>
+<td>creates <b>AssetCategory</b> instances and refreshes basic properties
+<tr>
+<td><a href="pma_CompanyToCountry.htm">CompanyToCountry</a>
+<td>updates the <i>company-country</i> relationship
+<tr>
+<td><a href="pma_CompanyToIndustry.htm">CompanyToIndustry</a>
+<td>updates the <i>company-industry</i> relationship over time
+<tr>
+<td><a href="pma_IndustryToSector.htm">IndustryToSector</a>
+<td>updates the <i>industry-sector</i> relationship
+</table></center>
+<p>
+The <a href="pma_CompanyMaster.htm"><b>CompanyMaster</b></a>
+data feed class can be used to create and refresh <b>Company</b> instances.
+The following tab-delimited feed could be used to create <b>Company</b>
+instances and refresh basic information:<pre><tt><b>
+     Interface ExternalFeedManager upload: "CompanyMaster" using:
+   #-- make sure this is tab-delimited
+     "Id          Name         fiscalYearEnd
+      00036110    AAR CORP          5    
+      00079410    ACC CORP          12    
+      00095710    ABM INDUSTRIES    10
+     " ;
+
+</b></tt></pre>
+The following tab-delimited string could be used to create
+and refresh <b>Security</b> instances:<pre><b>
+   Interface ExternalFeedManager upload: "SecurityMaster" using:
+   #-- make sure this is tab-delimited
+   "entityId    name       companyId   cusip      ticker  currencyId  type
+    00036110    AAR COM    00036110    00036100   AIR     USD         1
+    00079410    ACC COM    00079410    00079410   ACCC    USD         1
+    00095710    ABM IND    00095710    00095710   AMB     USD         1
+    "  ;
+
+</b></pre>
+The following tab-delimited string could be used to update 
+prices:<pre><b>
+     Interface ExternalFeedManager upload: "PriceFeed" using:
+   #-- make sure this is tab-delimited
+     "entityId    date        currencyId    close     volume
+      12345610    19971117    USD           88.000    0.28
+      12345610    19971118    USD           87.500    0.15
+      12345610    19971119    USD           42.000    0.63    
+      98765410    19971117    CAD           30.500    0.32    
+      98765410    19971118    CAD           30.400    0.05    
+      98765410    19971119    CAD           29.900    0.07    
+     " ;
+
+</b></pre>
+
+<p>
+<hr>
+<p>
+<h3><a name="related">Related Classes</a></h3>
+
+<p>
+<h4><a name= "country">The Country Class</a></h4>
+<p>
+Instances of the <b>Country</b> class correspond to individual countries
+such as <i>United States</i>, <i>Canada</i>, and <i>Great Britain</i>.
+The <b>Portfolio Management Application Layer</b> pre-defines a number 
+of countries using the 2-character ISO standard identifiers and names.  
+To display the code and name for each defined country use:<pre><tt><b>
+     Country masterList
+        sortUp: [ name ] .
+     do: [ code print: 15 ; name printNL ] ;
+
+</b></tt></pre>
+<p>
+For general descriptions of all the <b>Country</b> messages see the document
+<a href="mpmaClassify.htm">
+<i>Vision Application Messages: Classification</i></a>.
+<p>
+The <a href="pma_CountryMaster.htm"><b>CountryMaster</b></a>
+data feed class can be used to create and refresh <b>Country</b> instances.
+The following tab-delimited feed could be used to create <b>Country</b>
+instances and refresh basic information:<pre><tt><b>
+     Interface ExternalFeedManager upload: "CountryMaster" using:
+   #-- make sure this is tab-delimited
+     "EntityId  Name            Currency
+      AT        Austria         ATS
+      AU        Australia       AUD
+      CA        Canada          CAD
+      CH        Switzerland     CHF
+      US        United States   USD
+     " ;
+
+</b></tt></pre>
+<p>
+The fixed property <i>country</i> is used to assign a <b>Country</b>
+instance to a <b>Company</b>.  
+To display the number of companies in each country, use:<pre><tt><b>
+     Company masterList  
+         groupedBy: [ country ]  .     #- group into countries
+         sortUp: [ code  ] .           #- sort by country code
+    do: [ code print: 10 ;             #- country code
+          name print: 25 ;             #- country name
+          groupList count printNL ;    #- number of company instances
+        ] ;
+
+</b></tt></pre>
+To display the first 100 non-US companies by country, use:<pre><tt><b>
+     Company masterList
+        select: [ country isUS not ] . #-  non-US companies
+        first: 100 .                   #-  restrict to 100 companies  
+        groupedBy: [ country ]  .      #- group into countries
+        sortUp: [ code ] .             #- sort by country code
+    do: [                              #- for each country do the following:
+          code print: 10 ;             #- print country code
+          name print: 25 ;             #- print country name
+          groupList count printNL ;    #- print number of companies in subset
+          groupList                    #- for each company in country subset
+          do: [                           #- do the following:
+              code print: 10 ;            #-  print company code
+              name printNL ;              #-  print company name
+              ] ;                      #- end of groupList for country
+        ] ;
+
+</b></tt></pre>
+You can reassign a country explicitly using:<pre><tt><b>
+     Named Company IBM :country <- Named Country US ;
+
+</b></tt></pre>
+<p>
+You can also use
+the <a href="pma_CompanyMaster.htm"><b>CompanyMaster</b></a>
+data feed class to initialize and reassign country 
+values:<pre><tt><b>
+     Interface ExternalFeedManager upload: "CompanyMaster" using:
+   #-- make sure this is tab-delimited
+     "EntityId    country
+      00036110    US
+      00194110    CA    
+      461669      CH
+      000445      GB    
+      002826      GB    
+      003175      GB    
+     " ;
+
+</b></tt></pre>
+<p>
+The property <i>memberList</i> has been defined at <b>Country</b> to
+store the list of <b>Company</b> instances associated with each
+<b>Country</b> instance.  You can manually update the member cross
+reference using:<pre><tt><b>
+     #--  clear current memberships
+     Country masterList
+     do: [ :memberList <- defaultInstance memberList ] ;
+
+     #--  update lists using current companies
+     Company masterList
+        groupedBy: [ country ] .
+     do: [ :memberList <- groupList ] ;
+
+</b></tt></pre>
+Alternatively, you can use the
+<a href="pma_CompanyToCountry.htm"><b>CompanyToCountry</b></a>
+data feed which automatically updates the <i>country</i> property
+at <b>Company</b> and cross references the <i>memberList</i> property
+at <b>Country</b>:<pre><tt><b>
+     Interface ExternalFeedManager upload: "CompanyToCountry" using:
+   #-- make sure this is tab-delimited
+     "memberId    groupId
+      00036110    US
+      00194110    CA    
+      461669      CH
+      000445      GB    
+      002826      GB    
+      003175      GB    
+     " ;
+
+</b></tt></pre>
+If you assign the countries using this feed, the expression:<pre><tt><b>
+     Named Country GB memberList
+     do: [ displayInfo ] ;
+</b></tt></pre>
+displays all the companies with a <i>country</i> value of <i>Great Britain</i>.
+<p>
+Note that you should use this feed instead of the <b>CompanyMaster</b> if you
+want to cross reference the companies in the <i>memberList</i> property.
+The <i>memberList</i> property is automatically updated when
+you use the <b>CompanyToCountry</b> feed.  If you assign
+values to the <i>country</i> property at <b>Company</b>
+manually or using the <b>CompanyMaster</b> feed, these companies
+will not be reflected in the country's <i>memberList</i>.
+
+<p>
+<h4><a name= "industry">The Industry and Sector Classes</a></h4>
+<p>
+Instances of the <b>Industry</b> class correspond to user-defined industry
+classifications such as <i>Beverages</i>, <i>Automotive</i>, and 
+<i>Software</i>.  Instances of the class <b>Sector</b> correspond to
+user-defined sectors such as <i>Consumer Durables</i> and <i>Technology</i>.
+Sectors consist of one or more industries.  
+<p>
+To access a specific industry use:<pre><tt><b>
+     Named Industry at: "110" . name printNL ;
+
+</b></tt></pre>
+To display the code and name for currently defined industries use:<pre><tt><b>
+     Industry masterList
+        sortUp: [ name ] .
+     do: [ code print: 15 ; name printNL ] ;
+
+</b></tt></pre>
+<p>
+To access a specific sector use:<pre><tt><b>
+     Named Sector at: "TECH" . name printNL ;
+</b></tt></pre>
+To display the code and name for currently defined sectors use:<pre><tt><b>
+     Sector masterList
+        sortUp: [ name ] .
+     do: [ code print: 15 ; name printNL ] ;
+</b></tt></pre>
+<p>
+The property <i>sector</i>
+is defined for the class <b>Industry</b> and is used to store the
+<b>Sector</b> instance associated with the industry.
+To display the current list of industries grouped into their sectors
+use:<pre><tt><b>
+     Industry masterList
+        groupedBy: [ sector ] .         #- group into sectors
+        sortUp: [ code ] .              #- sort by sector code
+     do: [                              #- for each sector do:
+           displayInfo ;                #-     display sector code/name
+           groupList                    #-     for each industry in sector
+           do: [                        #-     do the following:
+                 " " print: 5 ;         #-         indent 5 spaces
+                 displayInfo ;          #-         display industry code/name
+               ] ;                      #-     end of industries in sector
+         ] ;                            #-  end of sector
+
+</b></tt></pre>
+<p>
+The time series property <i>industry</i> is used to track a company's
+<b>Industry</b> over time.  
+For example, to view the latest industry for a company use:<pre><tt><b>
+     Named Company GM industry name printNL ;
+</b></tt></pre>
+To view the industry as of a different date use:<pre><tt><b>
+     95 evaluate: [ Named Company GM industry name printNL  ] 
+</b>or<b>
+      Named Company GM :industry asOf: 95 .  name printNL ;
+</b></tt></pre>
+To look at industry history use:<pre><tt><b>
+     Named Company GM 
+        :industry              #-  leading : retrieves the time series
+     do: [ ^date print: 15 ;   #-  date of entry
+           code print: 10 ;    #-  industry code on date
+           name printNL ;      #-  industry name on date
+         ] ;
+</b></tt></pre>
+<p>
+The message <i>sector</i> is defined at <b>Company</b> to return
+the sector associated with the company's industry.
+For example, to view the sector associated with the current
+industry for a company use:<pre><tt><b>
+     Named Company GM sector name printNL ;
+</b></tt></pre>
+To view the sector as of a different date use:<pre><tt><b>
+     95 evaluate: [ Named Company GM sector name printNL  ] 
+</b>or<b>
+      Named Company GM :sector asOf: 95 .  name printNL ;
+</b></tt></pre>
+<p>
+The prior expressions are identical to:<pre><tt><b>
+     Named Company GM industry sector name printNL ;
+
+     95 evaluate: [ Named Company GM industry sector name printNL  ] 
+</b>and<b>
+      Named Company GM :industry asOf: 95 .  sector name printNL ;
+</b></tt></pre>
+<p>
+To display the first 100 companies by sector, by industry, use:<pre><tt><b>
+     Company masterList
+        first: 100 .                   #-  restrict to 100 companies  
+        groupedBy: [ sector ] .        #-  group into sectors
+        do: [ code print: 10 ;         #-  sector code
+              name printNL ;           #-  sector name
+              groupList                #-  for companies in sector
+              groupedBy: [industry ] . #-  group into industry
+              do: [                    #-  and do the following:
+                    code print: 10 ;       #- industry code
+                    name printNL ;         #- industry name
+                    groupList              #- for companies in industry
+                    do: [                  #- do the following:
+                          displayInfo ;    #-    display company information
+                        ] ;                #- end of companies in industry
+                  ] ;                  #-  end of industries in sector
+              newLine print ;          #-  skip a line after each sector
+            ] ; 
+
+</b></tt></pre>
+<p>
+For general descriptions of all the 
+<b>Industry</b> and <b>Sector</b> messages, see the document
+<a href="mpmaClassify.htm">
+<i>Vision Application Messages: Classification</i></a>.
+Instances of <b>Classification</b> subclasses such as <b>Industry</b>
+are often managed as a
+hierarchy.  For example, <i>Industry 123</i> may refer to "Book
+Publishing", <i>Industry 120</i> may refer to "General Publishing", 
+and <i>Industry 100</i> may refer to "General Media".  
+For a general discussion of classification hierarchies, see the document
+<a href="clClassify.htm#parent">
+<i>Vision Class: Classification</i></a>.
+
+
+<p>
+The <a href="pma_IndustryMaster.htm"><b>IndustryMaster</b></a>
+data feed class can be used to create and refresh <b>Industry</b> instances.
+The following tab-delimited feed could be used to create <b>Industry</b>
+instances and refresh basic information:<pre><tt><b>
+     Interface ExternalFeedManager upload: "IndustryMaster" using:
+   #-- make sure this is tab-delimited
+     "EntityId   Name                     
+      110        Beverages    
+      120        Cosmetics    
+      130        Grocery Products    
+      140        Apparel    
+      150        Other Consumer Non-durables    
+     " ;
+
+</b></tt></pre>
+<p>
+The <a href="pma_SectorMaster.htm"><b>SectorMaster</b></a>
+data feed class can be used to create and refresh <b>Sector</b> instances.
+The following tab-delimited feed could be used to create <b>Sector</b>
+instances and refresh basic information:<pre><tt><b>
+     Interface ExternalFeedManager upload: "SectorMaster" using:
+   #-- make sure this is tab-delimited
+     "EntityId   Name                     
+      NOND       Consumer non-durables    
+      DURB       Consumer durables    
+      SERV       Consumer services    
+      RETL       Retail trade    
+      TECH       Technology    
+     " ;
+</b></tt></pre>
+<p>
+The property <i>memberList</i> has been defined at <b>Sector</b> to
+store the list of <b>Industry</b> instances associated with each
+<b>Sector</b> instance.  You can manually update the member cross
+reference using:<pre><tt><b>
+     #--  clear current memberships
+     Sector masterList
+     do: [ :memberList <- defaultInstance memberList ] ;
+
+     #--  update lists using current companies
+     Industry masterList
+        groupedBy: [ sector ] .
+     do: [ :memberList <- groupList ] ;
+
+</b></tt></pre>
+Alternatively, you can use the
+<a href="pma_IndustryToSector.htm"><b>IndustryToSector</b></a>
+data feed which automatically updates the <i>sector</i> property
+at <b>Industry</b> and cross references the <i>memberList</i> property
+at <b>Sector</b>:<pre><tt><b>
+     Interface ExternalFeedManager upload: "IndustryToSector" using:
+   #-- make sure this is tab-delimited
+     "groupId   memberId
+      NOND      110
+      NOND      120
+      NOND      130
+      DURB      210
+      DURB      220
+      DURB      230
+     " ;
+
+</b></tt></pre>
+If you assign the sectors using this feed, the expression:<pre><tt><b>
+     Named Sector TECH memberList
+     do: [ displayInfo ] ;
+</b></tt></pre>
+displays all the industries with a <i>sector</i> value of <i>Technology</i>.
+<p>
+Note that you should use this feed if you
+want to cross reference the industries in the <i>memberList</i> property
+defined at <b>Sector</b>.  If you assign
+values to the <i>sector</i> property at <b>Industry</b>
+manually or using the <b>IndustryMaster</b> feed, these industries
+will not be reflected in the sector's <i>memberList</i>.
+
+<p>
+The time series property
+<i>memberList</i> is used to track the list of <b>Company</b> instances
+in an industry over time.  Any time the industry is reassigned
+for a company, the <i>memberList</i> for the prior
+industry and the new industry must be updated.  At any point in
+time, a company will belong to one industry.  At any point in
+time, an industry will have zero or more companies associated with it.
+<p>
+To view an industry's members as of a specific date use:<pre><tt><b>
+     #-- latest
+     Named Industry at: "540" .     #- get industry 540
+       memberList                   #- get latest member list (companies)
+     do: [                          #- for each member do:
+           code print: 10 ;             #- print company code
+           name printNL ;               #- print company name
+         ] ;
+
+     #-- as of last month
+     ^today - 1 monthEnds evaluate:
+       [ Named Industry at: "540" .     #- get industry 540
+           memberList                   #- get eom member list (companies)
+         do: [                          #- for each member do:
+              code print: 10 ;             #- print company code
+              name printNL ;               #- print company name
+             ] ;
+       ] ;
+
+     #-- all periods
+     Named Industry at: "540" . 
+        :memberList                  #- leading : returns time series of lists
+     do: [ ^date print ;             #- for each date membership changed
+           count printNL ;              #-  print number of members
+           ^self do: [ displayInfo ] ;  #-  and display them one per line
+         ] ;
+</b></tt></pre>
+<p>
+The <i>displayMemberHistory</i> report shows changes in the industry
+membership over time.  For example:<pre><tt><b>
+     Named Industry at: "540" . displayMemberHistory ;
+</b></tt></pre>
+
+<p>
+If you want to utilize the <i>company-industry</i>
+membership cross reference, you should use
+<a href="pma_CompanyToIndustry.htm"><b>CompanyToIndustry</b></a>
+data feed to update the <i>industry</i> property at <b>Company</b>.
+This feed automatically updates the <i>industry</i> property
+and cross references the <i>memberList</i> property 
+at <b>Industry</b> by date:<pre><tt><b>
+     Interface ExternalFeedManager upload: "CompanyToIndustry" using:
+   #-- make sure this is tab-delimited
+     "memberId    groupId    date
+      00036110    560        Default
+      00036110    120        951231
+      00079410    740        Default
+      00079410    120        931231
+      00079410    Default    960115
+      00163T10    140        Default
+     " ;
+</b></tt></pre>
+<p>
+The message <i>comanyList</i> is defined at <b>Sector</b> to return
+the list of companies associated with any of the industries in the
+sector's <i>memberList</i>.  This message assumes that the <b>Industry</b>
+and <b>Sector</b> <i>memberList</i> properties have been appropriately
+updated.
+
+<p>
+
+<p>
+<h4><a name= "type">The SecurityType and AssetCategory Classes</a></h4>
+<p>
+
+<p>
+Instances of the <b>SecurityType</b> class correspond to different
+types of security such as <i>Cash</i>, <i>Common Stock</i>, and
+<i>Mortgage-Back</i>.  Instances of the class <b>AssetCategory</b>
+correspond to general categories for asset classification. 
+The <b>Portfolio Management Application Layer</b> pre-defines the
+asset categories: <i>Equity</i>, <i>Fixed</i>, <i>Cash</i>, and <i>Other</i>.
+Each <b>SecurityType</b> instance is assigned to an <b>AssetCategory</b>
+via the <i>assetCategory</i> property.
+<p>
+To display the currently defined security types, grouped into asset
+category use:<pre><tt><b>
+     SecurityType masterList
+        groupedBy: [ assetCategory ] .
+     do: [ "===>  AssetCategory: " print ; code printNL ; 
+           groupList do: [ displayInfo ] ;
+         ] ;
+
+</b></tt></pre>
+<p>
+The <i>unitCalc</i> property is defined at the <b>SecurityType</b> class
+to store a multiplier used to adjust units held in market value calculations.
+The value is <i>1.00</i> by default.
+<p>
+For general descriptions of the <b>SecurityType</b> and <b>AssetCategory</b>
+messages see the document <a href="mpmaClassify.htm">
+<i>Vision Application Messages: Classification</i></a>.
+<p>
+The <a href="pma_SecurityTypeMaster.htm"><b>SecurityTypeMaster</b></a>
+data feed class can be used to create and refresh <b>SecurityType</b> 
+instances.
+The following tab-delimited feed could be used to create <b>SecurityType</b>
+instances and refresh basic information:<pre><tt><b>
+     Interface ExternalFeedManager upload: "SecurityTypeMaster" using:
+   #-- make sure this is tab-delimited
+     "Id    Name           UnitCalc    AssetCategory
+      0    Cash & Equiv    1.00        Cash
+      1    Common Stock    1.00        Equity
+      2    Corporate Bond  10.00       Fixed
+      3    Gvt Bond        10.00       Fixed
+      4    Option          100.00      Other
+     " ;
+
+</b></tt></pre>
+<p>
+The <a href="pma_AssetCatMaster.htm"><b>AssetCatMaster</b></a>
+data feed class can be used to create and refresh <b>AssetCategory</b> 
+instances.
+The following tab-delimited feed could be used to create <b>AssetCategory</b>
+instances and refresh basic information:<pre><tt><b>
+     Interface ExternalFeedManager upload: "AssetCatMaster" using:
+   #-- make sure this is tab-delimited
+     "EntityId    Name                     
+      Equity      Equity
+      Fixed       Fixed Income
+      Cash        Cash & Equivalents
+      Other       Other Assets
+     " ;
+
+</b></tt></pre>
+
+<p>
+The fixed property <i>type</i> is used to assign a <b>SecurityType</b>
+instance to a <b>Security</b>.  
+To display the number of securities in each security type, use:<pre><tt><b>
+     Security masterList  
+         groupedBy: [ type ]  .        #- group into security types
+    do: [ code print: 10 ;             #- security type code
+          name print: 25 ;             #- security type name
+          groupList count printNL ;    #- number of security instances
+        ] ;
+
+</b></tt></pre>
+<p>
+You can reassign a security type explicitly using:<pre><tt><b>
+     Named Security IBM :type <- Named SecurityType US ;
+</b></tt></pre>
+You can also use
+the <a href="pma_SecurityMaster.htm"><b>SecurityMaster</b></a>
+data feed class to initialize and reassign security type values:<pre><tt><b>
+     Interface ExternalFeedManager upload: "SecurityMaster" using:
+   #-- make sure this is tab-delimited
+     "EntityId    type
+      00036110    1
+      00194110    1
+      123456AB    2
+      456789BC    2
+      CashUS      0
+     " ;
+
+</b></tt></pre>
+
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated December 15, 2000</font>
+</table>
+
+</body>
+</html>

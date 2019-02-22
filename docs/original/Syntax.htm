@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Syntax </title>
+</head>
+<body>
+<body bgcolor=white>
+
+<h2>Vision Syntax</h2>
+<p>
+     | <a href="FHome.htm">Home</a> | <a href="Lang.htm">Language</a> | <a href="Program.htm">Programs</a> | <a href="Error.htm">Errors</a> |
+<hr>
+<h3>Topics Covered:</h3>
+<ul type="square">
+<li><a href="#order">Order of Operations</a>
+<li><a href="#sample">Sample Usage</a>
+<li><a href="#dot">The <font size=+2>.</font> (Dot) Operator</a>
+<li><a href="#summary">Syntax Summary</a>
+</ul>
+<p>
+<hr>
+<h3><a name="order">Order of Operations</a></h3>
+<p>
+In the expression:<pre><tt><b>
+     gm sales + ford sales 
+</b></tt></pre>
+the following interpretations could be possible:
+<p>
+<ul type="disc">
+<li>Add <i>ford</i> to 
+<i>gm sales</i> and send the resultant object the message <i>sales</i>.
+<li>Add <i>ford</i>
+to the message <i>sales</i> and send this message to <i>gm</i>.  Then send
+the message <i>sales</i> to the resultant object.  
+<li>Evaluate the expressions <i>gm sales</i> and <i>ford sales</i>
+and then add one to the other.  
+</ul>
+<p>
+In this example, the last interpretation is clearly the only
+meaningful one.  However, in the example:  <pre><tt><b>
+     gm sales + ford sales log 
+</b></tt></pre>
+the following interpretations could be possible:
+<p>
+<ul type="disc">
+<li>Add the log of Ford's sales to GM's sales.
+<li>Add GM's and Ford's sales, then take the log of the result.
+</ul>
+<p>
+Although the second interpretation is likely to be the one intended,
+Vision would actually use the first approach.  
+<p>
+Clearly the order of executing the various messages can make a
+difference, so Vision needs unambiguous rules for choosing what to do
+first.  Vision does this by assigning a precedence level to each type
+of message.  
+<p>
+You are probably familiar with the precedence rules used for basic
+arithmetic.  Arithmetic rules state that multiplication and division
+have a higher precedence than addition and subtraction, so they are
+performed first.  If an expression contains two operations of the
+same precedence, they are executed in the order in which they occur.
+For example:  <pre><tt><b>
+     3 * 2 + 4 
+</b></tt></pre>
+computes to 10 and:<pre><tt><b>
+     10 + 3 * 2 
+</b></tt></pre>
+computes to 16.
+<p>
+Parentheses can be used to change the order of evaluation.  In the
+above examples:  <pre><tt><b>
+      3 * (2 + 4) 
+</b></tt></pre>
+computes to 18 and:<pre><tt><b>
+      (10 + 3) * 2 
+</b></tt></pre>
+computes to 26.
+<p>
+Vision extends the notions of precedence to include all messages.
+The precedence rules for expression evaluation are as follows:
+<p>
+<ol type="1">
+<li>Parenthesized expressions are always evaluated first.
+<li><a href="Lang.htm#unary">Unary messages</a>
+take precedence over <a href="Lang.htm#binary">binary</a>
+and <a href="Lang.htm#keyword">keyword</a> messages.
+<li>Unary messages are evaluated in the order they appear in the expression.
+<li>The precedence order for binary messages is <i>*</i> and <i>/</i> first,
+followed by <i>+</i> and <i>-,</i> 
+followed by <i>=</i>, <i>==</i>, <i>></i>, <i><</i>, <i><=</i>, <i>>=</i>,
+and <i>!=</i>, <i>!==</i>, 
+followed by <i>&&</i> followed by <i>||</i>
+followed by <i>,</i>, followed by <i>-></i>, followed by <i>&lt-</i>.  
+<li>Within an expression, binary messages at the same precedence
+level evaluate in the order in which they appear.  
+<li>The binary messages 
+<i>*</i>, <i>/</i>, <i>+</i>, <i>-</i>, 
+<i>=</i>, <i>==</i>, <i>></i>, <i>&lt</i>, <i>&lt=</i>, <i>>=</i>, 
+<i>!=</i>, <i>!==</i>, 
+<i>&&</i>, <i>||</i>, and
+<i>,</i> take precedence over the keyword messages.  
+<li>Keyword messages take precedence over the binary messages
+<i>-></i> and <i>&lt-</i>.  
+</ol>
+<p>
+When Vision finds parenthesized expressions they are always evaluated
+first.  If more than one parenthesized expression exists, they are
+evaluated in the order in which they appear.  Parenthesized
+expressions may contain parenthesized expressions.  Within each
+expression, these same precedence rules apply.  
+<p>
+For example the order of operations for the example described above
+is illustrated below:  
+<p>
+<pre>
+<ul>
+      <img src="synt1.gif" lowsrc="synt1.gif" alt="Execution Order (1)" ></ul>
+</pre>
+<p>
+The actual steps performed are:
+<p>
+<ol type="1">
+<li>Send the unary message <i>sales</i> to <i>gm</i>
+to produce an object representing
+GM's sales.  
+<li>Send the unary message <i>sales</i> to <i>ford</i> to produce an object
+representing Ford's sales.  
+<li>Send the unary message <i>log</i>
+to the object representing Ford's sales to
+produce an object representing the log of Ford's sales.  
+<li>Send the binary message <i>+</i>  to the object representing GM's sales
+with the object representing the log of Ford's sales as its argument.
+</ol>
+<p>
+As the preceding example illustrates, expressions are actually
+decomposed into a series of expressions that get executed based on
+precedence order.  An expression within parentheses is evaluated
+before any expression outside the parentheses.  If the previous
+example were written as:  <pre><tt><b>
+     (gm sales + ford sales) log 
+</b></tt></pre>
+the expected result is achieved.  The order of operations is:
+<p>
+<pre>
+<ul>
+      <img src="synt2.gif" lowsrc="synt2.gif" alt="Execution Order (2)" ></ul>
+</pre>
+<p>
+The actual steps performed are:
+<p>
+<ol type="1">
+<li>Send the unary message <i>sales</i> to <i>gm</i> to produce an object
+representing GM's sales.  
+<li>Send the unary message <i>sales</i> to <i>ford</i> to produce an object
+representing Ford's sales.  
+<li>Send the binary message <i>+</i> to the object representing GM's sales
+with the object representing Ford's sales as its argument to produce
+an object representing the value of their combined sales.  
+<li>Send the unary message <i>log</i> to the combined sales value to
+produce an object representing the log of the combined sales figure.
+</ol>
+<p>
+<hr>
+<h3><a name="sample">Sample Usage</a></h3>
+<p>
+The following examples further illustrate precedence rules.  To add 3
+to the value of the May estimate, the expression:  <pre><tt><b>
+     :estimate asOf: 9305 + 3             <i>(incorrect)</i>
+</b></tt></pre>
+produces incorrect results.  Because the binary message <i>+</i> is
+evaluated before keyword messages, Vision will first add <i>3</i> to 
+<i>9305</i> to
+produce the parameter for the <i>asOf:</i> message.  The correct expression
+is:<pre><tt><b>
+     (:estimate asOf: 9305) + 3 
+</b></tt></pre>
+To print the sum of <i>2</i> and <i>7</i>, the expression:<pre><tt><b>
+     2 + 7 print ;                        <i>(incorrect)</i>
+</b></tt></pre>
+produces incorrect results.  Because unary messages are evaluated
+before binary messages, Vision will print the value <i>7</i> prior to
+performing the addition operation.  The correct expression is:<pre><tt><b>
+     ( 2 + 7 ) print ; 
+</b></tt></pre>
+Alternatively, you could have used one of the keyword versions of the
+print message.  For example, the expression:<pre><tt><b>
+     2 + 7 print: 12 ; 
+</b></tt></pre>
+also produces the correct result.  Because the keyword message <i>print:</i>
+has a lower precedence than the binary message <i>+</i>, the expression 
+<i>2 + 7</i> is evaluated first and the message 
+<i>print: 12</i> is applied to the
+result.  In this case the value <i>9</i> is printed, right justified in 12
+columns.  
+<p>
+To count the number of elements in the union of two lists, the 
+expression:<pre><tt><b>
+     mylist union: yourlist count          <i>(incorrect)</i>
+</b></tt></pre>
+produces incorrect results.  Because unary messages are evaluated
+before keyword messages, Vision will compute the number of elements
+in <i>yourlist</i> first and will use this result as the argument for the
+<i>union:</i> message.  The correct expression is:<pre><tt><b>
+     (mylist union: yourlist) count 
+</b></tt></pre>
+<p>
+<hr>
+<h3><a name="dot">The . (Dot) Operator</a></h3>
+<p>
+Because keyword messages have lower precedence than unary and most
+binary messages, it is often necessary to enclose the entire keyword
+message expression (i.e., recipient, selectors, and parameters) within
+parentheses.  This can become cumbersome, especially when an
+expression contains many multiple keyword expressions within it.
+For this situation, Vision provides an alternative to the parentheses.
+You can place a '.' (period) in your expression to indicate that you
+have completed a keyword message.  This <b>Dot Operator</b> plays the
+role of a closing parenthesis, where the opening parenthesis is
+assumed to be at the start of the current expression.
+<p>
+Using the dot operator, the previous 
+expressions could have been written as:<pre><tt><b>
+     :estimate asOf: 9305 . + 3 
+</b></tt></pre>
+and<pre><tt><b> 
+     mylist union: yourlist . count 
+</b></tt></pre>
+Note that the '.' can only be used as a terminator for a keyword
+message.  It is meaningless with unary and binary messages and will
+produce a <a href="Error.htm#syn">syntax error</a> in these cases.  
+<p>
+One final piece of information is needed to complete this discussion
+on order of operations.  Whenever multiple keywords appear in an
+unparenthesized expression, Vision assumes they form a single
+message.  Therefore the expression:  <pre><tt><b>
+     mylist union: yourlist exclude: autolist   <i>(incorrect)</i>
+</b></tt></pre>
+would be viewed as sending the keyword message <i>union:exclude:</i>
+to the
+object <i>mylist</i> and providing two parameters, 
+<i>yourlist</i> and <i>autolist</i>.  To
+tell Vision to view this expression as two successive keyword
+messages (i.e., <i>union:</i> and <i>exclude:</i> ) either of the following
+formats is valid:  <pre><tt><b>
+     (mylist union: yourlist) exclude: autolist
+</b>or<b>
+     mylist union: yourlist . exclude: autolist 
+</b></tt></pre>
+<p>
+Any of the following formats can be used to find the number of
+elements in the final list produced:<pre><tt><b>
+     ( (mylist union: yourlist) exclude: autolist) count 
+</b>or<b>
+     (mylist union: yourlist . exclude: autolist) count 
+</b>or<b>
+     mylist union: yourlist . exclude: autolist . count  
+</b></tt></pre>
+<hr>
+<h3><a name="summary">Syntax Summary</a></h3>
+<p>
+For you grammar buffs, here is the Vision language syntax presented in
+a BNF format:
+<p>
+<center><h4>Vision Syntax Summary</h4></center>
+<pre><font size=-1>
+VisionProgram           : ExpressionList
+ 
+ExpressionList          : ExpressionListTerm
+                        | ExpressionList ';' ExpressionListTerm
+
+ExpressionListTerm      :
+                        | Expression
+
+Expression              : KeywordExpression
+                        | BinaryExpression
+                        | UnaryExpression
+
+KeywordExpression       : Expression KeywordExpressionTerms
+
+KeywordExpressionTerms  : KeywordExpressionTerm
+                        | KeywordExpressionTerm KeywordExpressionTerms
+
+KeywordExpressionTerm   : Keyword Expression
+                        | ':' Keyword Expression
+
+BinaryExpression        : Expression BinaryOperator Expression
+                        | Expression ':' BinaryOperator Expression
+
+BinaryOperator          : '*'
+                        | '/'
+                        | '+'
+                        | '-'
+                        | '='
+                        | '=='
+                        | '!='
+                        | '!=='
+                        | '<'
+                        | '<='
+                        | '>='
+                        | '>'
+                        | '&&'
+                        | '||'
+                        | ','
+                        | '<-'
+                        | '->'
+
+UnaryExpression         : Primary
+                        | UnaryOperator
+                        | UnaryExpression UnaryOperator
+
+UnaryOperator           : Identifier
+                        | ':' Identifier
+
+Primary                 : '!' Identifier
+                        | '^' Identifier
+                        | Block
+                        | Selector
+                        | String
+                        | Number
+                        | '(' Expression ')'
+                        | KeywordExpression '.'
+
+
+Block                   : '[' ExpressionList ']'
+                        | '[' | BlockHeader '|' ExpressionList ']'
+
+BlockHeader             : ParameterList
+                        | MethodTemplate
+
+ParameterList           : ':' Identifier
+                        | ':' Identifier ParameterList
+
+MethodTemplate          : Identifier
+                        | BinaryOperator Identifier
+                        | KeywordMethodTemplate
+
+KeywordMethodTemplate   : Keyword Identifier
+                        | Keyword Identifier KeywordMethodTemplate
+
+Selector                : ''' Identifier '''
+                        | ''' BinaryOperator '''
+                        | ''' KeywordSelector '''
+
+KeywordSelector         : Keyword
+                        | Keyword KeywordSelector
+
+Keyword                 : Identifier':'     ... no whitespace allowed before the :
+
+Identifier              : Alpha 
+                        | Alpha AlphaNumerics
+
+Alpha                   : [a-zA-Z_]
+                        | '\'.          ... any character preceded by a \
+
+AlphaNumerics           : AlphaNumeric AlphaNumerics
+
+AlphaNumeric            : Alpha
+                        | Digit
+
+Number                  : Sign UnsignedNumber
+
+Sign                    :
+                        | '+'
+                        | '-'
+
+UnsignedNumber          : Mantissa Exponent
+                        | '0x'HexDigits     ... no whitespace allowed after the 0x
+
+Mantissa                : Digits
+                        | Digits '.'
+                        | '.' Digits
+                        | Digits '.' Digits
+
+Exponent                :
+                        | ExponentTag Sign Digits
+
+ExponentTag             : [Ee]
+
+Digits                  : Digit
+                        | Digit Digits
+
+Digit                   : [0-9]
+
+HexDigits               : HexDigit
+                        | HexDigit HexDigits
+
+HexDigit                : [0-9a-fA-F]
+
+String                  : '"' StringBody '"'
+
+StringBody              :
+                        | StringBodyCharacter StringBody
+
+StringBodyCharacter     : .
+                        | '\'.          ... any character preceded by a \
+</pre></font>
+
+<p><hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Created June 19, 1997</font>
+</table>
+
+
+</body>
+</html>

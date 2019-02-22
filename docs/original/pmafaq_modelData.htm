@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Portfolio Management FAQ: Model Data </title>
+
+</head>
+<body>
+<body bgcolor=white>
+<h2>Vision Portfolio Management FAQ:  Model Data</h2>
+<hr><p>
+<h4>Goal:</h4>
+<ul>
+To track several model scores about a company over time  
+by using <a href="#excel"><i>Excel</i></a> or the 
+<a href="#vadmin"><i>VAdmin</i></a> interface.
+</ul>
+
+<p>
+<h4>Description:</h4>
+<ul>
+<i>DataRecord</i> classes
+are used to manage sets of related
+information about a specific entity.  These classes provide a way to
+organize data about an entity into manageable substructures.
+<i>DataRecord</i> instances are normally accessed via a property
+defined at the <i>Entity</i> instance with which it is associated.
+
+</ul>
+
+<p>
+<h4>DataFeed Assumptions:</h4>
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>DataFeed<th>Fields
+<tr>
+<td>ModelDataFeed
+<td><i>id, date, model1,model2, model3 </i>
+</table></center>
+<p>
+
+<a name="excel"><h4>Using <i>Excel</i> to load model data</h4></a>
+
+<p>
+<h4>Steps:</h4>
+<p>
+<ol type="A">
+
+<p>
+<li>Create the <b>DataRecord</b>, <b>ModelData</b>
+
+<ol type="1">
+<p>
+<li>Select <i>Create DataRecord</i> from <i>VUpload</i> menu
+<li>Enter <i>ModelData</i> as the new <i>DataRecord</i> type 
+<li>Select <i>DataRecord</i> from the <i>From</i> List Box 
+<li>Select <i>Company</i> from the <i>Link To Entity...</i> list box
+<li>Enter <i>modelData</i> in the <i>access via:</i> text box. 
+<li>Select <i>Time Series</i> to indicate that the model data varies over time. 
+<li>Select OK 
+
+</ol>
+<p>
+The feed <i>ModelDataFeed</i> has been created, which is found in the <i>Entity Extender</i> feed category. 
+
+<p>
+<li>Creating Properties for <b>ModelData</b>.
+<ol type="1">
+<p>
+<li>In this example, you are defining the properties <i>model1</i>, <i>model2</i>, and <i>model3</i> for <i>ModelData</i>.
+
+Set up the spreadsheet to look like the following.  Note that the feed name
+is in the top left of the range.
+<pre>
+        PropertySetup		
+
+	<b>classId	        Property      tsflag	datatype</b>	
+	ModelData	model1	      N	        Number
+	ModelData	model2	      N	        Number
+	ModelData	model3	      N	        Number
+</pre>
+
+Note that if you want to explicitly limit the type of value to integer or
+non integer numbers, use the <i>dataType</i> of Integer or Double.
+<p>
+<li>Select the entire range, including the feed name.
+</ol>
+
+<p>
+<li>Creating <b>ModelRecord</b> Instances For <b>Companies</b> Over Time
+<p>
+
+<ol type="1">
+<p>
+<li>Assuming that you have already loaded the <i>CompanyMaster</i>,
+set up the spreadsheet to look like the following example:
+
+<pre>
+	<b>id	date	model1	model2	model3</b>
+	ibm	9710	4.9	4.7	4.6
+	ibm	9711	4.3	4.8	4.2
+	ibm	9712	4.3	4.2	4.9
+	gm	9710	8.4	8.5	8.9
+	gm	9711	7.9	8.1	8.5
+	gm	9712	8.3	8.5	8.3
+</pre>
+
+<li>Select the range.
+<li>Select <i>Upload Data</i> from the <i>VUpload</i> menu.
+<li>Select the category <i>EntityExtender</i> and the feed name <i>ModelDataFeed</i>.
+<li>Select the Range button.
+
+</ol>
+
+
+<p>
+
+<li>Access the Data
+<p>
+<ol type="1">
+<li>set up the spreadsheet to look like the following example:
+
+<pre>
+<b>		modelData model1	modelData model2</b>
+	ibm	
+	gm	
+</pre>
+
+<li>Select the range.
+<li>Select <i>Set Defaults</i> from the <i>Vision</i> menu.
+<li>Enter <i>Company</i> as the <i>EntityType</i>.
+<li>Select <i>Get Entity By Item Data</i> from the <i>Vision</i> menu.
+<p>
+The output will look similar to the following example:
+
+<pre>
+<b>		modelData model1	modelData model2</b>
+	ibm	4.3	                4.2
+	gm	8.3                     8.5
+</pre>
+
+Your Extraction is complete.
+
+</ol>
+</ol>
+
+<hr>
+<p>
+<a name="vadmin"><h4>Using <i>VAdmin</i> to load model data</h4></a>
+<p>
+
+<p>
+<h4>Steps:</h4>
+<p>
+<ol type="A">
+
+<p>
+<li>Create the <b>DataRecord</b>, <b>ModelData</b>
+
+<ol type="1">
+<p>
+<li>Select <i>Add New DataRecord</i> from the <i>Schema</i> menu
+<li>Enter <i>ModelData</i> as the new <i>DataRecord</i> type 
+<li>Select <i>DataRecord</i> from the <i>Based on DataRecord</i> List Box 
+<li>Select <i>Company</i> from the <i>Link To Entity...</i> list box
+<li>Enter <i>modelData</i> in the <i>Link Property:</i> text box. 
+<li>Select <i>Time Series</i> to indicate that the model data varies over time. 
+<li>Select OK 
+
+</ol>
+<p>
+The feed <i>ModelDataFeed</i> has been created, which is found in the <i>Entity Extender</i> feed category. 
+
+<p>
+<li>Creating Properties for <b>ModelData</b>.
+<ol type="1">
+<p>
+<li>In this example, you are defining the properties <i>model1</i>, <i>model2</i>, and <i>model3</i> for <i>ModelData</i>.
+
+Set up a text file look like the following.  Each column should be seperated by a tab.
+<pre>
+	<b>classId	Property      tsflag	datatype</b>	
+	ModelData	model1	      N         Number
+	ModelData	model2	      N	        Number
+	ModelData	model3	      N	        Number
+</pre>
+<p>
+
+Note that if you want to explicitly limit the type of value to integer or
+non integer numbers, use the <i>dataType</i> of Integer or Double.
+Save the File (ie property.txt) and put it in the <i>/localvision/upload/feeds</i> directory. 
+<p>
+
+<li>Select the file name from the <i>Pending DataFeeds</i> list box
+<li>Select the category <i>PropertySetup</i> from the <i>DataFeeds</i> list box
+<li>Select the feed <i>PropertySetup</i>.
+<li>Select the <i>Update</i> button.
+</ol>
+
+<p>
+<li>Creating <b>ModelRecord</b> Instances For <b>Companies</b> Over Time
+<p>
+
+<ol type="1">
+<p>
+<li>Assuming that you have already loaded the <i>CompanyMaster</i>,
+set up a tab delimited text file to look like the following example:
+
+<pre>
+	<b>id	date	model1	model2	model3</b>
+	ibm	9710	4.9	4.7	4.6
+	ibm	9711	4.3	4.8	4.2
+	ibm	9712	4.3	4.2	4.9
+	gm	9710	8.4	8.5	8.9
+	gm	9711	7.9	8.1	8.5
+	gm	9712	8.3	8.5	8.3
+</pre>
+
+Save the file and put it in the <i>/localvision/upload/feeds</i> directory.
+<p>
+<li>Select the file name from the <i>Pending DataFeeds</i> list box.
+<li>Select the category <i>EntityExtender</i> and the feed name <i>ModelDataFeed</i>.
+<li>Select the <i>Update</i> button.
+
+</ol>
+
+<p>
+
+<li>Access the Data in Excel
+<p>
+<ol type="1">
+<li>Open Excel
+<li>Set up the spreadsheet to look like the following example:
+
+<pre>
+<b>		modelData model1	modelData model2</b>
+	ibm	
+	gm	
+</pre>
+
+<li>Select the range.
+<li>Select <i>Set Defaults</i> from the <i>Vision</i> menu.
+<li>Enter <i>Company</i> as the <i>EntityType</i>.
+<li>Select <i>Get Entity By Item Data</i> from the <i>Vision</i> menu.
+<p>
+The output will look similar to the following example:
+
+<pre>
+<b>		modelData model1	modelData model2</b>
+	ibm	4.3	                4.2
+	gm	8.3                     8.5
+</pre>
+
+Your Extraction is complete.
+</ol></ol></ul>
+<hr>
+<table border="0" width="100%">
+<tr>
+<td align="left"><font size="-1">Copyright &copy; 1998 Innovative Systems Techniques, Inc.</font>
+<td align="right"><font size="-1">Updated December 23, 1998</font>
+</table>
+</body>
+</html>
+

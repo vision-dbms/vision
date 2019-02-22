@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Class: Dictionary </title>
+
+</head>
+<body bgcolor = white>
+<h2>Vision Class: Dictionary</h2>
+
+<p>
+     | <a href="FHome.htm">Home</a> | <a href="mDict.htm">Messages</a> | <a href="Classes.htm">Classes</a> | <a href="clXRef.htm">Class XRef</a> |
+<hr> <h3>Topics Covered:</h3> 
+<ul type=square>
+<li><a href="#overview">Dictionary Overview</a>
+<li><a href="#access">Basic Access</a>
+<li><a href="#shortcut">Access Shortcut</a> 
+<li><a href="#named">Naming Dictionaries (Named)</a>
+<li><a href="#xref">Cross Reference Dictionaries (XRef)</a> 
+<li><a href="#sys">System Dictionaries</a>
+</ul> 
+<hr> 
+<h3><a name="overview">Dictionary Overview</a></h3> 
+<p> 
+The subclasses of the class <b>Dictionary</b> are used to manage a
+set of names that return related objects.  Dictionary classes do not
+have instances.  All the messages defined for a particular Dictionary
+usually return objects of the same class.  
+Operationally, a Dictionary is similar to the class
+<a href="clIList.htm">IndexedList</a> except that the index values
+are String objects when you work with a Dictionary.
+<p>
+The Dictionary class is a direct subclass of Object:
+<font size=+1><pre>
+          <a href="clObject.htm">Object</a>
+             |
+             <b>Dictionary</b>
+                |
+                |-- Environment
+                |
+                |-- LocalDBDictionary
+                |
+                |-- <a href="#named">Named</a>
+                |
+                |-- <a href="#sys">SystemDictionary</a>
+                |
+                |-- <a href="#xref">XRef</a>
+
+</pre></font>
+<hr>
+<p>
+<h3><a name="access">Basic Access</a></h3>
+<p>
+To create a new Dictionary, use:<pre><tt><b>
+     !newDictionary <- Dictionary new ;
+</b></tt></pre>
+Initially the Dictionary is empty.  You add objects to the dictionary
+by providing a name for referencing the object.  For
+example, you can create a dictionary to translate externally defined
+codes into descriptive names using:<pre><tt><b>
+     !Lookups <- Dictionary new ;
+     Lookups at: "USA" put: "United States of America" ;
+     Lookups at: "CAN" put: "Canada" ;
+</b></tt></pre>
+The variable <i>Lookups</i> is defined to be a new
+Dictionary object.  
+The <a href="mDict.htm#at:put:"><i>at: id put: object</i></a>
+message is used to associate an id in the dictionary with a
+specific object.  In this example, the name <i>USA</i> is associated
+with the String object "United States of America" and the name
+<i>CAN</i> is associated with the String object "Canada".  The
+<a href="mDict.htm#at:"><i>at: id </i> </a>message is used to access the
+object associated with the specific id.  For example:<pre><tt><b>
+     Lookups at: "USA"
+</b></tt></pre>
+returns the String "United States of America" and<pre><tt><b>
+     Lookups at: "CAN"
+</b></tt></pre>
+returns the String "Canada".
+<p>
+Any type of object can be associated with an identifier in a
+Dictionary.  The following example creates a new class and several
+instances and uses a Dictionary to keep track of the instances by
+name:<pre><tt><b>
+     #- Create a new Class
+     !Industry <- Object createSubclass ;
+
+     #- Define a Property at the Class
+     Industry define: 'name' ;
+
+     #- Create new Instances
+     !autos <- Industry createInstance ;
+     autos :name <- "Automotive" ;
+     !tech <- Industry createInstance ;
+     tech :name <- "Technology" ;
+
+     #- Create a Dictionary to Reference Instances
+     !LookupIndustry <- Dictionary new ;
+     LookupIndustry at: "autos" put: autos ;
+     LookupIndustry at: "tech" put: tech ;
+</b></tt></pre>
+The expression:<pre><tt><b>
+    LookupIndustry at: "autos"
+</b></tt></pre>
+returns the instance of the class Industry representing the
+automotive industry.  Since the object returned is the actual
+Industry object which responds to the <i>name</i> message, the
+expression:<pre><tt><b>
+     LookupIndustry at: "autos" . name
+</b></tt></pre>
+returns the name of this industry, in this case the String
+"Automotive".  You can add several identifiers to the Dictionary
+that all return the same object.  For example:<pre><tt><b>
+     LookupIndustry at: "cars" put: (LookupIndustry at: "autos")
+</b></tt></pre>
+adds the name <i>cars</i> to the Dictionary and defines it to return
+the industry object representing the automotive industry.  The
+expressions:<pre><tt><b>
+     LookupIndustry at: "autos"
+</b>and<b>
+     LookupIndustry at: "cars"
+</b></tt></pre>
+produce identical results.
+<p>
+The message <i>displayMessages</i> can be used to see all the names
+in a Dictionary.  For example:<pre><tt><b>
+     LookupIndustry displayMessages
+</b></tt></pre>
+displays the names <i>autos, cars, </i>and <i>tech</i>.
+<p>
+If there is no object associated with the supplied identifier, the
+value <i>NA</i> is returned.  For example:<pre><tt><b>
+     LookupIndustry at: "xyz"
+</b></tt></pre>
+returns the value <i>NA</i>.  The message
+<a href="mDict.htm#uniformAt:"><i>uniformAt: id </i></a>
+will return the object named <i>Default</i> in the Dictionary if the
+original name is not found.  If no object named <i>Default</i> is
+found either, the value <i>NA</i> is returned.  For example, add the
+name <i>Default</i> to the Dictionary to return the default
+Industry instance:<pre><tt><b>
+     LookupIndustry at: "Default" put: Industry ;
+
+</b>then:<b>
+
+     LookupIndustry uniformAt: "xyz"
+</b></tt></pre>
+returns the object representing the default Industry since the id
+<i>xyz</i> is not found in the dictionary.
+<p>
+The <i>delete:</i> message can be used to delete an entry from a
+Dictionary.  For example:<pre><tt><b>
+     LookupIndustry delete: "cars" ;
+</b></tt></pre>
+deletes this entry from the dictionary.  The expression:<pre><tt><b>
+     LookupIndustry at: "cars"
+</b></tt></pre>
+will now return the value <i>NA</i>.  Note that the expression:<pre><tt><b>
+     LookupIndustry at: "autos"
+</b></tt></pre>
+will continue to return the industry object because the
+<i>delete:</i> message at Dictionary just deletes the reference from
+the Dictionary to the object but does not actually delete the object
+itself.
+<p>
+<hr>
+<p>
+<h3><a name="shortcut">Access Shortcut</a></h3>
+<p>
+Internally, the <i>at:</i> message defines the supplied name as a 
+<a href=Fund.htm#constant>class constant</a>.  The expression:<pre><tt><b>
+     Dictionary  at: "test" put: "this is a test"
+</b></tt></pre>
+is equivalent to:<pre><tt><b>
+     Dictionary define: 'test' toBe: "this is a test"
+</b></tt></pre>
+The expressions:<pre><tt><b>
+    Dictionary at: "test"
+</b></tt></pre>
+is therefore equivalent to:<pre><tt><b>
+    Dictionary test
+</b></tt></pre>
+Note that if the identifier does not start with a letter or the _
+character or if it contains any special characters, you need to use the \
+(escape) character to precede the name (and each special character within
+the name).  In these cases, it is often easier to use the <i>at:</i>
+form of the lookup.  For example, if you added a multi-word identifier
+using:<pre><tt><b>
+     Dictionary at: "this is a long identifier" put: "answer"
+</b></tt></pre>
+then the expressions:<pre><tt><b>
+     Dictionary at: "this is a long identifier"
+</b>and<b>
+     Dictionary this\ is\ a\ long\ identifier
+</b></tt></pre>
+both return the String "answer".  In this case, the version using <i>at:</i>
+is probably simpler to read.
+<p>
+Additional information on <a href="Lang.htm#variable">valid identifiers</a>
+is available.  
+<p>
+<hr>
+<p>
+<h3><a name="named">Naming Dictionaries (Named)</a></h3>
+<p>
+The subclass <b>Named</b> is used to organize Dictionary classes
+that are used for naming instances of the different Entity
+subclasses.  To avoid conflicting names across classes, a separate
+naming dictionary has been defined for
+each <a href="clEntity.htm#access">Entity subclass</a>.
+For example, the company General Motors and the common stock
+security of General Motors would represent distinct objects in a
+Company and Security class.  The name <i>GM</i> would be added to
+the dictionaries <i>Named Company</i> and <i>Named Security</i>.
+The expression:<pre><tt><b>
+     Named Company at: "GM" .
+</b>or<b>
+     Named Company GM
+</b></tt></pre>
+returns the Company instance representing General Motors and the
+expression:<pre><tt><b>
+     Named Security at: "GM" .
+</b>or<b>
+     Named Security GM
+</b></tt></pre>
+returns the Security instance representing General Motors common
+stock.
+<p>
+To display the set of naming dictionaries that have been
+defined, use the expression:<pre><tt><b>
+     Named displayMessages
+</b></tt></pre>
+<p>
+When a new entity subclass is created using the
+<i>createSubclass: id</i> message, a new naming dictionary is
+automatically defined at the class <i>Named</i> using the same
+identifier.  For example, the expression:<pre><tt><b>
+     Entity createSubclass: "Industry" ;
+</b></tt></pre>
+creates the new subclass <i>Industry</i> and the new naming dictionary
+<i>Named Industry</i>.  The <i>Default</i> identifier is automatically
+added to this naming dictionary to return the default instance in the
+new Entity class.  The expressions:<pre><tt><b>
+     Named Industry at: "Default"
+</b>and<b>
+     Named Industry Default
+</b></tt></pre>
+will therefore return the default Industry instance.  The 
+expression:<pre><tt><b>
+     Named Industry uniformAt: "xyz"
+</b></tt></pre>
+will return the default Industry if the identifier <i>xyz</i> has not
+been defined.  When a new instance of an entity class is created
+using the <i>createInstance: id</i> message, the id is automatically
+added to the class naming dictionary, returning the newly created instance. 
+For example, the expression:<pre><tt><b>
+     Industry createInstance: "Auto" ;
+</b></tt></pre>
+create a new instance of the Industry class and adds the name
+<i>Auto</i> to the <i>Named Industry</i> Dictionary.  The
+expressions:<pre><tt><b>
+     Named Industry at: "Auto"
+</b>and<b>
+     Named Industry Auto
+</b></tt></pre>
+will therefore return the Industry instance representing the
+automotive industry.
+<p>
+<hr>
+<p>
+<h3><a name="xref">Cross Reference Dictionaries (XRef)</a></h3>
+<p>
+The naming dictionaries defined for entity classes provides a useful way to
+track one or more standard aliases for an instance.
+It is often useful to track aliases for an entity that may be
+uniquely assigned by a specific source but which may overlap with
+aliases assigned by other sources.  For example, two sources may
+supply currency information using different coding schemes.  These
+schemes will not necessarily match the scheme used by your
+installation.
+To address this situation, a separate cross reference dictionary is
+set up to store the relationship between a specific alternative
+source's code and the actual entity instance.
+<p>
+The class <b>XRef</b> is a subclass of Dictionary and is used to store
+these cross references.  The message 
+<i>createXRef: withProperty: </i>
+is used to create a new XRef dictionary for a specific entity
+subclass.  The first parameter is the name of the XRef dictionary
+and the second is the name of a property at the entity class that
+will store the cross reference values.  For example, to create a
+currency cross reference to track Source1 currency codes use:<pre><tt><b>
+     Currency createXRef: "Source1" withProperty: "source1Code" ;
+</b></tt></pre>
+This message performs the following steps:
+<ol type="1">
+<li>Defines a new XRef dictionary named <i>Currency XRef Source1</i>.
+<li>Adds the name <i>Default</i> to this XRef to return the default Currency
+instance (i.e., <i>Currency XRef Source1 Default = Named Currency Default</i>).
+<li>Defines the property <i>source1Code</i> at the Currency class .
+</ol>
+<p>
+To obtain a list of the XRef instances defined for a
+class, use the expression:<pre><tt><b>
+     entityClass XRef displayMessages
+</b></tt></pre>
+For example:<pre><tt><b>
+     Currency XRef displayMessages
+</b></tt></pre>
+returns the names of all the <i>Currency XRef</i> dictionaries that have been
+created for the Currency class.
+<p>
+The message <i>setXRefIn: xref to: id</i> is used to add or change XRef values
+for a specific entity.  For example,
+if Source1's code for the US currency is 1, use the expression:<pre><tt><b>
+   Named Currency US setXRefIn: Currency XRef Source1 to: "1" ;
+</b></tt></pre>
+This expression adds the id <i>1</i> to the XRef and
+sets the value of the "source1Code" property
+for currency US to "1".  The expression:<pre><tt><b>
+     Currency XRef Source1 at: "1" . 
+</b></tt></pre>
+returns the US currency instance.  The expressions:<pre><tt><b>
+     Currency XRef Source1 at: "1" .
+
+     Currency XRef Source1 \1
+</b>and<b>
+     Named Currency US
+</b></tt></pre>
+all return the same instance.
+<p>
+Each XRef is associated with a specific property.  For example,
+<i>Currency XRef Source1</i> is associated with the property <i>source1Code</i>
+at the
+class Currency.  The message <i>updateBlock</i> defines a block that
+returns the property associated with a particular XRef.  For
+example:<pre><tt><b>
+     Currency XRef Source1 updateBlock
+</b></tt></pre>
+returns:<pre><tt>     [ :source1Code ] 
+</tt></pre>
+and the expression:<pre><tt><b>
+     Named Currency US source1Code
+</b></tt></pre>
+returns the value <i>1</i>.
+<p>
+The message <i>profile</i> is defined at XRef to display the cross
+reference values defined in this XRef for all entities.  For
+example, the expression:<pre><tt><b>
+     Currency XRef Source1 profile
+</b></tt></pre>
+displays:<pre><tt><b>
+     Currency XRef Source1  For Item: [:source1Code]
+     Code      Name                          XRef Value
+     . . .
+     US        U.S. Dollar                    : 1 /
+     . . .
+</b></tt></pre>
+Any number of aliases can be defined.  If Source1 also uses the code
+"USA1" for the US currency, then you can set and use either alias.
+For example:<pre><tt><b>
+   Named Currency US setXRefIn: Currency XRef Source1 to: "USA1" ;
+   Currency XRef Source1 profile ;
+</b></tt></pre>
+produces:<pre><tt><b>
+     Currency XRef Source1  For Item: [:source1Code]
+     Code      Name                          XRef Value
+     . . .
+     US        U.S. Dollar                    : 1 / USA1 /
+     . . .
+</b></tt></pre>
+The default <i>profile</i> message defined
+for the Entity class displays the value defined for each XRef property
+defined for the class.  For example, the expression:<pre><tt><b>
+     Named Currency US profile
+</b></tt></pre>
+produces:<pre><tt><b>
+     *** Currency Profile For: US Dollars
+     Code:                         US
+     Aliases:                      US / 
+
+     ---  Links   ---
+
+     ---  XRefs  ---
+     source1Code:                     USA1
+
+</b></tt></pre>
+<p>
+<hr>
+<p>
+<h3><a name="sys">System Dictionaries</a></h3>
+<p>
+The subclass <b>SystemDictionary</b> is used to organize Dictionary classes
+that are supplied with the core Vision system and various optional ToolKits.
+The dictionary <i>SystemDictionary UpperCaseDictionary</i> is used
+to store the upper case equivalents of the letters 'a' through 'z'.
+This Dictionary was created using:<pre><tt><b>
+     SystemDictionary newAs: "UpperCaseDictionary" ;
+     SystemDictionary UpperCaseDictionary 
+          at: "a" put: "A" .
+          at: "b" put: "B" .
+          at: "c" put: "C" .
+     ;
+</b></tt></pre>
+The message <a href="mString.htm#capitalize"><i>capitalize</i></a>
+is defined at the class String to use this dictionary to translate
+the first letter of a string to its capitalized equivalent.
+The dictionary <i>SystemDictionary LowerCaseDictionary</i> is 
+defined in a similar way and is used
+to store the lower case equivalents of the letters 'A' through 'Z'.
+<p>
+Note that the <i>newAs:</i> message has been defined at Dictionary to name the
+new dictionary in the dictionary's parent dictionary.  
+The expression:<pre><tt><b>
+     SystemDictionary newAs: "Test"
+</b></tt></pre>
+creates a new dictionary
+and automatically defines the message <i>Test</i> at the class SystemDictionary
+to return it.  The expression:<pre><tt><b>
+     SystemDictionary Test
+</b></tt></pre>
+returns this new dictionary instance.
+<p>
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated June 19, 1997</font>
+</table>
+
+</body>
+</html>

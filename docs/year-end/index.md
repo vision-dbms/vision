@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 This document discusses the implementation of new pricing and holding structures for a Vision database.
 
 Command Script Files:

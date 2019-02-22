@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Portfolio Management Application: Getting Started</title>
+</head>
+<body bgcolor=white>
+<h2>Vision Portfolio Management Application: Getting Started</h2>
+
+<p>
+| <a href="pmaFeeds.htm">Data Feeds</a> 
+| <a href="pmaDBA.htm">Database Administration</a>
+| <a href="pmaApps.htm">Applications</a>
+| <a href="pmaAnalyst.htm">Analyst Tools</a>
+| <a href="vpma.htm">Application Overview</a>
+|
+<hr>
+<h3>Topics Covered:</h3>
+<ul type=square>
+<li><a href="#starter">Assembling Starter Files</a>
+<li><a href="#vadmin">Using <i>VAdmin</i> to Load the Data</a>
+<li><a href="#restarting">Restarting the Master Listeners</a>
+<li><a href="#browser">Viewing the Data via Browser Applications</a>
+<li><a href="#excel">Using the Data in Excel</a>
+</ul>
+
+<p>
+<hr>
+<h3><a name="starter">Assembling Starter Files</a></h3>
+<p>
+To start each system, you will minimally want to prepare the following data feeds: <i>SecurityTypeMaster</i>, <i>SecurityMaster</i>,
+<i>PortfolioMaster</i>, and <i>HoldingsFeed</i>.    
+<p>
+
+Assume the data for <i>SecurityTypeMaster</i> looks like the following:  
+<p>
+<pre><b>Id	name	          unitCalc     AssetCategory</b>
+
+0	Cash & Equiv	  1	       Cash
+1	Common Stock	  1	       Equity
+2	Preferred Stock	  1	       Equity
+</pre>
+<p>
+This feed will be saved as <i>sectype.txt</i>.
+<p>
+
+Assume the data for <i>SecurityMaster</i> looks like the following:  
+<p>
+<pre>
+<b>id	   name	                 ticker   type   latestMarketCapUS</b>
+				
+00195710   AT&T CORP COM         T	  1      55447562.63
+00811710   AETNA INC COM         AET      1      14458498.5
+20449310   COMPAQ COMPUTER CORP	 CPQ	  1      26578000
+</pre>
+<p>
+This feed will be saved as <i>sec.txt</i>.
+<p>
+
+
+Assume the data for <i>PortfolioMaster</i> looks like the following:  
+<p>
+<pre>
+<b>id	name</b>
+	
+102	INSYTE GROWTH FUND
+232	INSYTE INCOME FUND
+332	INSYTE GROWTH & INCOME FUND
+532	INSYTE PENSION
+</pre>
+<p>
+This feed will be saved as <i>portfolio.txt</i>.
+<p>
+
+Assume the data for <i>HoldingsFeed</i> looks like the following:  
+<p>
+
+<pre>
+<b>date	acctId	secId	   shares   mval</b>
+				
+971215	102	00195710   8823	    49422.22
+971215	102	00811710   6111	    42122.11
+971215	232	00811710   7700	    444444.4
+971215	232	20449310   7001	    424344.4
+971215	332	20449310   7800	    497741.4
+971215	332	00195710   7100	    463321.4
+</pre>
+<p>
+This feed will be saved as <i>holdings.txt</i>.
+<p>
+
+More information about <a href="pmaFeeds.htm#formats">Feed Formats</a> and 
+<a href="pmaFeeds.htm#starter">Starter Feeds</a> is available.
+<p>
+
+<hr>
+
+<a name ="vadmin"><h3>Using <i>VAdmin</i> to Load the Data</h3></a>
+
+<p>
+
+Before the files can be loaded into the database, they must be moved to the appropriate directory.  
+When you have a data file available, you place it in a pre-defined directory on your <b>Server</b> machine. 
+On Unix servers this directory is normally <i>/localvision/upload/feeds</i>. 
+On NT servers, this directory is normally stored relative to a specific disk and may include an additional prefix as part of its path. 
+Check with your system administrator for the exact location in your environment. 
+<p>
+If you have not yet obtained a valid license file entry for your server(s), please contact Insyte.  You will be unable to commit updates to the database until you have done so. 
+<p>
+
+After moving the files, start the <i>VAdmin</i> module.  You should see 
+the files that you saved in the <i>Pending Files</i> section on the left of the form.
+
+<p>
+<center>
+<img src="starting1.gif" width=564 height=705 border=1 alt="VAdmin Interface with sample feeds">    
+</center>
+<p>
+
+You will want to load the files in the following order:
+<i>sectype.txt</i>, <i>sec.txt</i>, <i>portfolio.txt</i>, <i>holdings</i>.
+To start, select the <i>sectype.txt</i> data file from the left and the entity data feed <i>SecurityTypeMaster</i>, from the right. 
+Press the <i>Update</i> button to load this data.
+When the update finishes, you should see a summary report similar to: 
+<p>
+<center>
+<img src="starting2.gif" width=563 height=315 border=1 alt="VAdmin Diagnostics Report for SecurityType">    
+</center>
+<p>
+
+Press the <i>Save</i> button to save the feed. 
+When the save finishes, you should see a message similar to: 
+<p>
+<center>
+<img src="starting3.gif" width=471 height=292 border=1 alt="Saved message">    
+</center>
+<p>
+The file <i>sectype.txt</i> has now been removed from the Pending files list box.
+It has been moved to the directory <i>/localvision/upload/feeds/done</i>.
+
+Continue loading the files in the following order: <i>sec.txt</i>, <i>portfolio.txt</i>.  
+The last file to load is the <i>holdings.txt</i>, whose feed name is <i>HoldingsFeed</i>.
+To access the feed, you select the category <i>Transaction</i> from the top right list box.
+
+<p>
+
+Each time you add data to the Vision database, Vision
+creates a new version or view of the database.  
+To see the history of your updates to the database, click on the
+<i>Vision DBA</i> menu and select the <i>Version History</i> 
+choice.  This displays the history of your changes.  If you
+want to undo one or more updates, you can select the version that
+you wish to eliminate and press the <i>Rollback</i> option on this
+form.  
+
+For more information on this topic, see the section <a href="pmaDBA.htm#versions">Reviewing Version History</a>.
+<p>
+
+<a name="restarting"><h3>Restarting Master Listeners</h3></a>
+
+<p>
+
+When the database administrator has loaded new data and is ready to make it 
+available to web users, the <i>master listeners</i> should be restarted.
+<p>
+<center>
+<img src="starting4.gif" width=210 height=243 border=1 alt="Listener menu">
+</center>
+<p>
+
+Select the <i>Restart Master Listeners</i> choice from this menu.
+
+For more information on listeners, see the section
+<a href="pmaDBA.htm#web">Controlling the Web Reporter</a>.
+<p>
+<hr>
+
+<a name="browser"><h3>Viewing the Data via Browser Applications</h3></a>
+
+To access the browser, enter the url <i>http://visionWeb/vision</i>.
+You should see the <i>Vision Application</i> home page.
+<p>
+To see a <i>Security Profile</i> report for AET,
+select <i>Security Reports</i>, then select <i>Security Profile</i>.
+Enter <i>AET</i> or <i>00811710</i>.  You should see the AET profile.
+<p>
+<center>
+<img src="starting5.gif" width=646 height=446 border=1 alt="AET Profile" >
+</center>
+<p>
+
+The information you supplied via the <i>SecurityMaster</i> upload is displayed.
+<p>
+
+To see a list of all Accounts, do the following:
+<p>
+
+Select <i>Home</i> at the bottom of the current profile. 
+Select <i>Account Reports</i> then <i>AccountProfile</i>.  
+Enter <i>Submit</i> with no accounts selected.
+You should see a listing of all accounts that you loaded in hyperlink form.
+Select the link for account <i>102</i>.
+You should see an <i>Account Profile</i> for account <i>102</i>. 
+<p>
+<hr>
+
+<a name="excel"><h3>Using Data in Excel</h3></a>
+<p>
+
+You can also use the Vision data in Excel.  Start a new Excel and <a href="pmaAnalyst.htm#overview">connect to vision</a>.
+You are now ready to extract and/or upload data.
+<p>
+
+To extract holdings for portfolio <i>102</i>, select the following range:
+<p>
+<center>
+<img src="starting6.gif" width=474 height=44 border=1 alt="portfolio extraction">
+</center>
+<p>
+
+Select <i>Get Entity By Item Data</i> from the <i>Vision</i> menu. 
+<p>
+
+<center>
+<img src="starting7.gif" width=319 height=67 border=1 alt="portfolio extraction results">
+</center>
+<p>
+The information you supplied via the <i>SecurityMaster</i>, <i>PortfolioMaster</i>, and
+<i>HoldingsFeed</i> upload is displayed.
+<p>
+For more samples of using data in Excel see <a href="pmaAnalyst.htm#usage">Sample Usage</a>.
+
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated January 28, 1999</font>
+</table>
+
+</body>
+</html>
+
+

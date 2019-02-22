@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Error Messages </title>
+</head>
+<body bgcolor = white>
+<h2>Vision Error Messages</h2>
+
+<p>
+     | <a href="FHome.htm">Home</a> | <a href="Syntax.htm">Syntax</a> | <a href="Lang.htm">Language Basics</a> |
+<hr>
+<h3>Topics Covered:</h3>
+<ul type="square">
+<li><a href="#syn">Syntax Errors</a>
+<li><a href="#snf">Selector Not Found Errors</a>
+<li><a href="#fatal">Fatal Vision Errors</a>
+</ul>
+<hr>
+<h3><a name="syn">Syntax Errors</a></h3>
+<p>
+A <b>Syntax Error</b> occurs when you try to execute a Vision expression
+that is not formulated correctly.  For example, the following
+expression does not supply a parameter to the <i>+</i> message:<pre><tt><b>
+     3 + 
+</b></tt></pre>
+If you execute this expression, you should get the error message:<pre><tt><b>
+     >>> 'syntax error' near source line 2, character 9 <<<
+           3 +
+     **       ^
+</b></tt></pre>
+Since Vision was expecting a value following the <i>+</i> message and none
+was provided, you are informed that you have made a syntax error.
+Vision tries to identify where the error occurred and provides an
+indicator arrow (i.e., the ^ symbol) in the area where the problem
+was first identified.  In this case, the arrow points to the area
+directly after the <i>+</i> message.  Execution is terminated as soon the
+first syntax error is encountered.  
+<p>
+Several other mistakes will produce syntax errors.  For example, the
+expression:  <pre><tt><b>
+     2 + 7 . print 
+</b></tt></pre>
+produces the error:<pre><tt><b>
+     >>> 'syntax error' near source line 1, character 12 <<<
+           2 + 7 . print
+     **          ^
+</b></tt></pre>
+because you cannot use the <i>.</i> character to terminate a binary
+message.  A syntax error is generated if you send a 
+<a href="Lang.htm#literal">literal</a> (i.e., a
+number, string, block, or magic word) to another object, since
+literals must be the first object in an expression.  For example, the
+expression:<pre><tt><b>
+     2 2 
+</b></tt></pre>
+produces the error message:<pre><tt><b>
+     >>> 'syntax error' near source line 1, character 8 <<<
+           2 2 
+     **      ^
+</b></tt></pre>
+The expression:<pre><tt><b>
+     2 "xxx" 
+</b></tt></pre>
+produces the error message:<pre><tt><b>
+     >>> 'syntax error' near source line 1, character 8 <<<
+       2 "xxx" 
+     **      ^
+</b></tt></pre>
+The expression:<pre><tt><b>
+     2 [ ] 
+</b></tt></pre>
+produces the error message:<pre><tt><b>
+     >>> 'syntax error' near source line 1, character 4 <<<
+       2 [ ] 
+     **  ^
+</b></tt></pre>
+The expression:<pre><tt><b>
+     2 ^self 
+</b></tt></pre>
+produces the error message:<pre><tt><b>
+     >>> 'syntax error' near source line 1, character 4 <<<
+       2 ^self 
+     **  ^
+</b></tt></pre>
+You will generate a syntax error if you execute a program that has a
+mismatched number of quote characters.  For example, the 
+expression:<pre><tt><b>
+      "this is a string that never ends. 
+</b></tt></pre>
+produces the error message:<pre><tt><b>
+     >>> 'End of File encountered in String' near source line 2, character 38 <<<
+       "this is a string that never ends. 
+     *^
+     >>> 'syntax error' near source line 2, character 38 <<<
+       "this is a string that never ends. 
+     *^
+</b></tt></pre>
+You will also generate a syntax error if you do not have the
+appropriate number of closing parentheses or brackets in your
+program.  For example, the expression:  <pre><tt><b>
+     [ 2 + 2 ; 
+</b></tt></pre>
+produces the error message:<pre><tt><b>
+     >>> 'syntax error' near source line 2, character 11 <<<
+      [ 2 + 2 ; 
+     **         ^
+</b></tt></pre>
+Since the set of magic words is fixed and internal to Vision, you
+will generate a syntax error if you try to use an unknown magic word.
+For example, the expression:  <pre><tt><b>
+     ^cur gm sales 
+</b></tt></pre>
+produces the error message:<pre><tt><b>
+     >>> 'Unrecognized magic word '^cur'' near source line 1, character 4 <<<
+      ^cur gm sales 
+     **  ^
+</b></tt></pre>
+You will also receive a syntax error if you have a keyword message as
+the initial message in an expression.  For example:  <pre><tt><b>
+     defineMethod: [ | x | "This is a method at ^current" ] ; 
+</b></tt></pre>
+produces the error message:<pre><tt><b>
+     >>> 'syntax error' near source line 1, character 13 <<<
+      defineMethod: [ | x | "This is a method at ^current" ] ; 
+     **           ^
+</b></tt></pre>
+You must send binary and keyword messages to a named object or a literal
+(i.e., a number, string, block, or magic word).
+<p>
+<hr>
+<h3><a name="snf">Selector Not Found Errors</a></h3>
+<p>
+A <b>Selector Not Found</b> error
+occurs because you have asked Vision to execute a message
+that is not defined.  For example:<pre><tt><b>
+     "This is a string" + 5 
+</b></tt></pre>
+This expression produces the error message:<pre><tt><b>
+     >>> Selector '+' Not Found <<<
+       NA
+</b></tt></pre>
+When you ask Vision to add 5 to a string, Vision complains because
+the addition message is not defined for strings.  The <i>Selector Not
+Found</i> response identifies the specific message that Vision could
+not perform.  In this case, the message identified is <i>+</i>.  Execution
+is not terminated when a selector is undefined.  The result of
+applying an undefined selector to an object is the value NA.  
+<p>
+When you are using <a href="Program.htm#named">named blocks</a>, you can 
+generate a variation on the <i>selector not found</i> message if you
+do not provide the correct number of parameters to a block.
+For example:<pre><tt><b>
+     !block <-
+           [ | sampleP1: a  P2: b | 
+             "Parameter 1: " print ; a printNL ; 
+             "Parameter 2: " print ; b printNL ;
+           ] ; 
+     block valueWith: 10 
+</b></tt></pre>
+produces:<pre><tt><b>
+     >>> Parameter 'a' Unavailable <<<
+     Parameter 1:       NA 
+     Parameter 2:        10
+</b></tt></pre>
+Notice that the value NA was substituted for the missing parameter
+and the program execution continued.
+<p>
+<hr>
+<h3><a name="fatal">Fatal Vision Errors</a></h3>
+<p>
+A fatal Vision error is indicated by output in the form:<pre><tt><b>
+     >>>  Error Trapped By Read-Eval-Print  <<<
+     *    Utilities [132]
+     *    'malloc' Error
+     *    Private Memory Allocation Error
+     Size: 3255252408, Details: Not Enough Space
+</b></tt></pre>
+When a fatal error is encountered, the current execution is aborted.
+Your Vision session will remain active, but you will not be able to
+commit any saves if your session encounters a fatal error.  Depending
+on the nature of the error, you may be able to continue working in
+your session; however, it is normally best to restart your session
+as soon as possible.
+<p>
+In general, <i>Memory Allocation</i> and <i>Map Segment</i> errors
+indicate that your session has exceeded available system resources.  
+
+<p>
+Following are examples and descriptions of some of the fatal errors you can encounter, grouped by category (displayed in the second line after <b>Error Trapped By Read-Eval-Print</b> in the error message):
+
+<ul type="circle">
+<li><a href="#sys-faults">System Faults</a>
+<li><a href="#seg-faults">Segmentation Faults, Interrupts, Container Framing Errors</a>
+<li><a href="#malloc">Malloc Errors</a>
+<li><a href="#inconsist">Internal Inconsistencies</a>
+<li><a href="#memory-mgr">Memory Manager Errors</a>
+<li><a href="#rtype">Unknown UVector RType Errors</a>
+<li><a href="#usage">Usage Errors</a>
+</ul>
+
+
+<h3><a name="sys-faults">System Faults</a></h3>
+<ul type=disc><pre>
+<li><b>Map Segment [/localvision/network/42/35596] 'No such file or directory'</b>
+</pre>
+This error simply indicates that the segment cannot be found. This most
+frequently occurs when a compaction has been run since this session was 
+started. The segment in question has either been moved to the .dsegs directory
+or deleted entirely.
+<pre>
+<li><b>Segment '...3/76' checksum 123456 not equal to computed checksum 98765</b>
+</pre>
+On update, this error indicates that a newly created segment written
+to disk does not have the expected contents causing the update to abort.
+The problem can be the result of disk corruption.  On HP-UX operating
+systems, this error can also occur if you have tuned the operating system to
+NOT force commits to happen immediately.  The parameter 'fs_async'
+should be set to 0 so updates to disk are forced to happen.
+<pre>
+<li><b>Segment Seek To Offset [0]: 'Bad file number'</b>
+</pre>
+This is due to a directory write permission problem in the /vision/network
+sub-directories.  It is not a fatal error, but is currently reported as such.
+</ul>
+<hr><p>
+<h3><a name="seg-faults">Segmentation Faults, Interrupts, and Container Framing Errors</a></h3>
+<ul type=disc><pre>
+<li><b>Segmentation Violation Signal</b>
+</pre>
+This a serious error that indicates that the underlying batchvision program
+attempted to access memory that was not part of its address space. There
+can be many causes for this. If a rollback has been done, and new segments
+have been created since the rollback, any sessions that started before the
+rollback would be likely to get this error. A corrupt segment could cause the
+error. An unidentified bug in the C code implementing batchvision can cause 
+this error. 
+<pre>
+<li><b>Bus Error Signal</b>
+</pre>
+This error is very similar to the Segmentation Violation. The main difference
+is the value of the illegal address being accessed.
+<pre>
+<li><b>Container Framing Error
+Specifics: MA:017A2700, POP:[0:551], RT:[12], S:[835316604/126891290]</b>
+</pre>
+The causes of this error are similar to Segmentation violations and Bus Errors.
+The difference is that the bad address that was used was within the process's
+address space, and data structures were corrupted.
+</ul><hr><p>
+<h3><a name="malloc">Malloc Errors</a></h3>
+<ul type=disc><pre>
+<li><b>Private Memory Re-Allocation Error
+Address: 7DC69130, Size: 26009624, Details: Not enough space</b>
+</pre>
+This error indicates that the process does not have a contiguous set of 
+addresses in its address space which is large enough to honor the request
+to grow the size of a private data structure. A couple of approaches could
+be taken to avoid this error:<p>
+&nbsp; - the tuning parameter VisionMappingLimit could be lowered; that will raise the
+probability that enough space will remain in the private data area of the process<p>
+&nbsp; - the second approach would be to examine and optimize the vision code<p>
+If the <i>Details:</i> section reads "Resource temporarily unavailable" instead of
+"Not enough space", then a system resource has been exhausted; typically the
+resource is swap space. 
+<pre>
+<li><b>Private Memory Allocation Error
+Size: 258856460, Details: Not enough space</b>
+</pre>
+This is similar to the Re-allocation error described above. The difference 
+is that this refers to the creation of a new data structure rather than the
+growth of an existing one.
+</ul>
+<hr><p> 
+<h3><a name="inconsist">Internal Inconsistencies</a></h3>
+<ul type=disc><li><pre>
+<b>rtPTOKEN_IsntCurrent: R-Type Error: RTYPE_C_Link Found, RTYPE_C_PToken Expected.</b>
+</pre>
+This error could be a "domino-effect" error following an allocation error
+or a segmentation violation. It could be the result of a rollback, or it
+could be caused by a bug in batchvision's C code.
+<pre><li><b>M_GetSpecificCPD: R-Type Error: RTYPE_C_MethodD Found, RTYPE_C_PToken Expected.</b>
+</pre>
+This Internal Inconsistency could have the same causes as the above.
+<pre><li><b>rtPTOKEN_BaseElementCount: R-Type Error: RTYPE_C_Undefined Found, RTYPE_C_PToken Expected.</b>
+</pre>
+This is similar to the previous Internal Inconsistencies.
+<pre><li><b>Unknown Descriptor Pointer Type '0' Found By 'DSC_InitPointerFromPointerCPD'</b>
+</pre>
+This is similar to the previous Internal Inconsistencies except that it would
+not be caused by a rollback.
+<pre><li><b>rtPTOKEN_NewBasePToken: Invalid Element Count -2085841084</b>
+</pre>
+This error occurs when vision code tries to create a collection with more than
+2 billion elements. This usually occurs with time series operations or within
+nested list operations.
+<pre><li><b>DSC_InitCorrespondenceDescriptor: P-Token Size Difference</b>
+</pre>
+This error indicates that the positional state of an object was changed
+while the object was being used. The typical way of causing this would be
+via a delete operation from within a list iteration, and then trying to use
+the collection which had elements deleted from within that same list iteration.
+<p>
+For example, if an Entity instance was deleted and Security instanceList was then
+accessed in a list operation, you would get the error.  To avoid the error, after
+the deletion run a <i>cleanSpace</i> for the Entity class object space and that
+will align all subclasses in that space.
+<pre>
+<li><b>rtVECTOR_Save: Transient store in vector set</b>
+</pre>
+This error occurs when an IndexedList is being updated with an indexing object
+from a <b>transient</b> store (non-permanent residence in object space 0).
+Instances from <i>new classes created in the current session</i> or existing objects
+with <i>extensions</i> reside in transient stores.
+<p>
+In releases prior to 6.1.1 the only alternative is to save the newly created class
+prior to the IndexedList update. In release 6.1.1 and above you are able to establish
+a forward residency of the new class upon creation and therefore avoid the transient
+store error. Please see  <a href="rel611.htm#clusterobjectspace">Vision Release 6.1.1 Notes</a>
+for more information on establishing residency for new classes.
+<p>
+In most cases, an extended object used as an index is a mistake.  You should strip all
+extensions prior to the IndexedList update by sending the message <i>asSelf</i>, otherwise
+the index lookup will fail (i.e. return <b>NA</b>).
+</ul>
+<hr><p>
+<h3><a name="memory-mgr">Memory Manager Errors</a></h3>
+<ul type=disc>
+<pre>
+<li><b>M_FreeCPD: CPD not in use</b>
+</pre>
+This is typically a "domino-effect" error which occurs when batchvision tries
+to clean up following another error.
+<pre>
+<li><b>No More Room In Container Table (space:0)</b>
+</pre>
+This is typically due to an infinitely recursive block execution. Each block
+execution creates some number of containers, and those containers normally get
+garbage collected when the block exits. If there is non-bounded recursion, more
+containers get created and none get freed - this continues until you get a malloc
+error or this error. In the days before plentiful memory, you would run out of
+memory before running out of container table entries. <p>
+For persistent spaces (not 0) this means that, over time, containers have
+accumulated in the space. This may be because cleanup/garbage collection is not
+being run in a timely fashion or it may be that updates to data are very poorly
+clustered.
+
+</ul>
+<hr><p>
+<h3><a name="rtype">Unknown UVector RType Errors</a></h3>
+<ul type=disc>
+<pre>
+<li><b>DSC_InitScalarWithUVElement: Unsupported R-Type RTYPE_C_Undefined</b>
+
+OR
+<li><b>DSC_InitScalarWithUVElement: Unsupported R-Type RTYPE_C_ValueStore</b>
+</pre>
+These errors indicate that batchvision is confused internally - it may be
+due to a corrupted segment, an IO error or an unidentified bug.  A check
+of all segments should be done to verify they all belong to the expected
+network.</ul>
+<hr><p>
+<h3><a name="usage">Usage Errors</a></h3>
+<ul type=disc>
+<pre>
+<li><b>!!!!!  Primitive # 196637 Not Implemented In This Version  !!!!!</b>
+</pre>
+This error means that a primitive method has been incorrectly defined and
+typically happens if code meant for a new release is used with an earlier
+version of batchvision.  The primitive index value, if not in the range 1-600,
+can be obtained via &nbsp; <i>nnnn</i> mod: <i>65536</i> &nbsp .. in the example
+above, the primitive index is 29.
+
+</ul>
+<p>
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1996 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated July 5, 2000</font>
+</tr>
+</table>
+
+</body>
+</html>

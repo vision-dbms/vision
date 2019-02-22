@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Navigating a Vision Database</title>
+</head>
+<body bgcolor = white>
+
+<h2>Navigating a Vision Database</h2>
+<p>
+     | <a href="FHome.htm">Home</a> | <a href="Classes.htm">Classes</a> | <a href="Messages.htm">Messages</a> | 
+<hr>
+<h3>Topics Covered:</h3>
+<ul type="square">
+<li><a href="#object">Describing an Object</a>
+<li><a href="#class">Class Information</a>
+<li><a href="#message">Message Information</a>
+<li><a href="#environ">Top-Level Environments</a>
+<li><a href="#identity">Object Identity</a>
+</ul>
+<p>
+<hr>
+<h3><a name="object">Describing an Object</a></h3>
+<p>
+All objects respond to the message <i>whatAmI</i> by returning the
+name of their class as a string.  For example:<pre><tt><b>
+     3 whatAmI
+</b></tt></pre>
+returns the string <i>"Integer"</i> and: <pre><tt><b>
+     "3" whatAmI
+</b></tt></pre>
+returns the string <i>"String"</i>.  All objects have a default way
+in which they <a href="Output.htm#print">print</a>
+depending on their class.  By default, an object
+will print its <i>whatAmI</i> value.  Many classes redefine the
+<i>print</i> message to display more specific information about the
+object.  For example, numbers and strings display their actual value
+in response to the <i>print</i> message:<pre><tt><b>
+     3 whatAmI printNL ;              #-   <i>Integer</i>
+     3 printNL ;                      #-   <i>        3</i>
+     (3 + 3) whatAmI printNL ;        #-   <i>Double</i>
+     (3 + 3) printNL ;                #-   <i>     6.00</i>
+     "3" whatAmI printNL ;            #-   <i>String</i>
+     "3" printNL ;                    #-   <i>3</i>
+</b></tt></pre>
+If you do not terminate your request with a ';' character, the
+<i>print</i> message is <a href="Lang.htm#printing">automatically sent</a>
+to the object returned by the request.  Therefore:<pre><tt><b>
+     "19951231" asNumber asInteger asDate
+</b></tt></pre>
+automatically prints the object returned, in this case the Date object
+representing December 31, 1995.  You can confirm that this is a date
+object using:<pre><tt><b>
+     "19951231" asNumber asInteger asDate whatAmI
+</b></tt></pre>
+<p>
+The properties <i>code</i> and <i>creationDate</i> are defined for 
+all objects.  The <i>code</i> normally contains a string that identifies
+the object.  The <i>creationDate</i> contains the date that the object
+was created.  For example:<pre><tt><b>
+     Named Currency US
+     do: [ whatAmI print: 30 ;
+           code print: 10 ; 
+           creationDate printNL ;
+         ] ;
+</b></tt></pre>
+<p>
+Note that the <i>code</i> value may not be unique and
+both properties can have an <i>NA</i> value.  For example, instances
+of many of the built-in classes such as <i>Number</i> and <i>String</i>
+do not have these property values set.  Although any method can
+initialize and reset these values, these properties are usually updated
+as part of the <a href="Classes.htm#instance">instance creation process</a>.
+<p>
+The message
+<a href="mObject.htm#displayInfo"><i>displayInfo</i></a>
+is defined to display an object's class name and value followed by
+a carriage return.  Some classes, such as 
+<a href="mEntity.htm#displayInfo">Entity</a> redefine this message to display
+additional information.  For example, the expression:<pre><tt><b>
+     Named Currency US displayInfo ; 
+</b></tt></pre>
+displays the <i>code</i> and <i>name</i> of the object representing the
+US currency.
+<p>
+The message <a href="mObject.htm#profile"><i>profile</i></a>
+is defined to display a descriptive report for an object.
+Some classes, such as 
+<a href="mEntity.htm#profile">Entity</a> redefine this message to display
+additional information.  For example, the expression:<pre><tt><b>
+     Named Currency US profile ; 
+</b></tt></pre>
+displays a descriptive report about the object representing the
+US currency.
+<p>
+<hr>
+<h3><a name="class">Class Information</a></h3>
+<p>
+The message 
+<a href="mObject.htm#showInheritance"><i>showInheritance</i></a>
+can be sent to an object to see the
+classes in its hierarchy.  For example, the expression:<pre><tt><b>
+     Integer showInheritance
+</b></tt></pre>
+displays the following:<pre><tt><b>
+      ***  Inheritance Map For Class: Integer  ***
+
+      Object
+        |
+      Ordinal
+        |
+      Number
+        |
+     Integer   <===== YOU ARE HERE
+</b></tt></pre>
+<p>
+Note that you can send the <i>showInheritance</i> message to any object.
+The expression <i>3 showInheritance</i> is identical to the expression
+<i>Integer showInheritance</i>.
+<p>
+If you send the <i>showInheritance</i> message to a class that has subclasses,
+each subclass will be displayed recursively.  The expression:<pre><tt><b>
+     Object showInheritance
+</b></tt></pre>
+can be used to display all the classes in your Vision database.
+<p>
+All objects respond to the message 
+<a href="mObject.htm#instanceList"><i>instanceList</i></a>
+by returning an
+object containing the list of all instances in the recipient's class.  The
+expression:<pre><tt><b>
+     Currency instanceList 
+</b></tt></pre>
+returns the list of instances in the class <i>Currency</i>.  The
+expression:<pre><tt><b>
+     Currency instanceList do: [ displayInfo ] ;
+</b></tt></pre>
+displays the <i>code</i> and <i>name</i> of each currency instance.
+The <a href="mObject.htm#masterList"><i>masterList</i></a>
+message has been defined to return the non-default, 
+<a href="Classes.htm#access">base object instances</a>
+associated with a class.  For example, the expression:<pre><tt><b>
+    Currency masterList do: [ displayInfo ] ;
+</b></tt></pre>
+will not include the default currency instance.
+<p>
+You can write a method that executes the <i>displayInfo</i> message
+for each instance in the class.  For example:<pre><tt><b>
+     Entity defineMethod: [ | displayInstances | 
+        ^self masterList do: [ displayInfo ] ;
+     ] ;
+</b></tt></pre>
+To run this method for any Entity subclass, use:<pre><tt><b>
+     Currency displayInstances
+</b></tt></pre>
+<p>
+<hr>
+<h3><a name="message">Message Information</a></h3>
+<p>
+Several messages are available to display some or all of the
+messages to which the instances of a particular class can respond:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+</tr>
+
+<tr>
+<td><i>showMessages</i>
+<td>Displays all the messages defined for the object's class.
+
+<tr>
+<td><i>showMessagesX</i>
+<td>Displays messages defined for the object's class and any of its
+super classes excluding Object.
+
+<tr>
+<td><i>showProperties</i>
+<td>Displays all fixed and time series properties defined for the
+object and any of its super classes.
+
+<tr>
+<td><i>showMessagesDefining: string</i>
+<td>Displays all classes that have defined the message identified by
+the supplied string.
+
+<tr>
+<td><i>showMessageNamesContaining: string</i>
+<td>Displays all messages that contain the supplied
+string as part of the message name.
+
+<tr>
+<td><i>showMessagesUsing: string</i>
+<td>Displays all messages that contain the supplied
+string as part of its method definition.
+
+<tr>
+<td><i>showMethodsUsing: string</i>
+<td>Displays the actual method implementations that contain the supplied
+string as part of its definition.
+
+</tr></table></Center>
+<p>
+All objects respond to these messages.  Two instances of the same
+class will respond identically to any of these messages.  
+<a href="Messages.htm#access">Samples using these messages 
+are available.</a>  Note that the "show" messages only reflect
+messages that have been committed to the database.  If you want
+to include messages that have been defined during your session,
+use the messages:
+<i>displayMessages</i>, <i>displayMessagesX</i>, and
+<i>displayProperties</i>.
+<p>
+<hr>
+<h3><a name="environ">Top-Level Environments</a></h3>
+<p>
+The class 
+<a href="Admin.htm#environ"<i>Environment</i></a>
+is used to keep track of the various object spaces that have been
+created.  Three types of object space have been defined: <i>DB spaces</i>
+are used to store external database classes and methods for updating
+them; <i>DBA spaces</i> are used to store tools for managing various
+aspects of the Vision database; <i>User spaces</i> are used to store
+private user information. 
+<p>
+You can access data stored in another object space independent of
+your <a href="Running.htm#top">top-level environment</a>.  The
+expressions:<pre><tt><b>
+     Environment User id           #  Environment User at: "id" .
+</b>or<b>
+     Environment DBA id            #  Environment DBA at: "id"  .
+</b>or<b>
+     Environment DB id             #  Environment DB at: "id" .
+</b></tt></pre>
+can be used to navigate to the top level of a private user, general
+administration or database space.  The supplied id can be the
+identifier used to create the space or the space number.  The object
+returned is the top-level of that space.  As a result, any messages
+defined for that space can be accessed.  For example, the 
+expression:<pre><tt><b>
+     Environment DBA at: "5" . displayInfo
+
+</b>displays:<b>
+
+     Object Space Number:         5
+     This Space Contains: Schema Management Tools
+     Shared Access Via: Environment DBA Schema
+</b></tt></pre>
+<p>
+To access a list of all the top level spaces created after object
+space 3, use the expression:<pre><tt><b>
+     Environment MaintenanceTools spaceList
+</b></tt></pre>
+This returns a list of all the top level environments.  You can
+use this list to generate a report describing all spaces.  For
+example:<pre><tt><b>
+     Environment MaintenanceTools spaceList
+     do: [ number print: -5 ;         #- object space number
+           whatAmI printNL ;          #- full access path
+         ] ;
+</b></tt></pre>
+<p>
+<hr>
+<h3><a name="identity">Object Identity</a></h3>
+<p>
+Several useful techniques are available to help determine the
+identity of any object.
+<p>
+A separate "is" message has been defined for every class in the
+database.  For example, the expression <i>3 isInteger</i> returns
+the value <i>TRUE</i> and the expression <i>"xyz" isInteger</i>
+returns the value <i>FALSE</i>.  
+To determine if an object belongs to a particular class, you can
+send it an appropriate <i>"is"</i> message.  For example:<pre><tt><b>
+    !value <- myObject isNumber
+         ifTrue: [ myObject ] 
+        ifFalse: [ 100 ] ;
+</b></tt></pre>
+<p>
+<a name="equiv"> </a>
+The following relational operators can be used to determine if two
+objects are identical or equal:
+<p>
+<Center><table width=90% border=1 cellspacing=2 cellpadding=8>
+<tr>
+<td><b>Message</b></td>
+<td><b>Definition</b></td>
+</tr>
+
+<tr>
+<td><i>= object</i>
+<td>Returns <i>TRUE</i> if recipient is equal to (has the
+same value as) the supplied parameter.
+<tr>
+<td><i>== object</i>
+<td>Returns <i>TRUE</i> if recipient is identical to supplied
+parameter.
+<tr>
+<td><i>!= object</i>
+<td>Returns <i>TRUE</i> if recipient is not equal to supplied
+parameter.
+<tr>
+<td><i>!== object</i>
+<td>Returns <i>TRUE</i> if recipient is not identical to supplied
+parameter.
+
+</tr></table></Center>
+<p>
+For most classes the <i>=</i> and the <i>==</i> messages return the
+same value.  For the ordinal classes (i.e., <i>Number, Date, String</i>),
+these messages return different results.
+For example, the <i>integer 3</i> is equal to the <i>double 3.0</i> because
+they have the same value.  The 
+<i>integer 3</i> is not identical to the
+<i>double 3.0</i> because they are not the same object.  Therefore:<pre><tt><b>
+     3 = 3.0
+</b></tt></pre>
+returns <i>TRUE</i> and:<pre><tt><b>
+     3 == 3.0
+</b></tt></pre>
+returns <i>FALSE</i>.  The <i>=</i> and <i>!=</i>
+messages can be redefined for other
+classes as appropriate.  Although you could redefine the <i>==</i> and
+<i>!==</i> messages, this is not normally done.
+<p>
+One common mistake when working with object identity occurs when an
+extended object is compared to an unextended object.  Although the
+underlying objects may be the same, these objects will not be
+equal or identical.
+The message
+<a href="mObject.htm#asSelf">asSelf</a> can be used to strip any
+extensions from an object.  
+It is often useful to send this message
+to the recipient and parameter objects prior to performing any
+equality tests.  For example:<pre><tt><b>
+    Named Currency US = (Named Currency US extendBy: [ !x ] )
+</b></tt></pre>
+returns <i>FALSE</i>, whereas:<pre><tt><b>
+    Named Currency US = (Named Currency US extendBy: [ !x ] ) asSelf
+</b></tt></pre>
+returns <i>TRUE</i>.
+<p>
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated June 19, 1997</font>
+</tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Class: Boolean </title>
+</head>
+<body>
+<body bgcolor=white>
+<h2>Vision Class: Boolean</h2>
+
+<p>
+     | <a href="FHome.htm">Home</a> | <a href="clXRef.htm">Class XRef</a> | <a href="clNA.htm">The NA Class</a> |
+<hr> 
+<h3>Topics Covered:</h3> 
+<ul type=square> 
+<li><a href="#overview">Overview</a>
+<li><a href="#creation">Generating Boolean Values</a>
+<li><a href="#logical">Logical Messages</a>
+<li><a href="#control">Conditional Messages</a>
+<li><a href="#na">Boolean Values and NAs</a>
+<li><a href="#other">Related Topics</a>
+</ul>
+<p>
+<hr>
+<h3><a name="overview">Overview</a></h3> 
+<p> 
+The class <b>Boolean</b> provides the protocol for logical values.
+Logical value are represented by the two subclasses of
+<i>Boolean</i> - <b>TRUE</b> and <b>FALSE</b>.  Most of the protocol
+for booleans is actually implemented at these subclasses.  
+<p>
+The <b>Boolean</b> class is a direct subclass of Object:
+<font size=+1><pre>
+          <a href="clObject.htm">Object</a>
+             |
+             <b>Boolean</b>
+                |
+                |-- FALSE
+                |
+                |-- TRUE
+
+</pre></font>
+
+<p>
+<hr>
+<h3><a name="creation">Generating Boolean Values</a></h3>
+<p>
+The messages <i>TRUE</i> and <i>FALSE</i> are defined at the class
+<i>Object</i> to return the objects representing the two <i>Boolean</i>
+values.  You can assign these values to 
+<a href="Lang.htm#variable">variables</a> and
+<a href="Fund.htm#fixed">properties</a> using the standard procedures.
+For example:<pre><tt><b>
+     !trueValue <- TRUE ; 
+     Currency defineFixedProperty: 'status' ;
+     Named Currency USD :status <- FALSE ;
+</b></tt></pre>
+<p>
+Many messages return one of these values.  The <b>relational messages</b>
+<i>=, ==, !=, !==, <, <=, >, >= </i>
+return a <i>TRUE</i> or <i>FALSE</i> value when used to
+compare two objects of the same class.  For example:<pre><tt><b>
+     3 < 4
+</b></tt></pre>
+returns the object <i>TRUE</i> and:<pre><tt><b>
+     "3" > "4"
+</b></tt></pre>
+returns the object <i>FALSE</i>.
+<p>
+Whenever a new class is created, the message is<i>XXX</i> 
+(where <i>XXX</i> is the class name) is defined as a class constant
+for the new class and for <i>Object</i>.  The value of the constant
+for the new class is <i>TRUE</i> and the value for the <i>Object</i>
+class is <i>FALSE</i>.  These messages are automatically defined
+when you create new classes using the
+<a href="Classes.htm#subclass"><i>createSubclass:</i></a>
+message.  For example, when you create a new class <i>TestClass</i> 
+using:<pre><tt><b>
+     Object createSubclass: "TestClass" ;
+</b></tt></pre>
+the message <i>isTestClass</i> is automatically defined using:<pre><tt><b>
+     TestClass define: 'isTestClass' toBe: TRUE ;
+     Object define: 'isTestClass' toBe: FALSE ;
+</b></tt></pre>
+The expression:<pre><tt><b>
+     TestClass isTestClass
+</b></tt></pre>
+returns <i>TRUE</i> since this object is an instance of <i>TestClass</i>.
+The expression:<pre><tt><b>
+     3 isTestClass
+</b></tt></pre>
+returns <i>FALSE</i> since the integer object will use the implementation
+of <i>isTestClass</i> defined at <i>Object</i>.
+<p>
+Many other messages have been defined to return a <i>Boolean</i>
+value including:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Class</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><a href="mString.htm#isBlank"><i>isBlank</i></a>
+<td><a href="clString.htm#substring">String</a>
+<td>Is <i>recipient</i> blank?
+<td>"  abc" isBlank
+<tr>
+<td><a href="mString.htm#contains:"><i>contains:</i></a>
+<td><a href="clString.htm#substring">String</a>
+<td>Does <i>recipient</i> contain <i>parameter</i> as a substring?
+<td>"whatAmI" contains: "^what" .
+<tr>
+<td><a href="mList.htm#all:"><i>all:</i></a>
+<td><a href="clList.htm#inquiry">Collection</a>
+<td>Do all members of <i>recipient</i> respond to <i>parameter</i>
+with TRUE ?
+<td> 5 sequence all: [ isNumber ] .
+<tr>
+<td><a href="mList.htm#any:"><i>any:</i></a>
+<td><a href="clList.htm#inquiry">Collection</a>
+<td>Do any members of <i>recipient</i> respond to <i>parameter</i>
+with TRUE?
+<td> 5 sequence any: [ ^self < 3 ] .
+<tr>
+<td><a href="mNumber.htm#between:and:"><i>between:and:</i></a>
+<td><a href="clNumber.htm#compute">Number</a>
+<td>Is <i>recipient</i> value between two <i>parameter</i> values?
+<td>5 between: 3 and: 7 .
+<tr>
+<td><a href="mNumber.htm#within:percentOf:"><i>within:percentOf:</i></a>
+<td><a href="clNumber.htm#compute">Number</a>
+<td>Is <i>recipient</i> value within
+<i>parameter1</i> percent of <i>parameter2</i>?
+<td>100 within: 10 percentOf: 105 .
+<tr>
+<td><a href="mObject.htm#isDefault"><i>isDefault</i></a>
+<td><a href="clObject.htm#isMessages">Object</a>
+<td>Is <i>recipient</i> the default instance for its class?
+<td>Named Currency Default isDefault
+
+</tr>
+</table></Center>
+
+<p>
+<hr>
+<h3><a name="logical">Logical Messages</a></h3>
+<p>
+The binary message <i>&&</i> is defined for the
+<i>Boolean</i> classes to perform a logical <i>"and"</i>
+between the recipient <i>Boolean</i> and the parameter.
+The binary message <i>||</i> is defined for the
+<i>Boolean</i> classes to perform a logical <i>"or"</i>
+between the recipient <i>Boolean</i> and the parameter.
+The parameter can be supplied as a <i>Boolean</i> value
+or as a block that evaluates to a <i>Boolean</i> value.
+<p>
+The following rules apply:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Expression</b>
+<td><b>Returns</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td>TRUE && TRUE
+<td>TRUE
+<td>3 < 4 && 4 < 5
+<tr>
+<td>TRUE && FALSE
+<td>FALSE
+<td>3 < 4 && 4 > 5
+<tr>
+<td>FALSE && TRUE
+<td>FALSE
+<td>3 > 4 && 4 < 5
+<tr>
+<td>FALSE && FALSE
+<td>FALSE
+<td>3 > 4 && 4 > 5
+<tr>
+<td>TRUE || TRUE
+<td>TRUE
+<td>3 < 4 || 4 < 5
+<tr>
+<td>TRUE || FALSE
+<td>TRUE
+<td>3 < 4 || 4 > 5
+<tr>
+<td>FALSE || TRUE
+<td>TRUE
+<td>3 > 4 || 4 < 5
+<tr>
+<td>FALSE || FALSE
+<td>FALSE
+<td>3 > 4 || 4 > 5
+
+</tr>
+</table></Center>
+<p>
+If you supply the parameter to these messages as a block, it is only
+evaluated if needed.  Since <i>&&</i> returns <i>FALSE</i> if
+the recipient object is <i>FALSE</i> independent of the parameter,
+the block only needs to be evaluated if the recipient is <i>TRUE</i>.
+Likewise, the <i>||</i> message returns <i>TRUE</i> if the recipient
+object is <i>TRUE</i> independent of the parameter.  If you do not
+supply the parameter as a block, it is evaluated prior to being
+passed to the message.  For example:<pre><tt><b>
+    !object <- 3 ;
+    object isString && object count < 5
+</b></tt></pre>
+generates the <i>Selector 'count' Not Found</i> error since the
+message <i>count</i> is being sent to a numeric object.  If you
+supply this parameter as a block:<pre><tt><b>
+    !object <- 3 ;
+    object isString && [ object count < 5 ] 
+</b></tt></pre>
+the value <i>FALSE</i> is
+returned (since <i>object</i> is not a string) and no error message
+is generated.  
+<p>
+The message <i>not</i> is defined for the <i>Boolean</i> classes
+to return <i>TRUE</i> when sent to <i>FALSE</i> and to return
+<i>FALSE</i> when sent to <i>TRUE</i>.  For example:<pre><tt><b>
+     ( 3 < 4 ) not
+</b></tt></pre>
+returns <i>FALSE</i>.
+<p>
+<hr>
+<h3><a name="control">Conditional Messages</a></h3>
+<p>
+Several messages that perform conditional tests can be sent
+to the <i>Boolean</i> values:
+<p>
+<ul type="disc">
+<li><a href="mBoolean.htm#ifTrue:"><i>ifTrue:</i></a>
+<li><a href="mBoolean.htm#ifFalse:"><i>ifFalse:</i></a>
+<li><a href="mBoolean.htm#ifTrue:ifFalse:"><i>ifTrue:ifFalse:</i></a>
+<li><a href="mObject.htm#ifTrue:else:"><i>ifTrue:else:</i></a>
+<li><a href="mObject.htm#ifFalse:else:"><i>ifFalse:else:</i></a>
+<li><a href="mObject.htm#ifTrue:ifFalse:else:"><i>ifTrue:ifFalse:else:</i></a>
+</ul>
+<p>
+The first three of these messages can only be sent to the <i>Boolean</i>
+objects.  The last three can be sent to any object and evaluate
+their "true clause" when sent to <i>TRUE</i> and their "false clause"
+when sent to <i>FALSE</i>.
+<p>
+The <i>ifTrue:</i> message evaluates its block parameter
+if the recipient is <i>TRUE</i> and returns the result of evaluating
+the block.  If the recipient is <i>FALSE</i>, the <i>NA</i> value is
+returned.  The <i>ifFalse:</i> message evaluates its block parameter
+if the recipient is <i>FALSE</i> and returns the result of evaluating
+the block.  If the recipient is <i>TRUE</i>, the <i>NA</i> value is
+returned.  The <i>ifTrue:ifFalse:</i> message evaluates its 
+first block parameter if the recipient is <i>TRUE</i> and
+evaluates its second block parameter if the recipient is <i>FALSE</i>.
+The result of the block evaluation is returned.  For example:<pre><tt><b>
+     !result <- 3 > 2
+       ifTrue: [ " this is true" print ;
+                 100
+               ] ;
+</b></tt></pre>
+Since the expression <i>3 > 2</i> evaluates to <i>TRUE</i>, 
+the block is evaluated.  The string "this is true" is displayed
+and the variable <i>result</i> is set to <i>100</i>, the
+value returned by the block.  In the expression:<pre><tt><b>
+     !result <- 3 > 4
+       ifTrue: [ " this is true" print ;
+                 100
+               ] ;
+</b></tt></pre>
+the block is not evaluated, since the expression <i>3 > 4</i>
+evaluates to <i>FALSE</i>.  In this case the variable <i>result</i>
+is set to <i>NA</i>, the value returned by the <i>ifTrue:</i> message
+when the block is not evaluated.
+<p>
+The message <i>ifTrue:ifFalse:</i> allows you to supply different
+blocks for the two cases.  For example:<pre><tt><b>
+     !result <- Currency instanceList count > 100
+       ifTrue: [ "Many Currencies" printNL;
+                 100
+               ] 
+      ifFalse: [ "Few Currencies" printNL ;
+                  1
+               ] ;
+</b></tt></pre>
+If the expression <i>Currency instanceList count > 100</i>
+evaluates to <i>TRUE</i>, the first block is evaluated.  
+The string "Many Currencies" is displayed
+and the variable <i>result</i> is set to <i>100</i>, the
+value returned by the block.  
+If the expression <i>Currency instanceList count > 100</i>
+evaluates to <i>FALSE</i>, the second block is evaluated.  
+The string "Few Currencies" is displayed
+and the variable <i>result</i> is set to <i>1</i>, the
+value returned by the block.  
+<p>
+<a name="nested"> </a>
+Since the blocks supplied as parameters are Vision programs,
+they can be used to create nested control structures.  For 
+example:<pre><tt><b>
+     !myList <- 200 sequence ;
+     !result <- myList count > 100 
+        ifTrue: [ myList count > 1000 
+                     ifTrue: [ "This is a very big list." ] 
+                    ifFalse: [ "This is a big list." ] 
+                ] 
+       ifFalse: [ "This is a small list." ] ;
+    result print ;
+</b></tt></pre>
+This program will return one of the 3 strings, depending on the
+number of elements in the list <i>myList</i> and store the string
+in the variable <i>result</i>.  This program can be streamlined
+using the 
+<a href="mObject.htm#elseIf:then:"><i>elseIf:then:</i></a> and 
+<a href="mObject.htm#else:"><i>else:</i></a> messages:<pre><tt><b>
+     !myList <- Currency masterList ;
+     !result <- myList count > 1000
+        ifTrue: [ "This is a very big list." ] .
+        elseIf: [ myList count > 100 ] 
+          then: [ "This is a big list." ] .
+          else: [ "This is a small list." ] ;
+    result print ;
+</b></tt></pre>
+
+<p>
+
+<p>
+<hr>
+<h3><a name="na">Boolean Values and NAs</a></h3>
+<p>
+A common source of <a href="Error.htm#snf"><i>Selector Not Found</i></a>
+errors are the result of sending the <i>ifTrue:</i>, <i>ifFalse:</i>,
+or <i>ifTrue:ifFalse</i> messages to non-boolean values.  For
+example:<pre><tt><b>
+     !object <- NA ;
+     object > 0
+       ifTrue: [ "Good " ] ifFalse: [ "Bad " ] 
+</b></tt></pre>
+Since the expression <i>object > 0</i> returns <i>NA</i> and the
+<i>ifTrue:ifFalse:</i> message is not defined for this class,
+the warning message <i>Selector 'ifTrue:ifFalse:' Not Found</i>
+will be displayed.  To avoid this message, an extra conditional
+test could be performed:<pre><tt><b>
+     !object <- NA ;
+     object isNumber
+     ifTrue: [ object > 0 
+                 ifTrue: [ "Good " ] ifFalse: [ "Bad " ] . print ;
+             ] ;
+</b></tt></pre>
+In this case, the <i>ifTrue:</i> block is only evaluated if the
+variable <i>object</i> is a number.  If it is, then the string
+"Good" is printed, otherwise the string "Bad" is printed.
+No <i>Selector Not Found</i> messages are generated in this form.
+Several alternatives exist for writing this program without
+generating the warning messages.  For example:<pre><tt><b>
+     !object <- NA ;
+     object > 0
+        ifTrue: [ "Good" ] ifFalse: [ "Bad" ] else: [ ] . print ;
+</b></tt></pre>
+In this form, the string "Good" is printed if <i>object > 0 </i>
+evaluates to <i>TRUE</i>, the string "Bad" is printed if it
+evaluates to <i>FALSE</i>, and nothing is printed if it
+evaluates to anything else including <i>NA</i> as it does in this
+case.
+<p>
+<hr>
+<h3><a name="other">Related Topics</a></h3>
+<p>
+<p>
+For additional information see:
+<p>
+<ul type=square>
+<li><a href="Program.htm#control">Program Control Structures</a>
+<li><a href="clNA.htm#conditional">Conditionals and Non-Boolean Values</a>
+<li><a href="clNA.htm#else">Using <i>elseIf:then:</i> and <i>else:</i></a>
+<li><a href="clString.htm#inquiry">Inquiry Messages for Strings</a>
+<li><a href="clString.htm#comparison">Comparison Messages for Strings</a>
+<li><a href="clNumber.htm#comparison">Comparison Messages for Numbers</a>
+<li><a href="Navigate.htm#message">General Message Information</a>
+</ul>
+<p>
+<p>
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated June 19, 1997</font>
+
+</table>
+
+</body>
+</html>
