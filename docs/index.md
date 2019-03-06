@@ -13,7 +13,16 @@ Please pardon our appearance as we work to update and modernize the material in 
 * [Vision Concepts](original/vconcep.htm)
 * [Writing Programs](original/writprog.htm) 
 * [Using Vision](original/usingv.htm)
-* [Vision Help](original/vhelp.htm) 
+
+* [Class Cross Reference](original/vclassx.htm)
+* [Vision Tutorials](original/vtutor.htm)
+* [Vision Interfaces](original/vifaces.htm)
+
+* [Administration](original/vadmin.htm)
+* [Applications](original/vapps.htm)
+
+* [Vision Help](original/vhelp.htm)
+* [Vision FAQ](original/faq.htm)
 
 ## Legacy Documentation
 
