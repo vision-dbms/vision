@@ -1,5 +1,5 @@
 ---
-layout: default
+title: Debugging Update Malloc Errors
 ---
 
 ## Build a reproducer

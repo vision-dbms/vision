@@ -1,8 +1,6 @@
 ---
-layout: default
+title: "*nix Build instructions"
 ---
-
-# *nix Build instructions
 
 In this example we'll be building `release-8.1` on Linux from a fresh clone of the repository at `https://github.com/vision-dbms/vision.git`.  
 

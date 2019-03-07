@@ -1,6 +1,9 @@
 ---
-layout: default
+title: Vision
+layout: home
 ---
+
+* [The Technology](original/visiontech.htm)
 
 ## Building Vision
 
@@ -23,6 +26,8 @@ Please pardon our appearance as we work to update and modernize the material in 
 
 * [Vision Help](original/vhelp.htm)
 * [Vision FAQ](original/faq.htm)
+
+* [For Portfolio Managers](original/vpma.htm)
 
 ## Legacy Documentation
 
