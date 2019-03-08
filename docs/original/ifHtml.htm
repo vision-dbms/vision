@@ -25,7 +25,7 @@
 <li><a href="ifHtml.htm#vquery">The <i>vquery</i> Program</a>
 </ul>
 <hr>
-<h3><a name="overview">Overview</a></h3>
+<h3 id="overview">Overview</h3>
 <p>
 Web browsers such as Netscape and Internet Explorer offer an
 excellent mechanism for delivering documents that can be dynamically
@@ -72,7 +72,7 @@ the functionality offered by the Vision toolkits
 <a href="tkInterface.htm"><b>Interface</b> and <b>FormatTools</b></a>.
 <p>
 <hr>
-<h3><a name="io">Basic Handshaking</a></h3>
+<h3 id="io">Basic Handshaking</h3>
 <p>
 When Web servers call CGI programs, they supply information
 including the full path referenced.
@@ -108,7 +108,7 @@ read by an Html browser.  The document is returned to <i>vquery</i>
 which then returns it to the browser.
 <p>
 <hr>
-<h3><a name="access">The <b>Interface HtmlAccess</b> Class</a></h3>
+<h3 id="access">The <b>Interface HtmlAccess</b> Class</h3>
 <p>
 The class <b>Interface HtmlAccess</b> supplies the protocol needed
 to parse inputs from Html forms and links and produce a document
@@ -144,7 +144,7 @@ display the results.
 <li>Display Html page footer information.
 </ol>
 <p>
-<h4><a name="parsing">Parsing the Strings</a></h4>
+<h4 id="parsing">Parsing the Strings</h4>
 <p>
 The <i>get:usingQuery:for:at:</i> 
 method assumes that the PATH_INFO string is supplied in the
@@ -211,7 +211,7 @@ for the <b>Interface</b> class.
 If both the PATH_INFO and QUERY_STRING are present, the application
 associated with the PATH_INFO string is the one that is executed.
 <p>
-<h4><a name="output">Preparing the Output</a></h4>
+<h4 id="output">Preparing the Output</h4>
 <p>
 When the application is run, a document in the following format is 
 generated:<pre><tt><b>
@@ -234,7 +234,7 @@ within a
 <a href="#format"><i>FormatTools Html evaluate:</i> block</a>
 so that any display tags are generated for Html.
 <p>
-<h4><a name="conventions">Passing Information to Vision: Summary</a></h4>
+<h4 id="conventions">Passing Information to Vision: Summary</h4>
 <p>
 <p>
 <ol type="1">
@@ -261,7 +261,7 @@ currency for the <b>Interface</b> class.
 
 <p>
 <hr>
-<h3><a name="format">The <b>FormatTools Html</b> Class</a></h3>
+<h3 id="format">The <b>FormatTools Html</b> Class</h3>
 <p>
 The class
 <b>FormatTools Html</b> redefines various
@@ -283,7 +283,7 @@ default and Html behavior is presented in the document
 <a href="tkInterface.htm#format"><i>Vision ToolKit Class: Interface</i></a>.
 
 <p>
-<h4><a name="links">Embedding Links in Vision Documents</a></h4>
+<h4 id="links">Embedding Links in Vision Documents</h4>
 <p>
 The general format for an Html link is:<pre><tt><b>
      &lta HREF=URL&gt label &lt/a&gt
@@ -322,7 +322,7 @@ class.  For example:<pre><tt><b>
      ] ;
 </b></tt></pre>
 <p>
-<h4><a name="linkMessages">FormatTools: Link Creation Messages</a></h4>
+<h4 id="linkMessages">FormatTools: Link Creation Messages</h4>
 <p>
 A number of messages have been defined for the
 <b>FormatTools</b> class that aid in producing the links:
@@ -380,7 +380,7 @@ and <i>path</i> parameters.
 
 <p>
 <hr>
-<h3><a name="execution">Putting the Pieces Together</a></h3>
+<h3 id="execution">Putting the Pieces Together</h3>
 <p>
 If you use <a href="#vquery"><i>vquery</i></a> as your bridging program,
 the assumption is that you have one or more Vision sessions running
@@ -504,7 +504,7 @@ separate the document footer from the rest of the document body.
 By default, a standard horizontal line is drawn.
 <p>
 <hr>
-<h3><a name="vquery">The <i>vquery</i> Program</a></h3>
+<h3 id="vquery">The <i>vquery</i> Program</h3>
 <p>
 <i>vquery</i> is a CGI (Common Gateway Interface) program used to access
 Vision databases from any Web Server that can call a CGI compatible

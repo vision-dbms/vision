@@ -49,7 +49,7 @@ can be installed using the package of Vision scripts
 <a href="ifDownload.htm#tkInterface">supplied</a>.
 <p>
 <hr>
-<h3><a name="overview">Overview</a></h3>
+<h3 id="overview">Overview</h3>
 <p>
 The <b>Interface</b> class is used to support the protocol for
 interacting with Vision via a standard set of messages.
@@ -120,7 +120,7 @@ reference the other classes using a relative name.  For example:<pre><tt><b>
 </b></tt></pre>
 <p>
 <hr>
-<h3><a name="expressions">Running Arbitrary Expressions</a></h3>
+<h3 id="expressions">Running Arbitrary Expressions</h3>
 <p>
 At its simplest level, the <b>Interface</b> class can execute an
 arbitrary Vision expression supplied as a block or a string.
@@ -151,7 +151,7 @@ without using the <b>Interface</b> class, this class allows
 you to take advantage of other interface capabilities such as
 <a href="#globals">globals</a> and <a href="#buffering">buffering</a>.
 <p>
-<h4><a name="globals">Globals</a></h4>
+<h4 id="globals">Globals</h4>
 <p>
 There are a number of global variables that you can set to control
 access and display.  The variables currently defined are:
@@ -234,7 +234,7 @@ settings: <pre><tt><b>
 
 </b></tt></pre>
 <p>
-<h4><a name="buffering">Buffering results</a></h4>
+<h4 id="buffering">Buffering results</h4>
 <p>
 You can limit the number of lines of output returned using the
 <i>setRowLimitTo:</i> message defined at <b>Interface</b>.  For
@@ -282,7 +282,7 @@ of columns for the entire output buffer independent of the number of
 rows you actually displayed.  
 <p>
 <hr>
-<h3><a name="extract">Structured Data Extraction</a></h3>
+<h3 id="extract">Structured Data Extraction</h3>
 <p>
 The class <b>Interface ExtractWS</b> 
 is used to specify requests for 2-dimensional
@@ -403,7 +403,7 @@ includes the following topics:
 <li><a href="#extractMulti">Multiple Extraction Workspaces</a>
 </ul>
 <p>
-<h4><a name="extractBasics">Specifying Extraction Requests</a></h4>
+<h4 id="extractBasics">Specifying Extraction Requests</h4>
 <p>
 An extraction request must include an orientation and an entity type.
 The following orientation values have been defined:
@@ -494,7 +494,7 @@ this example, data is extracted for the 3 entities defined as the
 row dimension for the four data items defined in the column
 dimension.
 <p>
-<h4><a name="extractOptions">Extraction Options</a></h4>
+<h4 id="extractOptions">Extraction Options</h4>
 <p>
 A number of options are available to control the appearance of
 the extraction.  You can use the
@@ -597,7 +597,7 @@ The <i>reset</i> message can be sent to the <b>Interface
 ExtractWS</b> class to clear all the values.  The <i>profile</i>
 message can be used to display the current settings.
 <p>
-<h4><a name="extractEI">Entity by Item Extractions</a></h4>
+<h4 id="extractEI">Entity by Item Extractions</h4>
 <p>
 The <i>Entity by Item ("EI")</i> and the <i>Item by Entity ("IE")</i>
 orientations enable you to extract one or more items for one or more
@@ -653,7 +653,7 @@ for a specific instance of this class.  Since the returned list is a
 list of companies, the item list you supply should specify
 expressions that are applicable to company objects.
 <p>
-<h4><a name="extractIT">Item by Time Extractions</a></h4>
+<h4 id="extractIT">Item by Time Extractions</h4>
 <p>
 The <i>Item by Time ("IT")</i> and the <i>Time by Item ("TI")</i>
 orientations enable you to extract one or more items for one or more
@@ -681,7 +681,7 @@ Note that relative dates are relative to the scalar date, if
 specified.  Otherwise, the global date is used to compute relative
 dates.
 <p>
-<h4><a name="extractET">Entity by Time Extractions</a></h4>
+<h4 id="extractET">Entity by Time Extractions</h4>
 <p>
 The <i>Entity by Time ("ET")</i> and the <i>Time by Entity ("TE")</i>
 orientations enable you to extract data over time for one or more
@@ -694,7 +694,7 @@ the <a href="#extractEI">Entity by Item</a> orientation.
 The date list can be set using the same rules described for
 the <a href="#extractIT">Item by Time</a> orientation.
 <p>
-<h4><a name="extractMulti">Multiple Extraction Workspaces</a></h4>
+<h4 id="extractMulti">Multiple Extraction Workspaces</h4>
 <p>
 You can create and name multiple workspaces for your extractions.
 To create two new extraction workspaces, use:<pre><tt><b>
@@ -733,7 +733,7 @@ the <i>deleteInstance</i> message.  For example:<pre><tt><b>
 
 <p>
 <hr>
-<h3><a name="apps">Parameterized Applications</a></h3>
+<h3 id="apps">Parameterized Applications</h3>
 <p>
 The <b>Interface ApplicationWS</b> class is used to provide a standardized
 mechanism for supplying any number of parameters to an application.  In
@@ -798,7 +798,7 @@ in more detail and includes the following topics:
 <li><a href="#appMulti">Multiple Application Workspaces</a>
 </ul>
 <p>
-<h4><a name="appPredefined">Pre-defined Applications</a></h4>
+<h4 id="appPredefined">Pre-defined Applications</h4>
 <p>
 Two applications have been pre-defined: <b>Profile</b> and
 <b>GetValue</b>.
@@ -893,7 +893,7 @@ the class.  For example:<pre><tt><b>
 <p>
 
 <p>
-<h4><a name="appCreation">Creating Parameterized Applications</a></h4>
+<h4 id="appCreation">Creating Parameterized Applications</h4>
 <p>
 Applications name methods defined at the <b>Interface
 ApplicationWS</b> class.  Each method retrieves and interprets the
@@ -961,7 +961,7 @@ For example:<pre><tt><b>
 
 </b></tt></pre>
 <p>
-<h4><a name="appErrors">Error Handling</a></h4>
+<h4 id="appErrors">Error Handling</h4>
 <p>
 The prior application does not test on the validity of the inputs.
 You can add explicit tests and error messages directly to the
@@ -1048,7 +1048,7 @@ of an application even when an error is encountered.  For example:<pre><tt><b>
 </b></tt></pre>
 
 <p>
-<h4><a name="appMulti">Multiple Application Workspaces</a></h4>
+<h4 id="appMulti">Multiple Application Workspaces</h4>
 <p>
 You can create and name multiple workspaces for your applications.
 To create two new workspaces, use:<pre><tt><b>
@@ -1086,7 +1086,7 @@ You define and run methods for the subclasses the same way you do
 for the parent <b>ApplicationWS</b> class.
 <p>
 <hr>
-<h3><a name="format">The FormatTools ToolKit</a></h3>
+<h3 id="format">The FormatTools ToolKit</h3>
 <p>
 The Vision <b>FormatTools ToolKit</b> has been created to provide a modular
 approach for generating output that can be formatted for different
@@ -1213,7 +1213,7 @@ requirements.  Formatting messages include:
 <dt>Tables
 </dl>
 <p>
-<h4><a name="formatModes">Format Mode Messages</a></h4>
+<h4 id="formatModes">Format Mode Messages</h4>
 <p>
 <i>beginPreserveMode</i><br>
 <i>endPreserveMode</i>
@@ -1224,7 +1224,7 @@ messages do not do anything.  The "Html" versions generates the
 <i>&lt pre&gt</i> and <i>&lt/pre&gt</i> tags.
 <p>
 
-<h4><a name="formatTitles">Title and Section Formatting</a></h4>
+<h4 id="formatTitles">Title and Section Formatting</h4>
 <p>
 <i>buildTitle:</i> stringList <i>over:</i> span <br>
 <i>buildTitle:</i> stringList <i>over:</i> span <i>withStyle:</i> optionList
@@ -1299,7 +1299,7 @@ the line will be printed left-justified.
 The "Html" version supplies the two parameters to the <i>hr</i> tag
 as settings for the <i>align</i> and <i>width</i> values.
 <p>
-<h4><a name="formatStyles">Format Style Messages</a></h4>
+<h4 id="formatStyles">Format Style Messages</h4>
 <i>bold:</i> string
 <p>
 This message formats the supplied string within bold tags.  In the default
@@ -1320,7 +1320,7 @@ within the <i>&lt ul&gt</i> and <i>&lt/ul&gt</i> tags.  The supplied
 string is broken into lines and each line is prefixed with the
 <i>&lt li&gt</i> tag.
 <p>
-<h4><a name="formatLinks">Creating Links</a></h4>
+<h4 id="formatLinks">Creating Links</h4>
 <p>
 The various "build link"  messages are used to generate references 
 to other documents, including documents dynamically generated by
@@ -1329,7 +1329,7 @@ discussed in detail in the document
 <a href="ifHtml.htm#format"><i>Vision Interfaces: Sample Html Access</i></a>.
 <p>
 <hr>
-<h3><a name="html">Interfacing to Html</a></h3>
+<h3 id="html">Interfacing to Html</h3>
 <p>
 Web browsers such as <i>Netscape</i> and <i>Internet Explorer</i> offer an
 excellent mechanism for delivering documents that can be dynamically
@@ -1354,7 +1354,7 @@ Vision's role in generating dynamic Html documents is described in:
 
 <p>
 <hr>
-<h3><a name="external">External Access to Vision</a></h3>
+<h3 id="external">External Access to Vision</h3>
 <p>
 The <b>Vision C++ Interface Kit</b> consists of a set of C++ classes that you
 use to provide structured access to Vision data.  The classes in this

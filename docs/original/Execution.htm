@@ -23,7 +23,7 @@
 <li><a href="#dynamicContext">Dynamic Context</a></li>
 </ul>
 <hr>
-<h3><a name="overview"></a>Overview</h3>
+<h3 id="overview">Overview</h3>
 
 <p>Vision works by sending messages to objects. Every Vision <a href="Lang.htm#expression">expression</a>
 is constructed in terms of building blocks of the form:</p>
@@ -132,7 +132,7 @@ object that records those values. </p>
 <p>
 <hr width="100%" ></p>
 
-<h3><a name="layers"></a>Objects Layers</h3>
+<h3 id="layers">Objects Layers</h3>
 
 <p>The objects accessed and constructed as part of the context for a Vision
 expression take special advantage of the Vision object model. This section
@@ -270,7 +270,7 @@ to the operation of Vision programs.</p>
 <p>
 <hr width="100%" ></p>
 
-<h3><a name="blockContext"></a>Block Context</h3>
+<h3 id="blockContext">Block Context</h3>
 
 <p><i>Block context</i> is the largest and most complex of the contexts.
 Every expression needs a default place to look for the implementation of
@@ -300,7 +300,7 @@ Definitions</a></p>
 Definitions</a></p>
 </ul>
 
-<h4><a name="current"></a>The <i>^current</i> Object</h4>
+<h4 id="current">The <i>^current</i> Object</h4>
 
 <p>One of the first questions this document asked was how Vision knows
 where to find <i>gm</i> in the expression:</p>
@@ -503,7 +503,7 @@ should see the same collection of names as seen by their non-conditional
 brethren. Constructing a <i>^current</i> object that inherits from the
 environment of the block's definition produces that behavior. </p>
 
-<h4><a name="operate"></a>Using Blocks To Operate
+<h4 id="operate">Using Blocks To Operate
 On Objects</h4>
 
 <p>It is often useful to send a number of messages to the same object.
@@ -742,7 +742,7 @@ from the object with which it is working, the block gains direct access
 to the information it needs. That principle also applies to the definition
 of methods.</p>
 
-<h4><a name="methods"></a>Using Blocks To Define Methods</h4>
+<h4 id="methods">Using Blocks To Define Methods</h4>
 
 <p>When you define a method, you are defining code that runs in response
 to a message. Because that code is a block, it will have a <i>^current</i>
@@ -886,7 +886,7 @@ return the definition environment of the block. You will probably never
 need to use <i>^my</i> to access the environment that actually defined
 the method, but you can and it behaves consistently.</p>
 
-<h4><a name="super"></a>Using <i>^super</i> to Access Superclass
+<h4 id="super">Using <i>^super</i> to Access Superclass
 Definitions</h4>
 
 <p>In an object-oriented system, subclasses are used to implement more
@@ -1023,7 +1023,7 @@ operations like <i>extendBy:</i> and <i>groupedBy:</i> and implementing
 operations like <i>showMessagesX</i> that must examine each layer of
 an object. </p>
 
-<h4><a name="here"></a>Using <i>^here</i> to Ignore Subclass Definitions</h4>
+<h4 id="here">Using <i>^here</i> to Ignore Subclass Definitions</h4>
 
 <p>While the ability to override the implementation of a message in a subclass
 is a powerful capability, sometimes it is too powerful. When you write
@@ -1105,7 +1105,7 @@ MySubClass doItThisWay</b></pre>
 
 <p>in addition to whatever else these methods do.</p>
 
-<h3><a name="globalContext"></a>Global Context</h3>
+<h3 id="globalContext">Global Context</h3>
 
 <p><i>Global context</i> accesses the fixed, global state of your Vision
 session. Three magic words supply the global context for an expression
@@ -1126,7 +1126,7 @@ Vision provides an object that is not automatically saved as part of an
 update. That object is derived from the <i>^global</i> object and accessed
 via the <i>^tmp</i> magic word.</p>
 
-<h4><a name="global"></a><i>^global</i></h4>
+<h4 id="global"><i>^global</i></h4>
 
 <p>Every Vision data base is structured as a collection of <a href="Running.htm#ospace">object
 spaces</a>. In addition to organizing a Vision data base on disk, each
@@ -1180,7 +1180,7 @@ a permanent part of the data base, you simply need to update the data base.
 When you do, subject to your privileges and update mode, any new or modified
 objects accessible from your top level object will be saved.</p>
 
-<h4><a name="tmp"></a><i>^tmp</i></h4>
+<h4 id="tmp"><i>^tmp</i></h4>
 
 <p>While Vision takes care to not save objects you do not have the right
 to save, it will try to save all of the new and updated objects referenced
@@ -1263,7 +1263,7 @@ x print;</b></pre>
 <p>
 <hr width="100%" ></p>
 
-<h3><a name="dynamicContext"></a>Dynamic Context</h3>
+<h3 id="dynamicContext">Dynamic Context</h3>
 
 <p><i>Dynamic context</i> defines your perspective on the data base. Two
 magic words provide the dynamic context for an expression -- <i><a href="#date">^date</a></i>
@@ -1298,7 +1298,7 @@ without the tools of dynamic context requires re-writing all of the code
 between where you are as a user and where information about that perspective
 is needed in the data base. That is not a reasonable thing to do.</p>
 
-<h4><a name="date"></a><i>^date</i></h4>
+<h4 id="date"><i>^date</i></h4>
 
 <p>Time is a dimension that slices through an entire data base. When you
 build a data base using Vision, you model some part of the world. Included
@@ -1439,7 +1439,7 @@ all of the messages that enumerate the elements of a <i>TimeSeries</i>
 also make the effective date of the element available as the value of the
 <i>^date</i> magic word when they are processing the element.</p>
 
-<h4><a name="local"></a><i>^local</i></h4>
+<h4 id="local"><i>^local</i></h4>
 
 <p>The <i>^date</i> magic word is a special case of a more general concept.
 The <i>^local</i> magic word generalizes that concept. </p>

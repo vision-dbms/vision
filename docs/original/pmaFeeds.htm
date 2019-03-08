@@ -487,7 +487,7 @@ Configuration files can also be used with loadFromFile and <a href="clDataFeedAd
 <P>The following situations show where a configuration file is necessary and 
 provide examples of how it is used. 
 <UL></UL>
-<P><B><a name=fieldOrderList>fieldOrderList</a></B> 
+<P><B id=fieldOrderList>fieldOrderList</B> 
 <UL>If a feed has an incorrect headerline, the option <I>fieldOrderList</I> 
   should be used to change the headers. More specifically, if a feed contains 
   the header <I>symbol</I> for the data item that Vision recognizes as 
@@ -511,7 +511,7 @@ GM     | GeneralMotors | US
   <P>
   <UL><B>Sample Configuration:</B> <PRE>fieldOrderList | id, name, , country</PRE></UL>
   <P></P></UL>
-<P><B><a name=headerLineNumber>headerLineNumber</B></a> 
+<P><B id=headerLineNumber>headerLineNumber</B> 
 <UL>Another use of the configuration file is to provide headings to files that 
   do not have them. In addition to <I>fieldOrderList</I>, you need to set 
   <I>headerLineNumber</I> to 0 so that the top line of the instances is included (by default the first line is assumed to be a header). 
@@ -525,7 +525,7 @@ headerLineNumber | 0</PRE></UL>
   <P></P></UL>
 
 
-<P><B><a name=currency>currency</a></B> 
+<P><B id=currency>currency</B> 
 <UL>The configuration file option <i>currency</i> will set the currency value for all records in a feed that have no value or <i>NA</i> for currency.  
   <P>
   <UL><B>Sample File:</B> 
@@ -540,7 +540,7 @@ MHP  | McGraw-Hill Companies Inc | CAD</PRE></UL>
 In addition, <i>currency</i> can be used to set the currency value for all records in a feed where a currency field does not exist.  <P></P></UL>
 
 
-<P><B><a name=naPatternTest>naPatternTest</a></B> 
+<P><B id=naPatternTest>naPatternTest</B> 
 <UL>This configuration file option will convert data to NAs based on the exsitence of the pattern in the data.  The pattern can include the special pattern matching symbols supported as "regular expression".  For example:
   <P>
   <UL><B>Sample File:</B> 
@@ -553,7 +553,7 @@ In addition, <i>currency</i> can be used to set the currency value for all recor
 This example will load NA for <i>sharesOut</i> and <i>latestMarketCapUS</i> for security 45920010 but will load all of other values. <b>WARNING:</b> Practice extreme caution when using Regular Expressions - due to their nature it is easy for a regular expression to include more than intended as seen in the above example where it might not have been the intent for security 45920010's <i>latestMarketCapUS</i> value to be loaded as NA.
  <P></P></UL>
 
-<P><B><a name=skipTop>skipTop</a></B> 
+<P><B id=skipTop>skipTop</B> 
 <UL>Another use of the configuration file is for a multiline header. For 
   example, if a date has been included as a seperate header line, you need to 
   include <I>skipTop</I> set to 2, so that the two headers are not processed as 
@@ -568,7 +568,7 @@ GM     | GeneralMotors | USD</PRE></UL>
     <P><PRE>fieldOrderList | id,name,currency
 skipTop        | 2</PRE></UL>
   <P></P></UL>
-<P><B><a name=skipChars>skipChars</a></B> 
+<P><B id=skipChars>skipChars</B> 
 <UL>If a file has data that has quotation marks surrounding specific values, 
   uploads will be not be processed properly. To prevent this, you can use the 
   option <I>skipChars</I>. 
@@ -581,7 +581,7 @@ skipTop        | 2</PRE></UL>
   <P></P></UL>
 
 
-<P><B><a name=autoExpire>autoExpire</a></B> 
+<P><B id=autoExpire>autoExpire</B> 
 <UL>The <I>autoExpire</I> option provides the capability to add a default 
   value to a time series as of a certain offset for feeds associated with a 
   <B>DataRecord</B>. Since by default Vision returns the last available value 
@@ -619,7 +619,7 @@ mno | 06/30/99 | USD | 4.56</PRE></UL>
   the end of the next calendar quarter </P></UL>
 
 
-<P><B><a name=dateFormat>dateFormat</a></B> 
+<P><B id=dateFormat>dateFormat</B> 
 <UL>
   <P>If a file contains dates in any of the following alternative formats: MMYY, MMYYYY, MMDDYY, MMDDYYYY, or YYYYMM, you will need to use the 
   <I>dateFormat</I> option. Note: this only applies to the field named 'date'. 
@@ -635,7 +635,7 @@ The format YYYYMMXX will convert the supplied date in YYYYMMDD format to end of 
 
 
 
-<P><B><a name=asofDate>asofDate</a></B> 
+<P><B id=asofDate>asofDate</B> 
 <UL>If a file does not include a date, you can use the <I>asofDate</I> option. 
   For example: 
   <P>
@@ -644,7 +644,7 @@ The format YYYYMMXX will convert the supplied date in YYYYMMDD format to end of 
   <UL><B>Sample Configuration:</B> 
     <P><PRE>asofDate | 19990430</PRE></UL></UL>
 
-<P><B><a name=asofDateLineNumber>asofDateLineNumber</a></B> 
+<P><B id=asofDateLineNumber>asofDateLineNumber</B> 
 <UL>Alternatively, you can include the date in the feed file and use the 
   <I>asofDateLineNumber</I> option. For example: 
   <P>
@@ -654,7 +654,7 @@ memberID | groupID
 0036110  | 560</PRE><B>Sample Configuration:</B> 
     <P><PRE>asofDateLineNumber | 1
 HeaderLineNumber   | 2</PRE></UL></UL>
-<P><B><a name=adjustmentDate>adjustmentDate</a></B> 
+<P><B id=adjustmentDate>adjustmentDate</B> 
 <UL>If the data in your feed file has been adjusted to reflect splits but 
   <I>adjustmentDate</I> is not included as part of the data record, use this 
   option to set the adjustment date. For example: 

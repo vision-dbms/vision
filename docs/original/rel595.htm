@@ -33,7 +33,7 @@
 <hr>
 <p>
 
-<h3><a name=description>Description</a></h3><p>
+<h3 id=description>Description</h3><p>
 
 This document outlines the changes made in Vision release 5.9.5.  This
 release contains a number of miscellaneous cleanups to various executables
@@ -97,8 +97,8 @@ The <i>EXTcore</i>, <i>CHadmin</i>, and <i>CHov</i> scripts include protocol tha
 </ul>
 </ul>
 
-<b><hr><a name=genaccesstoGRM>Generalized access to Global Reclamation Manager (GRM) -- 
-    HPUX only.</a></b>
+<b><hr id=genaccesstoGRM>Generalized access to Global Reclamation Manager (GRM) -- 
+    HPUX only.</b>
 
 <ol type=1>
 <li>Moved GRM implementation from the <i>ps</i> module in batchvision into
@@ -144,7 +144,7 @@ The <i>EXTcore</i>, <i>CHadmin</i>, and <i>CHov</i> scripts include protocol tha
 GRM traces previously enabled by the environment variable <i>VisionNetOpenTrace</i> and by the debugger expression, '<i>#M segmentScanTrace on</i>' are now enabled by this new variable only.<p>
 
 </ol>
-<b><hr><a name=addofRSp>Addition of RestartSession primitive</a><p> </b>
+<b><hr id=addofRSp>Addition of RestartSession primitive<p> </b>
 
     Utility define:'<i>restartSession</i>'<i> toBe: 3 asPrimitive</i>;<p>
 
@@ -160,8 +160,8 @@ GRM traces previously enabled by the environment variable <i>VisionNetOpenTrace<
     This definition is included as part of the <i>CHcore.5.9.5</i> script.<p>
 
 
-<b><hr><a name=addtoOVC>Addition of <i>TCP_NODELAY</i> option to OpenVision Channels
-</a></b><p>
+<b><hr id=addtoOVC>Addition of <i>TCP_NODELAY</i> option to OpenVision Channels
+</b><p>
 
     This release exposes the <i>TCP_NODELAY</i> flag for OpenVision socket
     channels. In previous releases <i>TCP_NODELAY</i> was hardcoded to be
@@ -194,7 +194,7 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
     <i>CHov.5.9.5</i> script.
 <p>
 <b>
-<hr><a name=bugfix>Bug Fix: (Identity vs. Scalar)</a></b><p>
+<hr id=bugfix>Bug Fix: (Identity vs. Scalar)</b><p>
       [] send:[^self = asSelf]<p><p>
 
 
@@ -211,12 +211,12 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
 <ul type=disc><b><pre>TRUE</pre></b></ul>
 
 
-<b><hr><a name=resolveBusError>Resolve Bus Error occurring at OpenDialog startup.</a> <p> 
+<b><hr id=resolveBusError>Resolve Bus Error occurring at OpenDialog startup. <p> 
 </b>
     The 5.9.4 build for the HPUX9 platform could not run the
     OpenDialog package   ...    5.9.5 can.<p>
 
-<b><hr><a name=reimplRebuild>Reimplementation of the Rebuild function</a></b><p>
+<b><hr id=reimplRebuild>Reimplementation of the Rebuild function</b><p>
 	
 
     The old Rebuild feature of batchvision would create an NDF from an
@@ -289,7 +289,7 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
     the rollback utility.<p>
 
 
-<b><hr><a name=segVerification>Segment Verification</a><p></b>
+<b><hr id=segVerification>Segment Verification<p></b>
 
     Beginning with this release, batchvision and <i>onprof/onck</i> will
     verify that a segment belongs to the NDF which is pointing to
@@ -302,7 +302,7 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
     and identify it via an explicit error message.<p>
 
 
-<b><hr><a name=cleanupAA>Cleanup / Alignment augmentation</a><p></b>
+<b><hr id=cleanupAA>Cleanup / Alignment augmentation<p></b>
 
     This release builds on the container table based cleanup strategy
     introduced in release 5.9.4.<p>
@@ -323,7 +323,7 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
     <i>CHadmin.5.9.5</i> script.<p>
 
 
-<b><hr><a name=comp2Updates>Compustat2 updates</a><p></b>
+<b><hr id=comp2Updates>Compustat2 updates<p></b>
 
     The <i>compustat2</i> data base update utility has been modified to use
     the EBCDIC flag in the layout file header (line 1, field 4). If the
@@ -335,7 +335,7 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
     <i>compustat2</i> also has been modified to deal correctly with industrial
     annual tapes that contain header records. <p>
 
-<b><hr><a name=NDFMapping>NDF Mapping Coherency on HP (<i>dbconvert</i>)</a></b><p>
+<b><hr id=NDFMapping>NDF Mapping Coherency on HP (<i>dbconvert</i>)</b><p>
 
     A problem was noticed under HPUX where <i>dbconvert</i> would attempt to
     use an out-of-date version of the NDF which was mapped into
@@ -346,7 +346,7 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
     General documentation about the <i>dbconvert</i> utility has been added
     to the insytenet web site under the <a href=admTools.htm>Administration/Tools</a> section.
 <p>
-<b><hr><a name=removalofObsolete>Removal of obsolete tools.</a>
+<b><hr id=removalofObsolete>Removal of obsolete tools.
 </b><p>
     Starting with the 5.9.5 Release, the following tools are no longer
     included in the build.
@@ -355,7 +355,7 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
 - makeomitlist
 - xndfvts</pre></b></ul>
 <p>
-<b><hr><a name=onck>Onck/onprof updates</a>
+<b><hr id=onck>Onck/onprof updates
 </b><p>
     <i>onck</i> and <i>onprof</i> are now links to the same executable, the
     difference between them being that <i>onprof</i> presents RTYPE
@@ -365,10 +365,10 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
     volume of output, these programs now print an explicit <i>pass/fail</i>
     message upon exit.
 <p>
-<b><hr><a name=aixPlatform>The AIX platform has been built using the C++ compiler.
-</a></b><p>
-<b><hr><a name=vqueryupdate>vquery update
-</a></b><p>
+<b><hr id=aixPlatform>The AIX platform has been built using the C++ compiler.
+</b><p>
+<b><hr id=vqueryupdate>vquery update
+</b><p>
     A number of changes have been made to the vquery program.  Some of
     these were released in the web site version prior to 5.9.5 but are
     redocumented here for completeness.
@@ -506,7 +506,7 @@ $REMOTE_HOST at: $REMOTE_ADDR</b></pre>
 
 
 
-<b><hr><a name=containerTableOverflow>Container Table Overflow checking</a></b>
+<b><hr id=containerTableOverflow>Container Table Overflow checking</b>
 <p>
     An infinitely recursive Vision method can result in filling up
     all available slots in the container table for the scratch pad space.
@@ -517,15 +517,15 @@ $REMOTE_HOST at: $REMOTE_ADDR</b></pre>
     the infinitely recursive Vision method would run into a malloc error
     before container table overflow would occur.
 <p>
-<b><hr><a name=internalgarbage>Internal transient garbage collection modified.</a></b>
+<b><hr id=internalgarbage>Internal transient garbage collection modified.</b>
 <p>
     The algorithm to reclaim unreferenced <i>PToken</i> chains was changed
     from recursive to iterative. The same change was applied to the
     reclamation of virtual machine fragments. If either chain was long
     enough, an internal run-time stack overflow could occur.
 <p>
-<b><hr><a name=solarisonly>Solaris only:  Segmentation Faults and Bus Error Signals generate
-    a stack dump.</a></b>
+<b><hr id=solarisonly>Solaris only:  Segmentation Faults and Bus Error Signals generate
+    a stack dump.</b>
 <p>
     A stack dump is generated in the current working directory with a
     name of the form:  <i>pstack.ppp.n</i>  where <i>ppp</i> is the process id of the
@@ -542,7 +542,7 @@ $REMOTE_HOST at: $REMOTE_ADDR</b></pre>
 </ul>
     will turn stack dumping back on for subsequent invocations of batchvision.
 <p>
-<b><hr><a name=visionAddressThreshold>VisionAddressThreshold environment variable</a></b>
+<b><hr id=visionAddressThreshold>VisionAddressThreshold environment variable</b>
 <p>
     This variable is used to influence when a segment reclamation scan
     is done. If a map segment operation returns a process address less
@@ -560,7 +560,7 @@ $REMOTE_HOST at: $REMOTE_ADDR</b></pre>
     access since, under Solaris, no segment can be mapped at an
     address higher than <i>0xf0000000</i>.<p>
 
-<b><hr><a name=environVariables>Environmental Variables that accept Octal Input</a></b><p>The following environment variables now accept octal or hexadecimal
+<b><hr id=environVariables>Environmental Variables that accept Octal Input</b><p>The following environment variables now accept octal or hexadecimal
     input. In earlier releases, only decimal input was valid. Octal
     values are denoted with a leading '0'. Hexadecimal values are
     denoted with a leading <i>0x</i> or <i>0X</i>.
@@ -579,7 +579,7 @@ VisionCheckCheckSM
 VisionStackDump
 LargeTaskSize</b></pre></ul>
 
-<b><hr><a name=persistentGarbageCollector>Persistent Garbage Collector</a></b><p>The persistent garbage collector (<i>Utility collectGarbage</i>) now
+<b><hr id=persistentGarbageCollector>Persistent Garbage Collector</b><p>The persistent garbage collector (<i>Utility collectGarbage</i>) now
     rebuilds the container table free list in the opposite direction
     so that lower table indices are allocated first. This anticipates
     a feature in a future release that will allow container tables to
@@ -588,7 +588,7 @@ LargeTaskSize</b></pre></ul>
 
 
 <p><p>
-<b><hr><a name=newmessages>New Messages</a></b>
+<b><hr id=newmessages>New Messages</b>
 
 <b><pre>********************
    FIXcore.5.9.5
