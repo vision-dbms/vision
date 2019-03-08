@@ -1,5 +1,4 @@
 ---
-layout: default
 ---
 
 # Requested Alteration Count Exceeds Maximum

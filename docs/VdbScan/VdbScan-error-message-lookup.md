@@ -1,5 +1,4 @@
 ---
-layout: default
 ---
 
 # VdbScan Error Message Lookup

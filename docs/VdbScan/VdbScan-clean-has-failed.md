@@ -1,5 +1,4 @@
 ---
-layout: default
 ---
 
 When a query that shouldn't be using up a lot of memory but is check the network maintenance logs.  Especially if it is a read only query.  Especially if it seems impossible to recover that memory from within the session.

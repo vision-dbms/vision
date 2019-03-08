@@ -1,5 +1,4 @@
 ---
-layout: default
 ---
 
 # Vision Database Scan Start Page
