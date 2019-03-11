@@ -100,17 +100,18 @@ in your mind.
 <BR>&nbsp;
 <H2>
   A Modest Example</H2>
+
 <pre><i>
-    Account defineMethod: [ | correlatedAccounts |
-        !lowerPct <- pctEq * 0.8; !upperPct <- ...;
-        holdings
-           select: [security type isEquity].
-           collectListElementsFrom: [security holdings].
-           groupedBy: [account].
-           select: [pctEq >= ^my lowerPct &amp;&amp; pctEq <= ^my upperPct].
-           extendBy: [ !correlation <- groupList correlate: [...] ... ].
-           sortDown: [correlation]
-     ];
+   Account defineMethod: [ | correlatedAccounts |
+      !lowerPct <- pctEq * 0.8; !upperPct <- ...;
+      holdings
+         select: [security type isEquity].
+         collectListElementsFrom: [security holdings].
+         groupedBy: [account].
+         select: [pctEq >= ^my lowerPct &amp;&amp; pctEq <= ^my upperPct].
+         extendBy: [ !correlation <- groupList correlate: [...] ... ].
+         sortDown: [correlation]
+    ];
 </i></pre>
 
 <P>This modest, but typical example, is taken from a mutual fund/portfolio
@@ -136,11 +137,11 @@ to perform more collection operations on the result; it is unreasonable
 to materialize that collection into an 'outside the database' world that
 implements those operations in an ad hoc way.</LI>
 
-<blockquote><pre><i>
-TRoweFunds do: [correlatedAccounts first: 5 . do: [ ... ] ]
+<pre><i>
+MyFunds do: [correlatedAccounts first: 5 . do: [ ... ] ]
 
 ^today to: ^today - 1 yearEnds by: 1 quarterEnds. evaluate: [
-   TRoweFunds do: [correlatedAccounts first: 5. do: [...]]
+   MyFunds do: [correlatedAccounts first: 5. do: [...]]
 ]
 
 Account defineMethod: [ | displayCorrelatedAccounts |
@@ -149,9 +150,8 @@ Account defineMethod: [ | displayCorrelatedAccounts |
    ...
 ];
 
-TRoweFunds do: [displayCorrelatedAccounts]</I>
-</i></pre></blockquote>
-&nbsp;
+MyFunds do: [displayCorrelatedAccounts]</I>
+</i></pre>
 <LI>
 collection level detail is just as important as summary information.&nbsp;
 This is true  for both stored database state and dynamically derived
@@ -193,27 +193,7 @@ of operation.
 
 <P>and <I><A HREF="vonline.htm">Vision Online</A></I> describes the Vision
 technology and its applications extensively.
-<hr>
-<table border="0" width="100%">
-<tr>
-<td align="left"><font size="-1">Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
-<td align="right"><font size="-1">Created January 21, 2000</font>
-</table>
 
-<hr>
-
-<font size=-1><Center> 
-| <a href="index.htm">Home</a> 
-| <a href="abtinsyt.htm">About Insyte</a> |
-<br>
-| <a href="vonline.htm">Vision On-line</a> 
-| <a href="vpma.htm">Investment Managers</a>  
-| <a href="trowestory.htm">Client Spotlight</a>
-| <a href="euro.htm">Euro</a> |
-<br>
-| <a href="toc.htm">Table of Contents</a> |
-
-</center></font>
-
+{% include legacy-footer.htm copydates="2000" %}
 
 </body></html>
