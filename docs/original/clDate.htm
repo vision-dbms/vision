@@ -111,8 +111,7 @@ The message <i>earliestPossibleDate</i> has been defined at the
 class <i>Object</i> to return the <i>Date</i> object representing the first
 valid date that can be represented in Vision.  This date corresponds to
 the first of January in the year 1.
-<p>
-<a name="offset"> </a>
+<p id="offset">
 You can add and subtract <i>DateOffsets</i> from a <i>Date</i> to
 create new date objects.  For example:<pre><tt><b>
      95 asDate + 5 days
@@ -285,10 +284,9 @@ example:<pre><tt><b>
 </b></tt></pre>
 The <i>print:</i> message prints dates in different formats, depending
 on the value of the supplied parameter.  More information about
-<a name="print" href="Output.htm#printDate">printing dates</a>
+<a id="print" href="Output.htm#printDate">printing dates</a>
 is available.  
-<p>
-<a name="format"> </a>
+<p id="format">
 The <i>asInteger</i> message can be used to convert
 a date to an eight-digit integer in the form <i>YYYYMMDD</i>.
 The following additional messages can be used
@@ -352,8 +350,7 @@ was created using the
 <a href="Classes.htm#subclass"><i>createSubclass:at:</i></a>
 variation of the <i>createSubclass:</i> message so the class is only
 visible to <i>Date</i> objects.
-<p>
-<a name="convert"> </a>
+<p id="convert">
 In addition to the <i>asDate</i> message, 
 the following messages can be used to <b>convert</b> <i>Integer</i>
 instances to <i>Date</i> instances:
@@ -496,7 +493,7 @@ to the default date.  For example:<pre><tt><b>
          Named Currency CAD usExchange printNL ;
        ] ;
 </b></tt></pre>
-<a name="nested"> </a>
+<p id="nested">
 This example displays the date <i>3/15/1995</i> followed by the exchange
 rate.  You can change the default date within the <i>evaluate:</i> block.
 For example:<pre><tt><b>
@@ -512,7 +509,7 @@ rate for that date.  It then displays the date and exchange rate for
 the date 5 business days later than the original date.
 <p>
 <blockquote><hr><center>
-<a href="Execution.htm" name="evaluateScope.note"><b>Note: </b> </a></center>
+<a href="Execution.htm" id="evaluateScope.note"><b>Note: </b> </a></center>
 The <i>evaluate:</i> message changes the time context of the
 block but does not change the recipient object like the <i>do:</i>
 message.  In other words, the magic word <i>^date</i> is rebound
@@ -734,15 +731,14 @@ by: 1 monthEnds</i>, the exchange rates would be displayed starting
 with December 1995 and ending with January 1995.  
 <p>
 <blockquote><hr><center>
-<a href="Execution.htm" name="evaluateScopeDR.note"><b>Note: </b> </a></center>
+<a href="Execution.htm" id="evaluateScopeDR.note"><b>Note: </b> </a></center>
 The <i>evaluate:</i> message changes the time context of the
 block but does not change the recipient object like the <i>do:</i>
 message.  In other words, the magic word <i>^date</i> is rebound
 by the <i>evaluate:</i> message but the magic word <i>^self</i> is
 not.
 <hr></blockquote>
-<p>
-<a name="iterate"> </a>
+<p id="iterate">
 The <i>evaluate:</i> message is defined to evaluate its block parameter
 for each element in the date range.  Although this operation
 may appear to operate a date at a time, 
@@ -750,7 +746,7 @@ it is actually optimized internally
 and does not execute by sequential evaluation.  
 <p>
 <blockquote><hr><center><font size=+1>
-<a name="iterate.warn"><b>Warning!! </b></a>
+<span id="iterate.warn"><b>Warning!! </b></span>
 </font></center>
 Because date ranges are not evaluated sequentially,
 you do not have control over the order in which the date range is
@@ -766,8 +762,7 @@ date range an element at a time.  For example:<pre><tt><b>
                  Named Currency CAD usExchange printNL ;
                ] ;
 </b></tt></pre>
-<p>
-<a name="dateList"> </a>
+<p id="dateList">
 You can convert a <i>DateRange</i> into a <i>List</i> of <i>Date</i>
 objects using the <i>asDateList</i> message.  For example:<pre><tt><b>
      !drange <- 9501 to: 9512 by: 1 monthEnds ;

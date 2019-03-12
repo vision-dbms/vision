@@ -22,14 +22,14 @@
 <p>
 A <b>Syntax Error</b> occurs when you try to execute a Vision expression
 that is not formulated correctly.  For example, the following
-expression does not supply a parameter to the <i>+</i> message:<pre><tt><b>
+expression does not supply a parameter to the <i>+</i> message:<pre><b>
      3 + 
-</b></tt></pre>
-If you execute this expression, you should get the error message:<pre><tt><b>
+</b></pre>
+If you execute this expression, you should get the error message:<pre><b>
      >>> 'syntax error' near source line 2, character 9 <<<
            3 +
      **       ^
-</b></tt></pre>
+</b></pre>
 Since Vision was expecting a value following the <i>+</i> message and none
 was provided, you are informed that you have made a syntax error.
 Vision tries to identify where the error occurred and provides an
@@ -39,93 +39,93 @@ directly after the <i>+</i> message.  Execution is terminated as soon the
 first syntax error is encountered.  
 <p>
 Several other mistakes will produce syntax errors.  For example, the
-expression:  <pre><tt><b>
+expression:  <pre><b>
      2 + 7 . print 
-</b></tt></pre>
-produces the error:<pre><tt><b>
+</b></pre>
+produces the error:<pre><b>
      >>> 'syntax error' near source line 1, character 12 <<<
            2 + 7 . print
      **          ^
-</b></tt></pre>
+</b></pre>
 because you cannot use the <i>.</i> character to terminate a binary
 message.  A syntax error is generated if you send a 
 <a href="Lang.htm#literal">literal</a> (i.e., a
 number, string, block, or magic word) to another object, since
 literals must be the first object in an expression.  For example, the
-expression:<pre><tt><b>
+expression:<pre><b>
      2 2 
-</b></tt></pre>
-produces the error message:<pre><tt><b>
+</b></pre>
+produces the error message:<pre><b>
      >>> 'syntax error' near source line 1, character 8 <<<
            2 2 
      **      ^
-</b></tt></pre>
-The expression:<pre><tt><b>
+</b></pre>
+The expression:<pre><b>
      2 "xxx" 
-</b></tt></pre>
-produces the error message:<pre><tt><b>
+</b></pre>
+produces the error message:<pre><b>
      >>> 'syntax error' near source line 1, character 8 <<<
        2 "xxx" 
      **      ^
-</b></tt></pre>
-The expression:<pre><tt><b>
+</b></pre>
+The expression:<pre><b>
      2 [ ] 
-</b></tt></pre>
-produces the error message:<pre><tt><b>
+</b></pre>
+produces the error message:<pre><b>
      >>> 'syntax error' near source line 1, character 4 <<<
        2 [ ] 
      **  ^
-</b></tt></pre>
-The expression:<pre><tt><b>
+</b></pre>
+The expression:<pre><b>
      2 ^self 
-</b></tt></pre>
-produces the error message:<pre><tt><b>
+</b></pre>
+produces the error message:<pre><b>
      >>> 'syntax error' near source line 1, character 4 <<<
        2 ^self 
      **  ^
-</b></tt></pre>
+</b></pre>
 You will generate a syntax error if you execute a program that has a
 mismatched number of quote characters.  For example, the 
-expression:<pre><tt><b>
+expression:<pre><b>
       "this is a string that never ends. 
-</b></tt></pre>
-produces the error message:<pre><tt><b>
+</b></pre>
+produces the error message:<pre><b>
      >>> 'End of File encountered in String' near source line 2, character 38 <<<
        "this is a string that never ends. 
      *^
      >>> 'syntax error' near source line 2, character 38 <<<
        "this is a string that never ends. 
      *^
-</b></tt></pre>
+</b></pre>
 You will also generate a syntax error if you do not have the
 appropriate number of closing parentheses or brackets in your
-program.  For example, the expression:  <pre><tt><b>
+program.  For example, the expression:  <pre><b>
      [ 2 + 2 ; 
-</b></tt></pre>
-produces the error message:<pre><tt><b>
+</b></pre>
+produces the error message:<pre><b>
      >>> 'syntax error' near source line 2, character 11 <<<
       [ 2 + 2 ; 
      **         ^
-</b></tt></pre>
+</b></pre>
 Since the set of magic words is fixed and internal to Vision, you
 will generate a syntax error if you try to use an unknown magic word.
-For example, the expression:  <pre><tt><b>
+For example, the expression:  <pre><b>
      ^cur gm sales 
-</b></tt></pre>
-produces the error message:<pre><tt><b>
+</b></pre>
+produces the error message:<pre><b>
      >>> 'Unrecognized magic word '^cur'' near source line 1, character 4 <<<
       ^cur gm sales 
      **  ^
-</b></tt></pre>
+</b></pre>
 You will also receive a syntax error if you have a keyword message as
-the initial message in an expression.  For example:  <pre><tt><b>
+the initial message in an expression.  For example:  <pre><b>
      defineMethod: [ | x | "This is a method at ^current" ] ; 
-</b></tt></pre>
-produces the error message:<pre><tt><b>
+</b></pre>
+produces the error message:<pre><b>
      >>> 'syntax error' near source line 1, character 13 <<<
       defineMethod: [ | x | "This is a method at ^current" ] ; 
      **           ^
-</b></tt></pre>
+</b></pre>
 You must send binary and keyword messages to a named object or a literal
 (i.e., a number, string, block, or magic word).
 <p>
@@ -134,13 +134,13 @@ You must send binary and keyword messages to a named object or a literal
 <p>
 A <b>Selector Not Found</b> error
 occurs because you have asked Vision to execute a message
-that is not defined.  For example:<pre><tt><b>
+that is not defined.  For example:<pre><b>
      "This is a string" + 5 
-</b></tt></pre>
-This expression produces the error message:<pre><tt><b>
+</b></pre>
+This expression produces the error message:<pre><b>
      >>> Selector '+' Not Found <<<
        NA
-</b></tt></pre>
+</b></pre>
 When you ask Vision to add 5 to a string, Vision complains because
 the addition message is not defined for strings.  The <i>Selector Not
 Found</i> response identifies the specific message that Vision could
@@ -151,32 +151,32 @@ applying an undefined selector to an object is the value NA.
 When you are using <a href="Program.htm#named">named blocks</a>, you can 
 generate a variation on the <i>selector not found</i> message if you
 do not provide the correct number of parameters to a block.
-For example:<pre><tt><b>
+For example:<pre><b>
      !block <-
            [ | sampleP1: a  P2: b | 
              "Parameter 1: " print ; a printNL ; 
              "Parameter 2: " print ; b printNL ;
            ] ; 
      block valueWith: 10 
-</b></tt></pre>
-produces:<pre><tt><b>
+</b></pre>
+produces:<pre><b>
      >>> Parameter 'a' Unavailable <<<
      Parameter 1:       NA 
      Parameter 2:        10
-</b></tt></pre>
+</b></pre>
 Notice that the value NA was substituted for the missing parameter
 and the program execution continued.
 <p>
 <hr>
 <h3 id="fatal">Fatal Vision Errors</h3>
 <p>
-A fatal Vision error is indicated by output in the form:<pre><tt><b>
+A fatal Vision error is indicated by output in the form:<pre><b>
      >>>  Error Trapped By Read-Eval-Print  <<<
      *    Utilities [132]
      *    'malloc' Error
      *    Private Memory Allocation Error
      Size: 3255252408, Details: Not Enough Space
-</b></tt></pre>
+</b></pre>
 When a fatal error is encountered, the current execution is aborted.
 Your Vision session will remain active, but you will not be able to
 commit any saves if your session encounters a fatal error.  Depending

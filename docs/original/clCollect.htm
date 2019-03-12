@@ -90,8 +90,8 @@ All <i>Collection</i> objects respond to the message
      Currency instanceList count print ;
 </b></tt></pre>
 prints the number of instances in the Currency class.
-<p>
-The <a name="do" href="mList.htm#do:"><i>do:</i></a> message
+<p id="do">
+The <a href="mList.htm#do:"><i>do:</i></a> message
 has been redefined at the <i>Collection</i> class.
 It performs the same function as the 
 <a href="clObject.htm#do:">version defined at Object</a>; however,
@@ -106,8 +106,8 @@ displays the value of <i>code</i> and <i>name</i> for each instance
 in the Currency class.  The supplied block is evaluated for each
 element in the collection.  Messages within the block are sent
 to the individual elements in the collection.  
-<p>
-The <a name="send" href="mList.htm#send:"><i>send:</i></a> 
+<p id="send">
+The <a href="mList.htm#send:"><i>send:</i></a> 
 message has also been redefined at the <i>Collection</i> class.
 It works identically to the <i>do:</i> message except for the
 value returned.  The block is evaluated for each object in
@@ -136,11 +136,11 @@ returns a <i>List</i>.  If the original collection is a <i>TimeSeries</i>,
 the <i>send:</i> message returns a <i>TimeSeries</i>
 containing the same dates as the original <i>TimeSeries</i>.  
 The <i>do:</i> message always returns the original collection.
-<p>
+<p name="extend">
 The <i>extendBy:</i> message
 has been redefined at the <i>Collection</i> class.
 It performs the same function as the 
-<a name="extend" href="clObject.htm#extendBy:">version defined at Object</a>.
+<a href="clObject.htm#extendBy:">version defined at Object</a>.
 Instead of applying to a single object, the version defined
 for the <i>Collection</i> class applies the block supplied as the
 parameter to each
@@ -355,8 +355,7 @@ the same.  The expression:<pre><tt><b>
 </b></tt></pre>
 produces a descending sort by exchange rate, sorting alphabetically 
 when the exchange rates are the same.
-<p>
-<a name="ranks"> </a>
+<p id="ranks">
 The <a href="mList.htm#rankUp:"><i>rankUp:</i></a> and
 <a href="mList.htm#rankDown:"><i>rankDown:</i></a> 
 messages are defined to rank the elements in a <i>Collection</i>
@@ -784,8 +783,7 @@ the message <i>fractileUp:</i>, use:<pre><tt><b>
      ] ;
 
 </b></tt></pre>
-<p>
-<a name="runningTotal"> </a>
+<p id="runningTotal">
 The message
 <a href="mList.htm#runningTotal:"><i>runningTotal:</i></a>
 returns the recipient <i>Collection</i> extended by the
@@ -963,9 +961,7 @@ returns a single <i>List</i> containing the elements
 
 <p>
 <hr>
-<h3>
-<a name="dot">Collection Messages and the <font size=+1>.</font> Operator
-</a></h3>
+<h3 id="dot">Collection Messages and the <font size=+1>.</font> Operator</h3>
 <p>
 A common requirement when working with <i>Collections</i>
 is to apply a series of operations in succession.  Starting with a
@@ -1046,9 +1042,9 @@ for each element in the collection.  Although this operation
 may appear to operate an element at a time, 
 collection operations are actually optimized internally 
 and do not execute by sequential evaluation.  
-<p>
+<p name="iterate.warn">
 <blockquote><hr><center><font size=+1>
-<a name="iterate.warn"><b>Warning!! </b></a>
+<b>Warning!! </b>
 </font></center>
 Because collections are not evaluated sequentially,
 you do not have control over the order in which the collection is

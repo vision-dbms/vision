@@ -72,7 +72,7 @@ database update automatically appends a comment and a time stamp to
 this file after an update has been committed.
 <p>
 
-<a name="NDF.ERRORS File"><h4>The NDF.ERRORS File</h4></a>
+<h4 id="NDF.ERRORS File">The NDF.ERRORS File</h4>
 
 The file <i>/localvision/network/NDF.ERRORS</i> is a centralized error 
 log file that tracks all internal Vision errors reported to users using 
@@ -98,7 +98,7 @@ If only the first two parts match, successful updates were performed
 before the error was reported.
 <hr>
 
-<a name="Network Versions"><h3>Network Versions</h3></a>
+<h3 id="Network Versions">Network Versions</h3>
 
 Each time a save is committed to the database network, a  new  version
 of the database is created.  Old versions are not destroyed until explicitly 
@@ -191,7 +191,7 @@ execute permission if desired, so that it may be run from non
 <i>dbadmin</i> user codes.
 
 <p>
-<a name="-v Option"><h4>Viewing Older Versions:  The -v Option</h4></a>
+<h4 id="-v Option">Viewing Older Versions:  The -v Option</h4>
 
 
 The <i>-v</i> option to <i>batchvision</i> (and <i>vision</i>)names 
@@ -300,7 +300,7 @@ session restart flag, the version represents a view of the database that
 sees just the changes made by the creator of the version.
 <hr>
 
-<a name= "Garbage Collection"><h3>Garbage Collection</h3>
+<h3 id="Garbage Collection">Garbage Collection</h3>
 
 The <i>GCollect</i> script is used to flag Vision structures that are 
 no longer accessed by the current version of the network.  This process 
@@ -399,7 +399,7 @@ it is usually run when the system is not actively being used
 (i.e., as part of the overnight production cycle).
 <hr>
 
-<a name="compaction"><h3>Compaction</h3></a>
+<h3 id="compaction">Compaction</h3>
 
 The compaction process is used to remove obsolete and redundant structures from the 
 Vision network.  Each structure present in each segment of the network is 
@@ -787,7 +787,7 @@ at <i>Utility</i>.
 </ul>
 
 <hr>
-<a name="dbconvert"><h3>The <i>dbconvert</i> Utility</h3></a>
+<h3 id="dbconvert">The <i>dbconvert</i> Utility</h3>
 
 This document describes the current version of <i>dbconvert</i>, a tool that
 facilitates the transfer and conversion of a data base from one machine or
@@ -803,7 +803,7 @@ processor architecture to another.  <i>dbconvert</i> has several modes of operat
 Briefly, this document describes each of these modes and how they are used.
 <p>
 
-<a name="segment"><h4>Standalone Segment Maintenance</h4></a>
+<h4 id="segment">Standalone Segment Maintenance</h4>
 <p>
 
 Standalone segment maintenance mode is the simplest mode of operation
@@ -836,7 +836,7 @@ the required segment information which enables automatic segment
 transfer.
 <p>
 
-<a name="network"><h4>Standalone Network Maintenance</h4></a>
+<h4 id="network">Standalone Network Maintenance</h4>
 <p>
 
 Standalone network maintenance mode allows an entire database to be analyzed
@@ -929,7 +929,7 @@ ignores all updates to the <i>local</i> data base, effectively rolling them back
 replacing them with updates from the master.
 <p>
 
-<a name="server"><h4>Server Network Distribution</h4></a>
+<h4 id="server">Server Network Distribution</h4>
 <p>
 
 To use client network maintenance mode, a version of <i>dbconvert</i> running in
@@ -979,7 +979,7 @@ local6, local7, daemon.
 
 
 <hr>
-<a name="Other Tools"><h3>Other Tools</h3></a>
+<h3 id="Other Tools">Other Tools</h3>
 
 Several additional tools are available for general system 
 administration activities including: <b>checksum</b>, 
@@ -988,7 +988,7 @@ administration activities including: <b>checksum</b>,
 
 
 <p>
-<a name="checksum"><h4>The checksum Utility</h4></a>
+<h4 id="checksum">The checksum Utility</h4>
 
 A segment checksum is computed when a new segment is created 
 and is validated by re-reading the segment immediately after 
@@ -1033,7 +1033,7 @@ that does not match the computed checksum).  This return value
 is accessible as the value of the C-Shell variable <i>$status</i>
 immediately after execution of the checksum tool.
 
-<a name="rollback"><h4>The rollback Utility</h4></a>
+<h4 id="rollback">The rollback Utility</h4>
 
 The <i>rollback</i> program is used to create an NDF that represents
 an earlier version of the network.  This is especially 
@@ -1093,7 +1093,7 @@ NDF with the file <i>RollBkNDF</i>.  This activity should
 be performed with caution, while no Vision sessions are running.
 <p>
 
-<a name="ndftool"><h4>The ndftool Utility</h4></a>
+<h4 id="ndftool">The ndftool Utility</h4>
 
 The program <i>/vision/tools/ndftool</i> is an advanced 
 tool capable of performing more sophisticated analysis 

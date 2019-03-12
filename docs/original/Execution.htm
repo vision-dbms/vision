@@ -57,11 +57,11 @@ receives the <i>gm</i> message in the following expression?</p>
 <p><b>gm sales</b></p>
 </ul>
 
-<p>To answer these questions, Vision provides a special collection of variables
-called the 
-<a name="magic"><b>Magic Words</b></a>.
+<p id="magic">
+To answer these questions, Vision provides a special collection of variables
+called the <b>Magic Words</b>.
 These variables return objects that give every expression a 
-<a name="context"><b>Context</b></a>
+<b id="context">Context</b>
 in which to execute. There are ten magic words in
 Vision -- <i>^current</i>, <i>^my</i>, <i>^self</i>, <i>^super</i>, <i>^here</i>,
 <i>^global</i>, <i>^tmp</i>, <i>^today</i>, <i>^date</i>, and <i>^local</i>
@@ -69,8 +69,7 @@ Vision -- <i>^current</i>, <i>^my</i>, <i>^self</i>, <i>^super</i>, <i>^here</i>
 Context</a></i>, <i><a href="#globalContext">Global Context</a></i>,
 and <i><a href="#dynamicContext">Dynamic Context</a></i>.</p>
 
-<p>
-<a name="env"> </a>
+<p id="env">
 <i><a href="#blockContext">Block Context</a></i> is the largest
 and most complex of the contexts. Half of the magic words -- <i>^current</i>,
 <i>^my</i>, <i>^self</i>, <i>^super</i>, <i>^here</i> -- return objects
@@ -147,7 +146,7 @@ class hierarchy. The outermost layer of an object represents the most specialize
 class in the hierarchy. When a message is sent to an object, the layers
 of the object are searched for a definition of that message, starting at
 the outermost.  This is known as 
-<a name="resolve"><b>Resolving the Message</b></a>.
+<span id="resolve"><b>Resolving the Message</b></span>.
 
 <p><b>Classes</b> provide a template for constructing similar objects.
 <b>Layers</b> provide an implementation for those objects. Since object
@@ -171,18 +170,18 @@ an object is created with the <i>new</i> or
 <i>createInstance</i> message, Vision automatically
 creates a new layer for each class in the object's superclass chain. It
 links those newly created layers together so that each layer can uniquely
-find its superior. For example:<pre><tt><b>
+find its superior. For example:<pre><b>
      Object createSubclass: "MySubclass" ;
      !instance1 <- MySubclass createInstance;
-</tt></b></pre>
+</b></pre>
 creates <i>instance1</i> with two layers -- one associated with <i>MySubclass</i>
 and the other with <i>Object</i>. Each of these layers stores the values
 for properties defined at its associated class. For example, if <i>MySubclass</i>
 defines two fixed properties,<i> x</i> and<i> y</i>,</p>
 
 <ul>
-<pre><b><tt>MySubclass defineFixedProperty: 'x';
-MySubclass defineFixedProperty: 'y';</tt></b></pre>
+<pre><b>MySubclass defineFixedProperty: 'x';
+MySubclass defineFixedProperty: 'y';</b></pre>
 </ul>
 
 <p>and <i>Object</i> defines the fixed property, <i>code</i>:</p>
@@ -195,17 +194,17 @@ MySubclass defineFixedProperty: 'y';</tt></b></pre>
 <i>instance1</i>'s values for <i>x</i> and <i>y</i>:</p>
 
 <ul>
-<pre><b><tt>instance1 :x &lt;- 23; 
-instance1 :y &lt;- 92;</tt></b></pre>
+<pre><b>instance1 :x &lt;- 23; 
+instance1 :y &lt;- 92;</b></pre>
 </ul>
 
 <p>while the layer associated with <i>Object</i> stores the value for <i>code</i>:</p>
 
 <ul>
-<pre><b><tt>instance1 :code &lt;- &quot;instance1&quot;;</tt></b></pre>
+<pre><b>instance1 :code &lt;- &quot;instance1&quot;;</b></pre>
 </ul>
 
-<a name="specialization"> </a>
+<span id="specialization"> </span>
 <p>Instantiation is not the only mechanism by which object layers are created.
 The other is object specialization. Object specialization adds a layer
 to an existing object. Internally, object specialization is the mechanism
@@ -215,10 +214,10 @@ important Vision messages. One of those messages is <i>extendBy:</i>. The
 <i>extendBy:</i> message is defined for all objects. It takes a single
 argument which is expected to be a block. It returns its recipient with
 an added layer. That added layer contains the values of the local variables
-computed during the execution of the block:<pre><tt><b>
+computed during the execution of the block:<pre><b>
      !instance1a <- instance1
        extendBy: [ !greeting <- "Hi, I'm instance 1a" ];
-</b></tt></pre>
+</b></pre>
 <p>Unlike class specialization which inherits only the definitions of messages
 from a superclass, adding a layer to an object produces an object that
 inherits both the message definitions and property values of the original
@@ -246,12 +245,12 @@ layers can inherit from the same layer. For example, the expression:</p>
 <p>Objects created using object specialization operations like <i>extendBy:</i>
 are full fledged Vision objects in all respects. For example, <i>instance1a</i>
 is a member of a unique subclass of <i>MySubclass</i> which can be instantiated
-by sending the <i>createInstance</i> message to <i>instance1a</i>:<pre><tt><b>
+by sending the <i>createInstance</i> message to <i>instance1a</i>:<pre><b>
      !instance2a <- instance1a createInstance;
      instance2a :greeting <- "Hi, I'm instance 2a" ;
      instance2a :x <- -17.6;
      instance2a :y <- 2.718;
-</b></tt></pre>
+</b></pre>
 
 <p>The layers of any object can be peeled away. Every object responds to
 the <i>super</i> message by removing its outermost layer and returning
@@ -330,7 +329,7 @@ is a shorthand for and equivalent to:</p>
 <p>Every Vision expression needs a default place to look for the implementation
 of a message as well as a place to record the values of local variables
 and parameters. <i>^current</i> returns that object. 
-<a name="interactiveCurrent"></a>
+<span id="interactiveCurrent"></span>
 For expressions that you type interactively, <i>^current</i> returns the 
 <a href="#global">top
 level object accessed when you started your Vision session</a>. If you
@@ -526,8 +525,7 @@ do: [ sales print;
       earnings print;
     ];</b></pre>
 </ul>
-<a name="contextSwitch"> </a>
-<p>The block supplied to the <i>do:</i> message will need a <i>^current</i>
+<p id="contextSwitch">The block supplied to the <i>do:</i> message will need a <i>^current</i>
 object when it is run; however, in this example that <i>^current</i> object
 does not inherit from the environment of the block's definition -- it inherits
 from the object <i>gm</i> supplied to the <i>do:</i> message. The <i>do:</i>
@@ -557,8 +555,7 @@ do: [ name print;
 <pre><b>    ];</b></pre>
 </ul>
 
-<a name="my"> </a>
-<p>Whenever Vision creates a block's <i>^current</i> object from a dynamically
+<p id="my">Whenever Vision creates a block's <i>^current</i> object from a dynamically
 specified object, it makes the object that <i>^current</i> would have inherited
 from available as the value of the <i>^my</i> magic word. Using the <i>^my</i>
 magic word, it is possible to retrieve values from the environment in which
@@ -566,8 +563,7 @@ the block appears. In this example, <i>^my</i> returns the object that
 understands the <i>gm</i> message and defines the <i>industrySales</i>
 local variable.</p>
 
-<a name="self"> </a>
-<p>Whenever Vision creates a block's <i>^current</i> object from a dynamically
+<p id="self">Whenever Vision creates a block's <i>^current</i> object from a dynamically
 specified object, it also makes that dynamic object available as the value
 of the <i>^self</i> magic word. Using the <i>^self</i> magic word, you
 can access the dynamic object without any of the local redefinitions made
@@ -596,9 +592,8 @@ do: [ !eps &lt;- earnings &gt; 0
 </b>    <b>];</b></pre>
 </ul>
 
-<p>At this point, you should be telling yourself that there is another
+<p id="stripLayer">At this point, you should be telling yourself that there is another
 way to achieve the same result. 
-<a name="stripLayer"></a>
 Because
 <i>^current</i> is constructed as a specialization of the dynamic object
 returned by <i>^self</i>, you could also write:</p>
@@ -677,7 +672,7 @@ use blocks this way. The <i>do:</i> message illustrated here is one of
 those messages. It evaluates a block in the context of a dynamically specified
 object and returns that object. The <i>send:</i> message is another. It
 returns the value of the final expression in the block. 
-<a name="returningCurrent"></a>
+<span id="returningCurrent"></span>
 The
 <i>extendBy:</i> message, discussed in the
 <a href="#layers">object layers section of this document</a>, 
@@ -751,7 +746,7 @@ needs to choose an object from which it will inherit. The following examples
 illustrate how Vision makes that choice.</p>
 
 <p>To start with, assume that <i>Subclass1</i> and <i>Subclass2</i> are
-defined by the following Vision code:<pre><tt><b>
+defined by the following Vision code:<pre><b>
      Object createSubclass: "Subclass1" ;
      Subclass1 createSubclass: "Subclass2" ;
 
@@ -762,7 +757,7 @@ defined by the following Vision code:<pre><tt><b>
 
      Subclass2 define: 'message1' 
                toBe: "You got the definition of message1 at Subclass2" ;
-</b></tt></pre>
+</b></pre>
 and that <i>Subclass2</i> defines a method that displays the values
 of <i>message1</i> and <i>message2</i> as follows:</p>
 
@@ -970,7 +965,7 @@ is indistinguishable from <i>^self</i>. For example, the expression:</p>
 <pre><b>^self == ^super</b></pre>
 </ul>
 
-<p>always returns <b><tt>TRUE</tt><i>. </i></b>When you send a message
+<p>always returns <b>TRUE<i>. </i></b>When you send a message
 to <i>^super</i>, however, Vision starts searching for the message at <i>^current</i>.
 By starting at <i>^current</i>, the search is restricted to the class and
 superclasses of the class that defined the current method. In the case
@@ -1112,7 +1107,7 @@ session. Three magic words supply the global context for an expression
 -- <i>^global</i>, <i>^tmp</i>, and <i>^today</i>. Of these, 
 <i><a href="#global">^global</a></i>
 and <i><a href="#tmp">^tmp</a></i> are the most significant since
-<a name="today"> </a>
+<span id="today"> </span>
 <i>^today</i> simply returns the start date of the current session. When
 a Vision session starts, an initial object is derived from the session's
 startup options. That object provides a view of the data base and a workspace
@@ -1242,7 +1237,7 @@ to <i>^global</i>. In particular, </p>
 <pre><b>^tmp super == ^global</b></pre>
 </ul>
 
-<p>always returns <b><tt>TRUE</tt></b>. Because <i>^tmp</i> inherits the
+<p>always returns <b>TRUE</b>. Because <i>^tmp</i> inherits the
 messages and property values of <i>^global</i>, you can use <i>^tmp</i>
 virtually any place you would use <i>^global</i>. For example:</p>
 
@@ -1550,7 +1545,7 @@ method. Basically, this method asks <i>^local</i> for a currency to use
 as a target.</p>
 
 <p>The following illustrates how this capability works in a real data base.
-This expression displays GM's sales in each of four currencies:<pre><tt><b>
+This expression displays GM's sales in each of four currencies:<pre><b>
      Named Currency
      send: [DEM, GBP, USD, XAF].
      do: [
@@ -1559,13 +1554,13 @@ This expression displays GM's sales in each of four currencies:<pre><tt><b>
              ^global gm sales printNL
              ] ;
          ] ;
-</b></tt></pre>
-This is what gets displayed:<pre><tt><b>
+</b></pre>
+This is what gets displayed:<pre><b>
      German Deutschmark            235869.64
      British Pound                  97265.30
      United States Dollar          152172.00
      Franc                         152172.00
-</b></tt></pre>
+</b></pre>
 <p>
 
 {% include legacy-copyright.htm copydates="1997" %}

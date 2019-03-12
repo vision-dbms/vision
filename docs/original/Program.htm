@@ -31,7 +31,7 @@
 <p>
 Whether you realize it or not, you have already written your first
 Vision program.  
-A <a name="program"><b>Program</b></a>
+A <span id="program"><b>Program</b></span>
 is merely a set of one or more Vision
 expressions that are viewed together as a unit.  Most of the programs
 you have seen so far have asked Vision to perform a single request.
@@ -39,7 +39,7 @@ There are situations where you would like to perform a set of
 operations, one after another.  Vision provides a simple mechanism
 for accomplishing this.  
 <p>
-<a name="statement"> </a>
+<span id="statement"> </span>
 The '<i>;</i>' character is used to separate expressions within a Vision
 program.  Each expression in a program is known as 
 a <b>Statement</b>.  Each
@@ -47,11 +47,11 @@ statement is executed in sequence.  Programs always return the value
 of the last statement executed.  This value is automatically printed
 by Vision.  For example, the following program can be used to
 calculate a value and print out a descriptive message as well as the
-result:  <pre><tt><b>
+result:  <pre><b>
      !sum <- 2 + 2 ; 
      "The Answer Is: " print ; 
      sum printNL ;
-</b></tt></pre>
+</b></pre>
 This program contains 3 statements separated by the <i>;</i>
 character.  The first statement computes the sum of <i>2 + 2</i> and
 saves the result in the variable <i>sum</i>.  The second statement
@@ -60,30 +60,30 @@ statement prints the sum followed by a carriage return.
 <p>
 Some expressions that can be written as a single expression, can be
 subdivided into more manageable pieces by creating multiple
-expressions.  For example:  <pre><tt><b>
+expressions.  For example:  <pre><b>
      !count <- mylist union: yourlist . exclude: autolist . 
          select: [ score > 20] . count ; 
-</b></tt></pre>
-could be rewritten as:<pre><tt><b>
+</b></pre>
+could be rewritten as:<pre><b>
      !ourlist <- mylist union: yourlist ; 
      !universe <- ourlist exclude: autolist ; 
      !optimalList <- universe select: [score > 20 ] ; 
      !count <- optimalList count ; 
-</b></tt></pre>
+</b></pre>
 <p>
 <hr>
 <h3 id="block">Blocks</h3>
 <p>
 A <b>Block</b> is a program that represents a deferred sequence of
 actions.  Syntactically, a block is a program surrounded by square
-brackets.  The general form for a block is illustrated below:<pre><tt>
+brackets.  The general form for a block is illustrated below:<pre>
      [ statement 1 ; 
        statement 2 ; 
          . . .  
      ]  
-</tt></pre>
+</pre>
 The block will be executed when it receives the unary message <i>value</i>.
-For example, the following two programs have the same effect:  <pre><tt><b>
+For example, the following two programs have the same effect:  <pre><b>
     !index <- 17 ; 
     :index <- index + 1 ; 
     index print ; 
@@ -91,7 +91,7 @@ For example, the following two programs have the same effect:  <pre><tt><b>
     !index <- 17 ; 
     [:index <- index + 1 ] value ; 
     index print ; 
-</b></tt></pre>
+</b></pre>
 Blocks always return the value of the last statement executed.
 <p>
 Suppose every month you create a new screening universe which
@@ -101,25 +101,25 @@ also produce a second list that represents the companies added to
 <i>currentList</i>.  To accomplish this, you start out with two empty
 lists that will be used to hold a current list and a list of changes.
 You also create a block which will be used to update these 
-lists:<a name="runBlock.samp" > </a><pre><tt><b>
+lists:<pre id="runBlock.samp"><b>
      !currentList <- List new ;
      !changeList <- List new ;
      !myProgram <- [ !oldList <- currentList; 
                      :currentList <- joesList union: marysList; 
                      :changeList <- currentList exclude: oldList; 
                    ] ;
-</b></tt></pre>
+</b></pre>
 Each month, after Joe and Mary have updated their lists, you can
-execute this program by typing the expression:  <pre><tt><b>
+execute this program by typing the expression:  <pre><b>
      myProgram value 
-</b></tt></pre>
+</b></pre>
 You can now access the updated values of the variables
 <i>currentList</i> and <i>changeList</i>.  
 <p>
 You have actually already seen another use for blocks.  In the
-expression:<pre><tt><b> 
+expression:<pre><b> 
      universe select: [ score > 20 ] 
-</b></tt></pre>
+</b></pre>
 the argument to the <i>select:</i> message is actually a block.  When
 <i>universe</i> receives the message <i>select:</i>, 
 it evaluates the block once for each of the elements contained in the list.  
@@ -154,46 +154,46 @@ objects respond to several messages that support conditional execution:
 <li><i>ifFalse: falseBlock else: elseBlock</i>
 </ul>
 <p>
-For example:<pre><tt><b>
+For example:<pre><b>
      myList count > 100 
          ifTrue: [ "This is a big list."  ] 
         ifFalse: [ "This is a small list." ] 
-</b></tt></pre>
+</b></pre>
 If the number of elements in the list <i>myList</i> is greater than 100 the
 text "This is a big list" will be displayed; otherwise, the text
 "This is a small list" will be displayed.  
 <p>
 The value returned by these messages is the value of
-the block that was executed.  In the example:<pre><tt><b>
+the block that was executed.  In the example:<pre><b>
      !result <- myList count > 100 
                   ifTrue: [ 100 ] 
                  ifFalse: [ -100 ] 
                     else: [ 0 ] 
-</b></tt></pre>
+</b></pre>
 the variable <i>result</i> will be assigned to the value 
 <i>100</i>, <i>-100</i>, or <i>0</i>
 depending on the number of elements in <i>myList</i>.  
 <p>
 The <i>ifTrue:</i> or <i>ifFalse:</i> message can be used if there
-is only one conditional consequence of interest.  For example:<pre><tt><b>
+is only one conditional consequence of interest.  For example:<pre><b>
      count <= cutoff 
        ifTrue: [ :total <- total + 100 ] 
-</b></tt></pre>
-This expression is identical to:<pre><tt><b>
+</b></pre>
+This expression is identical to:<pre><b>
      count <= cutoff 
        ifTrue: [ :total <- total + 100 ] 
       ifFalse: [ NA ] 
-</b></tt></pre>
+</b></pre>
 Since the arguments in these messages are blocks, they can contain
 complex expressions as well, including nested control structures as
-shown below:<pre><tt><b>
+shown below:<pre><b>
      myList count > 100 
         ifTrue: [ myList count > 1000 
                      ifTrue: [ "This is a very big list." ] 
                     ifFalse: [ "This is a big list." ] 
                 ] 
        ifFalse: [ "This is a small list." ] 
-</b></tt></pre>
+</b></pre>
 This program will return one of the 3 strings, depending on the
 number of elements in the list <i>myList</i>.  Since there is no
 terminating <i>;</i> at the end of this program, the returned string
@@ -203,7 +203,7 @@ It is often useful to repeat an operation until a particular event is
 reached.  This conditional repetition of an activity is provided by
 sending the <i>whileTrue:</i> message to a block with a second block
 as its argument.  For example, this message could be used to print
-out the squares of the first ten numbers as shown below:  <pre><tt><b>
+out the squares of the first ten numbers as shown below:  <pre><b>
      !maxCount <- 10 ; 
      !count <- 1 ; 
      [ count <= maxCount ] 
@@ -211,7 +211,7 @@ out the squares of the first ten numbers as shown below:  <pre><tt><b>
                      (count * count ) printNL ; 
                      :count <- count + 1 ; 
                    ] ; 
-</b></tt></pre>
+</b></pre>
 The <i>whileTrue:</i> message is defined to evaluate the recipient
 block.  If it returns the value <i>TRUE</i>, the block supplied as
 a parameter is evaluated and the <i>whileTrue:</i> message is invoked
@@ -232,7 +232,7 @@ never terminate.
 <p>
 You can write new Vision methods that create additional control
 structures.  The <i>whileTrue:</i>  message could be written as
-illustrated below:<a name="controlMethod.samp"> </a><pre><tt><b>
+illustrated below:<pre id="controlMethod.samp"><b>
      Block defineMethod:
      [ | whileTrue: aBlock|
        !test <- ^self value ;       #- evaluate the recipient
@@ -243,7 +243,7 @@ illustrated below:<a name="controlMethod.samp"> </a><pre><tt><b>
          ]
                                     #- otherwise do nothing
      ] ;
-</b></tt></pre>
+</b></pre>
 <p>
 More
 <a href="clBlock.htm#control">detailed information about 
@@ -262,7 +262,7 @@ them at a later date.
 Programs can be created using spaces, tabs, and carriage returns
 wherever needed to enhance readability.  For example, multiple
 keyword messages are often written with each keyword-argument pair on
-different lines, as shown below:<pre><tt><b>
+different lines, as shown below:<pre><b>
      value within: 10 
         percentOf: oldvalue 
 </b>or<b>
@@ -270,7 +270,7 @@ different lines, as shown below:<pre><tt><b>
         ifTrue: [ ] 
         ifFalse: [ ] 
         else: [ ] 
-</b></tt></pre>
+</b></pre>
 Upper and lower case letters are distinct characters in Vision.  A
 convention evident in the examples above is that names formed by
 concatenating several English words capitalize each word following
@@ -278,10 +278,10 @@ the first one.  By convention, names that identify classes usually
 begin with an upper case letter.  These conventions are not enforced
 by Vision.  
 <p>
-<a name="comment">The <i>#</i> character </a>
+<span id="comment">The <i>#</i> character </span>
 is used to begin a comment.  All characters
 appearing on a line that follow this character are ignored.  For
-example:  <pre><tt><b>
+example:  <pre><b>
      ####################
      #   Sample Program Using Comments
      ####################
@@ -289,13 +289,13 @@ example:  <pre><tt><b>
       !x <- 10 ; 	# create variable x to hold first value
       !y <- 5 ;  	# create variable y to hold second value
       x + y             # print result
-</b></tt></pre>
+</b></pre>
 <p>
 <hr>
 <h3 id="named">Blocks and Parameters</h3>
 <p>
 Blocks can be named by providing a valid selector enclosed within
-vertical bars (i.e., the '<i>|</i>' character) as shown below:  <pre><tt>
+vertical bars (i.e., the '<i>|</i>' character) as shown below:  <pre>
      [ | sample | 
        statement1 ; 
        statement2 ; 
@@ -309,7 +309,7 @@ vertical bars (i.e., the '<i>|</i>' character) as shown below:  <pre><tt>
        "Parameter 2: " print ; b print ;
        . . . 
      ] ; 
-</tt></pre>
+</pre>
 The first example names the block <i>sample</i>.  This is equivalent
 to defining a block with no parameters.  This is the format used to 
 <a href="#method">define methods</a> that do not require parameters.
@@ -317,7 +317,7 @@ to defining a block with no parameters.  This is the format used to
 The second example defines a block which requires 2 parameters to
 execute.  You use the <i>valueWith:</i> message to evaluate a block
 with one parameter, the <i>valueWith:and:</i> to evaluate a block
-with two parameters, and so on.  For example:<pre><tt><b>
+with two parameters, and so on.  For example:<pre><b>
      !block <-
            [ | sampleP1: a  P2: b | 
              "Parameter 1: " print ; a printNL ; 
@@ -329,7 +329,7 @@ with two parameters, and so on.  For example:<pre><tt><b>
 
      Parameter 1:       10
      Parameter 2:        5
-</b></tt></pre>
+</b></pre>
 The names <i>a</i> and <i>b</i> are <b>Local Variables</b>
 that are only available inside the block.  They take on the values
 supplied when you run the method.
@@ -338,85 +338,85 @@ messages.
 <p>
 If a block is defined to require parameters and you do not supply
 the correct number, you will get an error message.  For example,
-if you supplied the above block with a single value:<pre><tt><b>
+if you supplied the above block with a single value:<pre><b>
      block valueWith: 10
-</b></tt></pre>
-You would see the error message:<pre><tt><b>
+</b></pre>
+You would see the error message:<pre><b>
      >>> Parameter 'a' Unavailable <<<
-</b></tt></pre>
+</b></pre>
 Note that stand-alone blocks such as the one defined here do not utilize the
 full block name, in this case <i>sampleP1:P2:</i>.  This name is
 important when the block is used to <a href="#method">define
 methods.</a>.  If you are using the block as a stand-alone, you can
-use the following short-hand to define the block:<pre><tt><b>
+use the following short-hand to define the block:<pre><b>
      !block <- 
            [ | :a :b | 
              "Parameter 1: " print ; a printNL ; 
              "Parameter 2: " print ; b printNL ;
            ] ;
-</b></tt></pre>
+</b></pre>
 This block works exactly the same way as the previously named block
 in that it defines two parameters named <i>a</i> and <i>b</i>.
-Execution is identical to before:<pre><tt><b>
+Execution is identical to before:<pre><b>
      block valueWith: 10 and: 5
-</b></tt></pre>
+</b></pre>
 and produces the same results.
 <p>
 <hr>
 <h3 id="method">Writing Methods</h3>
 <p>
 The method <i>defineMethod:</i> requires a named block as its parameter.
-To define a method that requires no parameters, use the form:<pre><tt>
+To define a method that requires no parameters, use the form:<pre>
      object
      defineMethod:
      [ | messageName |
        statement1 ;
        statement2 ;
      ] ;
-</tt></pre>
+</pre>
 For example, to define a method that prints the count of the number
-of elements in a list use:<pre><tt><b>
+of elements in a list use:<pre><b>
      List
      defineMethod:
      #-- name the method <i>printCount</i> with 0 parameters
      [ | printCount |
        count print ;
      ] ;
-</b></tt></pre>
+</b></pre>
 This defines the method <i>printCount</i> as a message for the
-class <i>List</i> that requires 0 parameters.  To run it use:<pre><tt><b>
+class <i>List</i> that requires 0 parameters.  To run it use:<pre><b>
      !myList <- 1, 2, 3 ;
      myList printCount ;          #- prints 3
-</b></tt></pre>
+</b></pre>
 To define a method that adds a supplied value to the list count and
-prints the result, use:<pre><tt><b>
+prints the result, use:<pre><b>
      List
      defineMethod:
      #-- name the method <i>printCountPlus:</i> with 1 parameters
      [ | printCountPlus: n |
        (count + n) print ;
      ] ;
-</b></tt></pre>
+</b></pre>
 This defines the method <i>printCount:</i> as a message for the
-class <i>List</i> that requires 1 parameter.  To run it use:<pre><tt><b>
+class <i>List</i> that requires 1 parameter.  To run it use:<pre><b>
      !myList <- 1, 2, 3 ;
      myList printCountPlus: 5 ;     #- prints 8
-</b></tt></pre>
+</b></pre>
 To define a method that adds a supplied value to the list count,
 multiplies the result by a second supplied value, and
-prints the result, use:<pre><tt><b>
+prints the result, use:<pre><b>
      List
      defineMethod:
      #-- name the method <i>printCountPlus:times:</i> with 2 parameters
      [ | printCountPlus: p1 times: p2 |
        ( (count + p1) * p2 ) print ;
      ] ;
-</b></tt></pre>
+</b></pre>
 This defines the method <i>printCount:times:</i> as a message for the
-class <i>List</i> that requires 2 parameters.  To run it use:<pre><tt><b>
+class <i>List</i> that requires 2 parameters.  To run it use:<pre><b>
      !myList <- 1, 2, 3 ;
      myList printCountPlus: 5 times: 2 ;        #- prints 16
-</b></tt></pre>
+</b></pre>
 More detailed information about messages
 <a href="Fund.htm#method">in general</a> and about 
 <a href="Execution.htm#methods">method execution</a> is available.
