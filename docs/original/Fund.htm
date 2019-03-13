@@ -94,11 +94,14 @@ instances of the class form the rows of the table.  The messages of
 the class form the columns in the table.  A sample tabular
 representation for the class Company is shown below:  
 <p>
-<pre>
-                        <Font Size = +1> <b>Company Class</b> </Font>
-<ul>
-      <img src="fund1.jpg" lowsrc="fund1.jpg" alt="Tabular representation for Company" ></ul>
-</pre>
+<figure>
+  <figcaption>
+    <font Size = +1><b>
+	&nbsp;&nbsp;&nbsp;Company Class
+    </b></font>
+  </figcaption>
+  <img src="fund1.jpg" lowsrc="fund1.jpg" alt="Tabular representation for Company">
+</figure>
 <p>
 This tabular organization is similar to the relational database
 model.  However, in most relational systems, the actual data that can
@@ -111,9 +114,9 @@ value would then be used to query an industry table in order to
 access information about a company's industry.  In Vision, the object
 representing the company's industry is stored directly as the
 value of the industry property.  As a result, the simple 
-expression:<pre><b>
-     gm industry name 
-</b></pre>
+expression:<pre>
+  gm industry name
+</pre>
 could be used to access the name of GM's industry.
 
 <p id="specialization">
@@ -136,10 +139,14 @@ the class from which it was created.  All instances of a class are
 also considered to be instances of its superclass.  This organization
 is illustrated below:  
 <p>
-<pre>
-<Font Size = +1><b>          Bank Company Class         Company Class</b></Font>
-
-<ul>            <img src="fund2.jpg" lowsrc="fund2.jpg" alt="Instances Hierarchy" ></ul></pre>
+  <figure>
+    <figcaption>
+      <font Size = +1><b>
+	  &nbsp;&nbsp;&nbsp&nbsp;&nbsp;&nbsp;Bank Company Class&nbsp;&nbsp;&nbsp&nbsp;&nbsp;&nbsp&nbsp;&nbsp;&nbsp&nbsp;&nbsp;&nbsp&nbsp;&nbsp;&nbsp;Company Class
+      </b></font>
+    </figcaption>
+    <img src="fund2.jpg" lowsrc="fund2.jpg" alt="Instances Hierarchy">
+</figure>
 <p>
 New properties and methods may be defined by the subclass.  For
 example, banks have a value for outstanding loan balance and standard
@@ -181,15 +188,15 @@ recipient object should perform.  The recipient object's class
 determines the manner in which to actually perform the operation
 indicated by the message.  
 <p>
-For example, the expression:<pre><b>
-     gm sales 
-</b></pre>
+For example, the expression:<pre>
+  gm sales
+</pre>
 sends the message <i>sales</i> to the company named <i>gm</i>.  
 The definition of the message <i>sales</i> for the class 
 <i>Company</i> may simply look up the value
-of GM's sales property.  Alternatively, the expression:<pre><b>
-     autoIndustry sales 
-</b></pre>
+of GM's sales property.  Alternatively, the expression:<pre>
+  autoIndustry sales
+</pre>
 sends the message <i>sales</i> to the industry named <i>autoIndustry</i>.
 The definition of the message <i>sales</i> for the class 
 <i>Industry</i> could be a
@@ -206,76 +213,76 @@ Four types of message can be defined:
 </ul>
 <p>
 You do not need to know what type of message has been defined in
-order to use the message.  In all cases, the form:<pre><b>
-     object messageName 
-</b></pre>
+order to use the message.  In all cases, the form:<pre>
+  object messageName
+</pre>
 is used to request that the recipient object carry out the specific
 function indicated by the message.
 <p id="fixed">
 <b>Fixed Properties</b> are defined for storing information that does not
 need to be maintained over time.  The general form for creating a
-fixed property is:<pre><b>
-     className defineFixedProperty: 'propertyName' ;
-</b></pre>
+fixed property is:<pre>
+  className defineFixedProperty: 'propertyName' ;
+</pre>
 where <i>className</i> 
 is the name of the class for which you are defining the property and
 <i>propertyName</i> is the name of the message which will be used to access
 the property.
 <p>
 For example, you could define a property to store the year in which a
-company was founded as shown below:<pre><b>
-     Company defineFixedProperty: 'yearFounded' ;
-</b></pre>
+company was founded as shown below:<pre>
+  Company defineFixedProperty: 'yearFounded' ;
+</pre>
 The value of a property for any instance of the class
 is <a href="clNA.htm"><i>NA</i></a> by 
 <span name="default">default</span>.
 The <i>yearFounded</i> property can be 
 <span id="update">updated</span> for instances of the class
-<i>Company</i> as illustrated below:<pre><b>
-     gm :yearFounded <- 1935 ;
-</b></pre>
+<i>Company</i> as illustrated below:<pre>
+  gm :yearFounded <- 1935 ;
+</pre>
 You place the : character in front of the property name to indicate that
 you want to return the <span id="intensional"><b>Intensional Form</b></span>
 of the property.  This form
 responds to a variety of messages including the assignment message
 which is used to update the property.  When the : is not prepended to
 the property name, the value of <i>yearFounded</i> for <i>gm</i> 
-is accessed:<pre><b>
-     gm yearFounded 
-</b></pre>
+is accessed:<pre>
+  gm yearFounded
+</pre>
 <p id="ts">
 You may want to retain the values for a property over time.  The
-general form for creating a <b>Time Varying Property</b> is:<pre><b>
-     className define: 'propertyName' ;
-</b></pre>
+general form for creating a <b>Time Varying Property</b> is:<pre>
+  className define: 'propertyName' ;
+</pre>
 where <i>className</i> is the name of the class for which you are 
 defining the property and <i>propertyName</i> 
 is the name of the message which will be used to access the property.
 <p>
 For example, you could define a property to track company sales over
-time as shown below:  <pre><b>
-     Company define: 'sales' ;
-</b></pre>
+time as shown below:  <pre>
+  Company define: 'sales' ;
+</pre>
 Initially, this time series property will not have any points in it
 for any instance of the class and the value of this property will be
 <a href="clNA.htm"><i>NA</i></a>.
 The sales values for <i>gm</i> for 1993, 1994, and 1995 could be 
-updated as illustrated below:<pre><b>
-     gm :sales asOf: 93 put: 96371.63 ; 
-     gm :sales asOf: 94 put: 102813.00 ; 
-     gm :sales asOf: 95 put: 101781.00 ; 
-</b></pre>
+updated as illustrated below:<pre>
+  gm :sales asOf: 93 put: 96371.63 ;
+  gm :sales asOf: 94 put: 102813.00 ;
+  gm :sales asOf: 95 put: 101781.00 ;
+</pre>
 Again, you
 place the : character in front of the property name to return it in
 a form that can be updated.  In this case, the <i>asOf:put:</i> message
 is used to update the time series property.
 <p>
-The sales values can be accessed as shown below:<pre><b>
-     gm sales               
-</b></pre>
-returns the most recent sales and<pre><b>
-     gm :sales asOf: 94
-</b></pre>
+The sales values can be accessed as shown below:<pre>
+  gm sales
+</pre>
+returns the most recent sales and<pre>
+  gm :sales asOf: 94
+</pre>
 returns the sales as of year-end 1994.  A time series property
 returns its value as of the current evaluation date which is the
 current date by default.  The <i>asOf:</i> message can be sent to
@@ -283,9 +290,9 @@ the intensional form of a time series (i.e., the form returned by
 prepending the : character) to override the default access date.
 <p id="constant"><b>Class Constants</b>
 are defined for storing information that is identical for all instances of a
-class.  The general form for creating a class constant is:<pre><b>
-     className define: 'constantName' toBe: object ;
-</b></pre>
+class.  The general form for creating a class constant is:<pre>
+  className define: 'constantName' toBe: object ;
+</pre>
 where <i>className</i> is the name of the class for which you are defining
 the class constant and <i>constantName</i> is the name of the message which
 will be used to access the constant for any instance of the class and
@@ -293,43 +300,43 @@ will be used to access the constant for any instance of the class and
 is sent to any instance of this class.
 <p>
 For example, the message <i>isCompany</i> could be defined to return the
-<i>Boolean</i> object <i>TRUE</i> for all companies as shown below:<pre><b>
-     Company define: 'isCompany' toBe: TRUE ;
-</b></pre>
+<i>Boolean</i> object <i>TRUE</i> for all companies as shown below:<pre>
+  Company define: 'isCompany' toBe: TRUE ;
+</pre>
 The message can be defined to return <i>FALSE</i> for all other objects as
-shown below:<pre><b>
-     Object define: 'isCompany' toBe: FALSE ;
-</b></pre>
-This message can be evaluated for <i>gm</i> using the expression:<pre><b>
-     gm isCompany 
-</b></pre>
-This expression returns the value <i>TRUE</i>.  The expression:<pre><b>
-     3 isCompany 
-</b></pre>
+shown below:<pre>
+  Object define: 'isCompany' toBe: FALSE ;
+</pre>
+This message can be evaluated for <i>gm</i> using the expression:<pre>
+  gm isCompany
+</pre>
+This expression returns the value <i>TRUE</i>.  The expression:<pre>
+  3 isCompany
+</pre>
 returns the value <i>FALSE</i>.
 <p id="method"><b>Methods</b>
 are used to define procedures.  The general form for creating
-a method is:<pre><b>
-     className defineMethod: 
-     [ | methodName | 
-         . . . 
-     ] ;
-</b></pre>
+a method is:<pre>
+  className defineMethod:
+  [ | methodName |
+      . . .
+  ] ;
+</pre>
 where <i>className</i> is the name of the class for which you are
 defining the method and <i>methodName</i> is the name of the
 message which will be used to execute the method.
 <p>
 For example, a method to compute the price to earnings ratio for a
-company can be written as shown below:<pre><b>
-     Company defineMethod: 
-     [ | peRatio | 
-       price / earnings 
-     ] ; 
-</b></pre>
+company can be written as shown below:<pre>
+  Company defineMethod:
+  [ | peRatio |
+    price / earnings
+  ] ;
+</pre>
 This method can be executed for the company <i>gm</i> using the 
-expression:<pre><b>
-     gm peRatio 
-</b></pre>
+expression:<pre>
+  gm peRatio
+</pre>
 This method assumes the messages <i>price</i> and <i>earnings</i> 
 are defined as messages for the class <i>Company</i> as well.
 <p>
@@ -337,19 +344,19 @@ As indicated earlier, you need not know that the message <i>sales</i> was
 defined as a time series and that <i>peRatio</i> is actually a method that
 accesses time series properties.  For example, the price to earnings
 ratio for GM for 1994 can be accessed in the same manner as <i>sales</i>, as
-illustrated below:  <pre><b>
-     gm :peRatio asOf: 94 
-</b></pre>
+illustrated below:  <pre>
+  gm :peRatio asOf: 94
+</pre>
 In this case, all data required by the 
 <i>peRatio</i> method is accessed as of 1994.
 <p>
 Methods can be defined to require one or more parameters.  
-The general form for creating a multi-parameter method is:<pre><b>
-     className defineMethod: 
-     [ | methodWithParam1: p1 param2: p2 param3: p3 ... | 
-         . . . 
-     ] ;
-</b></pre>
+The general form for creating a multi-parameter method is:<pre>
+  className defineMethod:
+  [ | methodWithParam1: p1 param2: p2 param3: p3 ... |
+      . . .
+  ] ;
+</pre>
 where <i>className</i> is the name of the class for which you
 are defining the method and
 <i>methodNameWithParam1:param2:param3:</i>
@@ -357,30 +364,30 @@ is the name of a three parameter method which will be used to
 execute the method.
 <p>
 For example, a method to compute the price to earnings ratio for a 
-company using a supplied price could be written as shown below:<pre><b>
-     Company defineMethod: 
-     [ | peRatioWithPrice: inputPrice | 
-       inputPrice / earnings 
-     ] ; 
-</b></pre>
-This method can be executed for <i>gm</i> using the expression:<pre><b>
-     gm peRatioWithPrice: 73.25 
-</b></pre>
+company using a supplied price could be written as shown below:<pre>
+  Company defineMethod:
+  [ | peRatioWithPrice: inputPrice |
+    inputPrice / earnings
+  ] ;
+</pre>
+This method can be executed for <i>gm</i> using the expression:<pre>
+  gm peRatioWithPrice: 73.25
+</pre>
 This method assumes the message <i>earnings</i> is defined as a message
 for the class <i>Company</i> and divides the supplied price by this value.
 <p>
 The <a href="#intensional">intensional form</a>
 of a message was briefly introduced earlier as a way
 to update properties.  Another use of this form is for
-viewing the definition of a method.  For example:<pre><b>
-     gm :peRatio 
-</b></pre>
+viewing the definition of a method.  For example:<pre>
+  gm :peRatio
+</pre>
 displays the definition of the method <i>peRatio</i> instead of evaluating
 it.  If you wish to display the definition of a method that has
 multiple parameters, you must supply "dummy" values for each
-parameter.  For example, the expression:<pre><b>
-     gm :peRatioWithPrice: 0 
-</b></pre>
+parameter.  For example, the expression:<pre>
+  gm :peRatioWithPrice: 0
+</pre>
 displays the definition of the <i>peRatioWithPrice:</i> method.  If the
 method has several parameters, you only need to place the ":"  in
 front of the first one to display its contents, but you must supply a
@@ -401,42 +408,45 @@ set of messages and use the same set of methods to do so.  All
 instances of a class have the same number of properties and use the
 same names to refer to them.  
 <p>
-You can define new classes as needed as illustrated below:<pre><b>
-     !Company <- Object createSubclass ;
-</b></pre>
+You can define new classes as needed as illustrated below:<pre>
+  !Company <- Object createSubclass ;
+</pre>
 New classes are always created as a subclass of an existing class.  
-Any number of subclasses can be created.  For example:<pre><b>
-     !BankCompany <- Company createSubclass ; 
-     !InsuranceCompany <- Company createSubclass ; 
-     !SavingsAndLoan <- BankCompany createSubclass ; 
-     !Industry <- Object createSubclass ;
-</b></pre>
+Any number of subclasses can be created.  For example:<pre>
+  !BankCompany <- Company createSubclass ;
+  !InsuranceCompany <- Company createSubclass ;
+  !SavingsAndLoan <- BankCompany createSubclass ;
+  !Industry <- Object createSubclass ;
+</pre>
 The resultant class hierarchy is illustrated below:
-<pre>
-<ul>            <img src="fund3.jpg" lowsrc="fund3.jpg" alt="Sample Inheritance Hierarchy" ></ul>
-                            <b>Sample Inheritance Hierarchy</b></pre>
+<figure>
+  <img src="fund3.jpg" lowsrc="fund3.jpg" alt="Sample Inheritance Hierarchy" >
+  <figcaption>
+    &nbsp;&nbsp;&nbsp;<b>Sample Inheritance Hierarchy</b>
+  </figcaption>
+</figure>
 
 <p>
 The <i>showInheritance</i> message is used to 
-display the class hierarchy for a specific class.  For example:<pre><b>
-     Company showInheritance
-</b></pre>
+display the class hierarchy for a specific class.  For example:<pre>
+  Company showInheritance
+</pre>
 All objects respond to the message 
 <i>instanceList</i> by returning an object representing the list of all 
 the instances in a class.  All <i>List</i> objects respond to the
-message <i>count</i>.  Therefore, the expression:<pre><b>
-     Company instanceList count 
-</b></pre>
+message <i>count</i>.  Therefore, the expression:<pre>
+  Company instanceList count
+</pre>
 returns the number of instances in the class Company.  
 This count should be one immediately after the class has been created.
 <p id="instance">
 Th <i>createInstance</i>
 message is used to create a new instance
-for a class.  For example:<pre><b>
-     !ibm <- Company createInstance ; 
-     !gm <- Company createInstance ; 
-     !citibank <- BankCompany createInstance ; 
-</b></pre>
+for a class.  For example:<pre>
+  !ibm <- Company createInstance ;
+  !gm <- Company createInstance ;
+  !citibank <- BankCompany createInstance ;
+</pre>
 <p>
 A subclass inherits both the properties and the methods of its
 superclass.  The objects <i>gm</i> and <i>ibm</i> will respond to
@@ -448,9 +458,9 @@ messages which includes the set of messages defined for the class
 <p>
 New properties, constants, and methods may be defined by the
 subclass.  For example, you can define a property <i>loansOut</i> for the
-class <i>BankCompany</i>:<pre><b>
-     BankCompany define: 'loansOut' 
-</b></pre>
+class <i>BankCompany</i>:<pre>
+  BankCompany define: 'loansOut'
+</pre>
 The object <i>gm</i> would not recognize the message 
 <i>loansOut</i> because it is
 a <i>Company</i>.  The object <i>citibank</i> 
@@ -465,19 +475,19 @@ company data and produce a report in balance sheet format.  The
 method to accomplish this operation would be defined as part of the
 class <i>Company</i>.  Since a bank company would require different data and
 format for its balance sheet, this method could be redefined for the
-class <i>BankCompany</i> as outlined below:<pre><b>
-     Company defineMethod: 
-     [ | balanceSheet | 
-       ...  get company data 
-       ...  display company balance sheet format 
-     ] ; 
+class <i>BankCompany</i> as outlined below:<pre>
+  Company defineMethod:
+  [ | balanceSheet |
+    ...  get company data
+    ...  display company balance sheet format
+  ] ;
 
-     BankCompany defineMethod: 
-     [ | balanceSheet | 
-       ...  get bank company data 
-       ...  display bank balance sheet format 
-     ] ; 
-</b></pre>
+  BankCompany defineMethod:
+  [ | balanceSheet |
+    ...  get bank company data
+    ...  display bank balance sheet format
+  ] ;
+</pre>
 All instances of the class <i>BankCompany</i> 
 would use the second method when responding to the message
 <i>balanceSheet</i>.  All other companies (i.e., non-bank companies) 
@@ -485,10 +495,10 @@ would use the first method, defined for the class
 <i>Company</i>.  
 Although different methods would actually be executed, 
 the request for <i>gm</i>'s and <i>citibank</i>'s balance sheet
-would look identical:<pre><b>
-     gm balanceSheet ; 
-     citibank balanceSheet ; 
-</b></pre>
+would look identical:<pre>
+  gm balanceSheet ;
+  citibank balanceSheet ;
+</pre>
 In the first case, <i>gm</i> is the recipient object and
 <i>balanceSheet</i> is the message.  Since <i>gm</i> is an instance
 of the class <i>Company</i>, Vision would look for its definition
@@ -512,9 +522,9 @@ still not found, an appropriate
 <p>
 It is sometimes useful to access the version of a message defined at
 the superclass of the object.  All objects respond to the message
-<i>super</i>.  For example, the expression:<pre><b>
-     citibank super balanceSheet 
-</b></pre>
+<i>super</i>.  For example, the expression:<pre>
+  citibank super balanceSheet
+</pre>
 creates Citibank's balance sheet as though it were a standard
 company.
 <p>
@@ -526,149 +536,149 @@ summarized below:
 <p>
 <ul type="disc">
 <li>To create a new class, send the message
-<i>createSubclass</i> to an existing class:<pre><b>
-     !testClass <- Object createSubclass ;
-</b></pre>
-<li> To display the inheritance hierarchy for a class:<pre><b>
-     testClass showInheritance ;
-</b></pre>
+<i>createSubclass</i> to an existing class:<pre>
+  !testClass <- Object createSubclass ;
+</pre>
+<li> To display the inheritance hierarchy for a class:<pre>
+  testClass showInheritance ;
+</pre>
 <li>To create a new instance of this class, send the class the 
-<i>createInstance</i> message:<pre><b>
-     !test1 <- testClass createInstance ;
-</b></pre>
-<li>To count the number of instances in a class:<pre><b>
-     testClass instanceList count 
-</b></pre>
+<i>createInstance</i> message:<pre>
+  !test1 <- testClass createInstance ;
+</pre>
+<li>To count the number of instances in a class:<pre>
+  testClass instanceList count
+</pre>
 <li>To create a new property for this class that does not vary over 
-time:<pre><b>
-     testClass defineFixedProperty: 'startDate' ;
-</b></pre>
-<li>To assign a value to this property:<pre><b>
-     test1 :startDate <- 951231 asDate ;
-</b></pre>
-<li> To access this value:<pre><b>
-     test1 startDate 
-</b></pre>
-<li>To create a new property for this class that varies over time:<pre><b>
-     testClass define: 'rating'  ;
-</b></pre>
-<li>To assign values to this property for May, June, and July 1995:<pre><b>
-     test1 :rating asOf: 9505 put: 10 ; 
-     test1 :rating asOf: 9506 put: 13 ; 
-     test1 :rating asOf: 9507 put: 15 ; 
-</b></pre>
-<li>To access the most recent value:<pre><b>
-      test1 rating 
-</b></pre>
-<li>To access the June 1995 value:<pre><b>
-     test1 :rating asOf: 9506 
-</b></pre>
-<li>To create a new method:<pre><b>
-     testClass defineMethod: 
-     [ | sample | 
-       "This Method Displays The Rating Value " print ; 
-       rating print ; 
-     ] ; 
-</b></pre>
-<li>To execute this method:<pre><b>
-     test1 sample 
-</b></pre>
+time:<pre>
+  testClass defineFixedProperty: 'startDate' ;
+</pre>
+<li>To assign a value to this property:<pre>
+  test1 :startDate <- 951231 asDate ;
+</pre>
+<li> To access this value:<pre>
+  test1 startDate
+</pre>
+<li>To create a new property for this class that varies over time:<pre>
+  testClass define: 'rating'  ;
+</pre>
+<li>To assign values to this property for May, June, and July 1995:<pre>
+  test1 :rating asOf: 9505 put: 10 ;
+  test1 :rating asOf: 9506 put: 13 ;
+  test1 :rating asOf: 9507 put: 15 ;
+</pre>
+<li>To access the most recent value:<pre>
+  test1 rating
+</pre>
+<li>To access the June 1995 value:<pre>
+  test1 :rating asOf: 9506
+</pre>
+<li>To create a new method:<pre>
+  testClass defineMethod:
+  [ | sample |
+    "This Method Displays The Rating Value " print ;
+    rating print ;
+  ] ;
+</pre>
+<li>To execute this method:<pre>
+  test1 sample
+</pre>
 </ul>
 <p>
 A final example should be useful for unifying these concepts.
 Suppose that the class <i>Industry</i> is defined to have three
 properties:  <i>codeNumber</i>, <i>name</i>, and <i>growthRate</i>.
 An object named <i>autos</i> is created as an instance of this class and its
-values are initialized.  <pre><b>
-     !Industry <- Object createSubclass ; 
-     Industry defineFixedProperty: 'codeNumber' ; 
-     Industry defineFixedProperty: 'name' ; 
-     Industry define: 'growthRate' ; 
+values are initialized.  <pre>
+  !Industry <- Object createSubclass ;
+  Industry defineFixedProperty: 'codeNumber' ;
+  Industry defineFixedProperty: 'name' ;
+  Industry define: 'growthRate' ;
 
-     !autos <- Industry createInstance ;
-     autos :codeNumber <- 3711 ; 
-     autos :name <- "Automotive" ; 
-     autos :growthRate asOf: 95 put: 10 ; 
-</b></pre>
+  !autos <- Industry createInstance ;
+  autos :codeNumber <- 3711 ;
+  autos :name <- "Automotive" ;
+  autos :growthRate asOf: 95 put: 10 ;
+</pre>
 <p>
 The class <i>Company</i> can be defined to respond to the message
 <i>industry</i> by returning the object representing the company's industry.
-For example:  <pre><b>
-     !Company <- Object createSubclass ; 
-     Company defineFixedProperty: 'industry' ; 
-     !gm <- Company createInstance ; 
-     !ford <- Company createInstance ; 
-     !chrysler <- Company createInstance ; 
+For example:  <pre>
+  !Company <- Object createSubclass ;
+  Company defineFixedProperty: 'industry' ;
+  !gm <- Company createInstance ;
+  !ford <- Company createInstance ;
+  !chrysler <- Company createInstance ;
 
-     gm :industry <- autos ; 
-     ford :industry <- autos ; 
-     chrysler :industry <- autos ; 
-</b></pre>    
-The expression:<pre><b>
-     gm industry 
-</b></pre>    
+  gm :industry <- autos ;
+  ford :industry <- autos ;
+  chrysler :industry <- autos ;
+</pre>
+The expression:<pre>
+  gm industry
+</pre>
 returns the object representing the auto industry as its value.
-The expression:<pre><b>
-     gm industry codeNumber
-</b></pre>    
-returns the number <i>3711</i> and the expression:<pre><b>
-     gm industry name 
-</b></pre>    
+The expression:<pre>
+  gm industry codeNumber
+</pre>
+returns the number <i>3711</i> and the expression:<pre>
+  gm industry name
+</pre>
 returns the string <i>Automotive</i>.
 <p>
 A method could be defined for the class 
 <i>Company</i> that computes expected sales based on the 
-company's industry growth rate:<pre><b>
-     Company define: 'sales' ; 
-     gm :sales asOf: 95 put: 1000 ; 
-     ford :sales asOf: 95 put: 500 ; 
-     chrysler :sales asOf: 95 put: 100 ; 
+company's industry growth rate:<pre>
+  Company define: 'sales' ;
+  gm :sales asOf: 95 put: 1000 ;
+  ford :sales asOf: 95 put: 500 ;
+  chrysler :sales asOf: 95 put: 100 ;
 
-     Company defineMethod: 
-     [ | expectedSales | 
-       sales * ( 1 + industry growthRate / 100 ) 
-     ]  ;
-</b></pre>    
-The expression:<pre><b>
-     gm expectedSales 
-</b></pre>    
-returns the value <i>1100</i>, the expression:<pre><b>
-     ford expectedSales 
-</b></pre>    
-returns the value <i>550</i>, and the expression:<pre><b>
-     chrysler expectedSales 
-</b></pre>    
+  Company defineMethod:
+  [ | expectedSales |
+    sales * ( 1 + industry growthRate / 100 )
+  ]  ;
+</pre>
+The expression:<pre>
+  gm expectedSales
+</pre>
+returns the value <i>1100</i>, the expression:<pre>
+  ford expectedSales
+</pre>
+returns the value <i>550</i>, and the expression:<pre>
+  chrysler expectedSales
+</pre>
 returns the value <i>110</i>.
 <p>
-Properties can refer to lists of objects.  For example:<pre><b>
-    Industry defineFixedProperty: 'companyList' ; 
-    autos :companyList <- gm, ford, chrysler ; 
-</b></pre>    
+Properties can refer to lists of objects.  For example:<pre>
+ Industry defineFixedProperty: 'companyList' ;
+ autos :companyList <- gm, ford, chrysler ;
+</pre>
 can be used to assign a list of auto industry companies into the
 <i>companyList</i> property defined for the class <i>Industry</i>.  
-The expression:<pre><b>
-     autos companyList 
-</b></pre>    
+The expression:<pre>
+  autos companyList
+</pre>
 returns the list of companies in the automotive industry.  
 If you wanted instances of the class <i>Industry</i>
 to respond to the message <i>sales</i> by computing the 
 total sales for the companies in the industry, 
-you could define this method as shown below:<pre><b>
-     Industry defineMethod: 
-     [ | sales | 
-       companyList total: [ sales ] 
-     ]  ;
-</b></pre>    
-The expression:<pre><b>
-     autos sales 
-</b></pre>    
+you could define this method as shown below:<pre>
+  Industry defineMethod:
+  [ | sales |
+    companyList total: [ sales ]
+  ]  ;
+</pre>
+The expression:<pre>
+  autos sales
+</pre>
 computes the total sales for the automotive industry.  The 
-expression:<pre><b>
-     gm industry sales 
-</b></pre>    
-produces the same value.  The expression:<pre><b>
-     gm sales / gm industry sales * 100 
-</b></pre>    
+expression:<pre>
+  gm industry sales
+</pre>
+produces the same value.  The expression:<pre>
+  gm sales / gm industry sales * 100
+</pre>
 computes GM's percentage of the automotive industry's sales.
 <p>
 

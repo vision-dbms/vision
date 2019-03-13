@@ -1,34 +1,48 @@
 ---
 title: Vision Language Basics
+
+related_topics:
+  - url: "Syntax.htm"
+    title: Syntax
+  - url: "Program.htm"
+    title: Programs
+  - url: "Execution.htm"
+    title: Program Execution
+  - url: "Running.htm"
+    title: Running Vision
+  - url: "Error.htm"
+    title: Errors
+
 ---
 <!DOCTYPE html>
 <html>
   <body>
     <p>
-     | <a href="vconcep.htm">Home</a> | <a href="Syntax.htm">Syntax</a> | <a href="Program.htm">Programs</a> | <a href="Execution.htm">Program Execution</a> | <a href="Running.htm">Running Vision</a> | <a href="Error.htm">Errors</a> |
 <h3 id="overview">Overview</h3>
 <p>
 The Vision language is designed around the concept of communicating
 objects.  Objects interact with one another via a process known as
 <a href="Fund.htm#message">"sending a message".</a>
 A message is a request for an object to carry out
-one of its operations.  In the example:<pre><b>
-     universe select: [ score > 10] 
-</b></pre>
+one of its operations.  In the example:
+<pre>
+  universe select: [ score > 10]
+</pre>
 the message <i>select:</i> is sent to the object named
 <i>universe</i>.  Some messages require parameters.  For example, to
 send the <i>select:</i> message, you provide a parameter that represents
 your selection criteria.  In the example, the <i>select:</i> parameter is
-<i>[score > 10]</i>.  
+<i>[score > 10]</i>.
 <p id="messExpress">
 All requests in Vision conform to this object/message pattern known
 as a <b>Message Expression</b>.  Message expressions always produce an
 object as a result.  In the preceding example, the expression
 produces a new object which represents the list of companies that
-satisfied the criteria.  
+satisfied the criteria.
 <p>
-The general form for a message expression is:<pre>
-     object message 
+The general form for a message expression is:
+<pre>
+  object message
 </pre>
 <p>
 A message expression includes a recipient object, a selector, and possibly
@@ -53,7 +67,7 @@ Messages without arguments are called <b>Unary Messages</b>.  These messages
 are called unary because only one object, the recipient, is involved
 in the expression.  The general form for a unary message expression
 is:<pre>
-     recipient unaryMessageSelector 
+  recipient unaryMessageSelector
 </pre>
 <p>
 Examples of unary message expressions are:
@@ -76,7 +90,7 @@ Message</b>.  The selector of a keyword message is composed of one or
 more <b>Keywords</b>, one preceding each parameter.  A keyword is a name
 followed by the : character.  Each keyword is followed by a parameter value.
 The general form for a keyword message is:  <pre>
-     recipient keyword1: parameter1 keyword2: parameter2   ... 
+  recipient keyword1: parameter1 keyword2: parameter2 ...
 </pre>
 Examples of single keyword message expressions are:
 <p>
@@ -113,12 +127,12 @@ independently, the keywords are concatenated; therefore, the names of
 the last two messages are <i>within:percentOf:</i>, and 
 <i>asOf:put:</i>.  There 
 can be any number of keywords in a message.  For example, the
-expression:  <pre><b>
-     sales > 1000
-         ifTrue: [ "Large Sales" ] 
-        ifFalse: [ "Small Sales" ] 
-           else: [ "No Sales" ] 
-</b></pre>
+expression:  <pre>
+  sales > 1000
+      ifTrue: [ "Large Sales" ]
+     ifFalse: [ "Small Sales" ]
+        else: [ "No Sales" ]
+</pre>
 uses a message containing three keywords.  This message is referred
 to as the <i>ifTrue:ifFalse:else:</i> message.
 <p>
@@ -127,30 +141,30 @@ to as the <i>ifTrue:ifFalse:else:</i> message.
 The <b>Binary Message</b> is a special type of message expression
 that takes a single parameter.  The general form for a binary message
 is:<pre>
-     recipient binaryMessage parameter
+   recipient binaryMessage parameter
 </pre>
 Binary messages differ from other messages in that there is a
 pre-defined, fixed set of these messages that are built into the
 system.  
 <p>
 The valid binary messages are:<pre>
-     +     addition
-     -     subtraction
-     *	   multiply
-     /     divide
-     =     equal
-     ==    identical to
-     <     less than
-     <=    less than or equal to
-     >     greater than
-     >=    greater than or equal to
-     !=    not equal to
-     !==   not identical to
-     &&    and
-     ||    or
-     ,     append
-     <-    left assignment
-     ->    right assignment
+   +     addition
+   -     subtraction
+   *	 multiply
+   /     divide
+   =     equal
+   ==    identical to
+   <     less than
+   <=    less than or equal to
+   >     greater than
+   >=    greater than or equal to
+   !=    not equal to
+   !==   not identical to
+   &&    and
+   ||    or
+   ,     append
+   <-    left assignment
+   ->    right assignment
 </pre>
 <p>
 As with single parameter keyword messages, the binary messages work
@@ -237,13 +251,13 @@ a selector as the first argument to the <i>define:toBe:</i> message.
 When you define a
 <a href="Fund.htm#method">method</a>, you supply
 a selector to define the name of the method.
-For example:<pre><b>
-     myClass defineFixedProperty: 'fixed' ;
+For example:<pre>
+  myClass defineFixedProperty: 'fixed' ;
 
-     yourClass define: 'ts' ;
+  yourClass define: 'ts' ;
 
-     ourClass defineMethod: [ | runReport  | ... ] ; 
-</b></pre>
+  ourClass defineMethod: [ | runReport  | ... ] ;
+</pre>
 defines the name <i>fixed</i> as a fixed property of the class
 <i>myClass</i>, defines the name <i>ts</i> as a time series property
 of the class <i>yourClass</i>, and defines the name <i>runReport</i>
@@ -254,23 +268,23 @@ properties and constants are enclosed in single quotes.
 The single quotes identify that the name is a selector and not a string.
 Enclosing the name in double quotes would work as well; however, if you
 provide the single quote (i.e., the selector) version, your name will be
-checked to make sure it is a valid name.  For example:<pre><b>
-     Object define: 'variable name' ;
-</b></pre>
-produces a <a href="Error.htm#syn">syntax error</a> whereas:<pre><b>
-     Object define: "variable name" ;
-</b></pre>
+checked to make sure it is a valid name.  For example:<pre>
+  Object define: 'variable name' ;
+</pre>
+produces a <a href="Error.htm#syn">syntax error</a> whereas:<pre>
+  Object define: "variable name" ;
+</pre>
 does not.
 <p id="variable">
 Names used to store values are often referred to as <b>Variable Names</b> or
 <b>Variables</b>.  The result of any Vision expression can be saved into a
-variable.  For example, in the expression:  <pre><b>
-     !x <- 2 + 2 
-</b></pre>
+variable.  For example, in the expression:  <pre>
+  !x <- 2 + 2
+</pre>
 the name <i>x</i> is used to store the result of evaluating the
-expression 2 + 2.  If you then execute the expression:  <pre><b>
-      x + 1 
-</b></pre>
+expression 2 + 2.  If you then execute the expression:  <pre>
+  x + 1
+</pre>
 Vision will use the stored value of <i>x</i> (4) to evaluate the expression
 and return the result 5.  
 <p>
@@ -278,11 +292,11 @@ To create a variable, type <i>!</i> followed by a valid name.
 <span id="assign">The <i><-</i> and <i>-></i></span>
 messages are used to assign a value into this variable.  Note that the
 assignment messages are formed using the two characters '<' and '-'
-or '-' and '>'.  For example:  <pre><b>
-     !x <- 2 ; 
-     !y <- 3 ; 
-     4 -> !z ; 
-</b></pre>
+or '-' and '>'.  For example:  <pre>
+  !x <- 2 ;
+  !y <- 3 ;
+  4 -> !z ;
+</pre>
 Variables can be used to store values other than numbers.  You can
 save the results of any Vision expression by assigning the expression
 to a variable name.  For example:
@@ -306,9 +320,9 @@ One additional fact is needed to complete this  discussion of
 variable assignment.  
 If you want to assign a new value to a name that already
 is in use, you should prefix the name by the '<i>:</i>' character instead of
-the '<i>!</i>' character as shown below:  <pre><b>
-      :x <- 17 ; 
-</b></pre>
+the '<i>!</i>' character as shown below:  <pre>
+  :x <- 17 ;
+</pre>
 The '<i>!</i>' character tells Vision to create a new variable using the
 name provided.  A variable name
 prefixed by the '<i>:</i>' character tells Vision to
@@ -329,15 +343,15 @@ The intensional form of a method is used to display its definition.
 <h3 id="expression">Expressions</h3>
 <p>
 The act of "sending a message" to an object always produces
-another object as a result.  For example the expression:<pre><b>
-     gm sales 
-</b></pre>
-returns a numeric value, the expression:<pre><b>
-     gm industry 
-</b></pre>
-returns an industry, and the expression:<pre><b>
-     universe select: [score > 20] 
-</b></pre>
+another object as a result.  For example the expression:<pre>
+  gm sales
+</pre>
+returns a numeric value, the expression:<pre>
+  gm industry
+</pre>
+returns an industry, and the expression:<pre>
+  universe select: [score > 20]
+</pre>
 returns a list of companies.  
 This resultant object can act as the recipient for another message.
 <p>
@@ -346,54 +360,50 @@ applied in succession.
 For example, the expression <i>gm industry</i> returns an object
 representing GM's industry.  The message <i>sales</i> could be sent to this
 industry to return the total sales for the industry. 
-The expression:<pre><b>
-     gm industry sales 
-</b></pre>
+The expression:<pre>
+  gm industry sales
+</pre>
 would therefore return the total sales for gm's industry.  In this
 example, the expression <i>gm industry</i> produces an object representing
 GM's industry.  Sending the message <i>sales</i> to this object produces a
 new object representing the total auto industry sales as illustrated
 below:  
 <p>
-<pre>
 <ul>
-      <img src="lang1.gif" lowsrc="lang1.gif" alt="Sending Messages (Sample)" ></ul>
-</pre>
+  <img src="lang1.gif" lowsrc="lang1.gif" alt="Sending Messages (Sample)" ></ul>
 <p>
 Expressions provide a simple way to
 <span id="navigate"><b>Navigate</b></span> from one object to another.
 Expanding on the earlier definition, the
 general form for a Vision expression is:  <pre>
-     recipient message1 message2 message3 ... 
+  recipient message1 message2 message3 ...
 </pre>
 Each message is sent to the resultant object of the previous message
 expression as shown below:  
 <p>
-<pre>
 <ul>
-      <img src="lang2.gif" lowsrc="lang2.gif" alt="Sending Messages (General)" ></ul>
-</pre>
+  <img src="lang2.gif" lowsrc="lang2.gif" alt="Sending Messages (General)" ></ul>
 <p>
-For example, the expression:<pre><b>
-     gm sales + ford sales 
-</b></pre>
+For example, the expression:<pre>
+  gm sales + ford sales
+</pre>
 could be used to add the sales figures for the two companies.  The
 expressions <i>gm sales</i> and <i>ford sales</i> each returns an object
 representing a numeric sales value.  Sending the message <i>+</i> to GM's
 sales instructs it to add Ford's sales to it, producing a new value.
 <p>
-The expression:<pre><b>
-     gm :eps asOf: 8705 
-</b></pre>
+The expression:<pre>
+  gm :eps asOf: 8705
+</pre>
 could be used to access a specific data point from GM's time series
 of earnings values.  The expression <i>gm :eps</i> returns an object that is
 a time series representing GM's earnings.  The keyword message
 <i>asOf:8705</i>
 could be sent to this time series to access the earnings value as of May.  
 <p>
-The expression:<pre><b>
-     universe select: [score > 20] . count 
-</b></pre>
+The expression:<pre>
+  universe select: [score > 20] . count
+</pre>
 could be used to find out how many companies in <i>universe</i> passed the
 screen.  The keyword message expression <i>universe select:  [score >
 20]</i> returns an object which is a list of those companies that met the
@@ -405,9 +415,9 @@ an argument to a binary or keyword message.  Parameter values can
 be as simple as an explicit number or string or a named object.
 Any expression can
 also be used as a parameter.  For example, you could add GM's industry
-sales to 100 using the expression:<pre><b>
-     100 + gm industry sales
-</b></pre>
+sales to 100 using the expression:<pre>
+  100 + gm industry sales
+</pre>
 This expression computes the sales value and adds it to 100.
 <p id="literal">
 Expressions must begin with a selector (i.e., the name of any object)
@@ -415,18 +425,18 @@ or a literal.  A <b>Literal</b> is a Number, a String,
 a <a href="Program.htm#block">Block</a>, or 
 a <a href="Execution.htm#magic">Magic Word</a>.  Expressions cannot start with
 binary or keyword messages.  The following examples are NOT valid
-expressions:<pre><b>
-     + 3                         <i>(incorrect expression)</i>
-     define: 'newProperty'       <i>(incorrect expression)</i>
-</b></pre>
+expressions:<pre>
+  + 3                      <i>(incorrect expression)</i>
+  define: 'newProperty'    <i>(incorrect expression)</i>
+</pre>
 Since the <i>+</i> and <i>define:</i> messages must be sent to a
 named object or a literal, both of these expressions would generate
 a <a href="Error.htm#syn">syntax error</a>.
 <p>
 A literal can only be the first object in an expression.  For example,
-you cannot send the message <i>100</i> to <i>gm</i>:<pre><b>
-     gm 100                      <i>(incorrect expression)</i>
-</b></pre>
+you cannot send the message <i>100</i> to <i>gm</i>:<pre>
+  gm 100                   <i>(incorrect expression)</i>
+</pre>
 This request would generate a <a href="Error.htm#syn">syntax error</a>
 as well.
 <p>
@@ -435,16 +445,16 @@ as well.
 <p>
 When you execute an expression, Vision automatically sends the
 message <i>print</i> to the final result.  In other words, when you submit
-the request:  <pre><b>
-     3 
-</b></pre>
-Vision actually evaluates the expression:<pre><b>
-     3 print 
-</b></pre>
+the request:  <pre>
+  3
+</pre>
+Vision actually evaluates the expression:<pre>
+  3 print
+</pre>
 and therefore prints the value 3 when it is done.  If you submit the 
-request:<pre><b>
-     3 print 
-</b></pre>
+request:<pre>
+  3 print
+</pre>
 you will see the result, 3, printed twice.  The first 3 is the one
 you explicitly requested; the second is Vision automatically sending
 the print message to the result.  All objects in the system have a
@@ -464,14 +474,14 @@ supplies a print format.  The format can be an integer or decimal
 number.  The integer portion of the format specifies the total width
 of the output.  If a decimal value is provided, the decimal portion
 indicates the number of decimal places to print if appropriate.  For
-example, the expression:  <pre><b>
-     10.123 print: 7.2 ; 
-</b></pre>
+example, the expression:  <pre>
+  10.123 print: 7.2 ;
+</pre>
 displays the number in 7 total character positions with 2 decimal
 places.  The number is right-justified by default.  The expression
-generates the output:  <pre><b>
-     ##10.12 
-</b></pre>
+generates the output:  <pre>
+  ##10.12
+</pre>
 where the # character indicates a blank space.  The messages 
 <i>printNL</i>
 and <i>printNL:</i>are identical to the 
@@ -489,22 +499,22 @@ that are used as a unit or referenced positionally.  A list is updated
 by appending objects to its end.
 <p>
 One way to create a list is to use the '<i>,</i>' binary message to 
-append objects together.  For example, the expression:<pre><b>
-     !sampleList <- 10, -3, 20, 132 ;
-</b></pre>
+append objects together.  For example, the expression:<pre>
+  !sampleList <- 10, -3, 20, 132 ;
+</pre>
 creates a list of four integers and saves the list as the variable
 named <i>sampleList</i>.  Any type of object can be included in a
 list and the list can contain objects from multiple classes.  For
-example, the expression:<pre><b>
-     !mixedList <- 1, "xyz", TRUE, NA, -3.45 ;
-</b></pre>
+example, the expression:<pre>
+  !mixedList <- 1, "xyz", TRUE, NA, -3.45 ;
+</pre>
 creates a list of five objects representing five distinct classes
 (<i>Integer, String, TRUE, NA, </i>and <i>Double</i>).  
 <p>
 The binary message '<i>,</i>' changes the recipient list directly.
-For example:<pre><b>
-     sampleList , 100 
-</b></pre>
+For example:<pre>
+  sampleList , 100
+</pre>
 modifies the list in <i>sampleList</i> by appending the
 object <i>100</i> to the end of the list.  
 <p>
