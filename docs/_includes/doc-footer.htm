@@ -1,0 +1,12 @@
+{% assign topics=page.related_topics %}
+
+{% if topics %}
+<h3 id="toc_RelatedTopics">Related Topics</h3>
+<ul>
+  {% for topic in topics %}
+  <a><li><a href="{{ topic.url }}">{{ topic.title }}</a>
+  {% endfor %}
+</ul>
+{% endif %}
+
+{% include legacy-copyright.htm copydates=include.copydates %}

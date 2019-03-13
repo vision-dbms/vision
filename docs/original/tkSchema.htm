@@ -1,34 +1,20 @@
 ---
+title: "Vision ToolKit Class: Schema"
+
+related_topics:
+  - url: Classes.htm
+    title: Classes
+  - url: Messages.htm
+    title: Messages
+  - url: kitNav.htm
+    title: Database Navigator Kit
+  - url: mSchema.htm
+    title: Message Cross Reference
+
 ---
 <!DOCTYPE html>
 <html>
-<head>
-<title>Vision ToolKit Class: Schema </title>
-</head>
 <body>
-<h2>Vision ToolKit Class: Schema</h2>
-
-<p>
-     | <a href="vconcep.htm">Home</a> 
-     | <a href="Classes.htm">Classes</a>
-     | <a href="Messages.htm">Messages</a>
-     | <a href="kitNav.htm">Database Navigator Kit </a>
-     | <a href="mSchema.htm">Message Cross Reference </a>
-     |
-<hr>
-<h3>Topics Covered:</h3>
-<ul type=square>
-<li><a href="#overview">Schema Overview</a>
-<li><a href="#basics">Basic Review</a>
-<li><a href="#cd">The Schema ClassDescriptor Class</a>
-<li><a href="#mid">The Schema MessageImplementationDescriptor Class</a>
-<li><a href="#md">The Schema MessageDescriptor Class</a>
-<li><a href="#maintain">Maintaining Schema Information</a>
-<li><a href="#use">Using Schema Information</a>
-<li><a href="#reports">Database Navigation Tools</a>
-<li><a href="#install">Installation</a>
-</ul>
-<hr>
 <p>
 The Vision <b>Schema</b> ToolKit has been created to provide a set of
 classes and messages that aid in tracking information about your
@@ -59,16 +45,15 @@ As with all ToolKits, subclasses of the <b>Schema</b> ToolKit are
 named relative to the <b>Schema</b> class.  The subclass hierarchy is
 shown below:
 <pre>
-          <a href="clObject.htm">Object</a>
-             |
-          ToolKit
-             |
-             <b>Schema</b>
-                Schema Descriptor
-                   Schema ClassDescriptor
-                   Schema MessageDescriptor
-                   Schema MessageImplementationDescriptor
-
+    <a href="clObject.htm">Object</a>
+       |
+    ToolKit
+       |
+       <b>Schema</b>
+          Schema Descriptor
+          Schema ClassDescriptor
+             Schema MessageDescriptor
+             Schema MessageImplementationDescriptor
 </pre>
 <p>
 The <b>Schema</b> class organizes protocol used to process and manage
@@ -120,13 +105,15 @@ the instance of the <i>Schema ClassDescriptor</i> class used to store
 descriptive information about the class.  
 <p>
 You can create a new class from an existing class using the
-expression:<pre><tt><b>
-     !NewClass <- Object createSubclass ;
-</b></tt></pre>
+expression:
+<pre>
+    !NewClass <- Object createSubclass ;
+</pre>
 In this case, the variable <i>NewClass</i> is defined to be a subclass of 
-the class <i>Object</i>.  The expression:<pre><tt><b>
-     NewClass classDescriptor
-</b></tt></pre>
+the class <i>Object</i>.  The expression:
+<pre>
+    NewClass classDescriptor
+</pre>
 returns the <i>Schema ClassDescriptor</i> instance associated with this
 class.  The variations of the <i>createSubclass</i> message
 (i.e., <i>createSubclass:</i> and <i>createSubclass:at:</i>)
@@ -147,14 +134,16 @@ class are NOT
 created automatically.  Each time you use one of the <i>define</i>
 messages, the class is flagged to indicate
 that new messages are pending.  To process and refresh all pending messages,
-you execute the expression:<pre><tt><b>
-     Schema processAllMessages
-</b></tt></pre>
+you execute the expression:
+<pre>
+    Schema processAllMessages
+</pre>
 This process creates and refreshes information as needed.
 <p>
-The expression:<pre><tt><b>
-     object getMessage: "message"
-</b></tt></pre>
+The expression:
+<pre>
+    object getMessage: "message"
+</pre>
 is used to access the descriptor associated with a specific
 implementation of a message.  This message
 returns an instance of the class <i>Schema
@@ -170,9 +159,10 @@ This class is used to maintain information about the classes in your
 Vision database.  Each instance of Schema ClassDescriptor corresponds
 to a specific class.  Messages defined for this class enable you to
 record information pertaining to class hierarchy, naming conventions,
-and descriptions.  The expression:<pre><tt><b>
-             object classDescriptor
-</b></tt></pre>
+and descriptions.  The expression:
+<pre>
+    object classDescriptor
+</pre>
 returns an instance of this class.
 <p>
 <h4>Descriptive Information</h4>
@@ -268,9 +258,10 @@ new class to return this new class descriptor instance.
 and instantiations for the underlying class are initialized.  
 </ol>
 <p>
-For example, the expression:<pre><tt><b>
-     Entity createSubclass: "Company" 
-</b></tt></pre>
+For example, the expression:
+<pre>
+    Entity createSubclass: "Company"
+</pre>
 creates a new subclass of <i>Entity</i> named <i>Company</i> and a new
 instance of the <i>Schema ClassDescriptor</i> class initialized as
 follows:
@@ -348,15 +339,16 @@ not currently documented or used anywhere.
 The underlying class is used to assign an initial <i>ClassType</i> to
 the <i>type</i> property for a <i>Schema ClassDescriptor</i> instance. 
 The property value can be reassigned using the <i>setClassTypeTo:</i>
-message.  To look at the current assignments use:<pre><tt><b>
-     Schema CD instanceList
-         groupedBy: [ type ] .
-     do: [ "===> " print ; code printNL ;
-           groupList sortUp: [ name ] .
-           do: [ name printNL ] ;
-           newLine print ;
-         ] ;
-</b></tt></pre>
+message.  To look at the current assignments use:
+<pre>
+    Schema CD instanceList
+        groupedBy: [ type ] .
+    do: [ "===> " print ; code printNL ;
+          groupList sortUp: [ name ] .
+          do: [ name printNL ] ;
+          newLine print ;
+        ] ;
+</pre>
 <p>
 <h4>Tracking Inheritance</h4>
 <p>
@@ -444,12 +436,13 @@ created your own naming dictionary and wish to record its value in
 the class descriptor, you can use the <i>setNamingDictionaryTo: dictionary</i>
 message.  For example, the naming dictionary associated
 with application workspaces for the <i>Interface</i> class was
-defined as follows:<pre><tt><b>
-     Dictionary createSubclass: "Named" at: Interface ;
-     Interface Named createInstance: "ApplicationWS" ;
-     Interface ApplicationWS classDescriptor
-        setNamingDictionaryTo: Interface Named ApplicationWS ;
-</b></tt></pre>
+defined as follows:
+<pre>
+    Dictionary createSubclass: "Named" at: Interface ;
+    Interface Named createInstance: "ApplicationWS" ;
+    Interface ApplicationWS classDescriptor
+       setNamingDictionaryTo: Interface Named ApplicationWS ;
+</pre>
 <p>
 The message <i>setAutoCreateNamingDictionaryOn</i> can be sent to
 a class descriptor to indicate that a new naming dictionary should
@@ -495,9 +488,10 @@ the document <a href="mSchema.htm"><i>Schema Message Dictionary</i></a>.
 This class is used to maintain information about each message
 implementation.  Each message defined for a class in the Schema
 database has a corresponding instance in this class.
-The expression:<pre><tt><b>
-             object getMessage: "string"
-</b></tt></pre>
+The expression:
+<pre>
+    object getMessage: "string"
+</pre>
 returns a message implementation descriptor if the <i>string</i> is defined
 as a message to which the object responds.  You can send the <i>displayInfo</i>
 or <i>describe</i> message to the result to display a short or long
@@ -639,11 +633,12 @@ When a property is defined for a class using the
 <i>defineFixedProperty:</i> or <i>define:</i> message,
 the initial value of the property is <a href="clNA.htm"><i>NA</i></a>
 for all instances of the class and for any new instance when it is
-created.  The expression:<pre><tt><b>
-     class defineFixedProperty: 'name' withDefault: object
-</b>or<b>
-     class define: 'name' withDefault: object
-</b></tt></pre>
+created.  The expression:
+<pre>
+    class defineFixedProperty: 'name' withDefault: object
+</pre>or<pre>
+    class define: 'name' withDefault: object
+</pre>
 runs the <i>defineFixedProperty:</i> or <i>define:</i>
 message and sets the default value in
 the associated message implementation descriptor to the supplied
@@ -658,14 +653,15 @@ method.
 <p>
 The time series property <i>implementationSource</i> provides a history
 of method changes.  To display the implementation history for a particular
-method use:<pre><tt><b>
-     Number getMessage: "absoluteValue" .
-     :implementationSource     #- returns time series of strings
-     do: [ "Implementation As Of: " print; ^date printNL ;
-           printNL ;           #- displays implementation
-           "-" fill: 50 . printNL ;
-         ] ;
-</b></tt></pre>
+method use:
+<pre>
+    Number getMessage: "absoluteValue" .
+    :implementationSource     #- returns time series of strings
+    do: [ "Implementation As Of: " print; ^date printNL ;
+          printNL ;           #- displays implementation
+          "-" fill: 50 . printNL ;
+        ] ;
+</pre>
 <p>
 
 <p>
@@ -676,9 +672,10 @@ class are NOT
 created automatically.  Each time you use one of the <i>define</i>
 messages, the class is flagged to indicate
 that new messages are pending.  To process and refresh all pending messages,
-execute the expression:<pre><tt><b>
-     Schema processAllMessages
-</b></tt></pre>
+execute the expression:
+<pre>
+    Schema processAllMessages
+</pre>
 This process creates new <i>MessageImplementationDescriptor</i>
 instances and refreshes information as needed.  Four properties
 supply update information for an instance.  The <i>creationDate</i>
@@ -721,9 +718,10 @@ Message implementation descriptors are not automatically generated
 for new messages.  As a result, the <i>Schema MID</i> class will not
 contain up-to-date entries for messages defined or modified recently.
 To process and refresh all pending messages, execute the 
-expression:<pre><tt><b>
-     Schema processAllMessages
-</b></tt></pre>
+expression:
+<pre>
+    Schema processAllMessages
+</pre>
 This process creates and refreshes message information as needed.
 Messages are normally updated as part of a a standard nightly production
 process.
@@ -741,14 +739,15 @@ about a class including:
 <p>
 All of these messages return the current class
 descriptor and can therefore be streamed together.  
-For example:<pre><tt><b>
-   Currency classDescriptor
-      setDescriptionTo:
-      "Instances of the Class Currency represents different monetary units." .
-      setSampleUsageTo: "Named Currency USD ;  "USD" asCurrency ; " .
-      setHtmlDocNameTo: "clCurrency.htm" .
-      ;
-</b></tt></pre>
+For example:
+<pre>
+    Currency classDescriptor
+       setDescriptionTo:
+       "Instances of the Class Currency represents different monetary units." .
+       setSampleUsageTo: "Named Currency USD ;  "USD" asCurrency ; " .
+       setHtmlDocNameTo: "clCurrency.htm" .
+       ;
+</pre>
 <p>
 Several messages are available for updating descriptive information
 about a message including:
@@ -771,26 +770,28 @@ about a message including:
 All of these messages return the current message implementation
 descriptor and can therefore be streamed together.  
 For example, to add descriptive information to the <i>absoluteValue</i>
-message defined at <i>Number</i>:<pre><tt><b>
-     Number getMessage: "absoluteValue" .
-        setDescriptionTo: "Returns the absolute value of the recipient" .
-        setReturnObjectTypeTo: Number .
-        setFunctionTypeTo: "Calc" .
-        describe ;
-</b></tt></pre>
-producing:<pre><tt><b>
-     Message:                 absoluteValue
-     Class:                   Number
-     Created:                 10/30/1992
-     Updated:                 10/30/1992
-     Function Type:           Calc
-     Returns the absolute value of the recipient
-     Returns:                 Number
-     Implementation Type:     Method
-     {|absoluteValue|
-     ^self < 0 ifTrue: [^self negated]
-     ifFalse: [^self]}
-</b></tt></pre>
+message defined at <i>Number</i>:
+<pre>
+    Number getMessage: "absoluteValue" .
+       setDescriptionTo: "Returns the absolute value of the recipient" .
+       setReturnObjectTypeTo: Number .
+       setFunctionTypeTo: "Calc" .
+       describe ;
+</pre>
+producing:
+<pre>
+    Message:                 absoluteValue
+    Class:                   Number
+    Created:                 10/30/1992
+    Updated:                 10/30/1992
+    Function Type:           Calc
+    Returns the absolute value of the recipient
+    Returns:                 Number
+    Implementation Type:     Method
+    {|absoluteValue|
+    ^self < 0 ifTrue: [^self negated]
+    ifFalse: [^self]}
+</pre>
 
 <p>
 <hr>
@@ -906,107 +907,104 @@ The message <i>getMessagesReturningSuperClass</i> returns a list of
 <i>Schema MID</i> instances that return a super class of the recipient's class.
 <p>
 The schema information can be used to answer a number of different
-questions.  For example:<pre><tt><b>
-     1. ===>  Find all Constants and display message, class, and value
-
-     Schema MessageImplementationDescriptor activeList
-         select: [ type isConstant ] .
-     do: [ message print: 30 ;
-           messageClassDescriptor print: 30 ;
-           implementationSource printNL ;
-         ] ;
-
-     2. ===>  Get all messages defined for Integer and group by function
-
-     Integer getMessagesX
-        groupedBy: [ functionType ] .
-     do: [ printNL ;
-           groupList do: [ displayInfo ] ;
-           newLine print ;
-         ] ;
-
-     3. ===> Display all Entity messages that do not have a description
-
-     Entity getMessages
-        select: [ description isNA ] .
-     do: [ displayInfo ] ;
-
-
-     4. ===> Display all methods that use the <i>asDate</i> message
-
-             Object showMethodsUsing: "asDate" ;
-
-
-     5. ===> Display old versions of the 'absoluteValue' message
-
-     Number getMessage: "absoluteValue" .
-     :implementationSource
-     do: [ "Implementation As Of: " print; ^date printNL ;
-           printNL ;    # displays implementation
-           "-" fill: 50 . printNL ;
-         ] ;
-
-     6.  ===>  Show Messages By Name
-               Sort by message, then by class within message:
-
-     "Message" print: 20 ;
-     "Class" print: 30 ;
-     "Type" print: 13 ;
-     "Function" printNL ;
-     Schema MessageImplementationDescriptor activeList
+questions.  For example:
+<ol>
+  <li><i>Find all Constants and display message, class, and value:</i>
+    <pre>
+Schema MessageImplementationDescriptor activeList
+    select: [ type isConstant ] .
+do: [ message print: 30 ;
+      messageClassDescriptor print: 30 ;
+      implementationSource printNL ;
+] ;
+    </pre>
+  <li><i>Get all messages defined for Integer and group by function:</i>
+    <pre>
+Integer getMessagesX
+    groupedBy: [ functionType ] .
+    do: [ printNL ;
+          groupList do: [ displayInfo ] ;
+          newLine print ;
+        ] ;
+    </pre>
+  <li><i>Display all Entity messages that do not have a description:</i>
+    <pre>
+Entity getMessages
+   select: [ description isNA ] .
+       do: [ displayInfo ] ;
+    </pre>
+  <li><i>Display all methods that use the </i>asDate<i> message:</i>
+    <pre>
+Object showMethodsUsing: "asDate" ;
+    </pre>
+  <li><i>Display old versions of the 'absoluteValue' message:</i>
+    <pre>
+Number getMessage: "absoluteValue" .
+:implementationSource
+do: [ "Implementation As Of: " print; ^date printNL ;
+      printNL ;    # displays implementation
+      "-" fill: 50 . printNL ;
+    ] ;
+    </pre>
+  <li><i>Show Messages by name, sorted by Message, then by Class within message:</i>
+    <pre>
+"Message" print: 20 ;
+"Class" print: 30 ;
+"Type" print: 13 ;
+"Function" printNL ;
+Schema MessageImplementationDescriptor activeList
+   sortUpBy: [ messageDescriptor message ]
+       then: [ messageClassDescriptor ] .
+   do: [ message print: 19 ; " " print ;
+         messageClassDescriptor code print: 29 ; " " print ;
+         type shortName print: 12 ; " " print ;
+         functionType printNL ;
+       ] ;
+    </pre>
+  <li><i>Show Messages grouped by Function, sorted by Message and then by Class within Message:</i>
+    <pre>
+"Message" print: 30 ;
+"Class" print: 40 ;
+"Type" printNL ;
+Schema MessageImplementationDescriptor activeList
+    groupedBy: [ functionType ] .
+do: [ "===> Function Type: " print ; code printNL ;
+      groupList
         sortUpBy: [ messageDescriptor message ]
-        then: [ messageClassDescriptor ] .
-     do: [ message print: 19 ; " " print ;
-           messageClassDescriptor code print: 29 ; " " print ;
-           type shortName print: 12 ; " " print ;
-           functionType printNL ;
-         ] ;
-
-     7.  ===>  Show Messages By Function
-               Group by function, then sort by message, then class
-
-     "Message" print: 30 ;
-     "Class" print: 40 ;
-     "Type" printNL ;
-     Schema MessageImplementationDescriptor activeList
-         groupedBy: [ functionType ] .
-     do: [ "===> Function Type: " print ; code printNL ;
-           groupList
-             sortUpBy: [ messageDescriptor message ]
-                 then: [ messageClassDescriptor ] .
-           do: [ message print: 29 ; " " print ;
-                 messageClassDescriptor code print: 39 ; " " print ;
-                 type shortName printNL ;
-               ] ;
-           newLine print ;
-         ] ;
-
-     8.  ===>  Show Messages By Class
-
-         For each class, display all messages (excluding those at Object):
-
-     "Message" print: 50 ;
-     "Type" print: 13 ;
-     "Implemented At Class: " printNL ;
-     Schema ClassDescriptor activeList
-     do: [ "Extended Message Dictionary For Class: " print ;
-           code printNL ;
-           class getMessagesX
-              select: [ messageClassDescriptor isObjectDescriptor not ] .
-           do: [ message print: 49 ; " " print ;
-                 type shortName print: 12 ; " " print ;
-                 messageClassDescriptor name printNL ;
-               ] ;
-           newPage print ;
-         ] ;
-</b></tt></pre>
+            then: [ messageClassDescriptor ] .
+        do: [ message print: 29 ; " " print ;
+              messageClassDescriptor code print: 39 ; " " print ;
+              type shortName printNL ;
+            ] ;
+      newLine print ;
+    ] ;
+    </pre>
+  <li><i>Show Messages by Class, excluding those at Object:</i>
+    <pre>
+"Message" print: 50 ;
+"Type" print: 13 ;
+"Implemented At Class: " printNL ;
+Schema ClassDescriptor activeList
+do: [ "Extended Message Dictionary For Class: " print ;
+      code printNL ;
+      class getMessagesX
+         select: [ messageClassDescriptor isObjectDescriptor not ] .
+         do: [ message print: 49 ; " " print ;
+               type shortName print: 12 ; " " print ;
+               messageClassDescriptor name printNL ;
+             ] ;
+      newPage print ;
+    ] ;
+    </pre>
+</ol>
 <p>
 These examples can easily be modified to restrict the display to
-messages that have been updated since a known date using:<pre><tt><b>
-     Schema MessageImplementationDescriptor activeList
-          select: [ updateDate >= ^today - 3 monthEnds ] .
-             . . .
-</b></tt></pre>
+messages that have been updated since a known date using:
+<pre>
+Schema MessageImplementationDescriptor activeList
+     select: [ updateDate >= ^today - 3 monthEnds ] .
+        . . .
+</pre>
 
 <p>
 <hr>
@@ -1045,13 +1043,14 @@ conditions must be true:
 <li>The class' direct super class does have a class descriptor.
 </ul>
 <p>
-The expressions:<pre><tt><b>
-      Schema addClass: class
-</b>and<b>
-      Schema addClass: class at: object
-</b>and<b>
-      Schema addClass: class as: id at: object
-</b></tt></pre>
+The expressions:
+<pre>
+    Schema addClass: class
+</pre>and<pre>
+    Schema addClass: class at: object
+</pre>and<pre>
+    Schema addClass: class as: id at: object
+</pre>
 can be used to add a class descriptor for a class the does not
 have one.  The parameter <i>class</i> refers to the class that
 needs a class descriptor.  The <i>id</i> parameter is a string used to
@@ -1062,8 +1061,7 @@ The <i>object</i> parameter is used to fill in the
 The path is defined relative to '^global' if this parameter is not
 supplied.
 
-
-{% include legacy-copyright.htm copydates="1997" %}
+{% include doc-footer.htm copydates="1997" %}
 
 </body>
 </html>
