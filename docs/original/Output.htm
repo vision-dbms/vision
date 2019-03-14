@@ -1,25 +1,15 @@
 ---
 title: Formatting Vision Output
+
+related_topics:
+  - url: "vifaces.htm"
+    title: Interfaces
+
 ---
 <!DOCTYPE html>
 <html>
 <body>
-<h2>Formatting Vision Output</h2>
-
 <p>
-     | <a href="vconcep.htm">Home</a> | <a href="Running.htm">Running Vision</a> | <a href="vifaces.htm">Interfaces</a> | <a href="Lang.htm">Vision Language</a> | 
-<hr>
-<h3>Topics Covered:</h3>
-<ul type="square">
-<li><a href="#print">Printing</a>
-<li><a href="#format">Basic String Formatting</a>
-<li><a href="#convert">Converting Objects to Strings</a>
-<li><a href="#files">Output Files</a>
-<li><a href="#more">Additional Formatting</a>
-</ul>
-
-<p>
-<hr>
 <h3 id="print">Printing</h3>
 <p>
 Several variations of the <i>print</i> message are defined at Object including:
@@ -343,25 +333,27 @@ Since <i>printNL</i> is defined at <i>Object</i>
 to run the object's <i>print</i>
 message followed by printing a new line, it should not be necessary
 to redefine this message when you redefine <i>print</i>.
-For example:<pre><b>
-     Entity defineMethod: 
-     [ | print | 
-       code print ; ^self
-     ] ;
+For example:
+<pre>
+  Entity defineMethod:
+  [ | print |
+    code print ; ^self
+  ] ;
 
-     Entity defineMethod: 
-     [ | print: f | 
-       code print: f ; ^self 
-     ] ;
-</b></pre>
+  Entity defineMethod: 
+  [ | print: f |
+    code print: f ; ^self
+  ] ;
+</pre>
 You can also define new variations of the print messages.  For example,
 you could define <i>printBar:</i> to do a formatted print followed by
-a vertical bar character using:<pre><b>
-     Object defineMethod: 
-     [ | printBar: f | 
-       ^self print: f ; "|" print ; ^self
-     ] ;
-</b></pre>
+a vertical bar character using:
+<pre>
+  Object defineMethod:
+  [ | printBar: f |
+    ^self print: f ; "|" print ; ^self
+  ] ;
+</pre>
 <p>
 <hr>
 <h3 id="format">Basic String Formatting</h3>
@@ -379,20 +371,22 @@ are used to extract a substring of the recipient string.
 The message
 <a href="mString.htm#concat:"><i>concat:</i></a>
 appends the supplied string to the end of the recipient string.
-For example:<pre><b>
-     "This is a very long string" take: 8 . concat: "shorter" .
-</b></pre>
+For example:
+<pre>
+  "This is a very long string" take: 8 . concat: "shorter" .
+</pre>
 returns the string "This is shorter".
 <p>
 The messages 
 <a href="mString.htm#center:"><i>center:</i></a> and
 <a href="mString.htm#centerNL:"><i>centerNL:</i></a>
 are used to center the recipient string in the supplied width.
-For example:<pre><b>
-     "This is a very long string" take: 8 . 
-        concat: "shorter" .
-        center: 80 . printNL ;
-</b></pre>
+For example:
+<pre>
+  "This is a very long string" take: 8 .
+     concat: "shorter" .
+     center: 80 . printNL ;
+</pre>
 centers the string "This is shorter" over 80 columns and print it.
 <p>
 The messages
@@ -404,9 +398,10 @@ the <i>fill:</i> message will repeat the
 characters in the recipient until a string of the specified length is formed.
 If the recipient string count is less than the parameter,
 the <i>pad:</i> message will pad the recipient with blanks.
-For example:<pre><b>
-     "=" fill: 5 . concat: "&gt;" . pad: 10
-</b></pre>
+For example:
+<pre>
+  "=" fill: 5 . concat: "&gt;" . pad: 10
+</pre>
 returns the string <i>"=====&gt;&nbsp&nbsp&nbsp&nbsp"</i>.
 <p>
 <hr>
@@ -417,28 +412,31 @@ defined at the class <i>String</i>.  You can convert an object
 into a string by sending it the 
 <a href="mString.htm#asString"><i>asString</i></a> message
 which returns the result of sending the <i>print</i> message
-to the object as a string.  For example: <pre><b>
-     ^today asString center: 80 . print ;
-</b></pre> converts the current date to a string, then centers
+to the object as a string.  For example:
+<pre>
+  ^today asString center: 80 . print ;
+</pre> converts the current date to a string, then centers
 and prints it.  
 <p> 
 The <i>divertOutput</i> message provides a general
 purpose way to create strings.  Defined at the class <i>Block</i>, this
 message is designed to divert any print messages used in the block
 and returns a single string containing this output.  For example, the
-program:  <pre><b>
-     !x <- 2 + 2 ; 
-     "The answer is: " print ; 
-     x printNL ; 
-</b></pre>
+program:
+<pre>
+  !x <- 2 + 2 ;
+  "The answer is: " print ;
+   x printNL ;
+</pre>
 prints the string followed by the value.  If you wanted to center
 this entire output, you could use <i>divertOutput</i> to capture the results
-first:  <pre><b>
-     [ !x <- 2 + 2 ; 
-       "The answer is: " print ; 
-       x print ; 
-     ] divertOutput center: 80 . print ;
-</b></pre>
+first: 
+<pre>
+  [ !x <- 2 + 2 ;
+    "The answer is: " print ;
+    x print ;
+  ] divertOutput center: 80 . print ;
+</pre>
 <p>
 Several messages have been defined to convert dates into strings 
 using different date formats:
@@ -473,9 +471,10 @@ using different date formats:
 <p>
 For example, to
 center the current date formatted using its long name, you could use
-the expression:<pre><b>
-     ^today formatUsingLongName center: 80 . print ;
-</b></pre>
+the expression:
+<pre>
+  ^today formatUsingLongName center: 80 . print ;
+</pre>
 <p>
 <hr>
 <h3 id="files">Output Files</h3>
@@ -488,16 +487,17 @@ to allow you to create/overwrite a file or append output to an
 existing file.  The recipient string provides the filename.  The
 parameter to these messages should be a block.  All print statements
 encountered in the block are printed to the file instead of your
-standard output device.  For example, the expression:  <pre><b>
-     "myFile" appendOutputOf: 
-        [ "First 10 Squares" centerNL: 20 . print ;
-          10 sequence 
-          do: [ !currentNumber <- ^self ;
-                currentNumber print: 10 ;
-                currentNumber * currentNumber printNL: 10 ; 
-              ] ; 
-        ] ;
-</b></pre>
+standard output device.  For example, the expression:
+<pre>
+  "myFile" appendOutputOf:
+     [ "First 10 Squares" centerNL: 20 . print ;
+       10 sequence
+       do: [ !currentNumber <- ^self ;
+             currentNumber print: 10 ;
+             currentNumber * currentNumber printNL: 10 ;
+           ] ;
+     ] ;
+</pre>
 creates a table of the first 10 integers and their squares and
 appends this output to the end of the file <i>myFile</i>. 
 No output will be displayed on your standard output device.  
@@ -513,17 +513,19 @@ generating by the external program is returned and printed by
 default.  For
 example, suppose you wanted to use the Unix utility <i>grep</i> to select
 the numbers in the first 1000 integers that contain the digits 10.
-You could use the expression:  <pre><b>
-     "grep 10" filterOutputOf: 
-        [ 1000 sequence do: [ printNL ] ; 
-        ] ; 
-</b></pre>
+You could use the expression:
+<pre>
+  "grep 10" filterOutputOf:
+     [ 1000 sequence do: [ printNL ] ;
+     ] ;
+</pre>
 The results are displayed on your output device.  
-The expression:<pre><b>
-     !result <- 
-        [ "grep 10" filterOutputOf: [ 1000 sequence do: [ printNL ] ] ; 
-        ] divertOutput ;
-</b></pre>
+The expression:
+<pre>
+  !result <-
+     [ "grep 10" filterOutputOf: [ 1000 sequence do: [ printNL ] ] ;
+     ] divertOutput ;
+</pre>
 can be used to capture the result a string.
 <p>
 <hr>
@@ -534,44 +536,47 @@ The message
 can be sent to a block and generates tab-delimited output suitable
 for loading into Excel and other many other packages.  The message
 returns a string.  Any print statement encountered while executing
-this block will be followed by a tab character.  For example:<pre><b>
-        [ 100 sequence
-          do: [ print ;
-                (^self + 1 ) asInteger print ;
-                (^self * 2 ) asInteger printNL ;
-              ]
-        ] formatForExcel print ;
-</b></pre>
-To save these results to an output file named <i>myFile</i> use:<pre><b>
-     "myFile" substituteOutputOf: [ 
-        [ 100 sequence
-          do: [ print ;
-                (^self + 1 ) asInteger print ;
-                (^self * 2 ) asInteger printNL ;
-              ]
-        ] formatForExcel print ;
-     ] ;
-</b></pre>
+this block will be followed by a tab character.  For example:
+<pre>
+  [ 100 sequence
+    do: [ print ;
+          (^self + 1 ) asInteger print ;
+          (^self * 2 ) asInteger printNL ;
+        ]
+  ] formatForExcel print ;
+</pre>
+To save these results to an output file named <i>myFile</i> use:
+<pre>
+  "myFile" substituteOutputOf: [
+     [ 100 sequence
+       do: [ print ;
+             (^self + 1 ) asInteger print ;
+             (^self * 2 ) asInteger printNL ;
+           ]
+     ] formatForExcel print ;
+  ] ;
+</pre>
 The <i>formatForExcel</i> message uses the 
 <a href="mBlock.htm#divertDelimitedOutput"<i>divertDelimitedOutput</i></a>
 message to mark the spots in the output where printing has occurred.  
 Each print statement encountered while evaluating the block will
 be followed by the <i>octal 377</i> character, returning the result as a 
 string.  This character can be translated into any other character
-using the <i>translate:to:</i> message.  For example: <pre><b>
-     #-- capture output delimited by octal 377 character
-     !output <- 
-        [ 100 sequence
-          do: [ print ;
-                (^self + 1 ) asInteger print ;
-                (^self * 2 ) asInteger printNL ;
-              ]
-        ] divertDelimitedOutput ;  
+using the <i>translate:to:</i> message.  For example:
+<pre>
+  #-- capture output delimited by octal 377 character
+  !output <-
+     [ 100 sequence
+       do: [ print ;
+             (^self + 1 ) asInteger print ;
+             (^self * 2 ) asInteger printNL ;
+           ]
+     ] divertDelimitedOutput ;
 
-     #-- convert character into | and print
-     !delimiter <- "\377" ;     #- must be actual octal character
-     output translate: delimiter to: "|" . print ;
-</b></pre>
+  #-- convert character into | and print
+  !delimiter <- "\377" ;     #- must be actual octal character
+  output translate: delimiter to: "|" . print ;
+</pre>
 <p>
 
 {% include doc-footer.htm copydates="1997" %}

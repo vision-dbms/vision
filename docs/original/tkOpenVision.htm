@@ -1,51 +1,11 @@
 ---
-title: The Vision OpenVision ToolKit Class
+title: The OpenVision ToolKit Class
 ---
 <!DOCTYPE html>
 <html>
 <body>
-<h2>The Vision OpenVision ToolKit Class</h2>
-
 <p>
-| <a href="vconcep.htm">Home</a> | <a href="vifaces.htm">Interfaces</a> |
-<hr>
-
-<p>
-<h3>Topics Covered:</h3>
-<ul type="square">
-<li><a href="#overview">An Overview Of The OpenVision Tool Kit</a>	
-<li><a href="#introduction">An Introduction To Sockets</a>
-<li><a href="#fundamentals">Fundamentals Of The OpenVision Tool Kit</a>	
-<li><a href="#Creating Channels">Creating Channels -- The <i>asOpenVisionChannel</i> Message</a>	
-<li><a href="#Accessing Files">Accessing Files</a>	
-<li><a href="#Starting Processes">Starting Processes</a>	
-<li><a href="#Creating Sockets">Creating Sockets</a>	
-<li><a href="#detail">A Detail You May Never Need</a>	
-<li><a href="#Reading And Writing Data">Reading And Writing Data</a>	
-<li><a href="#Reading Data Sequentially">Reading Data Sequentially</a>	
-<li><a href="#Writing Data Sequentially">Writing Data Sequentially</a>	
-<li><a href="#Reading and Writing Data Randomly">Reading and Writing Data Randomly</a>	
-<li><a href="#Controlling Data Formats">Controlling Data Formats</a>	
-<li><a href="#The Binary Format Option">The Binary Format Option</a>
-<li><a href="#The Trim Format Option">The Trim Format Option</a>
-<li><a href="#Reading, Writing, and List Operations">Reading, Writing, and List Operations</a>	
-<li><a href="#Offering Services and Creating Handlers">Offering Services and Creating Handlers</a>	
-<li><a href="#Offering a Simple Service">Offering a Simple Service</a>	
-<li><a href="#Writing Your Own Handlers">Writing Your Own Handlers</a>	
-<li><a href="#Exiting Vision">Exiting Vision</a>	
-<li><a href="#Closing Channels">Closing Channels</a>	
-<li><a href="#Detecting Errors">Detecting Errors</a>	
-<li><a href="#Using the Remaining Messages">Using the Remaining Messages</a>	
-<li><a href="#applications">Applications Of The Open Vision Tool Kit</a>	
-<li><a href="#A Text File Reader">A Text File Reader</a>	
-<li><a href="#A Flat File Reader">A Flat File Reader</a>	
-<li><a href="#A Remote Execution Daemon Client">A Remote Execution Daemon Client</a>	
-<li><a href="#A Passive Real-Time Data Base">A Passive Real-Time Data Base</a>	
-<li><a href="#A Peer-To-Peer Vision Connection">A Peer-To-Peer Vision Connection</a>	
-</ul>
-<hr>
-
-<a name="overview"><h3>An Overview of the OpenVision ToolKit</h3></a>
+<h3 id="overview">An Overview of the OpenVision ToolKit</h3>
 
 The OpenVision ToolKit is a collection of Vision methods
 and primitives that allows you to write Vision programs that 
@@ -122,7 +82,7 @@ section demonstrate how to read and write files, how to implement a Real-Time da
 repository, and how to develop simple and custom Vision servers.
 <hr>
 
-<a name="introduction"><h3>An Introduction To Sockets</h3></a>
+<h3 id="introduction">An Introduction To Sockets</h3>
 The Open Vision Tool Kit uses sockets to make network communication possible using Vision. 
 This section describes sockets. 
 If you are already familiar with sockets, you can skip to the next section, <a href="#fundamentals">Fundamentals Of The Open Vision Toolkit</a>.
@@ -240,7 +200,7 @@ In client-server parlance, a <i>listening</i> or <i>passive stream</i> implement
 <i>active</i> stream implements a client. These choices are mutually exclusive.  A stream socket cannot do both.
 <hr>
 
-<a name="fundamentals"><h3>Fundamentals Of The OpenVision Toolkit</h3></a>
+<h3 id="fundamentals">Fundamentals Of The OpenVision Toolkit</h3>
 This section describes the classes and messages that implement The OpenVision ToolKit.  
 Most of the protocol associated with the tool kit is defined at the class <i>OpenVision</i> or one of its subclasses.  
 The most important of those subclasses is <i>OpenVision Channel</i>.  
@@ -248,7 +208,7 @@ Its instances provide access to files, child processes, and sockets.
 Getting an instance of an <i>OpenVision Channel</i> object is the subject of the next section.
 <p>
 
-<a name="Creating Channels"><h4>Creating Channels -- The 'asOpenVisionChannel' Message</h4></a>
+<h4 id="Creating Channels">Creating Channels -- The 'asOpenVisionChannel' Message</h4>
 You obtain an <i>OpenVision Channel</i> object by sending the <i>asOpenVisionChannel</i> message to a string.  
 The string contains a channel specification in the form:
 <ul>
@@ -284,7 +244,7 @@ As is the case with the <i>options</i> component of a specification, the format 
 <center><b>Table 1. Components of an Open Vision Channel Specification</b></center>
 <p>
 
-<a name="Accessing Files"><b>Accessing Files</b></a>
+<b id="Accessing Files">Accessing Files</b>
 <p>
 To create a file channel, you supply the <i>file</i> as the <i>type</i> and a file name as the 
 <i>resource</i> in an <i>asOpenVisionChannel</i> specification string. If the file exists and you do not 
@@ -414,7 +374,7 @@ For that reason, you need to know how large the file will be before you map it.
 When you know in advance, as illustrated above, you can pre-allocate the file using the <i>Truncate</i> option.
 <p>
 
-<a name="Starting Processes"><b>Starting Processes</b></a>
+<b id="Starting Processes">Starting Processes</b>
 <p>
 A <i>process</i> is an independent program you start and control.  
 You create a process by specifying process as the <i>type</i> in an <i>asOpenVisionChannel</i> specification string.  
@@ -461,9 +421,7 @@ The expression:
 creates an independent <i>batchvision</i> process that sends Vision error messages to a separate channel.
 <p>
 
-<a name="Creating Sockets"><b>Creating Sockets</b>
-<p>
-
+<p id="Creating Sockets"><b>Creating Sockets</b></a>
 The final form of channel specification is socket format.
 <p>
 
@@ -576,7 +534,7 @@ Sockets used to access services already know to whom they will speak
 they just need to supply the address.
 <p>
 
-<a name="detail"><b>A Detail You May Never Need</b></a>
+<b id="detail">A Detail You May Never Need</b>
 <p>
 
 At the beginning of this section, the <i>asOpenVisionChannel</i> message was defined to return a channel. 
@@ -598,7 +556,7 @@ If you use the original copy, you get the behavior called for by the original pr
 In general, a number of methods already hide this detail for you.
 <p>
 
-<a name="Reading And Writing Data"><h4>Reading And Writing Data</h4></a>
+<h4 id="Reading And Writing Data">Reading And Writing Data</h4>
 
 Now that you have a channel, you need to use it.  For file and stream channels, that means reading and writing data.  
 The Open Vision Tool Kit supports two ways to read and write data <i>sequentially</i> and <i>randomly</i>.
@@ -661,7 +619,7 @@ Any terminating <i>newLine</i> read from the channel is returned as part of the 
 <center><b>Table 5. Sequential Read Operations</b></center>
 <p>
 
-<a name="Reading Data Sequentially"><b>Reading Data Sequentially</b></a>
+<b id="Reading Data Sequentially">Reading Data Sequentially</b>
 <p>
 
 The Open Vision Tool Kit provides ten messages, described in Table 5, that read data sequentially. 
@@ -760,7 +718,7 @@ Note that:
 4. The <i>getString</i> result is always tested for validity.
 </ul>
 
-<a name="Writing Data Sequentially"><b>Writing Data Sequentially</b></a>
+<b id="Writing Data Sequentially">Writing Data Sequentially</b>
 <p>
 
 <center><b>Table 6</b></center>
@@ -810,7 +768,7 @@ The <i>syncOutput</i> message requests that the data be sent immediately.
 Normally, you do not need this message.  Depending on the channel, either 
 The Open Vision Tool Kit or the operating system will execute it periodically.
 <p>
-<a name="Reading and Writing Data Randomly"><b>Reading and Writing Data Randomly</b></a>
+<b id="Reading and Writing Data Randomly">Reading and Writing Data Randomly</b>
 <p>
 <center><b>Table 7</b></center>
 <p>
@@ -883,14 +841,14 @@ Positive offsets access specific locations, negative offsets are always an error
 The offset of the first byte in the array is always 1.
 <p>
 
-<a name="Controlling Data Formats"><b>Controlling Data Formats</b></a>
+<b id="Controlling Data Formats">Controlling Data Formats</b>
 <p>
 
 The Open Vision Tool Kit supplies two options that control the format of the data read and written on a channel, 
 <i>binary</i> format and <i>trim</i> format.
 <p>
 
-<a name="The Binary Format Option"><b>The <i>Binary Format</i> Option</b></a>
+<b id="The Binary Format Option">The <i>Binary Format</i> Option</b>
 <p>
 The <i>binary</i> format option selects the representation used for all binary data read and written using a channel.  
 The Open Vision Tool Kit names binary data formats after processor architectures.  
@@ -928,7 +886,7 @@ In the context of the section <a href="#detail">A Detail You May Never Need</a>,
 <i>setBinaryFormat...</i> message.
 <p>
 
-<a name="The Trim Format Option"><b>The Trim Format Option</b></a>
+<b id="The Trim Format Option">The Trim Format Option</b>
 <p>
 
 The <i>trim</i> format option controls the removal of leading and trailing blanks from strings.
@@ -987,7 +945,7 @@ That object can print itself, describe itself in response to the message <i>desc
 defined at <i>OpenVision Channel TrimFormat</i>.
 <p>
 
-<a name="Reading, Writing, and List Operations"><b>Reading, Writing, and List Operations</b></a>
+<b id="Reading, Writing, and List Operations">Reading, Writing, and List Operations</b>
 <p>
 
 Combining The Open Vision Tool Kit's sequential read and write operations with Vision's list operations requires care; 
@@ -1011,14 +969,14 @@ You can use random read and write operations safely and predictably inside all l
 In fact, these operations are the basis for a number of data examples presented later in this document.
 <p>
 
-<a name="Offering Services and Creating Handlers"><h4>Offering Services and Creating Handlers</h4></a>
+<h4 id="Offering Services and Creating Handlers">Offering Services and Creating Handlers</h4>
 The previous sections of this document have focused on the mechanics of creating channels and the basics of reading and writing data.  
 The material covered in those sections is the material you need to act as a client of another program. 
 This section focuses on the issues associated with creating and managing servers using the Open Vision Tool Kit.  
 Because servers respond to unsolicited input, most of those issues deal with writing handlers.
 <p>
 
-<a name="Offering a Simple Service"><b>Offering a Simple Service</b></a>
+<b id="Offering a Simple Service">Offering a Simple Service</b>
 <p>
 
 The simplest service you can offer is a service that supplies a Vision prompt to its clients.  
@@ -1063,7 +1021,7 @@ The default Vision stream handler supplies a <i>V></i> prompt and executes Visio
 Together, these handlers provide the functionality needed to offer a simple Vision based server.
 <p>
 
-<a name="Writing Your Own Handlers"><b>Writing Your Own Handlers</b></a>
+<b id="Writing Your Own Handlers">Writing Your Own Handlers</b>
 <p>
 
 <center><b>Table 8</b></center>
@@ -1113,7 +1071,7 @@ This message returns <i>TRUE</i> during that invocation.
 <center><b>Table 8.  Handler Definition and Installation Messages</b></center>
 <p>
 
-<a name="Writing Your Own Handlers"><b>Writing Your Own Handlers</b></a>
+<b id="Writing Your Own Handlers">Writing Your Own Handlers</b>
 <p>
 
 This section deals with the mechanics and methodology of writing and installing your own input handler.
@@ -1292,7 +1250,7 @@ Using <i>close</i> for the same purpose leaves unprocessed data in operating sys
 The <i>endTransmission</i> and <i>close</i> messages are discussed further in the next section.
 </ul>
 
-<a name="Exiting Vision"><b>Exiting Vision</b></a>
+<b id="Exiting Vision">Exiting Vision</b>
 <p>
 
 Before Open Vision handlers, closing the one and only input channel to a Vision session caused the session to terminate.  
@@ -1307,7 +1265,7 @@ The service needs to stay alive.  It can be unexpected when a client session cre
 The Section <a href="#A Peer-To-Peer Vision Connection">A Peer-To-Peer Vision Connection</a> provides an example of just such a service.
 <p>
 
-<a name="Closing Channels"><h4>Closing Channels</h4></a>
+<h4 id="Closing Channels">Closing Channels</h4>
 The Open Vision Tool Kit provides three messages for closing a channel. They are described in Table 9.
 <p>
 
@@ -1334,7 +1292,7 @@ You will receive an end-of-input indication the next time you try to read data f
 <p>
 <center><b>Table 9.  Channel Shutdown Messages</b></center>
 
-<a name="Detecting Errors"><h4>Detecting Errors</h4></a>
+<h4 id="Detecting Errors">Detecting Errors</h4>
 
 Other than closed streams, the examples of the previous sections ignore errors.  
 No robust program ever does that.  The ones you write with the Open Vision Tool Kit should not either.
@@ -1346,7 +1304,7 @@ If no errors have occurred, <i>lastError</i> returns the object <i>OpenVision Ch
 An error object can print itself, return a string describing itself in response to the description message, and be compared to other instances of its class.
 <p>
 
-<a name="Using the Remaining Messages"><h4>Using the Remaining Messages</h4></a>
+<h4 id="Using the Remaining Messages">Using the Remaining Messages</h4>
 
 The Open Vision Tool Kit defines a number of other messages at <i>OpenVision Channel</i> that are useful and occasionally necessary.  
 They are described in Table 10.
@@ -1413,9 +1371,9 @@ describes one of the remote execution messages, you should examine the Open Visi
 
 <hr>
 
-<a name="applications"><h3>Applications of The Open Vision Tool Kit</h3></a>
+<h3 id="applications">Applications of The Open Vision Tool Kit</h3>
 
-<a name="A Text File Reader"><h4>A Text File Reader</h4></a>
+<h4 id="A Text File Reader">A Text File Reader</h4>
 
 The sample is an implementation of the <i>asFileContents</i> method using The Open Vision Tool Kit:
 
@@ -1430,7 +1388,7 @@ String defineMethod: [ | asFileContents |
 </b></pre>
 </ul>
 
-<a name="A Flat File Reader"><h4>A Flat File Reader</h4></a>
+<h4 id="A Flat File Reader">A Flat File Reader</h4>
 
 This sample uses The Open Vision Tool Kit to manufacture a collection of Vision objects from the data contained in a flat, ASCII file.
 <ul>
@@ -1473,7 +1431,7 @@ file close;
 </b></pre>
 </ul>
 
-<a name="A Remote Execution Daemon Client"><h4>A Remote Execution Daemon Client</h4></a>
+<h4 id="A Remote Execution Daemon Client">A Remote Execution Daemon Client</h4>
 
 This sample uses The Open Vision Tool Kit to access the remote execution daemon (rexecd) on a host.  
 This method implements the full protocol, including the secondary error socket defined in the documentation for the <i>rexecd</i> service. 
@@ -1534,7 +1492,7 @@ OpenVision defineMethod:
 </b></pre>
 </ul>
 
-<a name="A Passive Real-Time Data Base"><h4>A Passive Real-Time Data Base</h4></a>
+<h4 id="A Passive Real-Time Data Base">A Passive Real-Time Data Base</h4>
 
 This example illustrates a more complex application of the Open Vision Tool Kit,
 the access and maintenance of a collection of real time data.  
@@ -1742,7 +1700,7 @@ Only one expression needs to be run by each Vision session that accesses the fil
 Although this example does not do so, writing a method at either <i>MemoryRecord</i> or <i>RealTimePriceRecord</i> 
 to automate access to the file is a straightforward exercise.
 
-<a name="A Peer-To-Peer Vision Connection"><h4>A Peer-To-Peer Vision Connection</h4></a>
+<h4 id="A Peer-To-Peer Vision Connection">A Peer-To-Peer Vision Connection</h4>
 
 Most client-server interactions are asymmetric.  Generally, a server cannot send unsolicited requests to its clients.  
 The client-server examples presented up to this point in this document are no exception. 
