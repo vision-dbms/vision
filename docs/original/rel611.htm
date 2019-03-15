@@ -1,28 +1,8 @@
 ---
-head: <title>Vision Release Notes 6.1.1</head>
+title: "Vision Release Notes 6.1.1"
 ---
-<!DOCTYPE html>
-<html>
-<body>
-<h2>Vision Release Notes 6.1.1</h2>
 
-<hr><h3>Topics Covered:</h3>
-<ul type=square><br><li><a href="#description">Description</a>
-<br><li><a href="#updatelicenses">Update Licenses</a> 
-<br><li><a href="#selectornotfound">Selector Not Found Reporting</a> 
-<br><li><a href="#stringtokenization">String Tokenization Primitives</a> 
-<br><li><a href="#stringcaseconversion">String Case Conversion</a> 
-<br><li><a href="#stringclustering">String Clustering</a> 
-<br><li><a href="#clusterobjectspace">Cluster Object Space Assignment</a> 
-<br><li><a href="#ieeenan">IEEE NaN->NA Conversion</a> 
-<br><li><a href="#typedefragcoal">Type Defragmentation/Coalescing</a> 
-<br><li><a href="#optimizedgarbagecoll">Optimized Garbage Collection and Session Garbage Collection</a> 
-<br><li><a href="#errorhandling">Error handling in batchvision</a> 
-<br><li><a href="#tuneableupdate">Tuneable Update Write Size</a> 
-<br><li><a href="#minorenhancements">Minor Enhancements and Bug Fixes</a> 
-<br><li><a href="#newmessages">New Messages</a> 
-</ul>
-<p><hr><p>
+<p>
 <h3 id=description>Description</h3>
 
 <p>
@@ -71,10 +51,13 @@ Without that license, Vision can be used to read an existing database
 but not maintain or build one.  If, at the start of an update, Vision
 cannot find a suitable license, it generates the following output:
 
-<ul type=disc><b><pre>V> Utility updateNetwork
+<ul type=disc>
+<pre>
+<V> Utility updateNetwork
 V> ?g
 >>> License Does Not Permit Network Update From This Session &lt;&lt;&lt;
-        5</pre></b></ul>
+        5
+</pre></ul>
 
 Vision update licenses are tied to specific hosts or IP addresses.
 Once you have supplied Insyte with this information, you will receive via 
@@ -101,7 +84,9 @@ default, this attribute is disabled, resulting in the generation of
 conventional <i>Selector Not Found</i> messages.  The following example
 illustrates the result of enabling this attribute:  
 
-<ul type=disc><b><pre>####  Define a method that causes a selector not found, ...
+<ul type=disc>
+<pre>
+####  Define a method that causes a selector not found, ...
 V> Integer defineMethod: [ | foo | ^self bar ];
 V> ?g
 
@@ -134,7 +119,8 @@ V> ?g
 
 3 foo
   ^
-      NA </pre></b></ul>
+      NA 
+</pre></ul>
 
 The <i>verboseSelectorNotFound</i> session attribute makes an experimental
 capability added to release 5.9.5 controllable using a Vision expression.  
@@ -152,7 +138,9 @@ the <i>breakOn:</i> concept to support substring and pattern matching and
 provide a convenient way to return both the matched and unmatched
 portions of their input.  The following operations are available:  
 
-<ul type=disc><b><pre>    Message             Index   Converse
+<ul type=disc>
+<pre>
+    Message             Index   Converse
     =======             =====   ========
     breakOn:            369     breakString:
     breakOnString:      389     stringBreak:		
@@ -163,7 +151,8 @@ portions of their input.  The following operations are available:
     tokenizeOnPattern:  390/1   patternTokenize:
 
     cbreakOn:           370     cbreakString:
-    ctokenizeOn:        370/1   cbreakTokenize:</pre></b></ul>
+    ctokenizeOn:        370/1   cbreakTokenize:
+</pre></ul>
 
 In this list, all but <i>breakOn:</i> and <i>cbreakOn:</i> and their converses
 are new.
@@ -174,40 +163,55 @@ divide a string into one or more substrings based on a set of
 characters, a string to be matched, or a regular expression,
 respectively.  For example, if <i>s</i> is defined as:
 
-    <ul type=disc><b><pre>!s &lt;- "The quick brown fox jumped over the lazy dog.";</pre></b></ul>
+    <ul type=disc>
+<pre>
+!s &lt;- "The quick brown fox jumped over the lazy dog.";
+</pre></ul>
 
 then, <i>s breakOn: "the". do: ["&lt;" print; print; ">" printNL];</i>
 displays:
 
-<ul type=disc><b><pre>&lt;T&gt;
+<ul type=disc>
+<pre>
+&lt;T&gt;
 &lt;&gt;
 &lt; quick brown fox jump>
 &lt;d ov>
 &lt;r >
 &lt;>
 &lt;>
-&lt; lazy dog.></pre></b></ul>
+&lt; lazy dog.>
+</pre></ul>
 
 In this example, each occurrence of a "t", "h", or "e" marks the end of
 a substring.  To match the string "the" exactly, <i>breakOnString:</i> is
 used.  For example, using <i>breakOnString:</i> instead of <i>breakOn:</i> in
 the previous example produces the following output:
 
-<ul type=disc><b><pre>&lt;The quick brown fox jumped over >
-&lt; lazy dog.></pre></b></ul>
+<ul type=disc>
+<pre>
+&lt;The quick brown fox jumped over >
+&lt; lazy dog.>
+</pre></ul>
 
 Because <i>breakOnString:</i> performs an exact match, the initial "The"
 wasn't used to delimit a substring.  To match on more complex
 patterns, <i>breakOnPattern:</i> is used.  For example:
 
-<ul type=disc><b><pre>s breakOnPattern: "[Tt]he".
-do: ["&lt;" print; print; ">" printNL];</pre></b></ul>
+<ul type=disc>
+<pre>
+s breakOnPattern: "[Tt]he".
+do: ["&lt;" print; print; ">" printNL];
+</pre></ul>
 
 displays:
 
-<ul type=disc><b><pre>&lt;>
+<ul type=disc>
+<pre>
+&lt;>
 &lt; quick brown fox jumped over >
-&lt; lazy dog.></pre></b></ul>
+&lt; lazy dog.>
+</pre></ul>
 
 The <i>breakOn...:</i> operations return the text between matches as a list
 of the form "substring-1", "substring-2", ..., "substring-n".  The
@@ -219,7 +223,9 @@ primitives return their results as lists of the form "substring-1",
 For example, replacing <i>breakOn:</i> with <i>tokenizeOn:</i> in the first of
 the preceding examples yields the output:
 
-<ul type=disc><b><pre>&lt;T>
+<ul type=disc>
+<pre>
+&lt;T>
 &lt;h>
 &lt;>
 &lt;e>
@@ -233,7 +239,8 @@ the preceding examples yields the output:
 &lt;h>
 &lt;>
 &lt;e>
-&lt; lazy dog.></pre></b></ul>
+&lt; lazy dog.>
+</pre></ul>
 
 Note that the elements in the output list returned by <i>tokenizeOn...</i>
 always alternate between the substrings between matches and matched
@@ -249,33 +256,45 @@ To complete the illustration of the <i>tokenizeOn...:</i> variants, if
 <i>tokenizeOnString:</i> is used in place of <i>tokenizeOn:</i> in the previous
 example, the following output is generated:
 
-<ul type=disc><b><pre>&lt;The quick brown fox jumped over >
+<ul type=disc>
+<pre>
+&lt;The quick brown fox jumped over >
 &lt;the>
-&lt; lazy dog.></pre></b></ul>
+&lt; lazy dog.>
+</pre></ul>
 
 and, if <i>... tokenizeOnPattern: "[Tt]he"</i> is used in place of
 <i>... tokenizeOnString: "the"</i>, the following result is produced:
 
-<ul type=disc><b><pre>&lt;The>
+<ul type=disc>
+<pre>
+&lt;The>
 &lt; quick brown fox jumped over >
 &lt;the>
-&lt; lazy dog.></pre></b></ul>
+&lt; lazy dog.>
+</pre></ul>
 
 Before leaving the topic of tokenization, there is another noteworthy example.  <i>ctokenizeOn:</i>, given an empty argument, can be used to quickly
 convert a string into a list of its characters.  For example:
 
-<ul type=disc><b><pre>"abc" ctokenizeOn: "".
-do: ["&lt;" print; print; ">" printNL];</pre></b></ul>
+<ul type=disc>
+<pre>
+"abc" ctokenizeOn: "".
+do: ["&lt;" print; print; ">" printNL];
+</pre></ul>
 
 generates the output:
 
-<ul type=disc><b><pre>&lt;>
+<ul type=disc>
+<pre>
+&lt;>
 &lt;a>
 &lt;>
 &lt;b>
 &lt;>
 &lt;c>
-&lt;></pre></b></ul>
+&lt;>
+</pre></ul>
 
 This behavior is used to produce the high performance version of the
 <i>toList</i> String method, supplied in the FIXcore.6.1.1 script.
@@ -292,30 +311,48 @@ primitives to detect empty search strings and patterns.  If an empty
 string or pattern is detected, only the first, empty match will be
 returned.  Thus, either:
 
-    <ul type=disc><b><pre>"abc" breakOnString: "". do: ["&lt;" print; print; ">" printNL];</pre></b></ul>
+    <ul type=disc>
+<pre>
+"abc" breakOnString: "". do: ["&lt;" print; print; ">" printNL];
+</pre></ul>
 
 or:
 
-    <ul type=disc><b><pre>"abc" breakOnPattern: "()". do: ["&lt;" print; print; ">" printNL];</pre></b></ul>
+    <ul type=disc>
+<pre>
+"abc" breakOnPattern: "()". do: ["&lt;" print; print; ">" printNL];
+</pre></ul>
     
 displays:
 
-<ul type=disc><b><pre>&lt;>
-&lt;abc></pre></b></ul>
+<ul type=disc>
+<pre>
+&lt;>
+&lt;abc>
+</pre></ul>
 
 while either:
 
-    <ul type=disc><b><pre>"abc" tokenizeOnString: "". do: ["&lt;" print; print; ">" printNL];</pre></b></ul>
+    <ul type=disc>
+<pre>
+"abc" tokenizeOnString: "". do: ["&lt;" print; print; ">" printNL];
+</pre></ul>
 
 or:
 
-    <ul type=disc><b><pre>"abc" tokenizeOnPattern: "()". do: ["&lt;" print; print; ">" printNL];</pre></b></ul>
+    <ul type=disc>
+<pre>
+"abc" tokenizeOnPattern: "()". do: ["&lt;" print; print; ">" printNL];
+</pre></ul>
 
 displays:
 
-<ul type=disc><b><pre>&lt;>
+<ul type=disc>
+<pre>
 &lt;>
-&lt;abc></pre></b></ul>
+&lt;>
+&lt;abc>
+</pre></ul>
 
 While on the topic of regular expressions and string pattern matching,
 there is one final point to be made. The regular expression processing
@@ -325,24 +362,36 @@ this isn't usually an issue, but, for patterns with wildcards, some
 care needs to be taken.  For example, in the examples of this section,
 if:
 
-    <ul type=disc><b><pre>s tokenizeOnPattern: "[Tt]he". do: ["&lt;" print; print; ">" printNL];</pre></b></ul>
+    <ul type=disc>
+<pre>
+s tokenizeOnPattern: "[Tt]he". do: ["&lt;" print; print; ">" printNL];
+</pre></ul>
 
 had been written as:
 
-    <ul type=disc><b><pre>s tokenizeOnPattern: "[Tt].*e".do: ["&lt;" print; print; ">" printNL];</pre></b></ul>
+    <ul type=disc>
+<pre>
+s tokenizeOnPattern: "[Tt].*e".do: ["&lt;" print; print; ">" printNL];
+</pre></ul>
 
 the resulting output would have been:
 
-    <ul type=disc><b><pre>&lt;>
+    <ul type=disc>
+<pre>
+&lt;>
 &lt;The quick brown fox jumped over the>
-&lt; lazy dog.></pre></b></ul>
+&lt; lazy dog.>
+</pre></ul>
 
 instead of:
 
-<ul type=disc><b><pre>&lt;The>
+<ul type=disc>
+<pre>
+&lt;The>
 &lt; quick brown fox jumped over >
 &lt;the>
-&lt; lazy dog.></pre></b></ul>
+&lt; lazy dog.>
+</pre></ul>
 
 <hr>
 <p>
@@ -385,7 +434,10 @@ Not all string clusters are associative string clusters.  Associative
 string clusters are created using the <i>newAssociativeCluster</i>
 operation:
 
-<ul type=disc><b><pre>!stringSpace &lt;- String newAssociativeCluster;</pre></b></ul>
+<ul type=disc>
+<pre>
+!stringSpace &lt;- String newAssociativeCluster;
+</pre></ul>
 
 The <i>string</i> returned by <i>newAssociativeCluster</i> is the shadow
 instance of a new associative cluster containing no instances.
@@ -396,11 +448,17 @@ whether the recipient String is part of an associative string cluster.
 Strings are added to the associative cluster using the message
 <i>insertIntoCluster:</i>:
 
-<ul type=disc><b><pre>!a0 &lt;- "a" insertIntoCluster: stringSpace;</pre></b></ul>
+<ul type=disc>
+<pre>
+!a0 &lt;- "a" insertIntoCluster: stringSpace;
+</pre></ul>
 
 or its converse, <i>clusterInsert:</i>:
 
-<ul type=disc><b><pre>!a1 &lt;- stringSpace clusterInsert: "a";</pre></b></ul>
+<ul type=disc>
+<pre>
+!a1 &lt;- stringSpace clusterInsert: "a";
+</pre></ul>
 
 As noted, only one copy of "a" is inserted into the cluster -- both
 <i>a0</i> and <i>a1</i> reference the same copy of the string "a".
@@ -412,27 +470,38 @@ particular string.  The <i>locateInCluster:</i> message or its converse,
 instance of the string in the associative cluster if the string is
 present and NA if it isn't.  In the context of this example, both:
 
-<ul type=disc><b><pre>"a", "b" do: [
+<ul type=disc>
+<pre>
+"a", "b" do: [
     ^self print: 3;
      ^self locateInCluster: ^my stringSpace. printNL
-];</pre></b></ul>
+];
+</pre></ul>
 
 and:
 
-<ul type=disc><b><pre>"a", "b" do: [
+<ul type=disc>
+<pre>
+"a", "b" do: [
     ^self print: 3;
      ^my stringSpace clusterLocate: ^self. printNL
-];</pre></b></ul>
+];
+</pre></ul>
 
 display:
 
-<ul type=disc><b><pre>a  a
-b        NA </pre></b></ul>
+<ul type=disc>
+<pre>
+a  a
+b        NA 
+</pre></ul>
 
 Strings can be deleted from an associative cluster using the
  <i>deleteFromCluster:</i> message or its <i>clusterDelete:</i> converse:
 
-<ul type=disc><b><pre>Input:
+<ul type=disc>
+<pre>
+Input:
 "a" deleteFromCluster: stringSpace
 
 Output:
@@ -442,21 +511,28 @@ Input:
 stringSpace instanceList
 
 Output:
-List of 0</pre></b></ul>
+List of 0
+</pre></ul>
 
 Both deletion messages return TRUE if the string was found and deleted
 and FALSE if the string was not present in the first place.  If the
 same string is deleted in the context of a list operation:
 
-    <ul type=disc><b><pre>"a", "a" do: [
+    <ul type=disc>
+<pre>
+"a", "a" do: [
     ^self print: 2;
     ^self deleteFromCluster: ^my stringSpace. printNL
-];</pre></b></ul>
+];
+</pre></ul>
 
 only one instance of the delete operation returns TRUE:
 
-<ul type=disc><b><pre>a FALSE
-a TRUE</pre></b></ul>
+<ul type=disc>
+<pre>
+a FALSE
+a TRUE
+</pre></ul>
 
 As is the case with any deletion, all references to the deleted
 string are automatically converted to references to the shadow
@@ -469,7 +545,9 @@ using the standard instance deletion messages -- <i>delete</i> and
 resident string, the deletion will fail and the message will return
 FALSE:
 
-<ul type=disc><b><pre>Input:
+<ul type=disc>
+<pre>
+Input:
 !a0 &lt;- "a" insertIntoCluster: stringSpace
 Output:
 a
@@ -482,7 +560,8 @@ FALSE
 Input:
 a0
 Output:
-a</pre></b></ul>
+a
+</pre></ul>
 
 While strings in associative clusters are protected from accidental
 deletion, they are not protected from damage by the incorporator.  If
@@ -507,13 +586,19 @@ releases.
 Cluster object space assignments are made with the message
  <i>establishResidenceInSpaceOf:</i> :
 
-<ul type=disc><b><pre>Object createSubclass: "MyClass";
-MyClass establishResidenceInSpaceOf: AnotherClass</pre></b></ul>
+<ul type=disc>
+<pre>
+Object createSubclass: "MyClass";
+MyClass establishResidenceInSpaceOf: AnotherClass
+</pre></ul>
 
 or its converse <i>provideResidenceFor:</i>:
 
-<ul type=disc><b><pre>Object createSubclass: "MyClass";
-AnotherClass provideResidenceFor: MyClass</pre></b></ul>
+<ul type=disc>
+<pre>
+Object createSubclass: "MyClass";
+AnotherClass provideResidenceFor: MyClass
+</pre></ul>
 
 <i>AnotherClass</i> is assumed to have a persistent identity (i.e., it was
 saved previously or given a persistent identity using the cluster
@@ -588,11 +673,17 @@ accompanying extension scripts) or the <i>VisionAttemptDefragment</i>
 environment variable.  Aggressive defragmentation can be disabled by
 setting the session attribute to FALSE:
 
-    <ul type=disc><b><pre>Utility SessionAttribute visionAttemptDefragment &lt;- FALSE;</pre></b></ul>
+    <ul type=disc>
+<pre>
+Utility SessionAttribute visionAttemptDefragment &lt;- FALSE;
+</pre></ul>
 
 or by setting the environment variable to 0:
 
-       <ul type=disc><b><pre>setenv VisionAttemptDefragment 0    # c-shell syntax</pre></b></ul>
+       <ul type=disc>
+<pre>
+setenv VisionAttemptDefragment 0    # c-shell syntax
+</pre></ul>
 
 prior to starting a Vision session.
 
@@ -659,13 +750,19 @@ until the session with the error exits or restarts.
 There are two ways to enable restart or exit on error.  One is via
 environment variables:
 
-<ul type=disc><b><pre>setenv VisionExitOnError 1
-setenv VisionRestartOnError 1</pre></b></ul>
+<ul type=disc>
+<pre>
+setenv VisionExitOnError 1
+setenv VisionRestartOnError 1
+</pre></ul>
 
 The second is via session attributes:
 
-<ul type=disc><b><pre>Utility SessionAttribute visionExitOnError &lt;- 1;
-Utility SessionAttribute visionRestartOnError &lt;- 1;</pre></b></ul>
+<ul type=disc>
+<pre>
+Utility SessionAttribute visionExitOnError &lt;- 1;
+Utility SessionAttribute visionRestartOnError &lt;- 1;
+</pre></ul>
 
 
 <hr>
@@ -760,7 +857,10 @@ that you are encountering a problem caused by an operating system bug.
 	   compustat2 behaves as though it were called in the
 	   following way:
 
-		     <ul type=disc><b><pre>compustat2 -N "000000000000"</pre></b></ul>
+		     <ul type=disc>
+<pre>
+compustat2 -N "000000000000"
+</pre></ul>
 
 	   In other words, it will discard all records which begin
 	   with 12 zeros.
@@ -800,11 +900,14 @@ that you are encountering a problem caused by an operating system bug.
 	   result would be zero. This version converts such strings to
 	   NA values.
 
-	   <ul type=disc><b><pre>For Example			New		Old
+	   <ul type=disc>
+<pre>
+For Example			New		Old
 '         '			NA		0
 '    3    '			3		3
 '    .   3'			NA		0
-'   42Kzcd'			NA		42</pre></b></ul>
+'   42Kzcd'			NA		42
+</pre></ul>
 </ol>
 
 <p>
@@ -828,9 +931,12 @@ that you are encountering a problem caused by an operating system bug.
 <p>
 <h3 id=newmessages>New Messages</h3>
 
-<b><pre>********************
+
+<pre>
+********************
    EXTcore.6.1.1
-********************</pre></b>
+********************
+</pre>
 <ul type=disc>
 This script contains messages that have been added to the core classes as 
 part of release 6.1.1.  Note that many of these messages are primitives
@@ -841,12 +947,18 @@ script from release 6.0.
 
 
 <hr>
-</ul><b><pre>Class     Utility
+</ul>
+<pre>
+Class     Utility
 Message   UpdateLicense
-          setUpdateLicenseTo: </pre></b><ul type=disc>
+          setUpdateLicenseTo: 
+</pre><ul type=disc>
 
-</ul><b><pre>Class     Utility SessionAttribute
-Message   licenseItemAt:</pre></b><ul type=disc>
+</ul>
+<pre>
+Class     Utility SessionAttribute
+Message   licenseItemAt:
+</pre><ul type=disc>
 
 These message have been defined to install and access the license 
 information defined for your site.  You will not be able to perform
@@ -857,18 +969,26 @@ Insyte.
 <p>
 Note that this message will not work with releases prior to 6.1.1
 </ul><hr>
-<b><pre>Class     Utility
-Message   updateNetwork</pre></b><ul type=disc>
+
+<pre>
+Class     Utility
+Message   updateNetwork
+</pre><ul type=disc>
 
 This message has been modified to query the stored license information. 
 If this information is not stored and/or it does not match the host
 or IP address defined for your installation, the update will abort
 and you will see the error message:
 
-     <pre><ul type=disc>&gt;&gt;&gt; License Does Not Permit Network Update From This Session &lt;&lt;&lt;</pre></b></ul>
+
+<pre>
+<ul type=disc>&gt;&gt;&gt; License Does Not Permit Network Update From This Session &lt;&lt;&lt;
+</pre></ul>
 
 </ul><hr>
-<b><pre>Class     Utility SessionAttribute
+
+<pre>
+Class     Utility SessionAttribute
 Message   visionMaxWriteChunk
           visionMappingLimit
           visionAddressThreshold
@@ -885,14 +1005,18 @@ Message   visionMaxWriteChunk
           visionRestartOnError
           visionExitOnError
           verboseSelectorNotFound
-          largeContainerSizeOfSpace: space</pre></b><ul type=disc>
+          largeContainerSizeOfSpace: space
+</pre><ul type=disc>
 
 These messages provide control over various session-temporary attributes.
 Note that these messages will not work with releases prior to 6.1.1
 </ul><hr>
-<b><pre>Class     Utility SessionAttribute
+
+<pre>
+Class     Utility SessionAttribute
 Message   enableVerboseSelectorNotFound
-          disableVerboseSelectorNotFound</pre></b><ul type=disc>
+          disableVerboseSelectorNotFound
+</pre><ul type=disc>
 
 These messages are used to toggle the amount of information displayed
 when a Vision query encounters a <i>selector not found</i>.  By default,
@@ -901,11 +1025,14 @@ the verbose mode is disabled.
 <p>
 Note that these messages will not work with releases prior to 6.1.1
 </ul><hr>
-<b><pre>Class     Utility 
+
+<pre>
+Class     Utility 
 Message   hostname
           hostId
           username
-          processId</pre></b><ul type=disc>
+          processId
+</pre><ul type=disc>
 
 The message <i>hostname</i> displays the logical name of the machine on
 which your <i>batchvision</i> is running.  The message <i>hostId</i> displays
@@ -917,8 +1044,11 @@ identifier assigned to the <i>batchvision</i> by the operating system.
 <p>
 Note that these messages will not work with releases prior to 6.1.1
 </ul><hr>
-<b><pre>Class     Utility 
-Message   accessedNetworkVersion</pre></b><ul type=disc>
+
+<pre>
+Class     Utility 
+Message   accessedNetworkVersion
+</pre><ul type=disc>
 
 This message displays the version number of the NDF accessed at session
 startup.
@@ -926,8 +1056,11 @@ startup.
 <p>
 Note that this message will not work with releases prior to 6.1.1
 </ul><hr>
-<b><pre>Class     Utility 
-Message   currentNetworkVersion</pre></b><ul type=disc>
+
+<pre>
+Class     Utility 
+Message   currentNetworkVersion
+</pre><ul type=disc>
 
 This message displays the version number of the last commit performed
 by this session.  This will be the same as the accessed version when
@@ -936,26 +1069,35 @@ no commits have been performed.
 <p>
 Note that this message will not work with releases prior to 6.1.1
 </ul><hr>
-<b><pre>Class     Utility 
-Message   collectSessionGarbage</pre></b><ul type=disc>
+
+<pre>
+Class     Utility 
+Message   collectSessionGarbage
+</pre><ul type=disc>
 
 This message runs the transient garbage collection.
 
 <p>
 Note that this message will not work with releases prior to 6.1.1
 </ul><hr>
-<b><pre>Class     Utility 
+
+<pre>
+Class     Utility 
 Message   fullCompact
           fullCompactOf:
-          fullCompactExcept:</pre></b><ul type=disc>
+          fullCompactExcept:
+</pre><ul type=disc>
 
 These methods have been modified to turn off tracing after execution so
 that the release 6.1.1 transient garbage collect does not cause sporadic
 printing to occur within a session left running after a compaction.
 </ul><hr>
-<b><pre>Class     String 
+
+<pre>
+Class     String 
 Message   breakOnString: string
-          breakOnPattern: stringPattern</pre></b><ul type=disc>
+          breakOnPattern: stringPattern
+</pre><ul type=disc>
 
 These messages expand on the functionality of the <i>breakOn:</i> message.
 While the original <i>breakOn:</i> message divides the recipient string into 
@@ -968,18 +1110,21 @@ defined in the database but are not generally called directly.
 <p>
 Note that these messages will not work with releases prior to 6.1.1
 </ul><hr>
-<b><pre>Class     String 
+
+<pre>
+Class     String 
 Message   tokenizeOn: string
           ctokenizeOn: string
           tokenizeOnString: string
-          tokenizeOnPattern: stringPattern</pre></b><ul type=disc>
+          tokenizeOnPattern: stringPattern
+</pre><ul type=disc>
 
 The <i>breakOn:</i> message variations return the text between matches as a 
 list of the form "substring-1", "substring-2", ... "substring-n".  The
 matched characters, strings, or patterns are not returned as part of 
 the list of substrings.  The <i>tokenize</i> versions of these methods
 return their results in the form "substring-1", "match-1", "substring-2",
-"match-2", ... "match-n-1, "substring-n".  The elements in the returned
+"match-2", ... "match-n-1", "substring-n".  The elements in the returned
 list always alternate between the substrings between matches and the
 matched text.  If matches occur at adjacent positions in the recipient
 string, they are separated by an empty substring in the result. Then
@@ -992,9 +1137,12 @@ defined in the database but are not generally called directly.
 <p>
 Note that these messages will not work with releases prior to 6.1.1
 </ul><hr>
-<b><pre>Class     String 
+
+<pre>
+Class     String 
 Message   toList
-          translateString: string to: replacement</pre></b><ul type=disc>
+          translateString: string to: replacement
+</pre><ul type=disc>
 
 These modified messages used the new <i>ctokenizeOn:</i> and <i>breakOnString:</i>
 primitives to produce much faster implementations.
@@ -1002,8 +1150,11 @@ primitives to produce much faster implementations.
 <p>
 Note that these modifications will not work with releases prior to 6.1.1
 </ul><hr>
-<b><pre>Class     String 
-Message   translatePattern: pattern to: replacement</pre></b><ul type=disc>
+
+<pre>
+Class     String 
+Message   translatePattern: pattern to: replacement
+</pre><ul type=disc>
 
 This message replaces all occurrences of the supplied <i>pattern</i> with
 the <i>replacement</i>.
@@ -1011,12 +1162,15 @@ the <i>replacement</i>.
 <p>
 Note that this message will not work with releases prior to 6.1.1
 </ul><hr>
-<b><pre>Class     String 
+
+<pre>
+Class     String 
 Message   toUpper
           toLower
           capitalize
           lowercase
-          toggleCase</pre></b><ul type=disc>
+          toggleCase
+</pre><ul type=disc>
 
 These messages are used to change the case of the characters in the
 recipient string.  The first four of these messages replace non-primitive
@@ -1026,8 +1180,11 @@ all upper and lower case characters it finds in the recipient.
 <p>
 Note that these messages will not work with releases prior to 6.1.1
 </ul><hr>
-<b><pre>Class     String 
-Message   newAssociativeCluster</pre></b><ul type=disc>
+
+<pre>
+Class     String 
+Message   newAssociativeCluster
+</pre><ul type=disc>
 
 This message creates a new associative string cluster and is normally
 sent to ^global String.
@@ -1035,8 +1192,11 @@ sent to ^global String.
 <p>
 Note that this message will not work with releases prior to 6.1.1
 </ul><hr>
-<b><pre>Class     String 
-Message   isAnAssociativeCluster</pre></b><ul type=disc>
+
+<pre>
+Class     String 
+Message   isAnAssociativeCluster
+</pre><ul type=disc>
 
 This message returns a boolean value indicating if the recipient is an
 associative string cluster.
@@ -1044,9 +1204,12 @@ associative string cluster.
 <p>
 Note that this message will not work with releases prior to 6.1.1
 </ul><hr>
-<b><pre>Class     String 
+
+<pre>
+Class     String 
 Message   insertIntoCluster: cluster
-          clusterInsert: stringValue</pre></b><ul type=disc>
+          clusterInsert: stringValue
+</pre><ul type=disc>
 
 These messages add the <i>stringValue</i> into an associative cluster if it 
 is not already present in it and return the value stored in the cluster.
@@ -1057,9 +1220,12 @@ may not be the same string object.
 <p>
 Note that these messages will not work with releases prior to 6.1.1
 </ul><hr>
-<b><pre>Class     String 
+
+<pre>
+Class     String 
 Message   locateInCluster: cluster
-          clusterLocate: stringValue</pre></b><ul type=disc>
+          clusterLocate: stringValue
+</pre><ul type=disc>
 
 These messages return the instance of the string in the associative
 cluster if the string is present and NA if it is not.
@@ -1067,9 +1233,12 @@ cluster if the string is present and NA if it is not.
 <p>
 Note that these messages will not work with releases prior to 6.1.1
 </ul><hr>
-<b><pre>Class     String 
+
+<pre>
+Class     String 
 Message   deleteFromCluster: cluster
-          clusterDelete: stringValue</pre></b><ul type=disc>
+          clusterDelete: stringValue
+</pre><ul type=disc>
 
 These messages delete a string from an associative cluster.  They return
 TRUE if the string was found and deleted and FALSE otherwise.  If the 
@@ -1080,18 +1249,27 @@ instance of the delete operation will return TRUE.
 Note that these messages will not work with releases prior to 6.1.1
 </ul><hr>
 
-<b><pre>Class     Object 
+
+<pre>
+Class     Object 
 Message   establishResidenceInSpaceOf: object
-          provideResidenceFor: aCluster</pre></b><ul type=disc>
+          provideResidenceFor: aCluster
+</pre><ul type=disc>
 
 These messages can be used to explicitly assign newly created
 transient clusters to specific persistent object spaces.  Cluster object
 space assignments are made with the message <i>establishResidenceInSpaceOf:</i> :
-<ul type=disc><b><pre>Object createSubclass: "MyClass";
-MyClass establishResidenceInSpaceOf: AnotherClass</pre></b></ul>
+<ul type=disc>
+<pre>
+Object createSubclass: "MyClass";
+MyClass establishResidenceInSpaceOf: AnotherClass
+</pre></ul>
 or its converse <i>provideResidenceFor:</i>:
-<ul type=disc><b><pre>Object createSubclass: "MyClass";
-AnotherClass provideResidenceFor: MyClass</pre></b></ul>
+<ul type=disc>
+<pre>
+Object createSubclass: "MyClass";
+AnotherClass provideResidenceFor: MyClass
+</pre></ul>
 
 <i>AnotherClass</i> is assumed to have a persistent identity (i.e., it was
 saved previously or given a persistent identity using the cluster
@@ -1111,9 +1289,12 @@ changes occur.
 Note that these messages will not work with releases prior to 6.1.1
 </ul><hr>
 
-<b><pre>********************
+
+<pre>
+********************
    CHadmin.6.1.1
-********************</pre></b>
+********************
+</pre>
 <ul type=disc>
 This script contains modifications and additions related to the AdminTools
 ToolKit.  These messages work with pre-6.1.1 versions of the database as
@@ -1122,9 +1303,12 @@ help analyze object structure complexity.
 
 
 </ul>
-<b><pre>********************
+
+<pre>
+********************
    CHfeeds.6.1.1
-********************</pre></b>
+********************
+</pre>
 <ul type=disc>
 This script contains modifications and additions related to the DataFeed
 class.  The <i>reconcile</i> method is modified to keep track of the last
@@ -1133,9 +1317,4 @@ change - more audit information will be recorded in a separate descriptor
 class in a future release.
 </ul>
 
-<p>
-
 {% include doc-footer.htm copydates="1999" %}
-
-</body>
-</html>
