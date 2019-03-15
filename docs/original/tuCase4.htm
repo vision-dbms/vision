@@ -16,9 +16,9 @@ title: "Case Study 4: Simple Report Writer"
 To run these examples, you should first start a new session and then load the sample database using:
 <pre><tt><b>     "/localvision/samples/general/sample.load" asFileContents evaluate ;</b></tt></pre>
 and load <i>testList</i> using:
-<ul type=disc><pre><b>!testList <- Company masterList 
+<ul type=disc><pre>!testList <- Company masterList 
     rankDown: [ sales ] . 
-    select: [ rank <= 20 ] ; </b></pre></ul>
+    select: [ rank <= 20 ] ; </pre></ul>
 Any other files referenced can be read from the <i>/localvision/samples/general/</i>
 directory.<p>
 <b>Note:</b> The <i>sample.load</i> file runs by default on a <i>Unix</i> environment.  If you are using a <i>Windows NT</i> platform, this location may be prefixed by a drive  and optional path (e.g. <i>d:/visiondb/localvision/samples/general/sample.load</i>).  Check with your Vision Administrator for further details.
@@ -38,7 +38,7 @@ that can serve as a basis for a general-purpose report writer.
 Read the file <i>example4.a</i>.  You should see:
 
 <ul>
-<pre><b>
+<pre>
  !list <- testList ; 
  !blockList <- 
      [ ticker ] , [ name ] , [ sales ] , [ price / earningsPerShare ] ; 
@@ -49,7 +49,7 @@ Read the file <i>example4.a</i>.  You should see:
           do: [ ^my element send: ^self . print: 12 ] ; 
         newLine print ; 
     ] ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
@@ -62,7 +62,7 @@ AN	Amoco Corp	20174.00	19.91
 ARC	Atlantic Ric	16282.00	18.15
 CI	CIGNA Corp	16909.30	 6.90
 ...
-</b></pre>
+</pre>
 </ul>
 
 This program starts out by defining two variables: <i>list</i>
@@ -79,7 +79,7 @@ in <i>blockList</i> is printed, producing the simple tabular report above.
 The file <i>example4.b</i> uses the block to display headings on the 
 report:
 <ul>
-<pre><b>
+<pre>
  !list <- testList ; 
  !blockList <- 
      [ ticker ] , [ name ] , [ sales ] , [ price / earningsPerShare ] ; 
@@ -94,13 +94,13 @@ report:
           do: [ ^my element send: ^self . print: 12 ] ; 
        newLine print ; 
      ] ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 
 <ul>
-<pre><b>
+<pre>
 ticker  name         sales        price / earn
 AET	  Aetna Life &	 22114.11	  5.46
 T	  American Tel	 51209.02	 23.20
@@ -125,7 +125,7 @@ This class allows you to define a header, a data type, and a column
 width for each report item in addition to the block used to access 
 the data:
 <ul>
-<pre><b>
+<pre>
  #---  Create New Class 
  Object createSubclass: "ReportItem" ; 
  #---  Define Some Properties 
@@ -183,7 +183,7 @@ The file <i>example4.d</i> redefines the program to use a list of
 these report item instances instead of the list of blocks:
 
 <ul>
-<pre><b>
+<pre>
  !list <- testList ; 
  !itemList <- ticker, name, sales, pe ;       #-- list of ReportItems 
 
@@ -200,13 +200,13 @@ these report item instances instead of the list of blocks:
        do: [ ^my element send: accessBlock . print: width ] ; 
        newLine print ; 
      ] ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 
 <ul>
-<pre><b>
+<pre>
 Ticker	Name	                   Sales	PE Ratio
 AET	Aetna Life & Cas	22114.11	    5.46
 T	American Tel & Tel	51209.02	   23.20
@@ -214,7 +214,7 @@ AN	Amoco Corp	        20174.00	   19.91
 ARC	Atlantic Richfield	16282.00	   18.15
 CI	CIGNA Corp	        16909.30	    6.90
 . . .
-</b></pre>
+</pre>
 </ul>
 
 Notice that the headings, column width and column heading justification 
@@ -224,7 +224,7 @@ sort the list based on a user-defined order.  The file <i>example4.e</i>
 adds these capabilities:
 
 <ul>
-<pre><b>
+<pre>
  !list <- testList ; 
  !itemList <- ticker, name, sales, pe ; 
  !criteria <- [ sales > 50000 ] ;                 #--  criteria to use 
@@ -248,13 +248,13 @@ adds these capabilities:
        do: [ ^my element send: accessBlock . print: width ] ; 
        newLine print ; 
      ] ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 
 <ul>
-<pre><b>
+<pre>
 Ticker	Name	                    Sales	PE Ratio
 GM	General Motors Corp	123456.78	 6.39
 XON	Exxon Corp	         76416.00	18.62
@@ -262,7 +262,7 @@ F	Ford Motor Company	 71643.38	 4.36
 IBM	IBM Corp	         54217.02	 9.26
 MOB	Mobil Corporation	 51223.02	21.32
 T	American Tel & Tel	 51209.02	23.20
-</b></pre>
+</pre>
 </ul>
 The report now uses the variables <i>criteria</i>, <i>sort</i>, and 
 <i>sortIsUp</i> to restrict the list and sort the results.  This 
@@ -279,7 +279,7 @@ and <i>sortIsUp</i> values.  This class also defines a method that
 can be used to apply these settings to a list supplied as a parameter:
 
 <ul>
-<pre><b>
+<pre>
  #---  Create New Class and Properties 
  Object createSubclass: "Report" ; 
  Report 
@@ -318,12 +318,12 @@ can be used to apply these settings to a list supplied as a parameter:
 
  #--- And run it for rep1 on testList 
  rep1 displayFor: testList 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 <ul>
-<pre><b>
+<pre>
 Ticker	Name	                    Sales	PE Ratio
 GM	General Motors Corp	123456.78	    6.39
 XON	Exxon Corp	         76416.00	   18.62
@@ -331,7 +331,7 @@ F	Ford Motor Company	 71643.38	    4.36
 IBM	IBM Corp	         54217.02	    9.26
 MOB	Mobil Corporation	 51223.02	   21.32
 T	American Tel & Tel	 51209.02	   23.20
-</b></pre>
+</pre>
 </ul>
 This program creates the new class <i>Report</i> and defines its 
 properties.  An initial instance of this class is created and assigned 
@@ -348,11 +348,11 @@ The <i>displayFor:</i> message is then sent to <i>rep1</i> with
 You can now change any of the properties of <i>rep1</i> and rerun the
 report.  For example, the program:
 <ul>
-<pre><b>
+<pre>
  rep1 :sort <- [ name ] ; 
  rep1 :sortIsUp <- TRUE ; 
  rep1 displayFor: testList 
-</b></pre>
+</pre>
 </ul>
 runs the report using these new settings.  Any settings that are 
 unchanged retain their value.  The file <i>example4.g</i> defines 
@@ -362,7 +362,7 @@ prior to changing them.  These methods are also all defined to return
 <i>^self</i>, enabling the same type of message streaming that you 
 saw with <i>defineFixedProperty:</i>:
 <ul>
-<pre><b>
+<pre>
  #---  Define Cover Methods to Set the Report Parameters 
  Report 
  defineMethod: 
@@ -403,20 +403,20 @@ saw with <i>defineFixedProperty:</i>:
    setCriteriaTo: [ sales > 25000 && price / earningsPerShare < 10 ] . 
    setSortDownTo: [ sales ] . 
    displayFor: Company masterList ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 
 <ul>
-<pre><b>
+<pre>
 Name	            PE Ratio	    Sales
 General Motors Corp	6.39	123456.78
 Ford Motor Company	4.36	 71643.38
 IBM Corp	        9.26	 54217.02
 Citicorp	        3.67	 27988.01
 Chrysler Corp	        3.92	 26276.51
-</b></pre>
+</pre>
 </ul>
 
 Starting with the full Company universe, this report displays the 
@@ -428,16 +428,16 @@ the report from highest to lowest sales.
 You can execute the report as of a different date.  Read in 
 the file <i>example4.h</i> or type:
 <ul>
-<pre><b>89 evaluate: [ rep1 displayFor: Company masterList ] ;</b></pre>
+<pre>89 evaluate: [ rep1 displayFor: Company masterList ] ;</pre>
 </ul>
 
 Execute this program.  You should see:
 <ul>
-<pre><b>
+<pre>
 Name	            PE Ratio	    Sales
 General Motors Corp	7.82	102813.00
 Ford Motor Company	6.41	 62715.72
-</b></pre>
+</pre>
 </ul>
 
 All data in the report has been accessed as 12/31/1989.
@@ -448,7 +448,7 @@ data.  The file <i>example4.i</i> adds the date as another attribute
 of the report and modifies the <i>displayFor:</i> method to print 
 the date.  A <i>title</i> attribute is also defined in this version:
 <ul>
-<pre><b>
+<pre>
  Report 
  #---  Add asOfDate and title as Report attributes 
      defineFixedProperty: 'asOfDate' . 
@@ -503,12 +503,12 @@ the date.  A <i>title</i> attribute is also defined in this version:
    setTitleTo: "First Report" . 
    setAsOfDateTo: 89 . 
    displayFor: Company masterList 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 <ul>
-<pre><b>
+<pre>
                  First Report
 As Of: 12/31/1989
     Criteria: [sales > 25000 && price / earningsPerShare < 10]
@@ -517,7 +517,7 @@ As Of: 12/31/1989
 Name	            PE Ratio	    Sales
 General Motors Corp	7.82	102813.00
 Ford Motor Company	6.41	 62715.72
-</b></pre>
+</pre>
 </ul>
 
 The properties <i>asOfDate</i> and <i>title</i> and the appropriate 
@@ -536,7 +536,7 @@ redefined to include this item and the report is rerun for the full
 Company universe:
 
 <ul>
-<pre><b>
+<pre>
  !salesPrior <- ReportItem new 
     do: [ :header <- "Prev Sales" ; 
           :dataType <- ^global Number ; 
@@ -546,13 +546,13 @@ Company universe:
  rep1 
    setItemListTo: name, sales, salesPrior . 
    displayFor: Company masterList ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 
 <ul>
-<pre><b>
+<pre>
                   First Report
 As Of: 12/31/1989
     Criteria: [sales > 25000 && price / earningsPerShare < 10
@@ -561,7 +561,7 @@ As Of: 12/31/1989
 Name	                    Sales	Prev Sales
 General Motors Corp	102813.00	  96371.63
 Ford Motor Company	 62715.72	  52774.31
-</b></pre>
+</pre>
 </ul>
 
 <hr>
@@ -569,17 +569,17 @@ To run the same report as of 12/31/90, read in the file <i>example4.k</i>
 or type:
 
 <ul>
-<pre><b>
+<pre>
  rep1 
    setAsOfDateTo: 90 . 
    displayFor: Company masterList ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 
 <ul>
-<pre><b>
+<pre>
                   First Report
 As Of: 12/31/1990
     Criteria: [sales > 25000 && price / earningsPerShare < 10]
@@ -591,7 +591,7 @@ Ford Motor Company	 71643.38        62715.72
 IBM Corp	         54217.02	 51250.02
 Citicorp	         27988.01	 23496.00
 Chrysler Corp	         26276.51	 22586.30
-</b></pre>
+</pre>
 </ul>
 
 <hr>

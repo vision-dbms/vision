@@ -56,17 +56,17 @@ The <i>cleanStore</i> message should also be explicitly sent to any properties
 that reference collections to align these structures as well.  
 For example, if Security defines a fixed property <i>heldList</i> that contains 
 a list of <i>Holding</i> instances, you would use:
-<pre><b>
+<pre>
 	mySecurity heldList cleanStore
-</b></pre>
+</pre>
 
 to align the list as well as to purge old, non-referenced 
 structures.  If values of <i>heldList</i> are clustered for all securities, 
 you only need to run <i>cleanStore</i> for one element.  If the values of 
 <i>heldList</i> are not clustered, you could use:
-<pre><b>
+<pre>
 	Security instanceList do: [ heldList cleanStore ] ;
-</b></pre>
+</pre>
 
 The message <i>cleanDictionary</i> is the class level analog of <i>cleanStore</i>.  
 It aligns the class dictionary and purges unneeded <i>define:toBe:</i> and 
@@ -88,7 +88,7 @@ on the recipient and display a confirmation if the recipient required cleaning.
 This message can be redefined for any class that requires additional steps.  
 For example, to redefine this message to also clean the <i>heldList</i> property 
 at <i>Security</i>, use:
-<pre><b>
+<pre>
 	Security
 	defineMethod:
 	[ | cleanupClassStructures |
@@ -97,7 +97,7 @@ at <i>Security</i>, use:
 	      ifTrue: [ "-- cleaned Security heldList" printNL ] ;
 	  ^self
 	] ;
-</b></pre>
+</pre>
 <hr>
 
 <h3 id="deletions">Deletions</h3>
@@ -110,7 +110,7 @@ applications, giving you an opportunity to undelete an accidental
 deletion if necessary.  Several properties have been defined at <i>Object</i> 
 to aid in tracking deletion information.  Undeleted objects have values 
 of NA for all of these properties:
-<pre><b>
+<pre>
      Property	      Definition</pre>
 <ul><hr width=450 align=middle></ul>
 <pre>     deletionFlag     TRUE if flagged for deletion
@@ -118,7 +118,7 @@ of NA for all of these properties:
      deletionReason   String explaining deletion reason
 </pre></b>
 The expression:
-<pre><b>
+<pre>
 	object flagForDeletionWithReason: string
 
         where object	is the object to be flagged for deletion
@@ -153,14 +153,14 @@ classes as needed.
 
 Several messages have been defined to utilize the <i>deletionFlag</i> property:
 
-<pre><b>
-     Message	  Definition</b></pre>	
+<pre>
+     Message	  Definition</pre>	
 <ul><hr width=380 align=middle></ul>
-<pre><b>     isActive     TRUE if object's deletionFlag isNA
+<pre>     isActive     TRUE if object's deletionFlag isNA
      isntActive   TRUE if object isActive != TRUE
      isDeleted	  Same as isntActive
      isntDeleted  Same as isActive
-</b></pre>
+</pre>
 
 The message <i>activeList</i> is used to return all instances 
 of a class (as base objects) that are active and not default.
@@ -185,22 +185,22 @@ you can send it the <i>isInternalDefault</i> message.
 
 Messages should be deleted using the <i>deleteMessage:</i> message.  
 The general form for message deletion is:
-<pre><b>
+<pre>
 	object deleteMessage: "message"
-</b></pre>
+</pre>
 
 <h4 id="OtherDeletions">Other Deletions</h4>
 
 The <i>delete:</i> message can be used to remove a point from a time series, 
 an indexed list, or a dictionary object.  For example:
-<pre><b>
+<pre>
 	Named Security delete: "IBM"
-</b></pre>
+</pre>
 
 deletes the name IBM from the <i>Security</i> class' naming dictionary.  
 The general forms of this message are:
 
-<pre><b>        dictionary delete: string
+<pre>        dictionary delete: string
 
 	where	<i>dictionary</i> is an instance of the <i>Dictionary</i> class
 	and	<i>string</i> is an instance of the <i>String</i> class
@@ -214,7 +214,7 @@ The general forms of this message are:
 
 	where	<i>ilist</i> is an instance of the <i>IndexedList</i> class
 	and	<i>object</i> is an object that was used as an index in this list
-</b></pre>
+</pre>
 <hr>
 
 <h3 id="SchemaMessageManagement">Schema Message Management</h3>
@@ -233,15 +233,15 @@ created automatically.  Each time you use one of the <i>define</i> messages,
 the class is flagged to indicate that new messages are pending.  To process 
 and refresh all messages, execute the expression:
 
-<pre><b>
+<pre>
 	Schema processAllMessages
-</b></pre>
+</pre>
 
 This process creates and refreshes message descriptors in the 
 schema database as needed.  It will generate a report similar 
 to the one illustrated below:
 
-<pre><b>
+<pre>
 	Schema Message Cross Reference Last Updated: Fri Oct 30 11:59:17 EST 1992
 	---  Current Counts  ---
 	CD:             172
@@ -266,7 +266,7 @@ to the one illustrated below:
 
 	18 Created.
 	25 Refreshed.
-</b></pre>
+</pre>
 
 This report displays the status of the schema database prior 
 to processing, the list of classes processed, the status after 

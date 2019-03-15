@@ -129,7 +129,7 @@ You must be logged in as the Vision Database Administrator
 to save the results of this script.
 <p>
 NOTE: On Unix systems, you need to source the following file before you begin your batch processing:
-<ul><pre><b>source /localvision/include/DBAVision.env</b></pre></ul>
+<ul><pre>source /localvision/include/DBAVision.env</pre></ul>
 
 <p>
 
@@ -421,17 +421,17 @@ You must be logged in as the Vision Administrator.
 On Unix systems, you need to source the following file before you start your batchvision session:
 
 
-<ul><pre><b>source /localvision/include/DBAVision.env</b></pre></ul>
+<ul><pre>source /localvision/include/DBAVision.env</pre></ul>
 <p>
 To run a script, type the script name and redirect its output to 
 another file.  For example:
 
-<ul><pre><b>/localvision/adminScripts/garbageCollect.cmd > /localvision/logs/gc.yymmdd</b></pre></ul><p>
+<ul><pre>/localvision/adminScripts/garbageCollect.cmd > /localvision/logs/gc.yymmdd</pre></ul><p>
 Note that if you setup an automated procedure to run the maintenance tools
 that bypasses the standard login procedure, you should include the
 following "source" statement in your procedure:
 
-<ul><pre><b>source /localvision/include/DBAVision.env</b></pre></ul>
+<ul><pre>source /localvision/include/DBAVision.env</pre></ul>
 
 
 <font size=+1>Running Maintenance Scripts on NT</font>
@@ -439,7 +439,7 @@ following "source" statement in your procedure:
 To run a script, type the script name and redirect its output to 
 another file.  For example:
 
-<ul><pre><b>%LocalVisionRoot%adminScripts\garbageCollect.cmd > %LocalVisionRoot%logs\gc.yymmdd</b></pre></ul>
+<ul><pre>%LocalVisionRoot%adminScripts\garbageCollect.cmd > %LocalVisionRoot%logs\gc.yymmdd</pre></ul>
 <font size=+1>When to Run the Maintenance Scripts</font>
 <p>
 Large production environments typically run the maintenance functions
@@ -726,18 +726,18 @@ data:<b><pre>
 </pre></b>
 <p><li>If you want to create private <b>Entity</b> classes in your
 private space, you must save the following Vision code in the private
-space: <pre><b>
+space: <pre>
      Environment DB MySpace 
           define: 'Entity' toBe: CoreWorkspace Entity newPrototype ;
      Environment DB MySpace 
           define: 'Named' toBe: CoreWorkspace Named newPrototype ;
 
-</b></pre>
+</pre>
 This code must be saved by the Vision Administrator.
 <p><li>As the Vision Administrator, define and save one or more
 <b>Entity</b> classes.  Note that you must start your <i>batchvision</i>
 with the -U# option, where # indicates the private object space 
-number:<pre><b>
+number:<pre>
        Interface BatchFeedManager
            setObjectSpaceTo: Environment DB MySpace ;
        Interface BatchFeedManager 

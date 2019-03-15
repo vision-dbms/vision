@@ -49,13 +49,13 @@ directory.
 <p>Execute the following:
 
 <ul>
-<pre><b>Named Company GM sales</b></pre>
+<pre>Named Company GM sales</pre>
 </ul>
 
 You will see:
 
 <ul>
-<pre><b>101781.00</b></pre>
+<pre>101781.00</pre>
 </ul>
 
 When you ask for the value of an item that is tracked over time, by
@@ -63,7 +63,7 @@ default you access the value that was most recently updated on or before
 the current date. Now type the following: 
 
 <ul>
-<pre><b>Named Company GM :sales asOf: 19891231</b></pre>
+<pre>Named Company GM :sales asOf: 19891231</pre>
 </ul>
 
 You should see the value 102813.00 . 
@@ -78,27 +78,27 @@ in effect as of December 31, 1989.
 an Integer in one of the following forms: 
 
 <ul>
-<pre><b>Form          Definition        Examples       Date<hr align=left width="88%">YYYYMMDD      FullDate          19871231       Dec. 31, 1987 
+<pre>Form          Definition        Examples       Date<hr align=left width="88%">YYYYMMDD      FullDate          19871231       Dec. 31, 1987 
                                 19870430       Apr. 30, 1987 
                                 19870215       Feb. 15, 1987 
 YYMM          Month-end         8712           Dec. 31, 1987 
                                 8704           Apr. 30, 1987 
                                 8702           Feb. 28, 1987 
 YY            Year-end Date     87             Dec. 31, 1987 
-                                86             Dec. 31, 1986</b></pre>
+                                86             Dec. 31, 1986</pre>
 </ul>
 
 The expressions: 
 <ul>
-<pre><b>Named Company GM :sales asOf: 89 
+<pre>Named Company GM :sales asOf: 89 
 
-Named Company GM :sales asOf: 8912</b></pre> 
+Named Company GM :sales asOf: 8912</pre> 
 </ul>
 
 and 
 
 <ul>
-<pre><b>Named Company GM :sales asOf: 19891231</b></pre>
+<pre>Named Company GM :sales asOf: 19891231</pre>
 </ul>
 
 are all equivalent and return the value of GM's sales that was in effect
@@ -115,7 +115,7 @@ If you request data as of a date that is not in the time series, the
 value before that date will be returned. For example: 
 
 <ul>
-<pre><b>Named Company GM :sales asOf: 19890630</b></pre>
+<pre>Named Company GM :sales asOf: 19890630</pre>
 </ul>
 
 returns the value <i>96371.63</i>. Since no value is explicitly stored on June
@@ -125,7 +125,7 @@ the 6/89 in the time line. If your "as of" date is earlier than
 the first available date, the value NA will be returned. For example: 
 
 <ul>
-<pre><b>Named Company GM :sales asOf: 87</b></pre>
+<pre>Named Company GM :sales asOf: 87</pre>
 </ul>
 
 returns the value <i>NA</i>, since there is no time point on or before this
@@ -133,7 +133,7 @@ date. If your "as of" date is later than the last available date,
 the value of the last point in the time series is returned. For example:
 
 <ul>
-<pre><b>Named Company GM :sales asOf: 91</b></pre>
+<pre>Named Company GM :sales asOf: 91</pre>
 </ul>
 
 returns the 1990 value, the last value in the time series. The message
@@ -141,15 +141,15 @@ returns the 1990 value, the last value in the time series. The message
 to display all its points. For example: 
 
 <ul>
-<pre><b>Named Company GM :sales displayAll ;</b></pre>
+<pre>Named Company GM :sales displayAll ;</pre>
 </ul>
 
 displays: 
 
 <ul>
-<pre><b>12/31/1988      96371.63 
+<pre>12/31/1988      96371.63 
 12/31/1989     102813.00 
-12/31/1990     101781.00 </b></pre>
+12/31/1990     101781.00 </pre>
 </ul>
 
 <hr>
@@ -164,7 +164,7 @@ in Vision, you would first need to define a new time series property for
 the the class <i>Company</i>. The expression: 
 
 <ul>
-<pre><b>Company define: 'score' ;</b></pre>
+<pre>Company define: 'score' ;</pre>
 </ul>
 
 defines a new property at <i>Company</i> that can be used to record
@@ -172,7 +172,7 @@ scores for individual companies over time. To access a company's score,
 type: 
 
 <ul>
-<pre><b>Named Company GM score</b></pre>
+<pre>Named Company GM score</pre>
 </ul>
 
 You should see the answer <i>NA</i> (not available). Since you have not yet
@@ -180,7 +180,7 @@ assigned any scores for GM, this is the correct answer. To specify that
 GM's score on January 31, 1990 is 7, type: 
 
 <ul>
-<pre><b>Named Company GM :score asOf: 19900131 put: 7</b></pre>
+<pre>Named Company GM :score asOf: 19900131 put: 7</pre>
 </ul>
 
 Remember that the <b>:</b> preceding the item name indicates to Vision
@@ -190,19 +190,19 @@ by storing the supplied value as of the supplied date. To confirm
 that the value was stored, type: 
 
 <ul>
-<pre><b>Named Company GM :score asOf: 19900131</b></pre>
+<pre>Named Company GM :score asOf: 19900131</pre>
 </ul>
 
 You should see: 
 
 <ul>
-<pre><b>7</b></pre>
+<pre>7</pre>
 </ul>
 
 Now type: 
 
 <ul>
-<pre><b>Named Company GM score</b></pre>
+<pre>Named Company GM score</pre>
 </ul>
 
 This expression also returns the value 7. Since the value stored for
@@ -212,13 +212,13 @@ is the value that is returned.
 <p>Update GM's score for February 28, 1990 as shown below: 
 
 <ul>
-<pre><b>Named Company GM :score asOf: 900228 put: 9</b></pre>
+<pre>Named Company GM :score asOf: 900228 put: 9</pre>
 </ul>
 
 Now type: 
 
 <ul>
-<pre><b>Named Company GM score</b></pre>
+<pre>Named Company GM score</pre>
 </ul>
 
 You should see the value 9. Since February 28, 1990 represents the date
@@ -226,7 +226,7 @@ closest to the current date, the value from this date is returned. The <i>asOf:p
 message will modify an existing value if the date already exists.  For Example:
 
 <ul>
-<pre><b>Named Company GM :score asOf: 900228 put: 10</b></pre>
+<pre>Named Company GM :score asOf: 900228 put: 10</pre>
 </ul>
 
 
@@ -234,20 +234,20 @@ message will modify an existing value if the date already exists.  For Example:
 type the following: 
 
 <ul>
-<pre><b>Named Company GM :score displayAll</b></pre>
+<pre>Named Company GM :score displayAll</pre>
 </ul>
 
 You should see:
 
 <ul>
-<pre><b>1/31/1990         7
-2/28/1990        10</b></pre>
+<pre>1/31/1990         7
+2/28/1990        10</pre>
 </ul>
 
 Now type the following: 
 
 <ul>
-<pre><b>Named Company IBM :score displayAll</b></pre>
+<pre>Named Company IBM :score displayAll</pre>
 </ul>
 
 You should see no output. A time series responds to the <i><a href="mTS.htm#displayAll">displayAll</a></i>
@@ -258,57 +258,57 @@ by displaying the number of points that have been stored in the time series.
 The expression: 
 
 <ul>
-<pre><b>Named Company GM :score count</b></pre>
+<pre>Named Company GM :score count</pre>
 </ul>
 
 produces the result: 
 
 <ul>
-<pre><b>2</b></pre>
+<pre>2</pre>
 </ul>
 
 The expression: 
 
 <ul>
-<pre><b>Named Company IBM :score count</b></pre>
+<pre>Named Company IBM :score count</pre>
 </ul>
 
 produces the result: 
 
 <ul>
-<pre><b>0</b></pre>
+<pre>0</pre>
 </ul>
 
 To determine the first date for which you have recorded information
 into your time series, the expression: 
 
 <ul>
-<pre><b>Named Company GM :score firstDate</b></pre>
+<pre>Named Company GM :score firstDate</pre>
 </ul>
 
 produces the result: 
 
 <ul>
-<pre><b>1/31/1990</b></pre>
+<pre>1/31/1990</pre>
 </ul>
 
 The expression: 
 
 <ul>
-<pre><b>Named Company GM :score lastDate</b></pre>
+<pre>Named Company GM :score lastDate</pre>
 </ul>
 
 produces the result: 
 
 <ul>
-<pre><b>2/28/1990</b></pre>
+<pre>2/28/1990</pre>
 </ul>
 
 The first date that you stored data for GM's score was January 31, 1990.
 Try accessing GM's score for a date prior to this. For example, type: 
 
 <ul>
-<pre><b>Named Company GM :score asOf: 86</b></pre>
+<pre>Named Company GM :score asOf: 86</pre>
 </ul>
 
 The value NA should be displayed in the Output Window since no value
@@ -320,26 +320,26 @@ until a value is stored at a later date. Two messages are available to
 determine the interval over which a value is in effect. Type the following:
 
 <ul>
-<pre><b>Named Company GM :score effectiveDateAsOf: 19900215</b></pre>
+<pre>Named Company GM :score effectiveDateAsOf: 19900215</pre>
 </ul>
 
 You should see:
 
 <ul>
-<pre><b>1/31/1990</b></pre>
+<pre>1/31/1990</pre>
 </ul>
 
 This indicates that the value you are retrieving for February 15, 1990
 was really stored on January 31, 1990. Now type: 
 
 <ul>
-<pre><b>Named Company GM :score nextDateAsOf: 19900215</b></pre>
+<pre>Named Company GM :score nextDateAsOf: 19900215</pre>
 </ul>
 
 You should see: 
 
 <ul>
-<pre><b>2/28/1990</b></pre>
+<pre>2/28/1990</pre>
 </ul>
 
 This indicates that the first update date after February 15 was February
@@ -351,7 +351,7 @@ a value as of a specific date. For example, to delete GM's score for February
 28, type: 
 
 <ul>
-<pre><b>Named Company GM :score delete: 19900228</b></pre>
+<pre>Named Company GM :score delete: 19900228</pre>
 </ul>
 
 Try using the other messages described in this section to confirm that
@@ -366,14 +366,14 @@ series. Suppose you wanted to print the value for GM's sales and earnings
 per share as of December 31, 1989. Type the Vision statements: 
 
 <ul>
-<pre><b>Named Company GM :sales asOf: 19891231 . print; 
-<br>Named Company GM :earningsPerShare asOf: 19891231 . print; </b></pre>
+<pre>Named Company GM :sales asOf: 19891231 . print; 
+<br>Named Company GM :earningsPerShare asOf: 19891231 . print; </pre>
 </ul>
 
 producing the result: 
 
 <ul>
-<pre><b>102813.00      4.11</b></pre>
+<pre>102813.00      4.11</pre>
 </ul>
 
 As you can see, this code accesses the correct information; however,
@@ -384,11 +384,11 @@ the same date.
 the following: 
 
 <ul>
-<pre><b>19891231 evaluate: 
+<pre>19891231 evaluate: 
 [ 
  Named Company GM sales print; 
  Named Company GM earningsPerShare print; 
-]; </b></pre>
+]; </pre>
 </ul>
 
 This code produces the same results as the previous example. The <i>evaluate:</i> 
@@ -398,13 +398,13 @@ inside of the brackets. You can eliminate the duplicate references
 to GM using the <i>do:</i> message: 
 
 <ul>
-<pre><b>19891231 evaluate: 
+<pre>19891231 evaluate: 
 [ 
  Named Company GM 
  do: [ sales print ; 
        earningsPerShare print ;
      ] ; 
-] ;</b></pre>
+] ;</pre>
 </ul>
 
 This program also produces the same result. In other words, the use
@@ -416,18 +416,18 @@ the default date. The message <i>^today</i> can be used to specify the
 current date. For example, the expressions: 
 
 <ul>
-<pre><b>Named Company GM sales print; 
+<pre>Named Company GM sales print; 
 
-Named Company GM :sales asOf: ^today . print;</b></pre>
+Named Company GM :sales asOf: ^today . print;</pre>
 </ul>
 
 and 
 
 <ul>
-<pre><b>^today evaluate: 
+<pre>^today evaluate: 
 [ 
  Named Company GM sales print; 
-]; </b></pre>
+]; </pre>
 </ul>
 
 are all equivalent and return the value of GM's sales that is in effect
@@ -438,23 +438,23 @@ is in effect. By default, the value of <i>^date</i> is the current date
 (i.e., "^today"). For example: 
 
 <ul>
-<pre><b>^today print;</b></pre>
+<pre>^today print;</pre>
 </ul>
 
 Displays the current date, as does the expression:
 
 <ul>
-<pre><b>^date print;</b></pre>
+<pre>^date print;</pre>
 </ul>
 
 Now type: 
 
 <ul>
-<pre><b>89 evaluate: 
+<pre>89 evaluate: 
    [ 
     ^today printNL ; 
     ^date printNL ; 
-   ]; </b></pre>
+   ]; </pre>
 </ul>
 
 Notice that the value for current date (<i>^today</i>) does not change,
@@ -497,20 +497,20 @@ companies as of February 28, 1990. You could explicitly update this point
 for each company as shown below: 
 
 <ul>
-<pre><b>Named Company IBM :score asOf: 19900228 put: 8; 
+<pre>Named Company IBM :score asOf: 19900228 put: 8; 
 Named Company XON :score asOf: 19900228 put: 3; 
-Named Company C :score asOf: 19900228 put: 6; </b></pre>
+Named Company C :score asOf: 19900228 put: 6; </pre>
 </ul>
 
 Alternatively, you could use the following: 
 
 <ul>
-<pre><b>19900228 evaluate: 
+<pre>19900228 evaluate: 
 [ 
  Named Company IBM :score put: 8; 
  Named Company XON :score put: 3; 
  Named Company C :score put: 6; 
-] ; </b></pre>
+] ; </pre>
 </ul>
 
 The <i><a href="mTS.htm#put:">put:</a></i> message updates the time
@@ -521,18 +521,18 @@ series by storing the value as of the default date, in this case February
 date. For example, the expression: 
 
 <ul>
-<pre><b>^today evaluate: 
+<pre>^today evaluate: 
 [ Named Company IBM :score <- 9 ; 
-] ; </b></pre>
+] ; </pre>
 </ul>
 
 changes the value of IBM's most recent score. The following expressions
 are equivalent to this one: 
 
 <ul>
-<pre><b>Named Company IBM :score asOf: ^today assign: 9 ; 
+<pre>Named Company IBM :score asOf: ^today assign: 9 ; 
 
-Named Company IBM :score &lt;- 9 ; </b></pre>
+Named Company IBM :score &lt;- 9 ; </pre>
 </ul>
 
 These expressions all change the value for IBM's last score, relative
@@ -543,20 +543,20 @@ suppose you wanted to access GM's year-end sales value from 1988 through
 1990. You can explicitly ask for each point as illustrated below: 
 
 <ul>
-<pre><b>Named Company GM :sales asOf: 88 . printNL ; 
+<pre>Named Company GM :sales asOf: 88 . printNL ; 
 Named Company GM :sales asOf: 89 . printNL ; 
-Named Company GM :sales asOf: 90 . printNL ; </b></pre>
+Named Company GM :sales asOf: 90 . printNL ; </pre>
 </ul>
 
 Vision provides a more compact way for performing this operation. Type
 the following: 
 
 <ul>
-<pre><b>88 to: 90 by: 1 yearEnds . 
+<pre>88 to: 90 by: 1 yearEnds . 
 evaluate: 
 [ 
  Named Company GM sales printNL ; 
-]; </b></pre>
+]; </pre>
 </ul>
 
 The first part of this program creates a date range. Date ranges respond
@@ -573,11 +573,11 @@ the offset provided (i.e., 1 yearEnds) until the final date is crossed.
 the dates in the previous example, as shown below: 
 
 <ul>
-<pre><b>90 to: 88 by: 1 yearEnds . 
+<pre>90 to: 88 by: 1 yearEnds . 
 evaluate: 
 [ 
  Named Company GM sales printNL ; 
-]; </b></pre>
+]; </pre>
 </ul>
 
 Since the initial date is later than the final date, Vision will decrement
@@ -588,13 +588,13 @@ final date is crossed.
 as shown below: 
 
 <ul>
-<pre><b>90 to: 88 by: 1 yearEnds . 
+<pre>90 to: 88 by: 1 yearEnds . 
 evaluate: 
 [ 
  ^date print ; 
  Named Company GM sales print: 10 ; 
  newLine print; 
-]; </b></pre>
+]; </pre>
 </ul>
 
 You should see a report that contains a date and value on each line.
@@ -602,7 +602,7 @@ To display the date, sales, and earnings per share on one line, modify
 the code as follows: 
 
 <ul>
-<pre><b>90 to: 88 by: 1 yearEnds . 
+<pre>90 to: 88 by: 1 yearEnds . 
 evaluate: 
 [ 
  Named Company GM 
@@ -611,22 +611,22 @@ evaluate:
        earningsPerShare print ;
        newLine print ; 
      ] ; 
-]; </b></pre>
+]; </pre>
 </ul>
 
 You should see the following report: 
 
 <ul>
-<pre><b>12/31/1990       101781.00       5.03 
+<pre>12/31/1990       101781.00       5.03 
 12/31/1989       102813.00       4.11 
-12/31/1988        96371.63       6.14 </b></pre>
+12/31/1988        96371.63       6.14 </pre>
 </ul>
 
 To display this same information with dates across the page instead
 of down the side, try the following:
 
 <ul>
-<pre><b>### First create a variable representing the date range 
+<pre>### First create a variable representing the date range 
     !dr <- 88 to: 90 by: 1 yearEnds ; 
 
 ### Print just the dates across the page 
@@ -641,15 +641,15 @@ of down the side, try the following:
 
 ### Now the eps values 
     dr evaluate: [ Named Company GM earningsPerShare print: 12 ] ; 
-    newLine print; </b></pre>
+    newLine print; </pre>
 </ul>
 
 You should see: 
 
 <ul>
-<pre><b>12/31/1988         12/31/1989           12/31/1990
+<pre>12/31/1988         12/31/1989           12/31/1990
   96371.63          102813.00           101781.00
-      6.14               4.11                5.03</b></pre>
+      6.14               4.11                5.03</pre>
 </ul>
 
 Three other messages are useful to know when working with dates. All
@@ -658,7 +658,7 @@ To fix the format on the previous example, modify the code to display just
 the year as shown below:
 
 <ul>
-<pre><b>!dr <- 88 to: 90 by: 1 yearEnds; 
+<pre>!dr <- 88 to: 90 by: 1 yearEnds; 
 ### change this line to request ^date year 
 dr evaluate: [ ^date year print: 12 ] ; 
 newLine print;
@@ -667,22 +667,22 @@ dr evaluate: [ Named Company GM sales print: 12 ] ;
 newLine print; 
 
 dr evaluate: [ Named Company GM earningsPerShare print: 12 ]; 
-newLine print; </b></pre>
+newLine print; </pre>
 </ul>
 
 You should see&nbsp;the following modified report: 
 
 <ul>
-<pre><b>    1988         1989           1990
+<pre>    1988         1989           1990
 96371.63    102813.00      101781.00 
-    6.14         4.11           5.03</b></pre>
+    6.14         4.11           5.03</pre>
 </ul>
 
 If your date range includes a date that is earlier than the first available
 date, the value NA will be returned. For example: 
 
 <ul>
-<pre><b>90 to: 87 by: 1 yearEnds . 
+<pre>90 to: 87 by: 1 yearEnds . 
 evaluate: 
  [ 
   Named Company GM 
@@ -691,16 +691,16 @@ evaluate:
         earningsPerShare print ;
         newLine print; 
       ] ; 
- ]; </b></pre>
+ ]; </pre>
 </ul>
 
 produces the result: 
 
 <ul>
-<pre><b>12/31/1990     101781.00     5.03
+<pre>12/31/1990     101781.00     5.03
 12/31/1989     102813.00     4.11
 12/31/1988      96371.63     6.14
-12/31/1987        NA         NA</b></pre>
+12/31/1987        NA         NA</pre>
 </ul>
 
 Because no data has been stored prior to 1988, the value NA is displayed
@@ -710,7 +710,7 @@ if you ask for data as of a date that is after the last available date,
 you will access the last data point. For example: 
 
 <ul>
-<pre><b>91 to: 87 by: 1 yearEnds . 
+<pre>91 to: 87 by: 1 yearEnds . 
 evaluate: 
  [ 
   Named Company GM 
@@ -719,17 +719,17 @@ evaluate:
         earningsPerShare print;
         newLine print; 
       ] ; 
- ]; </b></pre>
+ ]; </pre>
 </ul>
 
 produces the result: 
 
 <ul>
-<pre><b>12/31/1991   101781.00   5.03
+<pre>12/31/1991   101781.00   5.03
 12/31/1990   101781.00   5.03 
 12/31/1989   102813.00   4.11 
 12/31/1988    96371.63   6.14
-12/31/1987        NA       NA</b></pre>
+12/31/1987        NA       NA</pre>
 </ul>
 
 Notice that the 1990 and 1991 values are identical. Since the 12/31/1990
@@ -740,16 +740,16 @@ as of 12/31/1991 as well.
 are valid: 
 
 <ul>
-<pre><b>years           yearEnds           yearBeginnings 
+<pre>years           yearEnds           yearBeginnings 
 quarters        quarterEnds        quarterBeginnings 
 months          monthEnds          monthBeginnings
-days            businessDays</b></pre>
+days            businessDays</pre>
 </ul>
 
 For example, try the following: 
 
 <ul>
-<pre><b>8903 to: 9012 by: 1 quarterEnds . 
+<pre>8903 to: 9012 by: 1 quarterEnds . 
 evaluate: 
 [ 
  Named Company GM 
@@ -758,20 +758,20 @@ evaluate:
        earningsPerShare print; 
        newLine print; 
      ] ; 
-]; </b></pre>
+]; </pre>
 </ul>
 
 You should see: 
 
 <ul>
-<pre><b>03/31/1989     96371.63      6.14
+<pre>03/31/1989     96371.63      6.14
 06/30/1989     96371.63      6.14
 09/30/1989     96371.63      6.14
 12/31/1989    102813.00      4.11
 03/31/1990    102813.00      4.11
 06/30/1990    102813.00      4.11
 09/30/1990    102813.00      4.11
-12/31/1990    101781.00      5.03 </b></pre>
+12/31/1990    101781.00      5.03 </pre>
 </ul>
 
 Although you have accessed the data on a quarterly basis, the actual
@@ -781,7 +781,7 @@ for March, June, and September represent the prior year-end values.
 <p>Now update the month-end scores for GM: 
 
 <ul>
-<pre><b>Named Company GM 
+<pre>Named Company GM 
 do: [ :score asOf: 9001 put: 7 ; 
       :score asOf: 9002 put: 10 ; 
       :score asOf: 9003 put: 9 ; 
@@ -794,27 +794,27 @@ do: [ :score asOf: 9001 put: 7 ;
       :score asOf: 9010 put: 9 ; 
       :score asOf: 9011 put: 9 ; 
       :score asOf: 9012 put: 9 ; 
-    ] ; </b></pre>
+    ] ; </pre>
 </ul>
 
 and execute: 
 
 <ul>
-<pre><b>9003 to: 9012 by: 1 quarterEnds . 
+<pre>9003 to: 9012 by: 1 quarterEnds . 
 evaluate: 
 [ 
  ^date print: 10 ; 
  Named Company GM score printNL ; 
-]; </b></pre>
+]; </pre>
 </ul>
 
 You should see
 
 <ul>
-<pre><b>3/31/1990       9 
+<pre>3/31/1990       9 
 6/30/1990       8 
 9/30/1990       8 
-12/31/1990      9 </b></pre>
+12/31/1990      9 </pre>
 </ul>
 
 This example displays quarter-end scores for GM in 1990. You can access
@@ -823,7 +823,7 @@ always, the value on or before the default date is accessed. For example,
 the expression: 
 
 <ul>
-<pre><b>9002 to: 9012 by: 2 monthEnds . 
+<pre>9002 to: 9012 by: 2 monthEnds . 
 evaluate: 
 [ 
  Named Company GM 
@@ -833,18 +833,18 @@ evaluate:
        score print ; 
        newLine print ; 
      ] ; 
-] ; </b></pre>
+] ; </pre>
 </ul>
 
 produces the result: 
 
 <ul>
-<pre><b>02/28/1990  12/31/1989   102813.00  10 
+<pre>02/28/1990  12/31/1989   102813.00  10 
 04/30/1990  12/31/1989   102813.00   7 
 06/30/1990  12/31/1989   102813.00   8
 08/31/1990  12/31/1989   102813.00   6
 10/31/1990  12/31/1989   102813.00   9
-12/31/1990  12/31/1990   101781.00   9</b></pre>
+12/31/1990  12/31/1990   101781.00   9</pre>
 </ul>
 
 This program displays the bi-monthly sales and score for GM in 1990.
@@ -854,7 +854,7 @@ fashion. For example, you could modify the previous program to display
 the sum of the score and the sales value:
 
 <ul>
-<pre><b>9002 to: 9012 by: 2 monthEnds . 
+<pre>9002 to: 9012 by: 2 monthEnds . 
 evaluate: 
 [ 
  Named Company GM 
@@ -865,18 +865,18 @@ evaluate:
        sales + score print: 15 ;
        newLine print ; 
      ] ; 
-] ; </b></pre>
+] ; </pre>
 </ul>
 
 You should see: 
 
 <ul>
-<pre><b>02/28/1990     12/31/1989     102813.00   10      102823.00 
+<pre>02/28/1990     12/31/1989     102813.00   10      102823.00 
 04/30/1990     12/31/1989     102813.00   7       102820.00 
 06/30/1990     12/31/1989     102813.00   8       102821.00 
 08/31/1990     12/31/1989     102813.00   6       102819.00 
 10/31/1990     12/31/1989     102813.00   9       102822.00 
-12/31/1990     12/31/1990     101781.00   9       101790.00 </b></pre>
+12/31/1990     12/31/1990     101781.00   9       101790.00 </pre>
 </ul>
 
 <hr>
@@ -891,7 +891,7 @@ provides you with many tools for working with relative dates.
 current date is January 15, 1993 you could type: 
 
 <ul>
-<pre><b>Named Company GM :sales asOf: 92</b></pre>
+<pre>Named Company GM :sales asOf: 92</pre>
 </ul>
 
 If you wish to save this expression as a part of a program that you
@@ -900,7 +900,7 @@ to reflect the correct date. Alternatively, you could specify the date
 you want to use relative to the current date as illustrated below: 
 
 <ul>
-<pre><b>Named Company GM :sales asOf: ^today - 1 yearEnds</b></pre>
+<pre>Named Company GM :sales asOf: ^today - 1 yearEnds</pre>
 </ul>
 
 This expression determines the "as of" date by calculating
@@ -1070,7 +1070,7 @@ to compute the quarter-end date following May 28, 1987, type the following:
 
 
 <ul>
-<pre><b>19870528 asDate + 0 quarterEnds</b></pre>
+<pre>19870528 asDate + 0 quarterEnds</pre>
 </ul>
 
 Note that date offsets can only be added to and subtracted from dates.
@@ -1081,12 +1081,12 @@ number 19870528 as a date, not an integer.
 For example, to access the last 5 years of GM's sales, you could use: 
 
 <ul>
-<pre><b>^today - 1 yearEnds to: ^today - 5 yearEnds by: 1 yearEnds .
+<pre>^today - 1 yearEnds to: ^today - 5 yearEnds by: 1 yearEnds .
 evaluate: 
 [ 
  ^date print: 12 ; 
  Named Company GM sales printNL ; 
-] ; </b></pre>
+] ; </pre>
 </ul>
 
 In this example, the initial and last dates in you date range are computed
@@ -1097,34 +1097,34 @@ to print the dates 1, 3, 6, and 12 months after December 31, 1989, type
 the following: 
 
 <ul>
-<pre><b>19891231 evaluate: 
+<pre>19891231 evaluate: 
 [ 
  ^date print: 12; 
  ^date + 1 monthEnds print: 12; 
  ^date + 3 monthEnds print: 12; 
  ^date + 6 monthEnds print: 12; 
  ^date + 12 monthEnds print: 12; 
-]; </b></pre>
+]; </pre>
 </ul>
 
 The following example can be used to access GM's score as of May 31,
 1990 as well as the scores 1 month prior and 3 months after this date:
 
 <ul>
-<pre><b>9005 evaluate: 
+<pre>9005 evaluate: 
 [ 
  Named Company GM 
  do:[score print ;                                    # 5/31/90 
      :score asOf: ^date - 2 monthEnds . print ;       # 3/31/90 
      :score asOf: ^date + 1 quarterEnds . print ;       # 9/30/90 
     ] ; 
-] ; </b></pre>
+] ; </pre>
 </ul>
 
 producing the result: 
 
 <ul>
-<pre><b>7       9      8</b></pre>
+<pre>7       9      8</pre>
 </ul>
 
 <p>The <a href="mTS.htm#lag:"><i>lag:</i></a> message can be used to automatically
@@ -1133,14 +1133,14 @@ message can be used to automatically add the date offset to the default
 date. The program below produces identical results to the previous example:
 
 <ul>
-<pre><b>9005 evaluate: 
+<pre>9005 evaluate: 
 [ 
  Named Company GM 
  do: [ score print ;                                   # 5/31/90 
        :score lag: 2 monthEnds . print ;               # 3/31/90 
        :score lead: 1 quarterEnds . print ;            # 9/30/90 
      ] ; 
-] ; </b></pre>
+] ; </pre>
 </ul>
 
 Suppose you wanted to compute the change in value between two points
@@ -1148,30 +1148,30 @@ in time. For example, to find the difference between GM's score in May
 and June 1990 type: 
 
 <ul>
-<pre><b>Named Company GM 
+<pre>Named Company GM 
 do: [ (:score asOf: 9006) - (:score asOf: 9005) print: 10 ; 
-    ] ; </b></pre>
+    ] ; </pre>
 </ul>
 
 or
 
 <ul>
-<pre><b>9006 evaluate:  
+<pre>9006 evaluate:  
  [ 
   Named Company GM 
   do: [ score - (:score lag: 1 monthEnds) print: 10 ; 
       ] ; 
- ] ; </b></pre>
+ ] ; </pre>
 </ul>
 
 The message <i><a href="mTS.htm#changeLag:">changeLag:</a></i> provides
 a more streamlined way for requesting the same information. The expression:
 
 <ul>
-<pre><b>9006 evaluate: 
+<pre>9006 evaluate: 
 [ 
  Named Company GM :score changeLag: 1 monthEnds . print:10 ; 
-] ; </b></pre>
+] ; </pre>
 </ul>
 
 produces the same result as the previous two versions. Likewise, the
@@ -1181,21 +1181,21 @@ can both be used to find the 2-month score percent change relative to April
 30, 1990: 
 
 <ul>
-<pre><b>9004 evaluate: 
+<pre>9004 evaluate: 
 [ 
  Named Company GM 
  do: [ 100 * (score / ( :score lag: 2 monthEnds) - 1) print:10 ; 
      ] ; 
-] ; </b></pre>
+] ; </pre>
 </ul>
 
 or
 
 <ul>
-<pre><b>9004 evaluate: 
+<pre>9004 evaluate: 
 [ 
  Named Company GM :score pctChangeLag: 2 monthEnds . print:10;
-] ; </b></pre>
+] ; </pre>
 </ul>
 
 Time series and lists can be used together. For example, to find the
@@ -1204,26 +1204,26 @@ companies in <i>fullList</i> (defined in <a href=tuList.htm>Tutorial
 1990, you could use the program: 
 
 <ul>
-<pre><b>90 evaluate: 
+<pre>90 evaluate: 
 [ fullList select: [ :sales pctChangeLag: 1 yearEnds . > 15 ] .
   do: [ ticker print: 10 ; 
         sales print: 10 ; 
         :sales lag: 1 yearEnds . print: 10 ; 
         newLine print ; 
       ] 
-] ; </b></pre>
+] ; </pre>
 </ul>
 
 producing the result: 
 
 <ul>
-<pre><b>C       26276.51        22586.30
+<pre>C       26276.51        22586.30
 CCI     27988.01        23496.00
 DEC      9389.44         7590.32
 DOW     13377.00        11113.00
 EK      13305.00        11550.00
 PEP     11485.20         9290.79
-WMT     11909.00         8451.46</b></pre>
+WMT     11909.00         8451.46</pre>
 </ul>
 
 This program selects all companies whose 1 year percent change in sales
@@ -1232,7 +1232,7 @@ for each company passing this screen. This program can be executed for
 a range of dates as well: 
 
 <ul>
-<pre><b>89 to: 90 by: 1 yearEnds . evaluate: 
+<pre>89 to: 90 by: 1 yearEnds . evaluate: 
 [ "Sales Growth Report As Of: " print ; ^date year printNL; 
   fullList select: [ :sales pctChangeLag: 1 yearEnds . > 15 ] . 
   do: [ ticker print: 10 ; 
@@ -1240,13 +1240,13 @@ a range of dates as well:
         :sales lag: 1 yearEnds . print: 10 ; 
         newLine print ; 
       ] 
-] ; </b></pre>
+] ; </pre>
 </ul>
 
 You should see: 
 
 <ul>
-<pre><b>Sales Growth Report As Of:  1989 
+<pre>Sales Growth Report As Of:  1989 
 BA            16341.00      13636.00 
 F             62715.72      52774.31 
 GE            35211.01      28285.01 
@@ -1260,7 +1260,7 @@ DEC            9389.44       7590.32
 DOW           13377.00      11113.00
 EK            13305.00      11550.00
 PEP           11485.20       9290.79
-WMT           11909.00       8451.46</b></pre>
+WMT           11909.00       8451.46</pre>
 </ul>
 
 This program displays the sales growth report for each date in the date
@@ -1290,7 +1290,7 @@ do: [ ^date print ;
 produces the result: 
 
 <ul>
-<pre><b>1/31/1990      7 
+<pre>1/31/1990      7 
 2/28/1990     10 
 3/31/1990      9 
 4/30/1990      7 
@@ -1301,7 +1301,7 @@ produces the result:
 9/30/1990      8 
 10/31/1990     9 
 11/30/1990     9 
-12/31/1990     9 </b></pre>
+12/31/1990     9 </pre>
 </ul>
 
 This program displays the date and the value for each point in the time
@@ -1321,19 +1321,19 @@ the <i>score</i> time series that are between May and July 1990 using:
 
 
 <ul>
-<pre><b>Named Company GM :score 
+<pre>Named Company GM :score 
 select: [ ^date >= 9005 asDate && ^date <= 9007 asDate ] . 
 do: [ ^date print: 10 ; 
       printNL ; 
-    ] ; </b></pre>
+    ] ; </pre>
 </ul>
 
 producing the result: 
 
 <ul>
-<pre><b>5/31/1990       7    
+<pre>5/31/1990       7    
 6/30/1990       8 
-7/31/1990       9 </b></pre>
+7/31/1990       9 </pre>
 </ul>
 
 The various <i>sort</i> messages are also defined to work with time
@@ -1343,7 +1343,7 @@ so that the other <b>List</b> class messages can be applied to it. The <i><a hre
 message performs this operation. For example, the expression:
 
 <ul>
-<pre><b>Named Company GM :sales toList</b></pre>
+<pre>Named Company GM :sales toList</pre>
 </ul>
 
 returns a list of 3 elements corresponding to the 3 year-end sales values.
@@ -1353,8 +1353,8 @@ returns a new time series that has a point for each point in the supplied
 date range based on the initial time series. For example, the expression:
 
 <ul>
-<pre><b>!extractTS <- Named Company GM :sales 
-      extractForDateRange: (8903 to: 9012 by: 1 quarterEnds ) ; </b></pre>
+<pre>!extractTS <- Named Company GM :sales 
+      extractForDateRange: (8903 to: 9012 by: 1 quarterEnds ) ; </pre>
 </ul>
 
 creates a time series with quarter-end points in it and saves this time
@@ -1362,26 +1362,26 @@ series using the name <i>extractTS</i>. To display the values and associated
 dates you can use: 
 
 <ul>
-<pre><b>extractTS displayAll</b></pre>
+<pre>extractTS displayAll</pre>
 </ul>
 
 or 
 
 <ul>
-<pre><b>extractTS do: [ ^date print ; printNL ] ;</b></pre>
+<pre>extractTS do: [ ^date print ; printNL ] ;</pre>
 </ul>
 
 producing the result: 
 
 <ul>
-<pre><b>3/31/1989         96371.63
+<pre>3/31/1989         96371.63
 6/30/1989         96371.63
 9/30/1989         96371.63
 12/31/1989       102813.00 
 3/31/1990        102813.00
 6/30/1990        102813.00
 9/30/1990        102813.00
-12/31/1990       101781.00 </b></pre>
+12/31/1990       101781.00 </pre>
 </ul>
 
 Notice the following: 
@@ -1401,29 +1401,29 @@ an object that is already a time series object.
 time series. For example, type: 
 
 <ul>
-<pre><b>Named Company GM :score average</b></pre>
+<pre>Named Company GM :score average</pre>
 </ul>
 
 <p>The average of all scores that have been stored for GM will be displayed.
 To find the average score for a particular range of dates, type:
 
 <ul>
-<pre><b>Named Company GM :score 
-  select: [ ^date >= 9004 asDate && ^date <= 9006 asDate ] . average </b></pre>
+<pre>Named Company GM :score 
+  select: [ ^date >= 9004 asDate && ^date <= 9006 asDate ] . average </pre>
 </ul>
 
 or 
 
 <ul>
-<pre><b>Named Company GM :score 
-  extractForDateRange: ( 9004 to: 9006 by: 1 monthEnds ). average </b></pre>
+<pre>Named Company GM :score 
+  extractForDateRange: ( 9004 to: 9006 by: 1 monthEnds ). average </pre>
 </ul>
 
 or 
 
 <ul>
-<pre><b>Named Company GM :score 
-  aveForDateRange: (9004 to: 9006 by: 1 monthEnds) </b></pre>
+<pre>Named Company GM :score 
+  aveForDateRange: (9004 to: 9006 by: 1 monthEnds) </pre>
 </ul>
 
 Similar messages are defined for other <a href=clTS.htm#stats>statistics</a>
@@ -1439,7 +1439,7 @@ For example, to find the average of the log of each sales value, you could
 use: 
 
 <ul>
-<pre><b>Named Company GM :sales average: [ log ]</b></pre>
+<pre>Named Company GM :sales average: [ log ]</pre>
 </ul>
 
 <p>

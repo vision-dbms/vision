@@ -67,7 +67,7 @@ in <a href="#newadmin">New Administrative Methods</a> and
 The following modified or new (*) scripts have been provided to make use of
 these new primitives and administrative methods:
 
-<ul type=disc><pre><b>   scripts file             replaces
+<ul type=disc><pre>   scripts file             replaces
    ---------------------    ----------------------------------
    runNetworkMaintenance    /localvision/admin/scripts/runNetworkMaintenance
    RunDaily                 /localvision/update/Cleanup/RunDaily
@@ -88,7 +88,7 @@ these new primitives and administrative methods:
    DeleteSegs               /localvision/tools
    GCandCompact             /localvision/tools
    GCollect                 /localvision/tools
-   cleanupOSD               /localvision/tools</b></pre></ul>
+   cleanupOSD               /localvision/tools</pre></ul>
 
 
 The addition of scripts currently in <i>/vision/tools</i> to <i>/localvision/tools</i> is
@@ -175,16 +175,16 @@ There are several ways to define <i>small</i> and <i>large</i>:<p>
       The <i>VisionLargeContainerSize</i> is space attribute 7, and can be installed
       into a Vision network via the following method:
 
-<ul type=disc><pre><b>Utility SessionAttribute
+<ul type=disc><pre>Utility SessionAttribute
 defineMethod: 
 [ | largeContainerSize: space |
     (space * 65536 + 7) asInteger asPointerTo: super
-];</b></pre></ul>
+];</pre></ul>
 
       For example, space 3's threshold could be set to 20,000 via the following
       expression:
 
-<ul type=disc><pre><b>Utility SessionAttribute largeContainerSize: 3 . <- 20000;</b></pre></ul>
+<ul type=disc><pre>Utility SessionAttribute largeContainerSize: 3 . <- 20000;</pre></ul>
 </ul>
       This option not only gives the flexibility to provide a space-specific
       override to the threshold, but allows the threshold to be set at runtime,
@@ -285,7 +285,7 @@ succeed given the available memory resources.<p>
 
 For example,
 
-    <ul type=disc><pre><b>AdminTools setAllocationThresholdTo: 200000000 ;</b></pre></ul>
+    <ul type=disc><pre>AdminTools setAllocationThresholdTo: 200000000 ;</pre></ul>
 
 would change the threshold to 200 MB for the session.  Upon exiting the session
 and starting up again, the original default value would still be in effect.
@@ -303,7 +303,7 @@ memory is low by calling <i>updateNetworkIfSpaceIsLow</i> as it iterates over
 its containers.  This message must be sent to an <i>ObjectSpace</i> instance;
 for example:
 
-    <ul type=disc><pre><b>3 asObjectSpace cleanSpace</b></pre></ul>
+    <ul type=disc><pre>3 asObjectSpace cleanSpace</pre></ul>
 
 would be used to clean object space 3.  Note that this should only be used
 in analysis mode - to avoid unwanted updates, make sure that the allocation
@@ -352,13 +352,13 @@ but can also be used for analysis purposes as long as the allocation threshold
 has not been changed from the default value to avoid unwanted updates.
 For example:
 
-<ul type=disc><pre><b>3 asObjectSpace cleanLists</pre></b></ul>
+<ul type=disc><pre>3 asObjectSpace cleanLists</pre></b></ul>
 
 will clean the Lists in object space 3. In addition, it provides statistical
 information such as the number of Lists to be considered, the current network
 allocation, the current allocation threshold and the number of Lists cleaned.
 
-</ul><pre><b>Class	  AdminTools ObjectSpace
+</ul><pre>Class	  AdminTools ObjectSpace
 Message	  getSpace</pre></b><ul type=disc>
 
 Returns the actual Environment for the <i>ObjectSpace</i> instance or NA if the network
@@ -367,14 +367,14 @@ Environment <i>(^global)</i>, you can start a session with the <i>-U</i> option 
 <i>getSpace</i> if <i>-U</i> was omitted at session startup.
 For example, the following are equivalent:
 
-<ul type=disc><pre><b>vision -U15                vision
-displayMessages ;          15 asObjectSpace getSpace displayMessages ;</b></pre></ul>
+<ul type=disc><pre>vision -U15                vision
+displayMessages ;          15 asObjectSpace getSpace displayMessages ;</pre></ul>
 
 Note that if a network does not contain object space 15, <i>asObjectSpace</i> will
 return NA.  To avoid getting Selector errors, the test <i>15 asObjectSpace isntNA</i>
 should be used before sending the <i>getSpace</i> message.
 
-</ul><pre><b>Class	  Integer
+</ul><pre>Class	  Integer
 Message	  asObjectSpace</pre></b><ul type=disc>
 
 Converts an integer into an <i>ObjectSpace</i> instance.  Typically used by network
@@ -488,7 +488,7 @@ implement network analysis tools and operations support.
   returned. Otherwise, an NA is returned. Note that the POP may not reference an
   existing space or container.
 <ul type=disc>
-  <pre><b>Binary Converse Message required: _packPOPWithSpace:</pre></b>
+  <pre>Binary Converse Message required: _packPOPWithSpace:</pre></b>
 </ul></ul>
  <p> <b><i>_extractSpace</i>
 </b><ul type=disc>
@@ -697,9 +697,9 @@ Message   isObjectDescriptor</pre></b><ul type=disc>
 Strips any extensions off recipient before testing if it is the class descriptor
 associated with the <i>Object</i> class.
 <p>
-</ul><pre><b>********************
+</ul><pre>********************
    EXTcore.5.9.4
-********************</b></pre>
+********************</pre>
 
 These methods have been added to the core classes as a supplement to release 5.9.4.
 

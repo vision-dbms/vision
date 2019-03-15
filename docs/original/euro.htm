@@ -125,8 +125,8 @@ displayed in <i>euros</i>.  For example, assume the following:
 <li>The fixed conversion rate from DEM to EUR is 2
 </ul></ul>
 <p>
-The Vision expression:<pre><b>
-     981231 evaluate: [ Named Security GermanSec price] </b></pre>
+The Vision expression:<pre>
+     981231 evaluate: [ Named Security GermanSec price] </pre>
 will return the value of 50 <i>euros</i>, since price data is
 automatically converted from reported currency to the security's
 base currency.  
@@ -139,11 +139,11 @@ that are being changed to the <i>euro</i>.  The cover method
 otherwise.
 <p>
 If desired, a new currency, <i>LEGACY</i>, can be introduced to support
-the Vision expression:<pre><b>
+the Vision expression:<pre>
      Named Currency LEGACY evaluate:
        [ securityList do: [ ] ;
        ] ;
-</b></pre>
+</pre>
 This usage instructs Vision to display the data for each security
 in the list using its legacy currency.  A minor change to
 the <i>currency</i> method will be needed to support this.
@@ -215,8 +215,8 @@ This approach assumes that you continue to update the legacy currency
 exchange rates after 1/1/99.  These rates will continue to provide
 the Legacy to US exchange rate.  If your currency source does not 
 provide these values, they can be computed and stored daily using
-the calculation:<pre><b>legacy fixed rate to EUR * daily EUR to US rate
-</b></pre>
+the calculation:<pre>legacy fixed rate to EUR * daily EUR to US rate
+</pre>
 </blockquote>
 
 <p>
@@ -224,7 +224,7 @@ the calculation:<pre><b>legacy fixed rate to EUR * daily EUR to US rate
 <p>
 The following patch should serve as a guide for making these changes:
 <p>
-<pre><b>
+<pre>
 ##################################################
 #  Vision Changes in support of Euro processing
 ##################################################
@@ -437,7 +437,7 @@ Entity defineMethod: [ | currencyFactor |
 
 Currency createInstance: "ECU" . setNameTo: "EURO (SYNTHETIC)" ;
 
-</b></pre>
+</pre>
 
 {% include doc-footer.htm %}
 

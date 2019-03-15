@@ -47,10 +47,10 @@ That first object is always a VLink Agent.  The OLE Automation libraries can cre
 The following Visual Basic code creates a VLink Agent:
 
 <ul>
-<pre><b>
+<pre>
 Dim MyAgent As Object
 Set MyAgent = CreateObject("VLink.Agent")
-</b></pre>
+</pre>
 </ul>
 
 Once you have your agent, you can use it to create and access other VLink objects.
@@ -94,19 +94,19 @@ If the variable <i>MyAgent</i> references a VLink Agent and the variables <i>hos
 hold values for the five parameters described above, you would write:
 
 <ul>
-<pre><b>
+<pre>
 Dim MyConnection As Object
 Set MyConnection = MyAgent.CreateConnection (host, user, password, database, objectSpace)
-</b></pre>
+</pre>
 </ul>
 
 to create a new connection.  To use an existing connection, you would write:
 
 <ul>
-<pre><b>
+<pre>
 Dim MyConnection As Object
 Set MyConnection = MyAgent.GetConnection (host, user, password, database, objectSpace)
-</b></pre>
+</pre>
 </ul>
 
 Using an existing connection you to share Vision data among applications.  
@@ -127,7 +127,7 @@ In addition, ConnectionTemplate provide several additional properties that you c
 You use a ConnectionTemplate by creating it, setting the values of the properties you need to specify, and then asking the ConnectionTemplate to create or access a Connection.  For example:
 
 <ul>
-<pre><b>
+<pre>
 Dim MyConnectionTemplate As Object, MyConnection As Object
 
 Set MyConnectionTemplate = MyAgent.CreateConnectionTemplate()
@@ -137,13 +137,13 @@ MyConnectionTemplate.Password = password
 MyConnectionTemplate.Database = database
 MyConnectionTemplate.ObjectSpace = objectSpace
 Set MyConnection = MyConnectionTemplate.CreateConnection()
-</b></pre>
+</pre>
 </ul>
 
 is equivalent to the <i>CreateConnection</i> method call described in section <a href="#Using a Parameter List">Using a Parameter List</a> while:
 
 <ul>
-<pre><b>
+<pre>
 Dim MyConnectionTemplate As Object, MyConnection As Object
 
 Set MyConnectionTemplate = MyAgent.CreateConnectionTemplate()
@@ -153,7 +153,7 @@ MyConnectionTemplate.Password = password
 MyConnectionTemplate.Database = database
 MyConnectionTemplate.ObjectSpace = objectSpace
 Set MyConnection = MyConnectionTemplate.GetConnection()
-</b></pre>
+</pre>
 </ul>
 
 is equivalent to the <i>GetConnection</i> method call of that section.  
@@ -228,11 +228,11 @@ It returns True if the template was successfully saved and False otherwise.
 For example, the Visual Basic code:
 
 <ul>
-<pre><b>
+<pre>
 If MyConnectionOrConnectionTemplate.StoreTemplate ("My Stored Template") Then
 	MsgBox "'My Stored Template 1' saved successfully"
 End If
-</b></pre>
+</pre>
 </ul>
 
 creates a stored connection template named "My Stored Template" from the Connection or ConnectionTemplate object referenced by <i>My ConnectionOrConnectionTemplate</i>.
@@ -242,21 +242,21 @@ If you supply an empty string to the <i>StoreTemplate</i> method, the template i
 You can also save the default template using the <i>StoreDefaultTemplate</i> method. 
 Both:
 <ul>
-<pre><b>
+<pre>
 If MyConnectionOrConnectionTemplate.StoreTemplate ("") Then
 	MsgBox "Default connection template saved successfully"
 End If
-</b></pre>
+</pre>
 </ul>
 
 and:
 
 <ul>
-<pre><b>
+<pre>
 If MyConnectionOrConnectionTemplate.StoreDefaultTemplate () Then
 	MsgBox "Default connection template saved successfully"
 End If
-</b></pre>
+</pre>
 </ul>
 
 save the values of the parameters used to create <i>MyConnectionOrConnectionTemplate</i> as the default stored template.
@@ -267,7 +267,7 @@ There are two ways to use a stored template.  You can use a stored template to c
 The following statements all create or access a Connection object:
 
 <ul>
-<pre><b>
+<pre>
 Set MyConnection = MyAgent.CreateStoredConnection ("My Stored Template")
 Set MyConnection = MyAgent.CreateStoredConnection ("")
 Set MyConnection = MyAgent.CreateDefaultConnection ()
@@ -275,7 +275,7 @@ Set MyConnection = MyAgent.CreateDefaultConnection ()
 Set MyConnection = MyAgent.GetStoredConnection ("My Stored Template")
 Set MyConnection = MyAgent.GetStoredConnection ("")
 Set MyConnection = MyAgent.GetDefaultConnection ()
-</b></pre>
+</pre>
 </ul>
 
 Like the <i>StoreTemplate</i> method, supplying an empty string for the template name instructs VLink to use the default stored template.  
@@ -283,17 +283,17 @@ If a stored template does not exist, these methods return the Visual Basic const
 It's a good idea for you to check that the method actually succeeded:
 
 <ul>
-<pre><b>
+<pre>
 If MyConnection Is Nothing Then
 	MsgBox "Stored Template Not Found"
 End If
-</b></pre>
+</pre>
 </ul>
 
 You can also use a stored template to supply the initial values of a ConnectionTemplate which you customize by updating the template properties you need to change:
 
 <ul>
-<pre><b>
+<pre>
 Set MyConnectionTemplate = MyAgent.CreateConnectionTemplate ()
 If MyConnectionTemplate.LoadTemplate ("My Stored Template") Then
 	MyConnectionTemplate.Executable = "/vision/bin/test/batchvision"
@@ -301,7 +301,7 @@ If MyConnectionTemplate.LoadTemplate ("My Stored Template") Then
 Else
 	MsgBox "'My Stored Template' Not Found"
 End If
-</b></pre>
+</pre>
 </ul>
 
 <i>LoadTemplate</i> returns True if the stored template was successfully read and False otherwise.  
@@ -323,11 +323,11 @@ Checking your connection is easy.  At any time, you can ask your Connection obje
 <i>IsUp</i> or <i>IsDown</i> property of the connection:
 
 <ul>
-<pre><b>
+<pre>
 If MyConnection.IsUp Then
 	MsgBox "My Connection Is Up!"
 End If
-</b></pre>
+</pre>
 </ul>
 
 You can also wait for your Connection to be <i>up</i> by using the <i>WaitForConnection</i> method.  
@@ -344,10 +344,10 @@ It is your responsibility to determine which of these conditions is true by exam
 <i>IsUp</i> or <i>IsDown</i> property:
 
 <ul>
-<pre><b>
+<pre>
 MyConnection.WaitForConnection MyTimeoutInSeconds
 If MyConnection.IsUp Then ...
-</b></pre>
+</pre>
 </ul>
 
 Because this sequence is so common, Connection objects implement a method which combines these calls. 
@@ -359,7 +359,7 @@ Your application cannot be interrupted until <i>WaitForConnection</i> or <i>IsUp
 The following example shows how you can wait for a connection while still giving yourself a chance to recover if the connection doesn't come up:
 
 <ul>
-<pre><b>
+<pre>
 Const YesNoMsgBox = 36
 Const No = 7
 Dim MyTimeoutInSeconds As Long, RetryingWait As Integer
@@ -378,7 +378,7 @@ If MyConnection.IsUp Then
 Else
     MsgBox "My Connection Is Down ;&#40;, Try Again Later"
 End If
-</b></pre>
+</pre>
 </ul>
 
 The timeout argument passed to the <i>WaitForConnection</i> and <i>IsUpWithin</i> methods can be less than or equal to zero. 
@@ -393,9 +393,9 @@ If the connection was created using a parameter list, the default value of this 
 The timeout property of a connection can be changed at any time simply by assigning a new value to it:
 
 <ul>
-<pre><b>
+<pre>
 MyConnection.Timeout = 30
-</b></pre>
+</pre>
 </ul>
 
 If the value of this property is greater than or equal to zero, it is used the default timeout for the connection.  
@@ -408,10 +408,10 @@ Submitting requests is straightforward.  Requests are submitted using the <i>Sub
 For example:
 
 <ul>
-<pre><b>
+<pre>
 Dim MyRequest As Object
 Set MyRequest = MyConnection.Submit ("2 + 2")
-</b></pre>
+</pre>
 </ul>
 
 asks the Vision session attached to <i>MyConnection</i> to compute 2 plus 2.
@@ -486,7 +486,7 @@ Your application cannot be interrupted until the call to <i>WaitForReply</i> or 
 The following example shows how you can wait for a reply and still give yourself a chance to regain control of your application if a reply doesn't arrive in a reasonable time:
 
 <ul>
-<pre><b>
+<pre>
 Const YesNoMsgBox = 36
 Const No = 7
 Dim MyTimeoutInSeconds As Long, RetryingWait
@@ -507,7 +507,7 @@ ElseIf MyRequest.Succeeded  Then
 Else
     MsgBox "My Request Failed!!!"
 End If
-</b></pre>
+</pre>
 </ul>
 
 <a name="Accessing Replies"><h4>Accessing Replies</h4></a>
@@ -535,22 +535,22 @@ The Section <a href="#Using Text Cursors">Using Text Cursors</a> shows you how t
 The easiest and least flexible way to access the text contained in a Request is to simply ask for as a string.  
 The following code defines the string variables <i>DosRequestText</i> and <i>DosReplyText</i> and initializes them to the text of a request and Vision reply to it:
 <ul>
-<pre><b>
+<pre>
 Dim DosRequestText As String, DosReplyText As String
 DosRequestText = MyRequest.RequestText
 DosReplyText = MyRequest.ReplyText
-</b></pre>
+</pre>
 </ul>
 
 The <i>RequestText</i> and <i>ReplyText</i> Request properties return multi-line strings with consecutive lines separated by a CR-LF sequence (i.e., CHR$(13) & CHR$(10)).  
 To access the same strings with UNIX, C, and C++ style line separators, use the properties <i>UnixRequestText</i> and <i>UnixReplyText</i>:
 
 <ul>
-<pre><b>
+<pre>
 Dim UnixRequestText As String, UnixReplyText As String
 DosRequestText = MyRequest.UnixRequestText
 DosReplyText = MyRequest.UnixReplyText
-</b></pre>
+</pre>
 </ul>
 
 While these methods are the easiest to use, they may not always be the most appropriate, especially if the amount text you 
@@ -566,11 +566,11 @@ Every request contains two <i>TextBuffer</i> objects - one containing the Vision
 You access these buffers via the <i>RequestBuffer</i> and <i>ReplyBuffer</i> properties of your <i>Request</i> object:
 
 <ul>
-<pre><b>
+<pre>
 Dim ReplyTextBuffer As Object, RequestTextBuffer As Object
 Set ReplyTextBuffer = MyRequest.ReplyBuffer
 Set RequestTextBuffer = MyRequest.RequestBuffer
-</b></pre>
+</pre>
 </ul>
 
 The RequestBuffer objects returned by these properties are owned by the Request object and are read-only. 
@@ -578,119 +578,119 @@ You can only access their contents, you cannot change them.
 <p>
 
 You can ask a TextBuffer for the length of the text it contains:
-<pre><b>
+<pre>
 	ReplyTextBuffer.Length
-</b></pre>
+</pre>
 
 and for its contents as a DOS style multi-line string:
 
-<pre><b>
+<pre>
         ReplyTextBuffer.Text
-</b></pre>
+</pre>
 
 and as a UNIX style multi-line string:
 
-<pre><b>
+<pre>
         ReplyTextBuffer.UnixText
-</b></pre>
+</pre>
 
 You can ask for its leftmost characters:
 
-<pre><b>
+<pre>
 	Dim CharacterCount As Long
 	CharacterCount = 32
         Substring = ReplyTextBuffer.Left (CharacterCount)
-</b></pre>
+</pre>
 
 rightmost characters:
 
-<pre><b>
+<pre>
         Dim CharacterCount As Long, Substring As String
         CharacterCount = 32
         Substring = ReplyTextBuffer.Right (CharacterCount)
-</b></pre>
+</pre>
 
 and middle characters using either the <i>Mid</i>:
 
-<pre><b>
+<pre>
         Dim StartingPosition As Long, CharacterCount as Long, Substring As String
         StartingPosition = 32
         CharacterCount = 19
         Substring = ReplyTextBuffer.Mid (StartingPosition, CharacterCount)
-</b></pre>
+</pre>
 
 or 'Get'(<i>Mid</i> and <i>Get</i> do exactly the same thing):
 
-<pre><b>
+<pre>
         Substring = ReplyTextBuffer.Get (StartingPosition, CharacterCount)
-</b></pre>
+</pre>
 
 methods. You can retrieve a substring using a search criterion.  
 You can retrieve the substring that begins at an arbitrary position and includes the characters up to but not 
 including the first character matched from a set of characters:
 
-<pre><b>
+<pre>
         Dim CharacterSet As String, Substring As String
         CharacterSet = "+-*/"
         Substring = ReplyTextBuffer.GetUntil (StartingPosition, CharacterSet)
-</b></pre>
+</pre>
 
 You can determine the number of characters in that substring without retrieving it:
 
-<pre><b>
+<pre>
 
         Dim SubstringLength As Long
         SubstringLength = ReplyTextBuffer.DistanceUntil (StartingPosition, CharacterSet)
-</b></pre>
+</pre>
 
 You can retrieve a substring that begins at an arbitrary position and includes only those characters that match one of the characters in a set of characters:
 
-<pre><b>
+<pre>
         CharacterSet = "abcdefghijklmnopqrstuvwxyz"
         Substring = ReplyTextBuffer.GetWhile (StartingPosition, CharacterSet)
-</b></pre>
+</pre>
 
 or just determine the length of that substring:
 
-<pre><b>
+<pre>
         SubstringLength = ReplyTextBuffer. DistanceWhile (StartingPosition, CharacterSet)
-</b></pre>
+</pre>
 
 You can retrieve the text and length of a substring that begins at an arbitrary position and extends up to but 
 not including the first occurrence of a target string:
 
-<pre><b>
+<pre>
         Substring = ReplyTextBuffer.GetTo (StartingPosition, "Earnings")
         SubstringLength = ReplyTextBuffer. DistanceTo (StartingPosition, "Earnings")
-</b></pre>
+</pre>
 
 or to the end of the TextBuffer:
 
-<pre><b>
+<pre>
         Substring = ReplyTextBuffer.GetToEnd (StartingPosition)
         SubstringLength = ReplyTextBuffer.DistanceToEnd (StartingPosition)
-</b></pre>
+</pre>
 
 You can retrieve the text of the substring that extends to the next newline:
 
-<pre><b>
+<pre>
         Dim ThisLine As String
         ThisLine = ReplyTextBuffer.GetLine (StartingPosition)
-</b></pre>
+</pre>
 
 or to the next Vision output delimiter:
 
-<pre><b>
+<pre>
         Dim ThisCell As String
         ThisCell = ReplyTextBuffer.GetCell (StartingPosition)
-</b></pre>
+</pre>
 
 Finally, you can obtain a TextCursor that allows you to do the same operations through an interface suited to 
 sequential processing of an entire text object:
 
-<pre><b>
+<pre>
         Dim MyTextCursor = ReplyTextBuffer.Cursor
-</b></pre>
+</pre>
 
 <a name="Using Text Cursors"><b>Using Text Cursors</b></a>
 <p>
@@ -703,11 +703,11 @@ It should be your interface of choice whenever you plan to process the text of a
 You obtain TextCursor objects from a Request with the methods <i>ReplyCursor</i> and <i>RequestCursor</i>:
 
 <ul>
-<pre><b>
+<pre>
 Dim MyReplyCursor As Object,  MyRequestCursor As Object
 Set MyReplyCursor = MyRequest.ReplyCursor
 Set MyRequestCursor = MyRequest.RequestCursor
-</b></pre>
+</pre>
 </ul>
 
 Unlike the <i>RequestBuffer</i> and <i>ReplyBuffer</i> properties which return the same TextBuffers every time they are accessed, 
@@ -720,74 +720,74 @@ Multiple text cursors allows you to keep track of and read from different locati
 With a TextCursor, you can determine your current position in the text:
 
 <ul>
-<pre><b>
+<pre>
 MyReplyCursor.Position
-</b></pre>
+</pre>
 </ul>
 
 or set it:
 
 <ul>
-<pre><b>
+<pre>
 MyReplyCursor.Position = 32
-</b></pre>
+</pre>
 </ul>
 
 You can determine whether the TextCursor does or does not point to the beginning:
 
 <ul>
-<pre><b>
+<pre>
 If MyReplyCursor.IsAtBeginning Then ...
 If MyReplyCursor.IsntAtBeginning Then ...
-</b></pre>
+</pre>
 </ul>
 
 or end:
 
 <ul>
-<pre><b>
+<pre>
 If MyReplyCursor.IsAtEnd Then ...
 If MyReplyCursor.IsntAtEnd Then ...
-</b></pre>
+</pre>
 </ul>
 
 of the TextBuffer.  You can determine the distance from the TextCursor's current position up to but not including 
 the first character that matches one of the characters in a character set:
 
 <ul>
-<pre><b>
+<pre>
 SubstringLength = MyReplyCursor.DistanceUntil (CharacterSet)
-</b></pre>
+</pre>
 </ul>
 
 or from the current position through the last character that matches one of the characters in a character set:
 
 <ul>
-<pre><b>
+<pre>
 SubstringLength = MyReplyCursor.DistanceWhile (CharacterSet)
-</b></pre>
+</pre>
 </ul>
 
 or from the current position up to but not including the first occurrence of a target string:
 
 <ul>
-<pre><b>
+<pre>
 SubstringLength = MyReplyCursor.DistanceTo ("Earnings")
-</b></pre>
+</pre>
 </ul>
 
 or from the current position to the end of the text:
 
 <ul>
-<pre><b>
+<pre>
 SubstringLength = MyReplyCursor.DistanceToEnd ()
-</b></pre>
+</pre>
 </ul>
 
 You can get a substring that begins at the current position and leaves the current position at the end of the substring:
 
 <ul>
-<pre><b>
+<pre>
 Substring = MyReplyCursor.Get (CharacterCount)
 Substring = MyReplyCursor.GetUntil (CharacterSet)
 Substring = MyReplyCursor.GetWhile (CharacterSet)
@@ -795,13 +795,13 @@ Substring = MyReplyCursor.GetTo ("Earnings")
 Substring = MyReplyCursor.GetToEnd
 Substring = MyReplyCursor.GetLine
 Substring = MyReplyCursor.GetCell
-</b></pre>
+</pre>
 </ul>
 
 or that leaves the current position unchanged:
 
 <ul>
-<pre><b>
+<pre>
 Substring = MyReplyCursor.Peek (CharacterCount)
 Substring = MyReplyCursor.PeekUntil (CharacterSet)
 Substring = MyReplyCursor.PeekWhile (CharacterSet)
@@ -809,36 +809,36 @@ Substring = MyReplyCursor.PeekTo ("Earnings")
 Substring = MyReplyCursor.PeekToEnd
 Substring = MyReplyCursor.PeekLine
 Substring = MyReplyCursor.PeekCell
-</b></pre>
+</pre>
 </ul>
 
 You can also change the current position without accessing a substring:
 
 <ul>
-<pre><b>
+<pre>
 MyReplyCursor.Skip CharacterCount
 MyReplyCursor.SkipUntil CharacterSet
 MyReplyCursor.SkipWhile CharacterSet
 MyReplyCursor.SkipTo "Earnings"
-</b></pre>
+</pre>
 </ul>
 
 Finally, you can access the TextBuffer to which this TextCursor points:
 
 <ul>
-<pre><b>
+<pre>
 Dim MyTextBuffer As Object
 Set MyTextBuffer = MyReplyCursor.Buffer
-</b></pre>
+</pre>
 </ul>
 
 or you can create a copy of your TextCursor:
 
 <ul>
-<pre><b>
+<pre>
 Dim MyClone As Object
 Set MyClone = MyReplyCursor.Clone
-</b></pre>
+</pre>
 </ul>
 
 <a name="Cleaning Up"><h4>Cleaning Up</h4></a>
@@ -858,9 +858,9 @@ In general, the only time you need to worry about releasing objects is when you 
 If you don't want to keep or no longer need an object referenced by a global variable, you should set it to the Visual Basic constant <i>Nothing</i>:
 
 <ul>
-<pre><b>
+<pre>
 Set MyGlobalObjectVariable = Nothing
-</b></pre>
+</pre>
 </ul>
 
 If no other reference exists to the object referenced by <i>MyGlobalObjectVariable</i>, either from another variable or another object, the object will be deleted.
@@ -878,12 +878,12 @@ In general, resource allocation failures occur when VLink cannot create an objec
 When VLink can't create an object, it returns Visual Basic constant <i>Nothing</i> which you can test for:
 
 <ul>
-<pre><b>
+<pre>
 Set MyRequest = MyConnection.Submit ("Named Company GM sales")
 If MyRequest Is Nothing Then
     MsgBox "Request Could Not Be Created"
 EndIf
-</b></pre>
+</pre>
 </ul>
 
 Connection and communication errors occur when the network, remote host, or remote Vision session stop operating.  

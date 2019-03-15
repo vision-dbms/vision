@@ -38,11 +38,11 @@ Minimum segment entries are written only by the <a href="#compaction">compactor<
 Most journal entries are in the form:
 
 <ul>
-<pre><b>
+<pre>
 5482d6c7.6002df0a.00000001 NewSeg 4/18    U 0
 5482d6c7.6002df0a.00000001 NewSeg 3/28    U 1
 5482d6c7.6002df0a.00000001 Commit 9514
-</b></pre>
+</pre>
 </ul>
 
 
@@ -77,13 +77,13 @@ log file that tracks all internal Vision errors reported to users using
 the NDF in this directory.  All users should have write permission for 
 this file.  A typical entry is illustrated below:
 <ul>
-<pre><b>
+<pre>
 ***** 59DE7FDE.2002CE66.00000000 Fri Jul 10 11:20:52 1992 lcn [31 31 23 23]
  >>>  Error Log Entry  <<<
 *  The Signal Handler [309]
 *  A Segmentation Fault
 *  Segmentation Violation Signal
-</b></pre>
+</pre>
 </ul>
 
 The identifying information occurs in the first line and includes the 
@@ -112,13 +112,13 @@ about each version in the database network including the version id.
 
 To invoke the <i>viewndf</i> program, type:
 
-<pre><b>
+<pre>
         /vision/tools/viewndf | more
-</b></pre>
+</pre>
 or
-<pre><b>
+<pre>
  	/vision/tools/viewndf /localvision/network/NDF | more
-</b></pre>
+</pre>
 
 
 This program takes one optional parameter, the NDF file to view.  The 
@@ -129,20 +129,20 @@ it is useful to redirect it to a file or filter it through more.
 The first page of the output contains header information that describes 
 where internal structures are located as illustrated below:
 
-<pre><b>
+<pre>
 	NETWORK DIRECTORY HEADER -- ( /localvision/network )
 	signature        : 314159265
 	ndf version      : 2
 	directory version: 0
 	current NVD FO   : 33960
 	update timestamp : 08/02/94:10:38:53.322409
-</b></pre>
+</pre>
 
 This  header shows the location of your object space (<b>/localvision/network</b>) 
 and the time stamp of the last update.  Scroll down to the part of the 
 output that looks similar to the section illustrated below:
 
-<pre><b>
+<pre>
 	NETWORK VERSION #1 (most recent) NVD FO:33960
 	   timestamp -- 08/02/94:10:38:53.322147
 
@@ -162,7 +162,7 @@ output that looks similar to the section illustrated below:
 	U	5	1	30	30	30	2221312
 	U	6	1	35	35	35	15936
 	 . . .
-</b></pre>
+</pre>
 
 This output displays information about the current version of the 
 network (version 1).  The header information describes the location 
@@ -310,15 +310,15 @@ and is normally executed as part of a normal production cycle.
 
 To invoke this script, type:
 
-<pre><b>
+<pre>
 	/vision/tools/GCollect >& gc.out &
-</b></pre>
+</pre>
 
 Since the process is lengthy, you will probably want to redirect its 
 output to another file and run the process in background as illustrated 
 above.  When the process finishes, your output file should look similar to the 
 one displayed below:
-<pre><b>
+<pre>
 	V>
 	...  Running Garbage Collection
 	>>> Object Network Updated <<<
@@ -354,7 +354,7 @@ one displayed below:
 	                  Bytes . . . . . 0
 	        Free Containers . . . . . 18075
 	++++++++++++++++
-</b></pre>
+</pre>
 
 The first part of the report is a Vision session that actually executes  
 the message to perform the garbage collection. You should see the 
@@ -375,9 +375,9 @@ full compaction.
 
 The network can be checked for consistency independent of the garbage 
 collection process.  To execute the program, type:
-<pre><b>
+<pre>
 	/vision/tools/onck /localvision/network/NDF
-</b></pre>
+</pre>
 
 Any errors flagged should be reported to Insyte and no network updates
 or compactions should be run until the problem has been investigated. 
@@ -438,9 +438,9 @@ The script <i>/vision/tools/Compact</i> has been defined
 to fully compact all object spaces and move the compacted 
 segments to the <i>.dsegs</i> directories.  To invoke this 
 script, type:
-<pre><b>
+<pre>
 	/vision/tools/Compact >& compact.out &
-</b></pre>
+</pre>
 
 Since the process is lengthy, you will probably want to 
 redirect its output to another file and run the process 
@@ -457,7 +457,7 @@ for each space.
 
 When the process finishes, your output file should look 
 similar to the one displayed below:
-<pre><b>
+<pre>
 	V> V> V> V>
 	+++  Compaction Statistics For Space 3:
 	Time Now: 07/26/94:18:27:40
@@ -500,7 +500,7 @@ similar to the one displayed below:
 	. . .
 
 	>>> Object Network Updated <<<
-</b></pre>
+</pre>
 
 In the example illustrated above,  the  MSS for <i>object space 3</i>
 is computed to be segment 14.  Segments 1 through 13 will 
@@ -567,10 +567,10 @@ A number of session attributes control the operation of
 the copy phase of the compactor.  The most important is 
 the attribute which requests the compaction - <i>compactOnUpdate</i>.  
 This flag can be set explicitly using:
-<pre><b>
+<pre>
 	Utility SessionAttribute compactOnUpdate <- TRUE;
 	Utility SessionAttribute compactOnUpdate <- FALSE;
-</b></pre>
+</pre>
 
 If this attribute is set to TRUE, all subsequent updates  
 in your session will perform the copy phase of the compaction on all 
@@ -586,9 +586,9 @@ in the compaction.  For a session running with global update
 permission, additional spaces can be included in the update 
 list with the <i>updateFlagOfSpace:</i> session attribute.  
 For example,
-<pre><b>
+<pre>
  	Utility SessionAttribute updateFlagOfSpace: 3 . <- TRUE;
-</b></pre>
+</pre>
 
 forces object space 3 to be included in the next update.  
 A number of restrictions apply to this attribute:
@@ -604,13 +604,13 @@ results will occur; however, specifying an object space
 index larger than the index of the largest object space 
 is ignored.  Since the largest possible object space is 1024, 
 the expression:
-<pre><b>
+<pre>
 	1024 sequence
 	do: 
 	[
 	^global Utility SessionAttribute updateFlagOfSpace: ^self. <- TRUE ;
 	];
-</b></pre>
+</pre>
 
 is a good way to force an update of each object space in 
 any size network.
@@ -619,9 +619,9 @@ While the <i>updateFlagOfSpace:</i> session attribute brings
 a space to the attention of the update, the <i>compactionFlagOfSpace:</i> 
 causes a space otherwise being updated to be ignored by the compactor.  
 Therefore,
-<pre><b>
+<pre>
 	Utility SessionAttribute compactionFlagOfSpace: 3 . <- FALSE;
-</b></pre>
+</pre>
 
 suppresses the compaction of object space 3 in subsequent 
 compacting updates performed in this session.  By default, 
@@ -632,9 +632,9 @@ object spaces.
 
 To select a specific MSS for an object space, you can use 
 the expression:
-<pre><b>
+<pre>
 	Utility SessionAttribute mssOverrideOfSpace: 3 . <- 9324 ;
-</b></pre>
+</pre>
 
 If the segment is invalid for the specified object space, 
 the specified segment is ignored and replaced by a segment 
@@ -645,18 +645,18 @@ the next compacting update only - once used it is reset.
 Two attributes are available for tuning the tradeoff between 
 amount of space needed to copy data versus the amount reclaimed 
 by the compaction:
-<pre><b>
+<pre>
 	Utility SessionAttribute    copyCoefficientOfSpace: 3 . <- 1.5;
 	Utility SessionAttribute reclaimCoefficientOfSpace: 3 . <- .75;
-</b></pre>
+</pre>
 
 By default these session attributes are 1.  The MSS for  
 a space is selected as the segment which generates the largest 
 value using the formula:
-<pre><b>
+<pre>
 	reclaimCoefficient * cumulativeReclaimedAsOfSegment
 	-  copyCoefficient * cumulativeCopiedAsOfSegment
-</b></pre>
+</pre>
 
 Decreasing the copy coefficient from its default value of 
 1 (note that negative and non-integral values are allowed and valid)  
@@ -670,14 +670,14 @@ smaller minimum segment values.
 
 The attribute <i>traceCompaction</i> causes the compactor to generate 
 a report of its activity:
-<pre><b>
+<pre>
 	Utility SessionAttribute traceCompaction <- TRUE;
-</b></pre>
+</pre>
 
 The output is generated on a space by space basis with  
 no guaranteed order of display of the spaces.  The following 
 is a typical display:
-<pre><b>
+<pre>
 	+++  Compaction Statistics For Space 3:
 	Time Now: 11/10/92:15:51:52
 	Unaccessed Container Count For Space 3: 0
@@ -690,16 +690,16 @@ is a typical display:
 	33	2310600	385100	0	4519464	   2208864
 	34	2695700	385100	0	4904564	   2208864
 	MSS = 35 [Reclaimed = 4904564, Copied =    2208864]
-</b></pre>
+</pre>
 
 The creation of a base version is controlled by the session 
 attribute <i>makeBaseVersionOnUpdate</i>.  Updates performed 
 while this attribute is TRUE create base versions.  
 The session attribute can be set using:
-<pre><b>
+<pre>
 	Utility SessionAttribute makeBaseVersionOnUpdate <- TRUE;
 	Utility SessionAttribute makeBaseVersionOnUpdate <- FALSE;
-</b></pre>
+</pre>
 
 Creating a base version causes the generation of <i>MSS</i> files but  
 does not actually move the files to the <i>.dsegs</i> directory.  
@@ -712,9 +712,9 @@ to each object space and must be performed by the <i>dbadmin</i>.
 The session attribute <i>targetSegmentSizeOfSpace:</i>  
 is available to control the size of segments created by updates.  
 The attribute is object space specific.  For example:
-<pre><b>
+<pre>
 	Utility SessionAttribute targetSegmentSizeOfSpace: 3 . <- 1000000 ;
-</b></pre>
+</pre>
 
 sets the target size of new object space 3 segments created  
 in this session.  This example sets that size to 1 megabyte.  
@@ -736,9 +736,9 @@ be broken into pieces with sizes near the value of this attribute.
 The total amount of space consumed by a compaction can be 
 further limited using the space specific session attribute  
 <i>maxCompactionSegmentsOfSpace:</i>.  For example:
-<pre><b>
+<pre>
 	Utility SessionAttribute maxCompactionSegmentsOfSpace: 3 . <- 10 ;
-</b></pre>
+</pre>
 
 limits to 10 the number of segments of <i>targetSegmentSizeOfSpace:</i>  
 that will be created to hold compacted data in subsequent compactions  
@@ -806,9 +806,9 @@ Briefly, this document describes each of these modes and how they are used.
 
 Standalone segment maintenance mode is the simplest mode of operation
 for <i>dbconvert</i>.  In this mode, <i>dbconvert</i> accepts the
-names of one or more segments on its command line:<pre><b>
+names of one or more segments on its command line:<pre>
     dbconvert /localvision/network/3/104 /localvision/network/4/107
-</b></pre>
+</pre>
 
 <i>dbconvert</i> examines the data format of these segments and converts them, if
 necessary, to the data format of the local machine.  This is the original mode
@@ -840,9 +840,9 @@ transfer.
 Standalone network maintenance mode allows an entire database to be analyzed
 and converted.  Standalone maintenance mode is invoked by passing the name of
 an existing NDF to <i>dbconvert</i> using the <i>-n</i> option:
-<pre><b>
+<pre>
     dbconvert -n /localvision/network/NDF
-</b></pre>
+</pre>
 
 In this mode, the NDF is read and converted, if necessary.  Once the NDF has
 been converted, the data base segments described in the NDF are examined and
@@ -900,9 +900,9 @@ recommended, the log it generates is valuable in following the progress of
 the transfer and conversion.  The following command is typical of a <i>dbconvert</i>
 command used to update a client copy of the data base:
 
-<pre><b>
+<pre>
     dbconvert -vn /my/vision/network/NDF -N /vision/network/NDF -a fred:10000
-</b></pre>
+</pre>
 
 This command transfers updates from /vision/network/NDF using the <i>dbconvert</i>
 server listening at TCP/IP port 10000 on 'fred' to the local data base described
@@ -945,13 +945,13 @@ its equivalent.  To configure an <i>inetd</i> service, two files typically need 
 modified, <i>/etc/services</i> and <i>/etc/inetd.conf</i>.  The following entries are
 appropriate for configuring a <i>dbconvert</i> service under HP-UX:
 
-<pre><b>
+<pre>
 <i>/etc/services</i>:
     vdbxfer         10000/tcp       # Vision DB Transfer Agent
 
 <i>/etc/inetd.conf</i>:
     vdbxfer stream tcp nowait insyte /vision/tools/dbconvert dbconvert
-</b></pre>
+</pre>
 
 Once <i>dbconvert</i> is configured to run as a server, any client can contact it to
 request a refresh of any data base to which the server has access.
@@ -998,30 +998,30 @@ variable <i>VisionCheckCheckSM</i> is set to 0, checksum validation
 will be disabled.  This environment variable sets a default 
 validation policy which can be altered by changing the session 
 attribute <i>validatingChecksums</i> using:
-<pre><b>
+<pre>
 	Utility SessionAttribute validatingChecksums <- TRUE ;
-</b></pre>
+</pre>
 or
-<pre><b>
+<pre>
 	Utility SessionAttribute validatingChecksums <- FALSE ;
-</b></pre>
+</pre>
 
 The program <i>/vision/tools/checksum</i> is available to validate 
 the checksums of segment files whose names are passed to it 
 as command line arguments.  For example:
-<pre><b>
+<pre>
 	/vision/tools/checksum 1/4 1/5 1/6 1/7
-</b></pre>
+</pre>
 
 For each segment, this tool prints a one line summary that 
 displays the stored and computed checksums and a checksum 
 validity indicator:
-<pre><b>
+<pre>
 	1/4   : stored cs =          0, computed cs = 4294967281 (NA)
 	1/5   : stored cs = 4290772989, computed cs = 4290772989 (OK)
 	1/6   : stored cs = 4290772990, computed cs = 4290772990 (OK)
 	1/7   : stored cs = 2349028409, computed cs = 4290772990 (MISMATCH)
-</b></pre>
+</pre>
 
 A stored checksum of zero means that a checksum was not  
 originally saved in the segment. In addition, this tool 
@@ -1044,9 +1044,9 @@ version if necessary.
 <p>
 
 To invoke the rollback program, type:
-<pre><b>
+<pre>
 	/vision/tools/rollback /localvision/network/NDF [ -n <# of versions> ]
-</b></pre>
+</pre>
 
 The program takes one required parameter, the NDF file to 
 view and one optional parameter, the number of versions 
@@ -1061,18 +1061,18 @@ current directory.
 
 For example, to create a new NDF that reflects the network 
 before the last three updates, type:
-<pre><b>
+<pre>
 	/vision/tools/rollback /localvision/network/NDF -n 3
-</b></pre>
+</pre>
 
 This program finishes almost immediately and generates no output.
 <p>
 
 To use this NDF instead of the default, you need to specify  
 it when you start your Vision session as illustrated below:
-<pre><b>
+<pre>
 	batchvision -n RollBkNDF
-</b></pre>
+</pre>
 
 Your entire Vision session will reflect the older version  
 of the network.  If you run the <i>viewndf</i> program and 
@@ -1120,7 +1120,7 @@ The <i>ndftool</i> program is located in the <i>/vision/tools</i> directory
 and supports the following options:
 
 <ul>
-<pre><b>
+<pre>
 ndftool -v 	show all versions (verbose)
 ndftool <version>	show specified version plus dependent versions
 ndftool -uc <version>	rollback specified version plus all dependent versions
@@ -1129,25 +1129,25 @@ ndftool -n <ndf>	override NDF (can be used in conjunction with other options)
 ndftool -b #	refer to versions before # base versions (can be used with other options)
 ndftool -r[012]	use alternate output format (can be used with other options)
 ndftool -q -uc <version>	supress output (quiet)
-</b></pre>
+</pre>
 </ul>
 
 A version is specified in one of the following forms:
 <ul>
-<pre><b>
+<pre>
 V#####	absolute version specification
 V0	most current version
 SXX/YY	version which added segment YY to space XX
-</b></pre>
+</pre>
 </ul>
 
 In addition, version specifications beginning with 'V' 
 can be modified with an offset, indicating some number 
 of versions previous to the specified version.  For example:
 <ul>
-<pre><b>
+<pre>
 V0-3	3 versions before current version
-</b></pre>
+</pre>
 </ul>
 
 Because <i>ndftool</i> generates a good deal of output, 
@@ -1160,20 +1160,20 @@ your update annotations with this use in mind.
 
 To see the version number, time stamp, annotation and  
 segments added for the latest update use:
-<pre><b>
+<pre>
 	ndftool V0
-</b></pre>
+</pre>
 
 To see the last few updates use:
-<pre><b>
+<pre>
 	ndftool -v |head
-</b></pre>
+</pre>
 
 To see all updates that were not annotated with the word 
 Reconcile use:
-<pre><b>
+<pre>
 	ndftool -v | grep -v "Reconcile" | more
-</b></pre>
+</pre>
 
 The <i>rollback</i> program creates a new, updated copy 
 of the NDF, but does not commit the update to the existing 
@@ -1198,7 +1198,7 @@ not access the removed versions.
 For example, say that corruption has been detected in 
 <i>segment 4 of object space 22</i>.  First identify which 
 versions are affected:
-<pre><b>
+<pre>
 	ndftool S22/4
 
 	--->  Segment 22/4 Deletion Requested.
@@ -1207,15 +1207,15 @@ versions are affected:
 	50470	RuleDel	17/2	08/11/94:16:58:29	Update to 17
 	49995	RuleDel	22/5	08/11/94:16:58:29	Update to 22
 	49572	UserDel	22/4	08/11/94:16:58:29	Update to 22
-</b></pre>
+</pre>
 
 The save associated with version 50470 read data from 
 22/4, so it and its dependents must be removed as well.  
 Ensure that no updates are being made to spaces 17 or 22.  
 Then execute the rollback using:
-<pre><b>
+<pre>
 	ndftool -uc S22/4
-</b></pre>
+</pre>
 
 {% include doc-footer.htm copydates="1997" %}
 

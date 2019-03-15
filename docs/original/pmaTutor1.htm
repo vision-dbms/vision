@@ -27,17 +27,17 @@ directory.
 <p>The first example displays a basic data item for a single Security.
 Read the file <i>example1.a</i>.  You should see the following:
 <ul>
-<pre><b>
+<pre>
 Named Security IBM ticker print ;
-</b></pre>
+</pre>
 </ul>
 
 <p>Execute this program. You should see: 
 
 <ul>
-<pre><b>
+<pre>
 IBM
-</b></pre>
+</pre>
 </ul>
 <p>
 
@@ -47,19 +47,19 @@ The message <i>ticker</i> is a property of Security.
 <p>This example displays two basic data items for a single Security.
 Read the file <i>example1.b</i>.  You should see the following:
 <ul>
-<pre><b>
+<pre>
 Named Security IBM ticker print ;
 Named Security IBM price print ;
 
-</b></pre>
+</pre>
 </ul>
 
 <p>Execute this program. You should see: 
 
 <ul>
-<pre><b>
+<pre>
 IBM   102.00
-</b></pre>
+</pre>
 </ul>
 <p>
 <hr>
@@ -67,22 +67,22 @@ IBM   102.00
 Read the file <i>example1.c</i> You should see the following:
 
 <ul>
-<pre><b>
+<pre>
 Named Security IBM
 do: [ 
       ticker print: 5 ; 
       name print: 30 ; 
       price print:10 ;
      ] ;
-</b></pre>
+</pre>
 </ul>
 
 <p>Execute this program. You should see: 
 
 <ul>
-<pre><b>
+<pre>
 IBM  INTERNATIONAL BUSINESS MACH CO    102.00
-</b></pre>
+</pre>
 </ul>
 <p>
 
@@ -95,7 +95,7 @@ In this example, the <i>do:</i> statement is used to write three separate messag
 <p>In the previous examples the current date was used because one had not been supplied.  However, it is possible to access data from any date.  The following example displays the same data as the previous example but as of 12/10/97.  Read the file <i>example1.d</i>. You should see: 
 
 <ul>
-<pre><b>
+<pre>
 971210 evaluate: 
   [
    Named Security IBM 
@@ -105,16 +105,16 @@ In this example, the <i>do:</i> statement is used to write three separate messag
         price print:10 ;
        ] ;
    ];
-</b></pre>
+</pre>
 </ul>
 
 <p>Execute this program. You should see: 
 
 
 <ul>
-<pre><b>
+<pre>
 IBM  INTERNATIONAL BUSINESS MACH CO    106.50
-</b></pre>
+</pre>
 </ul>
 <p>
 
@@ -127,7 +127,7 @@ This date becomes the default date used for all operations contained inside the 
 Read the file <i>example1.e</i>. You should see: 
 
 <ul>
-<pre><b>
+<pre>
  Named Security IBM 
    do: [ 
         ticker print: 5 ; 
@@ -135,14 +135,14 @@ Read the file <i>example1.e</i>. You should see:
 	company industry sector print: 8 ; 
         price print:10 ;
        ] ;
-</b></pre>
+</pre>
 </ul>
 
 <p>Execute this program. You should see: 
 
 
 <ul>
-<pre><b>
+<pre>
 IBM  12   TECH        102.00
 </pre></b>
 </ul>
@@ -163,7 +163,7 @@ This next program displays the same data, but for a list of Securities.
 Read the file <i>example1.f.</i> You should see: 
 
 <ul>
-<pre><b>
+<pre>
 Security masterList
    first: 100 . 
    do: [ 
@@ -171,19 +171,19 @@ Security masterList
         name print: 30 ; 
         price printNL:10;
        ] ;
-</b></pre>
+</pre>
 </ul>
 
 <p>Execute this program. You should see: 
 
 <ul>
-<pre><b>       
+<pre>       
 CashUS    CashUS                               NA 
 AOL       AMERICA ONLINE INC DEL COM         83.94
 GM        GENERAL MTRS CORP COM              64.38
 IBM       INTERNATIONAL BUSINESS MACH CO    102.00
 ...
-</b></pre>
+</pre>
 </ul>
 
 
@@ -195,7 +195,7 @@ This next example displays the same data for multiple Securities as of a differe
 Read the file <i>example1.g.</i> You should see: 
 
 <ul>
-<pre><b>
+<pre>
 971210 evaluate:
 [
  Security masterList
@@ -205,19 +205,19 @@ Read the file <i>example1.g.</i> You should see:
         price printNL:10;
        ] ;
 ];
-</b></pre>
+</pre>
 </ul>
 
 <p>Execute this program. You should see: 
 
 <ul>
-<pre><b>       
+<pre>       
 CashUCashUS                               NA 
 AOL  AMERICA ONLINE INC DEL COM         85.00
 GM   GENERAL MTRS CORP COM              64.38
 IBM  INTERNATIONAL BUSINESS MACH CO    106.50
 ...
-</b></pre>
+</pre>
 </ul>
 
 <hr>
@@ -226,7 +226,7 @@ The next example displays securities with a price over $50.
 Read the file <i>example1.h.</i> You should see: 
 
 <ul>
-<pre><b>
+<pre>
 Security masterList 
 select:[ price > 50 ] .
 sortUp: [ name ] .
@@ -235,17 +235,17 @@ do: [
       name print:30 ;
       price printNL:10 ;
     ];
-</b></pre>
+</pre>
 </ul>
 <p>Execute this program. You should see: 
 
 <ul>
-<pre><b>
+<pre>
 02364J10       AMERICA ONLINE INC DEL COM         83.94
 37044210       GENERAL MTRS CORP COM              64.38
 45920010       INTERNATIONAL BUSINESS MACH CO    102.00
 275438         ROYAL BK CDA MONTREAL QUE COM      53.50
-</b></pre>
+</pre>
 </ul>
 
 The <i>select:</i> message eliminates all data that does not meet the criteria inside its brackets.
@@ -257,7 +257,7 @@ The next example displays securities with a price over $50 as of a different dat
 Read the file <i>example1.i.</i> You should see: 
 
 <ul>
-<pre><b>
+<pre>
 971210 evaluate:
 [
 Security masterList 
@@ -269,17 +269,17 @@ do: [
       price printNL:10;
     ];
 ];
-</b></pre>
+</pre>
 </ul>
 <p>Execute this program. You should see:
 
 <ul>
-<pre><b>
+<pre>
 02364J10       AMERICA ONLINE INC DEL COM         85.00
 37044210       GENERAL MTRS CORP COM              64.38
 45920010       INTERNATIONAL BUSINESS MACH CO    106.50
 275438         ROYAL BK CDA MONTREAL QUE COM      53.50
-</b></pre>
+</pre>
 </ul>
 
 
@@ -290,7 +290,7 @@ The following example improves on the previous example by grouping the securitie
 Read the file <i>example1.j</i>. You should see: 
 
 <ul>
-<pre><b>
+<pre>
 Security masterList 
 select:[ price > 50 ] .
 groupedBy: [ company industry sector ] .
@@ -308,13 +308,13 @@ do: [
          ];
     newLine print;
     ];
-</b></pre>
+</pre>
 </ul>
 
 <p>Execute this program. You should see:
 
 <ul>
-<pre><b>
+<pre>
 Consumer durables
 37044210  GENERAL MTRS CORP COM             64.38
 
@@ -322,7 +322,7 @@ Consumer services
 02364J10  AMERICA ONLINE INC DEL COM        83.94
 
 ...
-</b></pre>
+</pre>
 </ul>
 
 The <i>groupedBy:</i> message groups the current list based on the supplied block.
@@ -336,7 +336,7 @@ account based on the most recent pricing date of 12/15/97.
 Read the file <i>example1.k</i> You should see the following:
 
 <ul>
-<pre><b>
+<pre>
 Named Account \102 
 do:
    [
@@ -345,15 +345,15 @@ do:
     holdings count print:5;
     totalMarketValue printWithCommasNL:15;
    ];
-</b></pre>
+</pre>
 </ul>
 
 <p>Execute this program. You should see: 
 
 <ul>
-<pre><b>
+<pre>
 102  INSYTE GROWTH FUND     11   4,655,327.20
-</b></pre>
+</pre>
 </ul>
 <p>
 The message <i>holdings count</i> is used to find the total number of holdings within the Account.
@@ -369,7 +369,7 @@ This next program displays the same data, but for a list of Accounts.
 Read the file <i>example1.l.</i> You should see: 
 
 <ul>
-<pre><b>
+<pre>
 Account masterList 
 sortDown:[name] .
 do:
@@ -379,18 +379,18 @@ do:
     holdings count print:5;
     totalMarketValue printWithCommasNL:20; 
   ];
-</b></pre>
+</pre>
 </ul>
 
 <p>Execute this program. You should see: 
 
 <ul>
-<pre><b>
+<pre>
 879  RICH's INTL FUND                      22        7,822,067.28
 999  RICH'S INSYTE GLOBAL FUND             20        4,740,402.27
 892  RICH'S GROWTH FUND                    25       10,391,284.11
 ...
-</b></pre>
+</pre>
 </ul>
 
 

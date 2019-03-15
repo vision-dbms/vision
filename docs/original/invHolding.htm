@@ -107,7 +107,7 @@ Holding.   The  message  <i>id</i>  has been defined at Holding to return a
 string in the form  <i>securityCode---accountCode</i>.   For  example,  the
 <i>id</i> for a holding of security GM in portfolio XYZ would display as:
 
-<pre><b>    37044210---XYZ  </b></pre>
+<pre>    37044210---XYZ  </pre>
 
 Unlike the entity classes described so far, you do not create holdings
 directly.  Instead various methods have been defined which can be used
@@ -124,7 +124,7 @@ current evaluation date. Since the message <i>holdings</i> returns a  List,
 any  message  defined  for  the  List  class  can be sent (e.g., do: ,
 select: , groupedBy:, sortUp: , etc.).  For example:
 
-<pre><b>    Named Portfolio XYZ holdings
+<pre>    Named Portfolio XYZ holdings
     do: [
         security name print: 30 ;               #-- security level
         security price print: 10 ;              #-- security level
@@ -144,23 +144,23 @@ select: , groupedBy:, sortUp: , etc.).  For example:
             ] ;
        newLine print ;
        ] ;
-</b></pre>
+</pre>
 
 The message <i>getHoldingIn:</i> is used to get an account's holding  in  a
 specific  security if it exists.  A default holding record is returned
 otherwise.  For example:
 
-<pre><b>    Named Portfolio XYZ
-      getHoldingIn: Named Security GM . percentOfPort </b></pre>
+<pre>    Named Portfolio XYZ
+      getHoldingIn: Named Security GM . percentOfPort </pre>
 
 returns the percentage of the Portfolio XYZ represented by the holding
 in  GM.   The  message  <i>holds:</i> is used to indicate whether or not an
 account holds a specific security.  It returns a boolean  value.   For
 example:
 
-<pre><b>    Portfolio masterList
+<pre>    Portfolio masterList
       select: [ ^self holds: ^global Named Security GM ] .
-</b></pre>
+</pre>
 
 returns the list of all portfolios that currently hold GM.
 
@@ -168,7 +168,7 @@ returns the list of all portfolios that currently hold GM.
 The message  <i>holdings</i>  is  used  to  access  the  list  of  holdings
 associated with a Security as well.  For example:
 
-<pre><b>    Named Security GM  holdings
+<pre>    Named Security GM  holdings
     do: [
         account code print: 30 ;                     #--  account level
         account portfolioManager name print: 20 ;    #--  account level
@@ -190,30 +190,30 @@ associated with a Security as well.  For example:
             ] ;
         newLine print ;
         ] ;
-</b></pre>
+</pre>
 
 Note that the list  of  holdings  includes  holdings  in  any  account
 subclass.   If  you  want to restrict this list to the holdings in the
 portfolio class only, use the expression:
 
-<pre><b>    Named Security GM holdings
+<pre>    Named Security GM holdings
       select: [ account isPortfolio ] .
     do: [
         ] ;
-</b></pre>
+</pre>
 
 The message <i>getHoldingIn:</i> is used to get a security's holding  in  a
 specific  account  if it exists.  A default holding record is returned
 otherwise.  For example:
 
-<pre><b>    Named Security GM
+<pre>    Named Security GM
         getHoldingIn: Named Portfolio XYZ  . percentOfPort
-</b></pre>
+</pre>
 
 Since holdings are stored over time, you can access a portfolio as  of
 a different date using the standard Vision techniques.  For example:
 
-<pre><b>    9311 evaluate:
+<pre>    9311 evaluate:
        [
        Named Portfolio XYZ holdings
        do: [
@@ -222,13 +222,13 @@ a different date using the standard Vision techniques.  For example:
            totalMarketValue printNL: 15 ;
            ] ;
        ]
-</b></pre>
+</pre>
 
 displays the holdings information as of Nov  30,  1993.   The  message
 <i>holdingsDate</i>  can  be  used  to  display  the  effective date of the
 holdings list being accessed.  For example:
 
-<pre><b>    9311 evaluate:
+<pre>    9311 evaluate:
        [
        Named Portfolio XYZ
        do: [ "Holdings As Of: " print; holdingsDate printNL ;
@@ -240,21 +240,21 @@ holdings list being accessed.  For example:
                   ] ;
            ]
        ] ;
-</b></pre>
+</pre>
 
 The message <i>hasHoldings</i> is defined for the Account class to indicate
 whether  an account has holdings as of the current evaluate date.  For
 example, the expression:
 
-<pre><b>    Portfolio masterList select: [ hasHoldings ]  </b></pre>
+<pre>    Portfolio masterList select: [ hasHoldings ]  </pre>
 
 returns the list of portfolios that  have  current  holdings  and  the
 expression:
 
-<pre><b>    9311 evaluate:
+<pre>    9311 evaluate:
        [ Portfolio masterList select: [ hasHoldings ]
        ]
-</b></pre>
+</pre>
 
 returns the list of portfolios that had holdings as of Nov 30, 1993.
 
@@ -366,11 +366,11 @@ instances   of   the   IndexAccount   class.    Creating  holdings  is
 advantageous if you wish to use an IndexAccount interchangeably with a
 Portfolio or AggAccount in an application.  The messages:
 
-<pre><b>    createEvenDollarHoldingsAsOf: aDate
+<pre>    createEvenDollarHoldingsAsOf: aDate
     createEvenShareHoldingsAsOf: aDate
     createMCapWeightedHoldingsAsOf: aDate
     createMValWeightedHoldingsAsOf: aDate using: anAccount
-</b></pre>
+</pre>
 
 can be used to build holdings based  on  the  IndexAccount's  security
 list  as  of  a  date.  The  first  three messages require a date as a
@@ -401,7 +401,7 @@ in the account's base currency.   The  message  <i>computeAccountTotals</i>
 described   in   the   previous  section  is  then  executed  for  the
 IndexAccount.  For example:
 
-<pre><b>    Named IndexAccount MyIndex createEvenDollarHoldingsAsOf: ^today ;
+<pre>    Named IndexAccount MyIndex createEvenDollarHoldingsAsOf: ^today ;
     Named IndexAccount MyIndex holdings
     do: [ security code print: 10 ;
           totalMarketValue print: 15 ;        #- 1000 for all
@@ -410,7 +410,7 @@ IndexAccount.  For example:
         ] ;
    <i>Total Account Market Value: </i> print ;
    Named IndexAccount MyIndex totalMarketValue printNL: 15 ;
-</b></pre>
+</pre>
 
 The <i>createEvenShareHoldingsAsOf:</i>  message assumes that you  purchase
 1000  shares  of  each  security  in  the  index.  In other words, the
@@ -420,7 +420,7 @@ account's base currency.  The message <i>computeAccountTotals</i> described
 in  the  previous  section is then executed for the IndexAccount.  For
 example:
 
-<pre><b>    Named IndexAccount MyIndex createEvenShareHoldingsAsOf: ^today ;
+<pre>    Named IndexAccount MyIndex createEvenShareHoldingsAsOf: ^today ;
     Named IndexAccount MyIndex holdings
     do: [ security code print: 10 ;
           totalMarketValue print: 15 ;
@@ -429,7 +429,7 @@ example:
         ] ;
     <i>Total Account Market Value: </i> print ;
     Named IndexAccount MyIndex totalMarketValue printNL: 15 ;
-</b></pre>
+</pre>
 
 The  <i>createMCapWeightedHoldingsAsOf:</i>   message  assumes   that   you
 purchase all the outstanding shares of each security in the index.  In
@@ -439,7 +439,7 @@ as the shares times the security price in the account's base currency.
 The  message  <i>computeAccountTotals</i> described in the previous section
 is then executed for the IndexAccount.  For example:
 
-<pre><b>    Named IndexAccount MyIndex createMCapWeightedHoldingsAsOf: ^today ;
+<pre>    Named IndexAccount MyIndex createMCapWeightedHoldingsAsOf: ^today ;
     Named IndexAccount MyIndex holdings
     do: [ security code print: 10 ;
           totalMarketValue print: 15 ;
@@ -448,7 +448,7 @@ is then executed for the IndexAccount.  For example:
         ] ;
     <i>Total Account Market Value: </i> print ;
     Named IndexAccount MyIndex totalMarketValue printNL: 15 ;
-</b></pre>
+</pre>
   
 The <i>createMValWeightedHoldingsAsOf:using:</i>  message assumes that  you
 purchase  the equivalent number of shares held in the supplied account
@@ -457,7 +457,7 @@ each  holding  as the shares times the security price in the account's
 base currency.  The message <i>computeAccountTotals</i>  described  in  the
 previous section is then executed for the IndexAccount.  For example:
 
-<pre><b>    Named IndexAccount MyIndex
+<pre>    Named IndexAccount MyIndex
        createMValWeightedHoldingsAsOf: ^today
        using: Named Portfolio XYZ ;
     Named IndexAccount MyIndex holdings
@@ -468,20 +468,20 @@ previous section is then executed for the IndexAccount.  For example:
         ] ;
     <i>Total Account Market Value: </i> print ;
     Named IndexAccount MyIndex totalMarketValue printNL: 15 ;
-</b></pre>
+</pre>
 
 The message <i>createWeightedHoldingsAsOf: date using: account</i>  can  be
 used  to create a holdings structure that responds to market value and
 percentage held messages for the different types of weighting schemes.
 This message extends the holdings list with the following variables:
 
-<pre><b>    pctEvenDollar
+<pre>    pctEvenDollar
     mvalEvenDollar
     pctMCapWeighted
     mvalMCapWeighted
     pctMValWeighted
     mvalMValWeighted
-</b></pre>
+</pre>
 
 The summary statistics are not recomputed  with  this  message,  since
 several different market value numbers are defined.
@@ -492,9 +492,9 @@ the shares value for one more holding.  The message: <i>setSharesIn:to:</i>
 is used to reset the value of shares for the holdings in the  security
 specified.  For example:
 
-<pre><b>    Named IndexAccount MyIndex
+<pre>    Named IndexAccount MyIndex
       setSharesIn: Named Security IBM to: 500 ;
-</b></pre>
+</pre>
 
 After you have changed the shares in one or more securities  you  will
 need  to  execute  the <i>computeAccountTotals</i> message to recompute the
@@ -520,7 +520,7 @@ Holding  class.   The  <i>showMessages</i> message is the fastest way to
 determine the current list of messages available  for  a  class.   For
 example:
 
-<pre><b>    Holding showMessages </b></pre>
+<pre>    Holding showMessages </pre>
 
 
 {% include doc-footer.htm copydates="1997" %}

@@ -101,7 +101,7 @@ environment.  The <b>Interface HtmlAccess</b> class is included here.
 <p>
 Because all these classes inherit from and are named at
 <b>Interface</b>, methods defined at any of the subclasses can
-reference the other classes using a relative name.  For example:<pre><b>
+reference the other classes using a relative name.  For example:<pre>
      Interface ApplicationWS 
      defineMethod: 
      [ | displayGlobalMessages |
@@ -115,27 +115,27 @@ reference the other classes using a relative name.  For example:<pre><b>
      [ | displayGlobalMessages |
        ^global Interface Global displayMessages ;
      ] ;
-</b></pre>
+</pre>
 <p>
 <hr>
 <h3 id="expressions">Running Arbitrary Expressions</h3>
 <p>
 At its simplest level, the <b>Interface</b> class can execute an
 arbitrary Vision expression supplied as a block or a string.
-For example:<pre><b>
+For example:<pre>
      Interface runExpression: "2 + 2" ;
 </b>or<b>
      Interface runExpression: [ 2 + 2 ] ;
 
-</b></pre>
-An arbitrary amount of output can be returned.  For example:<pre><b>
+</pre>
+An arbitrary amount of output can be returned.  For example:<pre>
      Interface runExpression: 
         "Currency masterList 
             sortUp: [ name ] .   
          do: [ code print: 5 ; name print: 25 ; usExchange printNL ] ;
         " ;
 
-</b></pre>generates:<pre><b>
+</pre>generates:<pre>
 
      AUD  Australian Dollar             1.34
      BEF  Belgian Franc                29.93
@@ -143,7 +143,7 @@ An arbitrary amount of output can be returned.  For example:<pre><b>
      CAD  Canadian Dollar               1.35
      . . . 
 
-</b></pre>
+</pre>
 Although these expressions could be evaluated by Vision directly
 without using the <b>Interface</b> class, this class allows
 you to take advantage of other interface capabilities such as
@@ -178,12 +178,12 @@ access and display.  The variables currently defined are:
 <p>
 A global value remains in effect for the remainder of your Vision
 session or until you reset the value.  To reset all globals to their
-default values use one of:<pre><b>
+default values use one of:<pre>
      Interface resetGlobals ;
 </b>or<b>
      Interface Global reset ;
 
-</b></pre>
+</pre>
 To set a global value, use one or more of the following messages,
 sent to <i>Interface Global</i>:
 <p>
@@ -197,7 +197,7 @@ The value supplied for <i>date</i> can be any valid date or numeric
 equivalent.  The value supplied for <i>currency</i> can be any
 <b>Currency</b> object or a string that converts to a <b>Currency</b> (e.g.,
 "BEF" ; "CAD").  The value supplied for <i>character</i> can be any
-string value.  For example:<pre><b>
+string value.  For example:<pre>
      Interface Global reset
         setDateTo: 93 . setDelimiterTo: "|" ;
 
@@ -207,36 +207,36 @@ string value.  For example:<pre><b>
           do: [ code print: 5 ; name print: 25 ; usExchange printNL ] ;
         " ;
 
-</b></pre>generates:<pre><b>
+</pre>generates:<pre>
 
      AUD  |Australian Dollar        |     1.48|
      BEF  |Belgian Franc            |    36.12|
      GBP  |British Pound            |     0.68|
      CAD  |Canadian Dollar          |     1.33|
      . . .
-</b></pre>
+</pre>
 In this example, the exchange rate data is retrieved as of year-end
 1993 and the output is delimited by the "|" character.  Notice that
 the "set" messages all return the <b>Interface Global</b> object
 so multiple messages can be streamed in a sequence as shown here.
 You can send the <i>profile</i> message to see the current global
-settings: <pre><b>
+settings: <pre>
      Interface Global profile ;
 
-</b></pre>generates:<pre><b>
+</pre>generates:<pre>
 
      Current Interface Globals
      Date:          12/31/1993
      Currency:       Undefined       NA 
      Delimiter:     |
 
-</b></pre>
+</pre>
 <p>
 <h4 id="buffering">Buffering results</h4>
 <p>
 You can limit the number of lines of output returned using the
 <i>setRowLimitTo:</i> message defined at <b>Interface</b>.  For
-example:<pre><b>
+example:<pre>
      Interface resetGlobals ;
      Interface setRowLimitTo: 2 ;
      Interface runExpression: 
@@ -245,36 +245,36 @@ example:<pre><b>
          do: [ code print: 5 ; name print: 25 ; usExchange printNL ] ;
         " ;
 
-</b></pre>generates:<pre><b>
+</pre>generates:<pre>
 
      AUD  Australian Dollar             1.34
      BEF  Belgian Franc                29.93
 
-</b></pre>
+</pre>
 Set the limit to <i>0</i> to suppress all output.  To retrieve a
 subset of rows use the <i>displayRowsFrom:to:</i> message.  For
-example: <pre><b>
+example: <pre>
      Interface displayRowsFrom: 2 to: 5 ;
 
-</b></pre>generates:<pre><b>
+</pre>generates:<pre>
 
      BEF  Belgian Franc                29.93
      GBP  British Pound                 0.65
      CAD  Canadian Dollar               1.35
      DKK  Danish Krone                  5.63
 
-</b></pre>
+</pre>
 To display size information about the last expression run, use
-the <i>displayCounts</i> message:<pre><b>
+the <i>displayCounts</i> message:<pre>
      Interface displayCounts ;
 
-</b></pre>generates:<pre><b>
+</pre>generates:<pre>
 
       Characters:      4628
             Rows:       167
      Max Columns:         3
 
-</b></pre>
+</pre>
 These values indicate the total size, total rows, and maximum number
 of columns for the entire output buffer independent of the number of
 rows you actually displayed.  
@@ -311,7 +311,7 @@ integers or strings in the form
 <b>YY</b>, <b>YYMM</b>, <b>YYMMDD</b>, or <b>YYYYMMDD</b>.  The
 constant <b>^today</b> can also be used.  Relative dates can be expressed 
 as:<pre>     { + -}  ##  offset
-</b></pre>
+</pre>
 where <i>##</i> is an integer and offset is one of 
 <i>days</i>, <i>businessDays</i>, 
 <i>months</i>, <i>monthEnds</i>, <i>monthBeginnings</i>, 
@@ -470,7 +470,7 @@ entity.
 </tr></table></Center><p>
 
 For example, the following extract requests price and industry sales
-data for a list of companies:<pre><b>
+data for a list of companies:<pre>
      Interface ExtractWS
          setOrientationTo: "EI" .
          setEntityTypeTo: Company .
@@ -485,7 +485,7 @@ data for a list of companies:<pre><b>
       GM     53.62     54.88 359988.98 
       XON     88.62     63.12 195283.44 
 
-</b></pre>
+</pre>
 The first line displays the total number of rows and columns in the
 extraction.  The row count does not include this totals line.  In
 this example, data is extracted for the 3 entities defined as the
@@ -501,7 +501,7 @@ general <b>Interface</b> class to control the default date,
 currency, and delimiter.  You can use the
 <a href="#buffering">buffering</a> options defined for the
 general <b>Interface</b> class to control the lines of output
-returned.  For example:<pre><b>
+returned.  For example:<pre>
      Interface ExtractWS
          setDelimiterTo: "," .
      run ;
@@ -513,7 +513,7 @@ returned.  For example:<pre><b>
       GM,     53.62,     54.88,359988.98,
       XON,     88.62,     63.12,195283.44, 
 
-</b></pre>
+</pre>
 Notice that you did not need to respecify the entire query.  You
 only need to set the new options and rerun the extract.
 <p>
@@ -551,7 +551,7 @@ a string in the form:
 If the "," character appears anywhere in the format, numeric data
 will be displayed with commas.
 <p>
-For example:<pre><b>
+For example:<pre>
      Interface ExtractWS
         setDelimiterTo: "|" .
         setScalarLabelOn
@@ -560,13 +560,13 @@ For example:<pre><b>
         setNumberFormatTo: "15.3," .
      run ;
 
-</b></pre>generates:<pre><b>
+</pre>generates:<pre>
              4|        5|
      2/27/1997|ticker|price|price@93|industry sales|
      45920010|IBM|        129.000|         56.500|    221,318.330|
      37044210|GM|         53.625|         54.875|    359,988.980|
      30229010|XON|         88.625|         63.125|    195,283.440|
-</b></pre>
+</pre>
 <p>
 The counts in the first line reflect the additional row and column
 for the labels.  The delimiter has been changed to the "|" character
@@ -575,13 +575,13 @@ and the numeric data has been reformatted.
 You can create blank rows and columns in your output by including
 blank value in your entity, date, and/or item lists.  
 A blank column is signified by two consecutive delimiter characters.
-For example:<pre><b>
+For example:<pre>
      Interface ExtractWS
          setEntityListTo: "IBM", "", "GM", "XON" .
          setItemListTo: "ticker", "price", "", "industry sales" .
      run ;
 
-</b></pre>generates:<pre><b>
+</pre>generates:<pre>
              5|        5|
      2/27/1997|ticker|price||industry sales|
      45920010|IBM|        129.000||    221,318.330|
@@ -589,7 +589,7 @@ For example:<pre><b>
      37044210|GM|         53.620||    359,988.980|
      30229010|XON|         88.620||    195,283.440|
 
-</b></pre>
+</pre>
 <p>
 The <i>reset</i> message can be sent to the <b>Interface
 ExtractWS</b> class to clear all the values.  The <i>profile</i>
@@ -610,7 +610,7 @@ The entity list can be set in one of two ways.  You can explicitly
 supply a list of entity identifiers that correspond to the current
 entity type.  This list can be supplied as a list of strings or a 
 a single string containing comma-separated identifiers.  For 
-example:<pre><b>
+example:<pre>
      Interface ExtractWS
           setOrientationTo: "EI" .
           setEntityTypeTo: Company .
@@ -626,14 +626,14 @@ example:<pre><b>
           setItemListTo: "ticker", "price", "price@93" .
      run ;
 
-</b></pre>
+</pre>
 These forms both set the entity list to the three companies
 indicated.  You can also derive a set of entities by supplying
 a Vision expression that evaluates to a list when sent to
 a specific entity.  For example, if the class <b>Industry</b>
 responds to the message <i>companyList</i> with the list of
 companies in that industry, you could generate a list of company
-entities using:<pre><b>
+entities using:<pre>
      Interface ExtractWS
           setOrientationTo: "EI" .
           setEntityTypeTo: Industry .
@@ -641,10 +641,10 @@ entities using:<pre><b>
           setEntityListTo: [ companyList ] .
           setItemListTo: "ticker", "price", "price@93" .
      run ;
-</b></pre>
-This assumes that the expression:<pre><b>
+</pre>
+This assumes that the expression:<pre>
      Named Industry Auto companyList
-</b></pre>
+</pre>
 returns the list of companies you wish to extract.  Note that in this
 case you set the entity type to <i>Industry</i> and supplied the id
 for a specific instance of this class.  Since the returned list is a
@@ -662,7 +662,7 @@ dates for a specific entity.  You use the
 This value must be an identifier for the entity type specified.
 The date list can be any combination of absolute and relative dates.
 The item list should specify items that are applicable to the entity
-type selected.  For example:<pre><b>
+type selected.  For example:<pre>
      Interface ExtractWS
           setOrientationTo: "IT" .
           setEntityTypeTo: Company .
@@ -674,7 +674,7 @@ type selected.  For example:<pre><b>
           setRowLabelsOn
      run ;
 
-</b></pre>
+</pre>
 Note that relative dates are relative to the scalar date, if
 specified.  Otherwise, the global date is used to compute relative
 dates.
@@ -695,19 +695,19 @@ the <a href="#extractIT">Item by Time</a> orientation.
 <h4 id="extractMulti">Multiple Extraction Workspaces</h4>
 <p>
 You can create and name multiple workspaces for your extractions.
-To create two new extraction workspaces, use:<pre><b>
+To create two new extraction workspaces, use:<pre>
      Interface ExtractWS createInstance: "Extract1" ;
      Interface ExtractWS createInstance: "Extract2" ;
-</b></pre>
+</pre>
 Access to these workspaces is provided via <i>Interface Named
-ExtractWS</i>.  For example:<pre><b>
+ExtractWS</i>.  For example:<pre>
      Interface Named ExtractWS Extract1
-</b></pre>
-accesses the first workspace and<pre><b>
+</pre>
+accesses the first workspace and<pre>
      Interface Named ExtractWS Extract2
-</b></pre>
+</pre>
 accesses the second one.  Any of the extraction messages can be
-used with any workspace.  For example:<pre><b>
+used with any workspace.  For example:<pre>
      Interface Named ExtractWS Extract2
           setOrientationTo: "IT" .
           setEntityTypeTo: Company .
@@ -723,11 +723,11 @@ used with any workspace.  For example:<pre><b>
           setEntityTo: "GM" .
      run ;     
 
-</b></pre>
+</pre>
 You can delete a named workspace using
-the <i>deleteInstance</i> message.  For example:<pre><b>
+the <i>deleteInstance</i> message.  For example:<pre>
      Interface Named ExtractWS Extract2 deleteInstance ;
-</b></pre>
+</pre>
 
 <p>
 <hr>
@@ -744,7 +744,7 @@ method which interprets and processes the inputs and presents results.
 <p>
 To interact with the <b>Interface ApplicationWS</b> class, you need to
 specify an application name and a list of parameter values.
-Two general formats are available:<pre><b>
+Two general formats are available:<pre>
      Interface ApplicationWS runWith: "appName", p1, p2, ... pn ;
 
 </b>and<b>
@@ -756,7 +756,7 @@ Two general formats are available:<pre><b>
           set: "paramn" to: pn .
      run ;
 
-</b></pre>
+</pre>
 In the first format, you supply a list of inputs to the <i>runWith:</i>
 message where the first element in this list is the name of the method
 to run and the remaining list elements are the input values.  The method
@@ -777,14 +777,14 @@ parameter values.
 The <i>runWith:</i> message executes the <i>reset</i> message prior
 to updating the parameter list.   The <i>set:to:</i> messages do not.
 If desired, you can use a combination of the parameter list and named
-parameters using:<pre><b>
+parameters using:<pre>
      Interface ApplicationWS
         reset resetGlobals
         setApplicationTo: "appName" .
         setParameterListTo: p1, p2, p3 .
         set: "extraParameter" to: TRUE .
      run ;
-</b></pre>
+</pre>
 <p>
 The remainder of this section describes parameterized applications
 in more detail and includes the following topics:
@@ -816,19 +816,19 @@ following rules:
 <td>2
 <td>"id"
 </tr></table></Center><p>
-For example:<pre><b>
+For example:<pre>
      Interface ApplicationWS 
         runWith: "Profile", Currency, "USD" ;
-</b></pre>
+</pre>
 returns a profile for the <b>Currency</b> object representing US
-Dollars and:<pre><b>
+Dollars and:<pre>
      Interface ApplicationWS 
         reset
         setApplicationTo: "Profile" .
         set: "classId" to: Currency .
         set: "id" to: "CAD" .
         run ;
-</b></pre>
+</pre>
 returns a profile for the <b>Currency</b> object representing
 Canadian Dollars.
 <p>
@@ -857,37 +857,37 @@ following rules:
 <td>4
 <td>"path"
 </tr></table></Center><p>
-For example:<pre><b>
+For example:<pre>
      Interface ApplicationWS 
         runWith: "GetValue", Currency, "CAD", "usExchange" ;
-</b></pre>
+</pre>
 returns the value of the Canadian exchange rate as of the current
 date.  You can use the
 <a href="#globals">global</a> and 
 <a href="#buffering">buffering</a> options defined for the
 general <b>Interface</b> class to control the default date,
-currency, delimiter, and buffering. For example:<pre><b>
+currency, delimiter, and buffering. For example:<pre>
      Interface Global setDateTo: 93 ;
      Interface ApplicationWS 
         runWith: "GetValue", Currency, "CAD", "usExchange" ;
-</b></pre>
+</pre>
 returns the value of the Canadian exchange rate as of year-end 1993.
 <p>
 The supplied entity can be a string containing a comma-separated
 list of identifiers.  In this case, a multi-line report will be
 returned displaying one line for each entity id that is valid for
-the class.  For example:<pre><b>
+the class.  For example:<pre>
      Interface ApplicationWS 
         resetGlobals
         runWith: "GetValue", Currency, "BEF, GBP, CAD", "usExchange" ;
 
-</b></pre>generates:<pre><b>
+</pre>generates:<pre>
 
      id    usExchange
      BEF       29.93 
      GBP        0.65 
      CAD        1.35 
-</b></pre>
+</pre>
 <p>
 
 <p>
@@ -905,7 +905,7 @@ positionally from the supplied parameter list.  If the argument to
 this message is a string, the parameter associated with the name
 indicated by the string is retrieved.  For example, a basic profile
 application can be defined to accept two inputs, the class and the
-instance id, then run the <i>profile</i> message for this object:<pre><b>
+instance id, then run the <i>profile</i> message for this object:<pre>
      Interface ApplicationWS defineMethod: [ | BasicProfile |
         !class <- ^self getParameter: 1 ;
         !id <- ^self getParameter: 2 . stripBoundingBlanks ;
@@ -916,9 +916,9 @@ instance id, then run the <i>profile</i> message for this object:<pre><b>
 </b>To run:<b>
 
      Interface ApplicationWS runWith: "BasicProfile", Currency, "CAD" ;
-</b></pre>
+</pre>
 Alternatively, you could have defined this method to use named
-parameters:<pre><b>
+parameters:<pre>
      Interface ApplicationWS defineMethod: [ | BasicProfile |
         !class <- ^self getParameter: "class" ;
         !id <- ^self getParameter: "objectId" . stripBoundingBlanks ;
@@ -934,11 +934,11 @@ parameters:<pre><b>
         set: "objectId" to: "CAD" .
         run ;
 
-</b></pre>
+</pre>
 You could also define this method to accept either order-based or
 named parameters.  The <i>getParameter:orName:</i> message will
 retrieve the parameter positionally if present, by name otherwise.
-For example:<pre><b>
+For example:<pre>
      Interface ApplicationWS defineMethod: [ | BasicProfile |
         !class <- ^self getParameter: 1 orName: "class" ;
         !id <- ^self getParameter: 2 orName: "objectId" .
@@ -957,13 +957,13 @@ For example:<pre><b>
         set: "objectId" to: "CAD" .
         run ;
 
-</b></pre>
+</pre>
 <p>
 <h4 id="appErrors">Error Handling</h4>
 <p>
 The prior application does not test on the validity of the inputs.
 You can add explicit tests and error messages directly to the
-method.  For example:<pre><b>
+method.  For example:<pre>
      Interface ApplicationWS defineMethod: [ | BasicProfile |
         !class <- ^self getParameter: 1 ;
         !id <- ^self getParameter: 2 . stripBoundingBlanks ;
@@ -975,16 +975,16 @@ method.  For example:<pre><b>
 
      Interface ApplicationWS runWith: "BasicProfile", Currency, "XYZ";
 
-</b></pre>generates:<pre><b>
+</pre>generates:<pre>
 
      >>> Bad class or id supplied.
-</b></pre>
+</pre>
 You can create whatever conventions you need to report errors in this
 fashion.  A logging mechanism has been included as part of the <b>Interface</b>
 class to standardize error reporting and queue any error messages generated
 until the end of the application's execution.  The message
 <i>post:for:with:</i> has been defined for the class <b>Interface ErrorLog</b>
-to store an error message.  For example:<pre><b>
+to store an error message.  For example:<pre>
      Interface ApplicationWS defineMethod: [ | BasicProfile |
         !class <- ^self getParameter: 1 ;
         !id <- ^self getParameter: 2 . stripBoundingBlanks ;
@@ -999,7 +999,7 @@ to store an error message.  For example:<pre><b>
 
      Interface ApplicationWS runWith: "BasicProfile", Currency, "XYZ" ;
 
-</b></pre>generates:<pre><b>
+</pre>generates:<pre>
 
      Transaction #: 1       
      Error: Bad class or id supplied.
@@ -1007,12 +1007,12 @@ to store an error message.  For example:<pre><b>
         Input: Currency Default
         Input: String XYZ
 
-</b></pre>
+</pre>
 The current error log is automatically displayed after the application
 has run.  If more than one error were encountered, they would each be
 listed in this format.  The errors will always be displayed at the end
 of any application execution.  This enables you to run some parts
-of an application even when an error is encountered.  For example:<pre><b>
+of an application even when an error is encountered.  For example:<pre>
      Interface ApplicationWS defineMethod: [ | BasicProfile |
         !class <- ^self getParameter: 1 ;
         !id <- ^self getParameter: 2 . stripBoundingBlanks ;
@@ -1029,7 +1029,7 @@ of an application even when an error is encountered.  For example:<pre><b>
 
      Interface ApplicationWS runWith: "BasicProfile", Currency, "XYZ" ;
 
-</b></pre>generates:<pre><b>
+</pre>generates:<pre>
 
      This profile is run whether the entity is found or not.
      Class:                        Undefined
@@ -1043,43 +1043,43 @@ of an application even when an error is encountered.  For example:<pre><b>
         Input: Currency Default
         Input: String XYZ
 
-</b></pre>
+</pre>
 
 <p>
 <h4 id="appMulti">Multiple Application Workspaces</h4>
 <p>
 You can create and name multiple workspaces for your applications.
-To create two new workspaces, use:<pre><b>
+To create two new workspaces, use:<pre>
      Interface ApplicationWS createInstance: "App1" ;
      Interface ApplicationWS createInstance: "App2" ;
-</b></pre>
+</pre>
 Access to these workspaces is provided via <i>Interface Named
-ApplicationWS</i>.  For example:<pre><b>
+ApplicationWS</i>.  For example:<pre>
      Interface Named ApplicationWS App1
-</b></pre>
-accesses the first workspace and<pre><b>
+</pre>
+accesses the first workspace and<pre>
      Interface Named ApplicationWS App2
-</b></pre>
+</pre>
 accesses the second one.  Any of the application messages can be
-used with any workspace.  For example:<pre><b>
+used with any workspace.  For example:<pre>
      Interface Named ApplicationWS App2
          runWith: "BasicProfile", Currency, "CAD" ;
-</b></pre>
+</pre>
 You can delete a named workspace using
-the <i>deleteInstance</i> message.  For example:<pre><b>
+the <i>deleteInstance</i> message.  For example:<pre>
      Interface Named ApplicationWS App2 deleteInstance ;
 
-</b></pre>
+</pre>
 You can also make subclasses of the <b>Interface ApplicationWS</b>
 class to group related applications together.  For example, you
 may want to separate administrative applications from analyst 
-applications:<pre><b>
+applications:<pre>
      Interface ApplicationWS 
          createSubclass: "AdminApps" at: Interface ;
      Interface ApplicationWS 
          createSubclass: "AnalystApps" at: Interface ;
      Interface ApplicationWS showInheritance ;
-</b></pre>
+</pre>
 You define and run methods for the subclasses the same way you do
 for the parent <b>ApplicationWS</b> class.
 <p>
@@ -1115,7 +1115,7 @@ For example, the message <i>bold:</i> can be defined to format
 the supplied parameter with bold tags.  By default, you just
 return the argument.  In the <i>Html</i> environment, you surround the
 output with the tags &lt b&gt and &lt/b&gt.  The following methods
-implement this behavior:<pre><b>
+implement this behavior:<pre>
      FormatTools defineMethod: [ | bold: object |
         object asString
      ] ;
@@ -1124,13 +1124,13 @@ implement this behavior:<pre><b>
         [ "&lt b&gt" print ; object print ; "&lt/b&gt" print ;
         ] divertOutput
      ] ;
-</b></pre>
-The expression:<pre><b>
+</pre>
+The expression:<pre>
      FormatTools bold: "xyz" . print ;
-</b></pre>
-displays the undecorated string and the expression:<pre><b>
+</pre>
+displays the undecorated string and the expression:<pre>
      FormatTools Html bold: "xyz" . print ;
-</b></pre>
+</pre>
 displays the bold tags.
 <p>
 The message <i>FormatTools</i> is defined at <b>Object</b> to
@@ -1138,22 +1138,22 @@ return the parent <b>FormatTools</b> class by default.  You can
 use the <i>evaluate:</i> message to rebind the <b>FormatTools</b>
 message to one of the subclasses.  For 
 example, define a method at the <b>Currency</b> class to
-display the code in bold followed by the name of the instance:<pre><b>
+display the code in bold followed by the name of the instance:<pre>
      Currency defineMethod: [ | demoFormat |
         FormatTools bold: code . print ;
         name printNL ;
      ] ;
-</b></pre>
-Run this method using:<pre><b>
+</pre>
+Run this method using:<pre>
      Named Currency CAD demoFormat ;
 
 </b>generating:<b>
 
      CAD Canadian Dollar
-</b></pre>
+</pre>
 Note that no special formatting appears since the default
 <i>bold:</i> message just prints its argument.  Run the same
-expression within an <i>evaluate:</i> block:<pre><b>
+expression within an <i>evaluate:</i> block:<pre>
      FormatTools Html evaluate:
         [ Named Currency CAD demoFormat ; ] ;
 </pre>
@@ -1161,7 +1161,7 @@ expression within an <i>evaluate:</i> block:<pre><b>
 
      &lt b&gt CAD&lt/b&gt Canadian Dollar
 </pre>
-</b></pre>
+</pre>
 Because the <i>demoFormat</i> message was invoked from within the
 <i>FormatTools Html</i> evaluation block, this version of the
 <i>bold:</i> message is executed.
@@ -1239,7 +1239,7 @@ The "Html" version prints the first string within
 <i>&lt h4&gt</i> and <i>&lt/h4&gt</i> tags.  The entire title is printed
 within <i>&lt center&gt</i> and <i>&lt/center&gt</i> tags.
 The second parameter is not
-used by this version of the method. For example:<pre><b>
+used by this version of the method. For example:<pre>
      Currency defineMethod: [ | demoFormat |
         FormatTools buildTitle: "Currency Report" over: 80 . print ;
         code print ; " " print ; name printNL ;
@@ -1247,24 +1247,24 @@ used by this version of the method. For example:<pre><b>
 
      Named Currency CAD demoFormat ;
 
-</b></pre>generates:<pre><b>
+</pre>generates:<pre>
 
                               Currency Report
 
      CAD Canadian Dollar
-</b></pre>
+</pre>
 The title is centered over 80 columns.  Running the same
-expression within an <i>evaluate:</i> block:<pre><b>
+expression within an <i>evaluate:</i> block:<pre>
      FormatTools Html evaluate:
         [ Named Currency CAD demoFormat ; ] ;
 
-</b></pre>generates:<pre><b>
+</pre>generates:<pre>
 
      &lt center&gt
      &lt h3&gt Currency Report &lt/h3&gt
      &lt/center&gt&lt p&gt
      CAD Canadian Dollar
-</b></pre>
+</pre>
 Because the <i>demoFormat</i> message was invoked from within the
 <i>FormatTools Html</i> evaluation block, this version of the
 message is executed.

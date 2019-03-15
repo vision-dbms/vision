@@ -28,7 +28,7 @@ The following example displays the basic holdings data for an Account.
 Read the file <i>example2.a.</i> You should see: 
 
 <ul>
-<pre><b>
+<pre>
 Named Account \102 holdings
 do:
    [
@@ -38,18 +38,18 @@ do:
     totalMarketValue printWithCommas:15 ;
     percentOfPort printNL ;
    ];
-</b></pre>
+</pre>
 </ul>
 
 <p>Execute this program. You should see: 
 
 <ul>
-<pre><b>       
+<pre>       
 02364J10  AMERICA ONLINE INC DEL COM       8200.00     695,975.00    14.95
 37044210  GENERAL MTRS CORP COM            7800.00     497,741.40    10.69
 00949T10  AIRTOUCH COMMUNICATNS COM       15200.00     589,000.00    12.65
 ...
-</b></pre>
+</pre>
 </ul>
 <p>
 The message <i>holdings</i> is a list that contains the individual securities held within the specific account.
@@ -62,7 +62,7 @@ The next example displays holdings data with headings, sorted by percentage of p
 Read the file <i>example2.b.</i> You should see: 
 
 <ul>
-<pre><b>
+<pre>
 # Add headers 
 "Code" print:10 ;
 "Name" print:35 ;
@@ -81,19 +81,19 @@ do:
     totalMarketValue printWithCommas:15 ;
     percentOfPort printNL ;
    ];
-</b></pre>
+</pre>
 </ul>
 <p>Execute this program. You should see: 
 
 <ul>
-<pre><b>
+<pre>
 Code      Name                               Shares      Total Mkt Val  % of Port
 
 24702510  DELL COMPUTER CORP COM                8600.00     717,566.80    15.41
 02364J10  AMERICA ONLINE INC DEL COM            8200.00     695,975.00    14.95
 00949T10  AIRTOUCH COMMUNICATNS COM            15200.00     589,000.00    12.65
 ...
-</b></pre>
+</pre>
 </ul>
 <p>
 This example expands on the previous example by adding column headings and sorting the holdings.
@@ -107,7 +107,7 @@ from a different date.
 Read the file <i>example2.c.</i> You should see: 
 
 <ul>
-<pre><b>
+<pre>
 "Code" print:10 ;
 "Name" print:37 ;
 "Shares" print:12 ;
@@ -128,19 +128,19 @@ do:
     percentOfPort printNL ;
    ];
 ];
-</b></pre>
+</pre>
 </ul>
 <p>Execute this program. You should see:
 
 <ul>
-<pre><b>
+<pre>
 Code      Name                                 Shares      Total Mkt Val  % of Port
 
 40410010  HBO & CO COM                        19,600.00     852,600.00     9.61
 37935240  GLOBAL MARINE INC COM               25,400.00     790,575.00     8.91
 24702510  DELL COMPUTER CORP COM               8,600.00     689,075.00     7.77
 ...
-</b></pre>
+</pre>
 </ul>
 <p>
 By surrounding the request with a changed date, you are able to display the same
@@ -153,7 +153,7 @@ This example displays sectors for each holding.
 Read the file <i>example2.d</i>.  You should see:
 
 <ul>
-<pre><b>
+<pre>
 "Code" print:10 ;
 "Name" print:37 ;
 "Shares" print:12 ;
@@ -174,19 +174,19 @@ do:
     percentOfPort print:10 ;
     security company industry sector name printNL:-35 ;  #Navigate to sector
    ];
-</b></pre>
+</pre>
 </ul>
 <p>Execute this program. You should see:
 
 <ul>
-<pre><b>
+<pre>
 Code      Name                                 Shares      Total Mkt Val  % of Port     Sector
 
 24702510  DELL COMPUTER CORP COM               8,600.00     717,566.80     15.41                         Technology
 02364J10  AMERICA ONLINE INC DEL COM           8,200.00     695,975.00     14.95                  Consumer services
 00949T10  AIRTOUCH COMMUNICATNS COM           15,200.00     589,000.00     12.65     Commercial/industrial services
 ...
-</b></pre>
+</pre>
 </ul>
 <p>
 
@@ -203,7 +203,7 @@ This example displays holdings grouped into sectors.
 Read the file <i>example2.e.</i> You should see: 
 
 <ul>
-<pre><b>
+<pre>
 Named Account \102 holdings
 groupedBy:[security company industry sector] .  # group into sectors
 sortUp:[name] . # sort by sector name
@@ -222,13 +222,13 @@ do:
        ];
         newLine print ;
    ];
-</b></pre>
+</pre>
 </ul>
 
 <p>Execute this program. You should see:
 
 <ul>
-<pre><b>
+<pre>
 SRVI      Commercial/industrial services     
 00949T10  AIRTOUCH COMMUNICATNS COM       15200.00     589,000.00    12.65
 
@@ -237,7 +237,7 @@ DURB      Consumer durables
 34537010  FORD MTR CO DEL COM              7200.00     338,853.60     7.28
 
 ...
-</b></pre>
+</pre>
 </ul>
 <p>
 The <i>groupedBy:</i> message groups the current list based on the supplied block.
@@ -253,7 +253,7 @@ Read the file <i>example2.f.</i> You should see:
 <p>
 
 <ul>
-<pre><b>
+<pre>
 971105 evaluate:
 [
 Named Account \102 holdings
@@ -276,13 +276,13 @@ do:
         newLine print ;
    ];
 ];
-</b></pre>
+</pre>
 </ul>
 
 <p>Execute this program. You should see:
 
 <ul>
-<pre><b>
+<pre>
 SRVI      Commercial/industrial services     
 00949T10  AIRTOUCH COMMUNICATNS COM       15200.00     587,100.00     6.62
 
@@ -290,7 +290,7 @@ DURB      Consumer durables
 37044210  GENERAL MTRS CORP COM            7800.00     500,666.40     5.65
 34537010  FORD MTR CO DEL COM             12400.00     541,731.20     6.11
 ...
-</b></pre>
+</pre>
 </ul>
 
 

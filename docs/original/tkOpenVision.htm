@@ -317,32 +317,32 @@ This flag is ignored if the <i>Append</i> option is selected.
 The following examples illustrate some Vision expressions used to access files.  
 The expression:
 <ul>
-<pre><b>"file:/tmp/file1.dat" asOpenVisionChannel</b></pre>
+<pre>"file:/tmp/file1.dat" asOpenVisionChannel</pre>
 </ul>
 opens the file <i>/tmp/file1.dat</i> using the default read-only, non-mapped access.  
 In contrast:
 <ul>
-<pre><b>"file,m:/tmp/file1.dat" asOpenVisionChannel</b></pre>
+<pre>"file,m:/tmp/file1.dat" asOpenVisionChannel</pre>
 </ul>
 opens the same file using read-only, memory mapped access, while:
 <ul>
-<pre><b>"file,rwm:/tmp/file1.dat" asOpenVisionChannel</b></pre>
+<pre>"file,rwm:/tmp/file1.dat" asOpenVisionChannel</pre>
 </ul>
 uses memory mapping to access the file for reading and writing.
 <p>
 The next two expressions show how to create files.
 <ul>
-<pre><b>
+<pre>
 "file,c644t:/tmp/file1.dat" asOpenVisionChannel
-</b></pre>
+</pre>
 </ul>
 creates an empty, write-only file which grants UNIX style read-write permission to its owner and read-only permission to all other users.  
 Because the optional size argument to the truncate option has been omitted, it assumes its default value of zero.  
 Finally,
 <ul>
-<pre><b>
+<pre>
 "file,rct20000000m:/tmp/file1.dat" asOpenVisionChannel
-</b></pre>
+</pre>
 </ul>
 creates a 20 megabyte memory-mapped file that can be read and written.  
 If <i>file1.dat</i> does not exist, it will be created with permissions that attempt to grant all users read and write access to the file.
@@ -406,17 +406,17 @@ The channel returned by <i>errorInput</i> is read only.
 The following examples show how to create process channels.  
 The expression:
 <ul>
-<pre><b>
+<pre>
 "process:/vision/bin/batchvision -U19" asOpenVisionChannel
-</b></pre>
+</pre>
 </ul>
 
 creates a channel talking to an independently executing <i>batchvision</i> session.  
 The expression:
 <ul>
-<pre><b>
+<pre>
 "process,e:/vision/bin/batchvision -U19" asOpenVisionChannel
-</b></pre>
+</pre>
 </ul>
 creates an independent <i>batchvision</i> process that sends Vision error messages to a separate channel.
 <p>
@@ -428,10 +428,10 @@ The final form of channel specification is socket format.
 Unlike file and process specifications, socket specifications correspond to a family of types.  
 The <i>type</i> component of a socket specification consists of two and possibly three fields, separated by /'s:
 <ul>
-<pre><b>
+<pre>
 address_family/socket_type
 address_family/socket_type/socket_protocol
-</b></pre>
+</pre>
 </ul>
 
 In these type specifications, the <i>address_family</i> field understands two keywords 
@@ -450,7 +450,7 @@ The format of the <i>resource</i> component of a socket specification depends on
 For <i>inet</i> family addresses, the <i>resource</i> component consists of a string in one of the following forms:
 
 <ul>
-<pre><b>
+<pre>
 host:port
 host:service
 port
@@ -501,30 +501,30 @@ It is easier to specify socket channels than it might appear.
 For example, to contact the remote execution daemon on host <i>fester</i>, 
 you use the expression:
 <ul>
-<pre><b>
+<pre>
 "inet/stream:fester:exec" asOpenVisionChannel
-</b></pre>
+</pre>
 </ul>
 
 To create a service listening on port 7000, you use:
 <ul>
-<pre><b>
+<pre>
 "inet/stream,p:7000" asOpenVisionChannel
-</b></pre>
+</pre>
 </ul>
 
 To contact that service from a Vision session running on the same host, you enter:
 <ul>
-<pre><b>
+<pre>
 "inet/stream:7000" asOpenVisionChannel
-</b></pre>
+</pre>
 </ul>
 
 If the service created above was started on host <i>fred</i>, you could also use:
 <ul>
-<pre><b>
+<pre>
 "inet/stream:fred:7000" asOpenVisionChannel
-</b></pre>
+</pre>
 </ul>
 
 As you can see from the last three examples, the only difference between a socket that acts as a server and one that acts as a client is whether the socket is passive. 
@@ -691,7 +691,7 @@ You will inevitably develop an idiomatic style to wait for data. A useful form o
 The following method, included with the Open Vision Tool Kit as part of a package that submits requests to other Vision sessions, 
 illustrates these points. This particular method collects data from a stream until it receives a prompt indicating the end of a block of output:
 <ul>
-<pre><b>
+<pre>
 OpenVision Channel
 defineMethod:
 [ | getStringThroughPrompt: prompt |
@@ -704,7 +704,7 @@ defineMethod:
                  ];
                  string
 ];
-</b></pre>
+</pre>
 </ul>
 
 Note that:
@@ -863,7 +863,7 @@ If you do not specify a binary format, all binary data is read and written using
 This corresponds to the special format <i>Untranslated</i>.  
 You specify an explicit format by sending one of the following messages to your channel before using it to read or write binary data:
 <ul>
-<pre><b>
+<pre>
 setBinaryFormatToUntranslated
 
 setBinaryFormatToIntel
@@ -871,7 +871,7 @@ setBinaryFormatToIntel
 setBinaryFormatToPARisc
 
 setBinaryFormatToSparc
-</b></pre>
+</pre>
 </ul>
 
 To query a channel's binary format, you send the message <i>binaryFormat</i> to the channel.  
@@ -895,7 +895,7 @@ The <i>trim</i> format option controls the removal of leading and trailing blank
 By default, all strings read from a channel are unchanged.  
 To select a different behavior, you send one of the following messages to your channel:
 <ul>
-<pre><b>
+<pre>
 setTrimFormatToBoundingBlanks
 
 setTrimFormatToLeadingBlanks
@@ -903,14 +903,14 @@ setTrimFormatToLeadingBlanks
 setTrimFormatToTrailingBlanks
 
 setTrimFormatToUntrimmed
-</b></pre>
+</pre>
 </ul>
 
 You must capture and use the <i>OpenVision Channel</i> returned. 
 The setting applies only to the returned <i>OpenVision Channel</i>.  
 The following example illustrates the correct way to specify and use the trim format option:
 <ul>
-<pre><b>
+<pre>
 !channel <- "file:mydata.txt"
       asOpenVisionChannel
       setTrimFormatToTrailingBlanks;
@@ -922,7 +922,7 @@ The following example illustrates the correct way to specify and use the trim fo
 !string4 <- channel
       setTrimFormatToUntrimmed 
       getString: 20 at: 61;
-</b></pre>
+</pre>
 </ul>
 
 Trailing blanks are trimmed from <i>string1</i> and <i>string3</i> because they are read using the channel returned by <i>setTrimFormatToTrailingBlanks</i>.  
@@ -956,10 +956,10 @@ Unfortunately, reading and writing data sequentially has a global side effect, i
 Vision makes no attempt to determine where in a stream your data should go and, harder still, from whence it should come.  
 If you attempt an operation such as:
 <ul>
-<pre><b>
+<pre>
 !stream <- "file:mydata.txt" asOpenVisionChannel;
 Company masterList do: [ ^my stream getLine ];
-</b></pre>
+</pre>
 </ul>
 you can not predict or control the association of file lines with data base companies.
 <p>
@@ -991,17 +991,17 @@ It is simply a number not already in use and usually chosen from the range of po
 The following expression creates that socket along with the Open Vision Tool Kit service channel that manages it:
 
 <ul>
-<pre><b>
+<pre>
 !Service <- "inet/stream,p:7000" <i>asOpenVisionChannel</i>
-</b></pre>
+</pre>
 </ul>
 
 Once created, a service must be enabled before it can accept connections. 
 The following Vision expression enables the service just created:
 <ul>
-<pre><b>
+<pre>
 Service <i>enableHandler</i>
-</b></pre>
+</pre>
 </ul>
 
 Enabling a service instructs Vision to look for and process incoming connection requests. 
@@ -1087,7 +1087,7 @@ The remainder of this section illustrates the methodology used to develop a hand
 It uses an interactive balance sheet server as an example.  
 The following telnet session shows a sample interaction with the server:
 <ul>
-<pre><b>
+<pre>
 % telnet fester 7100
 Trying 204.32.67.16 ...
 Connected to fester.
@@ -1122,7 +1122,7 @@ Currency: United States Dollar
 
 Enter Ticker Symbol: bye
 Connection closed by foreign host.
-</b></pre>
+</pre>
 </ul>
 
 Creating a custom server is a three step process:
@@ -1146,7 +1146,7 @@ The following Vision code shows the implementation of the service channel handle
 For clarity, the stream handler's implementation is omitted:
 
 <ul>
-<pre><b>
+<pre>
 !BServer <- "inet/stream,p:7100" <i>asOpenVisionChannel</i>;
 
 BServer <i>setBoundHandlerTo:</i> [
@@ -1163,12 +1163,12 @@ BServer <i>setBoundHandlerTo:</i> [
 ];
 
 BServer <i>enableHandler;</i>
-</b></pre>
+</pre>
 </ul>
 
 The omitted stream handler's implementation is:
 <ul>
-<pre><b>
+<pre>
 client <i>setBoundHandlerTo:</i> [
    !prompt <- "Enter Ticker Symbol: ";
 
@@ -1209,7 +1209,7 @@ client <i>setBoundHandlerTo:</i> [
 
    ^self isAtEndOfInput ifTrue: [ ^self <i>close</i> ];
 ];
-</b></pre>
+</pre>
 </ul>
 
 Obviously, most of this code deals with the details of writing prompts and retrieving data.  
@@ -1226,7 +1226,7 @@ After it exits, it will not be called again until new data arrives.
 The section <a href="#Reading Data Sequentially">Reading Data Sequentially</a> also discussed this constraint and introduced an idiom for dealing with it.  
 A similar idiom applies here:
 <ul>
-<pre><b>
+<pre>
 !inputLine <- ^self getLine;
 [ inputLine isntNA ] whileTrue: [
 
@@ -1234,7 +1234,7 @@ A similar idiom applies here:
 
    :inputLine <- ^self <i>getLine;</i>
 ];
-</b></pre>
+</pre>
 </ul>
 <li>It must detect the end of input and close or disable itself when it does.
 </ul>
@@ -1378,21 +1378,21 @@ describes one of the remote execution messages, you should examine the Open Visi
 The sample is an implementation of the <i>asFileContents</i> method using The Open Vision Tool Kit:
 
 <ul>
-<pre><b>
+<pre>
 String defineMethod: [ | asFileContents |
     !file <- "file:" concat: ^self. asOpenVisionChannel;
     !result <- file getString;
     file close;
     result
 ];
-</b></pre>
+</pre>
 </ul>
 
 <h4 id="A Flat File Reader">A Flat File Reader</h4>
 
 This sample uses The Open Vision Tool Kit to manufacture a collection of Vision objects from the data contained in a flat, ASCII file.
 <ul>
-<pre><b>
+<pre>
 Object specializeAs: 'SampleData';
 SampleData
   defineFixedProperty: 'name'.
@@ -1428,7 +1428,7 @@ rcount sequence0 do: [
 ];
 
 file close;
-</b></pre>
+</pre>
 </ul>
 
 <h4 id="A Remote Execution Daemon Client">A Remote Execution Daemon Client</h4>
@@ -1438,7 +1438,7 @@ This method implements the full protocol, including the secondary error socket d
 This method is a standard part of The Open Vision Tool Kit.
 
 <ul>
-<pre><b>
+<pre>
 OpenVision defineMethod:
 [ | rexec: command onHost: host
                    asUser: username
@@ -1489,7 +1489,7 @@ OpenVision defineMethod:
        message
     ]
 ];
-</b></pre>
+</pre>
 </ul>
 
 <h4 id="A Passive Real-Time Data Base">A Passive Real-Time Data Base</h4>
@@ -1508,7 +1508,7 @@ Any program can construct and maintain this file.
 This example uses Vision to do it.  
 The following Vision code constructs an initial version of the file from the securities already present in the Vision data base:
 <ul>
-<pre><b>
+<pre>
 !slist <- Security masterList;
 
 !channelSpec <- "file,mcrwt"
@@ -1531,7 +1531,7 @@ slist numberElements do: [
     ^my channel putByte:   pvalid         at: roffset + 10;
     ^my channel putDouble: pvalue         at: roffset + 11;
 ];
-</b></pre>
+</pre>
 </ul>
 
 Note that this file is constructed as a memory mapped file created with enough space to contain as many 18 byte 
@@ -1541,13 +1541,13 @@ data records as there are securities.
 The data file constructed above is designed to be accessed and updated by any Vision session that has an interest in it. 
 The following code defines the first of two classes to help:
 <ul>
-<pre><b>
+<pre>
 Object specializeAs: "MemoryRecord";
 
 MemoryRecord
 defineFixedProperty: 'offset'.
 ;
-</b></pre>
+</pre>
 </ul>
 
 The class <i>MemoryRecord</i> is designed to be an abstract superclass of any class used to model data contained in a memory mapped file. 
@@ -1559,7 +1559,7 @@ The class <i>RealTimePriceRecord</i> models the data in the file illustrated in 
 In particular, this class defines cover methods that access code and that access and update price. 
 The following Vision code defines the class:
 <ul>
-<pre><b>
+<pre>
 MemoryRecord specializeAs: "RealTimePriceRecord";
 
 RealTimePriceRecord
@@ -1591,7 +1591,7 @@ defineMethod:
     ];
     ^self
 ];
-</b></pre>
+</pre>
 </ul>
 
 In the preceding code, the object <i>^global RealTimePriceRecordFile</i> is expected to return a channel object that accesses the data file.  
@@ -1600,7 +1600,7 @@ That channel object is defined in the final block of Vision code included in thi
 
 To facilitate the use of real time price records from the rest of the Vision data base, the following code defines an access path and cover methods at <i>Security:</i>
 <ul>
-<pre><b>
+<pre>
 Security
 defineFixedProperty: 'realTimePriceRecord'.
 
@@ -1616,14 +1616,14 @@ defineMethod:
     ];
     ^self
 ];
-</b></pre>
+</pre>
 </ul>
 
 With the real time data file created and modeled, the final step is its access. 
 The following code makes that possible:
 
 <ul>
-<pre><b>
+<pre>
 ^global
   define: 'RealTimePriceRecordFile'
     toBe: "file,rwm:/tmp/pricedb.dat" asOpenVisionChannel;
@@ -1637,7 +1637,7 @@ The following code makes that possible:
 	record :security <- security;
     ];
 ];
-</b></pre>
+</pre>
 </ul>
 
 The first Vision expression simply opens the data file and defines the value of <i>^global RealTimePriceRecordFile</i>
@@ -1648,24 +1648,24 @@ attaching each record to the appropriate security.
 
 Once attached, accessing the data contained in this file is as simple as:
 <ul>
-<pre><b>
+<pre>
 Named Security IBM realTimePrice
-</b></pre>
+</pre>
 </ul>
 
 Changing the data is also simple:
 
 <ul>
-<pre><b>
+<pre>
 Named Security IBM setRealTimePriceTo: 68.75
-</b></pre>
+</pre>
 </ul>
 
 Because the change is made directly to the file, it is immediately visible to all other programs running on the same computer. 
 The interaction between two Vision sessions running at the same time on the same computer is illustrated by the following example:
 <p>
 
-<pre><b>
+<pre>
 Session 1                       Session 2
 
 Named Security IBM realTimePrice
@@ -1679,7 +1679,7 @@ Named Security IBM setRealTimePriceTo: 68.75
 
                                 Named Security IBM realTimePrice
                                 68.75
-</b></pre>
+</pre>
 
 In this example, expressions displayed further down the page are executed after those preceding them on the page.
 <p>
@@ -1690,11 +1690,11 @@ can be created and saved at the same time the initial data file is created.
 Only one expression needs to be run by each Vision session that accesses the file:
 
 <ul>
-<pre><b>
+<pre>
 ^global
   define: 'RealTimePriceRecordFile'
     toBe: "file,rwm:/tmp/pricedb.dat" asOpenVisionChannel;
-</b></pre>
+</pre>
 </ul>
 
 Although this example does not do so, writing a method at either <i>MemoryRecord</i> or <i>RealTimePriceRecord</i> 
@@ -1757,31 +1757,31 @@ As implemented in this example, that output is simply displayed.
 The following code illustrates how <i>OpenVision PeerToPeerChannel</i> objects are used.  
 To kick things off, a peer-to-peer service listening on port 7100 is started on <i>fester</i>:
 <ul>
-<pre><b>
+<pre>
 !ptps <- OpenVision PeerToPeerChannel new
     setOpenVisionChannelTo: "inet/stream,p:7100";
-</b></pre>
+</pre>
 </ul>
 
 With the service started, two clients separately connect to it -- one also running on <i>fester</i>:
 <ul>
-<pre><b>
+<pre>
 !ptpc <- OpenVision PeerToPeerChannel new
     setOpenVisionChannelTo: "inet/stream:7100"
-</b></pre>
+</pre>
 </ul>
 
 and the other on a different host:
 <ul>
-<pre><b>
+<pre>
 !myptp <- OpenVision PeerToPeerChannel new
     setOpenVisionChannelTo: "inet/stream:fester:7100"
-</b></pre>
+</pre>
 </ul>
 
 Either client can execute a Vision expression using the service provided on <i>fester</i>:
 <ul>
-<pre><b>
+<pre>
 ptpc submitRequest: "(2 + 2) print"
 
 +++ Got Reply:
@@ -1792,11 +1792,11 @@ myptp submitRequest: "(2 + 2) print"
 +++ Got Reply:
      4.00
 </ul>
-</b></pre>
+</pre>
 Unlike traditional client-server protocols, the connection is symmetric. 
 As a result, the server can make use of the computational resources of its clients:
 <ul>
-<pre><b>
+<pre>
 ptps children do: [
     ^self submitRequest: "OpenVision HostName print"
 ];
@@ -1805,7 +1805,7 @@ ptps children do: [
 fester
 +++ Got Reply:
 sonbeem
-</b></pre>
+</pre>
 </ul>
 
 Although this example is simple, the capability is potent.  
@@ -1857,7 +1857,7 @@ When new input arrives, the channel advances to the next state.
 After processing a message, the channel returns to the first state. 
 This loop is implemented using a list of blocks containing the processing rules for each state:
 <ul>
-<pre><b>
+<pre>
 OpenVision PeerToPeerChannel define: 'InputStates' toBe:
  [ :messageType <- channel getByte ],
  [ :messageSize <- channel getLong ],
@@ -1869,13 +1869,13 @@ OpenVision PeerToPeerChannel define: 'InputStates' toBe:
     :inputState <- 0;
     TRUE
  ];
-</b></pre>
+</pre>
 </ul>
 
 an input handler that cycles through the states as long as the channel remains open:
 
 <ul>
-<pre><b>
+<pre>
 OpenVision PeerToPeerChannel defineMethod:
 [ | acceptInput |
     [ ^self send: (InputStates at: inputState). isntNA
@@ -1884,12 +1884,12 @@ OpenVision PeerToPeerChannel defineMethod:
     ];
     channel isAtEndOfInput ifTrue: [ ^self close ];
 ];
-</b></pre>
+</pre>
 </ul>
 
 and a dispatch table that contains a processing rule for each type of message:
 <ul>
-<pre><b>
+<pre>
 OpenVision PeerToPeerChannel
 define: 'MessageProcessors' toBe:
 [ ^self returnReply: [
@@ -1907,7 +1907,7 @@ define: 'MessageProcessors' toBe:
 All of this is explicit in the complete implementation that follows:
 
 <ul>
-<pre><b>
+<pre>
 ################
 ####
 ####  OpenVision PeerToPeerChannel
@@ -2103,7 +2103,7 @@ defineMethod:
 
 initializeClusterPrototype
 ;
-</b></pre>
+</pre>
 </ul>
 
 

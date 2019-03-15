@@ -64,12 +64,12 @@ the  company  associated  with  the  security.   The   actual   object
 representing  the  company  is  returned.   For  example,  the  Vision
 expression:
 
-<pre><b>    Named Security GM company</b></pre>
+<pre>    Named Security GM company</pre>
 
 returns the object representing the company GM and the expression:
 
 
-<pre><b>    Named Security GM company = Named Company GM </b></pre>
+<pre>    Named Security GM company = Named Company GM </pre>
 
 yields the result TRUE.  Note that several  securities  may  have  the
 same value for company since more than one security can be issued by a
@@ -86,12 +86,12 @@ security defined as the primary security for the company.  The  actual
 object representing the security is returned.  For example, the Vision
 expression:
 
-<pre><b>    Named Company GM primarySecurity </b></pre>
+<pre>    Named Company GM primarySecurity </pre>
 
 returns the object representing GM's common  stock  security  and  the
 expression:
 
-<pre><b>    Named Company GM primarySecurity = Named Security GM</b></pre>
+<pre>    Named Company GM primarySecurity = Named Security GM</pre>
 
 yields the result TRUE.  Note that only one security can  be  assigned
 as  the  <i>primarySecurity</i>  for  a  Company.  By default, the value of
@@ -136,16 +136,16 @@ default, no security instances are associated with this company.
 
 For example, the expression:
 
-<pre><b>    Company createInstance: "370442". </b></pre>
+<pre>    Company createInstance: "370442". </pre>
 
 creates a new Company instance with a code of <i>370442</i>.  The <i>profile</i>
 message can be used to display a summary description of this company:
 
-<pre><b>    Named Company at: "370442". profile </b></pre>
+<pre>    Named Company at: "370442". profile </pre>
 
 produces:
 
-<pre><b>    *** Company Profile For: 370442
+<pre>    *** Company Profile For: 370442
     Code:                         370442
     Aliases:                      370442  
 
@@ -165,15 +165,15 @@ produces:
    the <i>ticker</i> property.  This value is automatically added to the alias
    list for the company instance as well.  For example:
 
-<pre><b>     Named Company at: "370442" .
+<pre>     Named Company at: "370442" .
                 setNameTo: "GENERAL MOTORS" .
                 setTickerTo: "GM" ;
      Named Company GM profile ;  
-</b></pre>
+</pre>
 
 produces:
 
-<pre><b>    *** Company Profile For: GENERAL MOTORS
+<pre>    *** Company Profile For: GENERAL MOTORS
     Code:                         370442
     Aliases:                      370442 / GM /
 
@@ -188,18 +188,18 @@ produces:
     ---  Supplemental Data  ---
     ticker:                       GM
     fiscalYearEnd:                12 
-</b></pre>
+</pre>
 
 Notice that messages  such  as  <i>baseCurrency</i>  and  <i>primarySecurity</i>
 return   an  object  of  another  entity  class.   As  a  result,  the
 expression:
 
-<pre><b>    Named Company GM baseCurrency name </b></pre>
+<pre>    Named Company GM baseCurrency name </pre>
 
 returns the name associated  with  the  company  GM's  currency.   The
 expression:
 
-<pre><b>    Named Company GM primarySecurity price </b></pre>
+<pre>    Named Company GM primarySecurity price </pre>
 
 returns the price associated with GM's primary security.
 <p>
@@ -211,9 +211,9 @@ that is a valid alias for the security or an actual security instance
 as the parameter.  For example, if a  security  named  <i>GM</i>  has  been
 defined, the expressions:
 
-<pre><b>    Named Company GM setPrimarySecurityTo: Named Security GM  .</b></pre>
+<pre>    Named Company GM setPrimarySecurityTo: Named Security GM  .</pre>
 or
-<pre><b>    Named Company GM setPrimarySecurityTo: "GM"  . </b></pre>
+<pre>    Named Company GM setPrimarySecurityTo: "GM"  . </pre>
 
 can be used to assign the value of the <i>primarySecurity</i> property.  If
 the supplied parameter does not refer to a valid security, the value of
@@ -237,7 +237,7 @@ change  the  value of <i>fiscalYearEnd</i> for a company.  This method only
 changes the value if the supplied parameter is a number between 1  and
 12.  For example:
 
-<pre><b>    Named Company GM setFiscalYearEndTo: 12 ; </b> </pre>
+<pre>    Named Company GM setFiscalYearEndTo: 12 ; </b> </pre>
 
 Note that companies are automatically created with  a  default  fiscal
 year end value of 12.
@@ -287,7 +287,7 @@ detail:
 The remaining properties can be changed using the standard  assignment
 operation.  For example, the expression:
 
-<pre><b>    Named Company GM :country <- Named Country US ; </b></pre>
+<pre>    Named Company GM :country <- Named Country US ; </pre>
 
 assigns the Country instance representing the United  States  to  GM's
 country property.
@@ -330,17 +330,17 @@ value supplied as a parameter to the <i>createInstance:</i> message).
 
 For example, the expression:
 
-<pre><b>    Security createInstance: "37044210" . </b></pre>
+<pre>    Security createInstance: "37044210" . </pre>
 
 creates a new Security  instance  with  a  code  of  <i>37044210</i>.   The
 <i>profile</i> message can be used to display a summary description of this
 security:
 
-<pre><b>    Named Security at: "37044210" . profile </b></pre>
+<pre>    Named Security at: "37044210" . profile </pre>
 
 produces:
 
-<pre><b>    *** Security Profile For: 37044210
+<pre>    *** Security Profile For: 37044210
     Code:                         37044210
     Aliases:                      37044210 /
 
@@ -361,21 +361,21 @@ produces:
     eps:                                NA
     unitCalc:                          1.00
     holdings (count):                     0 
-</b></pre>
+</pre>
 
 The message <i>setTickerTo:</i> is used to assign an alternative  value  to
 the  <i>ticker</i>  property.   This  value  is  automatically added to the
 <i>aliases</i> property for the security instance as well. For example:
 
-<pre><b>    Named Security at: "37044210" .
+<pre>    Named Security at: "37044210" .
        setNameTo: "GENERAL MOTORS COM" .
        setTickerTo: "GM" ;
     Named Security GM profile ;
-</b></pre>
+</pre>
 
 produces:
 
-<pre><b>    *** Security Profile For: GENERAL MOTORS COM
+<pre>    *** Security Profile For: GENERAL MOTORS COM
     Code:                         37044210
     Aliases:                      37044210 / GM /
 
@@ -389,7 +389,7 @@ produces:
     cusip:                             NA
     sedol:                             NA
     . . .
-</b></pre>
+</pre>
 
 The properties <i>cusip</i>, <i>canCusip</i>, and <i>sedol</i> have been  defined  to
 allow  you  alternative  means for identifying a security.  A specific
@@ -397,20 +397,20 @@ security will set the value of  one  of  these  properties  using  the
 message   <i>setCusipTo:</i>,   <i>setCanCusipTo:</i>,  or  <i>setSedolTo:</i>.   For
 example:
 
-<pre><b>    Named Security GM
+<pre>    Named Security GM
           setCusipTo: "37044210" .
     do: [ "Cusip: " print: 20 ; cusip printNL ;
           "Can Cusip: " print: 20 ; canCusip printNL ;
           "Sedol: " print: 20 ; sedol printNL ;
         ] ;
-</b></pre>
+</pre>
 
 produces:
 
-<pre><b>    Cusip:              37044210
+<pre>    Cusip:              37044210
     Can Cusip:                 NA
     Sedol:                     NA
-</b></pre>
+</pre>
 
 The <i>cusip</i> or <i>sedol</i> value is automatically added to  the  <i>aliases</i>
 property  for the security instance.  Because there are many different
@@ -426,9 +426,9 @@ different company.  You can use a string that is a valid alias for the
 company  or an actual company instance as the parameter.  For example,
 the expressions:
 
-<pre><b>    Named Security GM setCompanyTo: Named Company GM </b></pre>
+<pre>    Named Security GM setCompanyTo: Named Company GM </pre>
 or
-<pre><b>    Named Security GM setCompanyTo: "GM"</b></pre>
+<pre>    Named Security GM setCompanyTo: "GM"</pre>
 
 can be used to assign the value of the  <i>company</i>  property.   If  the
 supplied  parameter  does  not  refer  to a valid company the value of
@@ -469,12 +469,12 @@ maintained  as  part  of  the external pricing update or as part of an
 internal security <i>refresh</i> feed.  These values can be  changed  using
 the standard assignment operation.  For example, the expression:
 
-<pre><b>    Named Security GM :_sharesOut asOf: 9311 put: 1234000 ;</b></pre>
+<pre>    Named Security GM :_sharesOut asOf: 9311 put: 1234000 ;</pre>
 
 assigns the value 1234000 as  GM's  shares  outstanding  value  as  of
 November 1993 and the expression:
 
-<pre><b>    Named Security GM :unitCalc <- 1.0 ; </b></pre>
+<pre>    Named Security GM :unitCalc <- 1.0 ; </pre>
 
 assigns the values 1 to the <i>unitCalc</i> property.
 <p>
@@ -573,7 +573,7 @@ Your installation may have defined many additional  messages  for  the
 Company  and  Security  classes.  The <i>showMessages</i> message is the
 fastest way to determine the current list of messages available for  a
 class.  For example:
-<pre><b>    Company showMessages </b></pre>
+<pre>    Company showMessages </pre>
 
 External databases such as WorldScope  and  Ibes  provide  data  about
 specific  entities.  Each  database  includes one or more classes that

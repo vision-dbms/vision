@@ -1219,7 +1219,7 @@ IBM's price as of 3:03 pm on April 14, 2000, use: <b><pre>
      Named Security IBM :rtPrice asOf: 20000414.1503 put: 102.25 ;
 </pre></b>
 You can continue to use the <i>asOf:</i> message to access a high
-frequency time series.  For example:<pre><b>
+frequency time series.  For example:<pre>
      #-- get the most recent price
      Named Security IBM rtPrice printNL ;
 
@@ -1228,24 +1228,24 @@ frequency time series.  For example:<pre><b>
 
     #--  get the end of date price on 4/14/2000
     Named Security IBM :rtPrice asOf: 20000414 . printNL ;
-</b></pre>
+</pre>
 You can continue to use the standard <b>Collection</b> messages such
-as <i>do:</i> to access the entire time series:<pre><b>
+as <i>do:</i> to access the entire time series:<pre>
      Named Security IBM :rtPrice
      do: [ ^date print ; printNL ;
          ] ;
-</b></pre>
+</pre>
 <p>
 When a time series object is indexed by time, it responds to the
 messages <i>hours</i>, <i>minutes</i>, and <i>seconds</i> as well
 as the messages <i>year</i>, <i>month</i>, and <i>day</i>.  For
-example: <pre><b>
+example: <pre>
      Named Security IBM :rtPrice
      do: [ ^date asDate print: 12 ; 
            ^date hours print ; ^date minutes print; ^date seconds print ;
            printNL ;
          ] ;
-</b></pre>
+</pre>
 <p>
 The <i>asNumber</i> message can be sent to a <b>Time</b> object to 
 convert it into a decimal number where the integer portion of the

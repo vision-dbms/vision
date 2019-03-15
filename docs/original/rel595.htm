@@ -52,7 +52,7 @@ other files may have been changed or deleted.  It is left to the Administrator
 to make the site-specific <i>/vision</i> directory compatible with the latest version.
 You should expect to find changes to the following executables:<br><br>
 
-<ul type=disc><pre><b>/vision/bin/batchvision
+<ul type=disc><pre>/vision/bin/batchvision
 /vision/bin/format
 /vision/bin/loadtape
 /vision/bin/paginate
@@ -75,7 +75,7 @@ You should expect to find changes to the following executables:<br><br>
 /vision/tools/viewndf
 /vision/tools/viewseg
 /vision/tools/vquery
-/vision/tools/xndfosds</b></pre></ul>
+/vision/tools/xndfosds</pre></ul>
 
 The <i>rel.5.9.5</i> directory contains Vision protocol that is specific to this
 release and modifications or additions to existing administrative procedures.
@@ -258,7 +258,7 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
     the first mode, use the following command line:<p>
 
 <ul type=disc><b><pre>batchvision -R fromOSD -o &lt;OSD Path Name&gt; -n &lt;NDF Path Name&gt;
-</b></pre></ul>
+</pre></ul>
 
     The -o option can be omitted if the environment variable,
     <i>OSDPathName</i>, has been set. The -n option can be omitted if the
@@ -273,7 +273,7 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
     To invoke the Rebuilder in the second mode, use the following
     command line:
 
-       <ul type=disc><pre><b>batchvision -R fromNDF -n &lt;NDF Path Name&gt;</b></pre></ul>
+       <ul type=disc><pre>batchvision -R fromNDF -n &lt;NDF Path Name&gt;</pre></ul>
 
     The -n option can be omitted if the environment variable,
     <i>NDFPathName</i>, has been set, or if the default value,
@@ -386,11 +386,11 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
 
        The default class and message now executed by vquery is:
     
-<ul type=disc><pre><b>Interface HtmlAccess
+<ul type=disc><pre>Interface HtmlAccess
 get: "url-path"
 usingQuery: "url-query"
 for: "client-host-name"
-at: "client-host-address" ;</b></pre>
+at: "client-host-address" ;</pre>
 </ul>
        Earlier versions were defined to use the UserInterface HyperWS class.
        You have the ability to override the default class in the <i>vquery.cfg</i>
@@ -400,13 +400,13 @@ at: "client-host-address" ;</b></pre>
        specific destination using the <i>class <dest></i> directive.  The 
        following example illustrates both:
 
-<ul type=disc><pre><b>default class   UserInterface HyperWS
+<ul type=disc><pre>default class   UserInterface HyperWS
 
 server default  pugsley:7001
 server test     pugsley:8010
 
 server demo     pugsley:7200
-class  demo     Interface HtmlAccess</b></pre>
+class  demo     Interface HtmlAccess</pre>
 </ul>
        As expected, when both a class <i><dest></i> directive and a <i>default class</i>
        directive are present in the same file, the <i>class <dest></i> directive
@@ -415,9 +415,9 @@ class  demo     Interface HtmlAccess</b></pre>
        same class specification applies to all of the them.  For example, the
        <i>class analyzer</i> statement in the following example:
 
-<ul type=disc><pre><b>server analyzer pugsley:7010
+<ul type=disc><pre>server analyzer pugsley:7010
 server analyzer lurch:7010
-class  analyzer UserInterface HyperWS</b></pre>
+class  analyzer UserInterface HyperWS</pre>
 </ul>
        applies to both <i>analyzer</i> servers.
 
@@ -441,14 +441,14 @@ class  analyzer UserInterface HyperWS</b></pre>
        Two new commands have been added to the set of commands recognized in a
        <i>vquery.cfg</i> file.  The command:
 
-<ul type=disc><pre><b>default expression aVisionExpressionSpecification</b></pre>
+<ul type=disc><pre>default expression aVisionExpressionSpecification</pre>
 </ul>
        establishes a Vision expression to use by default for any service
        destination that does not supply its own specification.  Any service
        that requires a different expression can override the default expression
        using the directive:
 
-<ul type=disc><pre><b>expression aServiceName aVisionExpressionSpecification</b></pre>
+<ul type=disc><pre>expression aServiceName aVisionExpressionSpecification</pre>
 </ul>
        Both the <i>default expression</i> and <i>expression</i> directives must be
        included on a single input line.  THERE IS NO PROVISION FOR ESCAPING 
@@ -459,7 +459,7 @@ class  analyzer UserInterface HyperWS</b></pre>
        supplied:
 
 <ul type=disc><b><pre>default expression $$class get: $$path usingQuery: $$query for:
-$REMOTE_HOST at: $REMOTE_ADDR</b></pre>
+$REMOTE_HOST at: $REMOTE_ADDR</pre>
 </ul>
        This default <i>default expression</i> specifies the expression that vquery
        has historically generated.  In particular, it specifies that the
@@ -535,10 +535,10 @@ $REMOTE_HOST at: $REMOTE_ADDR</b></pre>
 <p>    This behavior can be disabled by setting an environment variable prior
     to starting the vision session:
 
-<ul type=disc><pre><b>setenv VisionStackDump 0</b></pre>
+<ul type=disc><pre>setenv VisionStackDump 0</pre>
 </ul>
     Setting this variable to any non-zero numeric value, or 
-<ul type=disc><pre><b>unsetenv VisionStackDump</b></pre>
+<ul type=disc><pre>unsetenv VisionStackDump</pre>
 </ul>
     will turn stack dumping back on for subsequent invocations of batchvision.
 <p>
@@ -565,7 +565,7 @@ $REMOTE_HOST at: $REMOTE_ADDR</b></pre>
     values are denoted with a leading '0'. Hexadecimal values are
     denoted with a leading <i>0x</i> or <i>0X</i>.
 
-<ul type=disc><pre><b>VisionLargeContainerSize
+<ul type=disc><pre>VisionLargeContainerSize
 VisionMappingLimit
 VisionAddressThreshold
 VisionNSyncRetries
@@ -577,7 +577,7 @@ VisionSORetryDelay
 VisionNetOpenTrace
 VisionCheckCheckSM
 VisionStackDump
-LargeTaskSize</b></pre></ul>
+LargeTaskSize</pre></ul>
 
 <b><hr id=persistentGarbageCollector>Persistent Garbage Collector</b><p>The persistent garbage collector (<i>Utility collectGarbage</i>) now
     rebuilds the container table free list in the opposite direction
@@ -623,15 +623,15 @@ constant to refer to the new class.
 This script contains messages that have been added to the core classes as 
 part of release 5.9.5.
 
-<pre><b>Class     Object
-Message   ifDefault: object</b></pre><ul type=disc>
+<pre>Class     Object
+Message   ifDefault: object</pre><ul type=disc>
 
 If the recipient is the default object, this message returns the parameter,
 otherwise the recipient is returned.  If the parameter is a block, it is
 evaluated.
 
-</ul><pre><b>Class     Object
-Message   ifDefault: block1 else: block2</b></pre><ul type=disc>
+</ul><pre>Class     Object
+Message   ifDefault: block1 else: block2</pre><ul type=disc>
 
 If the recipient is the default object, block1 is sent to it; otherwise,
 block2 is sent to it.  This can be used to eliminate some conditional
@@ -675,7 +675,7 @@ Note that this message will not work with releases prior to 5.9.5.
 </ul>
 <b><pre>********************
    CHadmin.5.9.5
-********************</b></pre>
+********************</pre>
 This script contains modifications and additions related to the <i>AdminTools</i>
 ToolKit and cannot be installed in releases prior to release 5.9.5.
 
@@ -719,9 +719,9 @@ This method has been modified so that it no longer cleans dictionaries.
 
 
 
-</ul><pre><b>********************
+</ul><pre>********************
    CHov.5.9.5
-********************</b></pre>
+********************</pre>
 
 This script contains modifications and additions related to the OpenVision
 ToolKit and requires release 5.9.5.
@@ -736,9 +736,9 @@ on NT and Unix.  The old version does not work correctly with NT.
 
 
 
-</ul><pre><b>********************
+</ul><pre>********************
    CHschema.5.9.5
-********************</b></pre>
+********************</pre>
 
 This script contains modifications and additions related to the <i>Schema</i>
 ToolKit added as a supplement to release 5.9.5.  These changes assume that
@@ -807,9 +807,9 @@ class or the Object class are excluded from this list.
 
 
 
-</ul><pre><b>********************
+</ul><pre>********************
    CHiface.5.9.5
-********************</b></pre>
+********************</pre>
 
 This script contains modifications and additions related to the
 <i>Interface</i> and <i>FormatTools</i> ToolKits added as a supplement to release

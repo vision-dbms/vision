@@ -403,8 +403,8 @@ displayed in <i>euros</i>.  For example, assume the following:
 <li>The fixed conversion rate from DEM to EUR is 2
 </ul></ul>
 <p>
-The Vision expression:<pre><b>
-     981231 evaluate: [ Named Security GermanSec price] </b></pre>
+The Vision expression:<pre>
+     981231 evaluate: [ Named Security GermanSec price] </pre>
 will return the value of 50 <i>euros</i>, since price data is
 automatically converted from reported currency to the security's
 base currency.  
@@ -419,11 +419,11 @@ modified in release 6.1.2 to automatically set the <i>_legacyCurrency</i>
 when you change the base currency to <i>EUR</i>.
 <p>
 To display data in the <i>LEGACY</i> currency, use 
-the Vision expression:<pre><b>
+the Vision expression:<pre>
      Named Currency LEGACY evaluate:
        [ securityList do: [ ] ;
        ] ;
-</b></pre>
+</pre>
 This usage instructs Vision to display the data for each security
 in the list using its legacy currency.  
 <p>
@@ -436,14 +436,14 @@ exchange rates after 1/1/99.  These rates will continue to provide
 the Legacy to US exchange rate.  If your currency source does not 
 provide these values, they can be computed and stored daily using
 the calculation:
-<ul type=disc><pre><b>legacy fixed rate to EUR * daily EUR to US rate</b></pre></ul>
+<ul type=disc><pre>legacy fixed rate to EUR * daily EUR to US rate</pre></ul>
 
 The <i>ExchangeRateFeed</i> data feed computes these legacy rates automatically.
 <p>
 Vision Installations that predate release 6.1.2 may wish to review the <a href="euro.htm">Euro</a> document for more information.
 
 
-</b></pre>
+</pre>
 
 {% include doc-footer.htm copydates="1999" %}
 
