@@ -1,21 +1,23 @@
 ---
 title: "Case Study 3: Cross Tabular Reporting"
+
+toc: false
 ---
 
-<h2>Case Study 3: Cross Tabular Reporting</h2>
-
-<p>| <a href="vconcep.htm">Home</a> 
-   | <a href="vtutor.htm">Tutorials</a> | 
-<hr>
-
 <blockquote><hr>
-<center><b><font size+1>Reminder!</font></b> </a></center><p>
+<center><b><font size+1>Reminder!</font></b></center><p>
 To run these examples, you should first start a new session and then load the sample database using:
-<pre><tt><b>     "/localvision/samples/general/sample.load" asFileContents evaluate ;</b></tt></pre>
+<pre>
+  "/localvision/samples/general/sample.load" asFileContents evaluate ;
+</pre>
 and load <i>testList</i> using:
-<ul type=disc><pre>!testList <- Company masterList 
+<ul type=disc>
+<pre>
+!testList <- Company masterList 
     rankDown: [ sales ] . 
-    select: [ rank <= 20 ] ; </pre></ul>
+    select: [ rank <= 20 ] ;
+</pre>
+</ul>
 
 Any other files referenced can be read from the <i>/localvision/samples/general/</i>
 directory.

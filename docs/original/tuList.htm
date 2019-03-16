@@ -2,46 +2,19 @@
 title: "Vision Tutorial 4: Using Lists"
 ---
 
-<h2>Vision Tutorial 4: Using Lists<a name="Vision Tutorial 4: Using Lists"></a></h2>
-
-<p>
-| <a href="vconcep.htm">Home</a> 
-| <a href="vtutor.htm">Tutorials</a> 
-| <a href="clList.htm">The List Class</a> 
-| <a href="clCollect.htm">The Collection Class</a> |
-<hr>
-
-<h2>Topics Covered:</h2>
-
-<ul type= square>
-<li><a href="#List Creation and Basic Access">List Creation
-and Basic Access</a>
-<li><a href="#The do: Message">The "do:" Message</a>
-<li><a href="#The select: Message">The "select:" Message</a>
-<li><a href="#Sort Messages">Sort Messages</a>
-<li><a href="#The extendBy: Message">The "extendBy" Message</a>
-<li><a href="#List Rank, Decile, and Quintile Messages">List
-Rank, Decile, and Quintile Messages</a>
-<li><a href="#The groupedBy: Message">The "groupedBy"
-Message</a>
-<li><a href="#Statistical Messages">Statistical Messages</a>
-<li><a href="#Other List Messages">Other List Messages</a>
-<li><a href="#See Also">See Also</a>:
-</ul>
-<hr>
-
 <blockquote><hr>
-<center><b><font size+1>Reminder!</font></b> </a></center>
+<center><b><font size+1>Reminder!</font></b></center>
 To run these examples, you should first start a new session then load the sample database using:
-<pre><tt><b>     "/localvision/samples/general/sample.load" asFileContents evaluate ; 
-</b></tt></pre>
+<pre>
+  "/localvision/samples/general/sample.load" asFileContents evaluate ; 
+</pre>
 Any other files referenced can be read from the <i>/localvision/samples/general/</i>
 directory.
 <p>
 <b>Note:</b> The <i>sample.load</i> file runs by default on a <i>Unix</i> environment.  If you are using a <i>Windows NT</i> platform, this location may be prefixed by a drive  and optional path (e.g. <i>d:/visiondb/localvision/samples/general/sample.load</i>).  Check with your Vision Administrator for further details.<hr></blockquote>
 
 <hr>
-<a name="List Creation and Basic Access"><b><h2>List Creation and Basic Access</h2></b></a>
+<h2 id="List Creation and Basic Access">List Creation and Basic Access</h2>
 
 <p>Vision allows you to store one or more objects in a list. To create
 a list, just separate the objects you wish to include in the list with
@@ -127,7 +100,7 @@ returns the value <i>TRUE</i>.
 
 <hr width="100%" ></p>
 
-<a name="The do: Message"><h2><b>The "<a href="clCollect.htm#do">do:</a>" Message</b></h2></a>
+<h2 id="The do: Message">The "<a href="clCollect.htm#do">do:</a>" Message</h2>
 
 <p>Now that you know how many companies are in <i>testList</i>, you may
 wish to analyze and display information for each company in the list. The
@@ -276,7 +249,7 @@ the companies.
 
 <hr>
 
-<a name="The select: Message"><b><h2>The "<a href="clCollect.htm#select">select:</a>" Message</h2></b></a>
+<h2 id="The select: Message">The "<a href="clCollect.htm#select">select:</a>" Message<</h2>
 
 <p>It is often useful to restrict a list to objects that meet certain criteria.
 For example, you may wish to find the companies in <i>fullList</i> whose
@@ -399,8 +372,7 @@ your criteria.
 
 <hr></p>
 
-<a name="Sort Messages"><b><h2>
-<a href="clCollect.htm#sorts">Sort</a> Messages</h2></b></a>
+<h2 id="Sort Messages"><a href="clCollect.htm#sorts">Sort</a> Messages</h2>
 
 <p>It is often useful to display your information in sorted order. The
 <i><a href="mList.htm#sortDown:">sortDown:</a></i> and <i><a href="mList.htm#sortUp:">sortUp:</a>
@@ -488,7 +460,7 @@ sort.
 are available.
 <hr>
 
-<a name="The extendBy: Message"><h2>The <a href="clCollect.htm#extend">"extendBy:"</a>Message</h2></a>
+<h2 id="The extendBy: Message">The <a href="clCollect.htm#extend">"extendBy:"</a>Message</h2>
 
 <p>The last example used the calculation price / earningsPerShare three
 times (selecting, sorting, and doing) thus creating two inefficiencies.
@@ -603,10 +575,9 @@ IBM Corp           0.10   54217.02     9.26 </pre>
 <p>
 <hr>
 
-<a name="List Rank, Decile, and Quintile Messages">
-<h2>List <a href="clCollect.htm#ranks">Rank</a>, 
+<h2 id="List Rank, Decile, and Quintile Messages">List <a href="clCollect.htm#ranks">Rank</a>, 
 <a href="clCollect.htm#tiles">Decile</a>, and 
-<a href="clCollect.htm#tiles">Quintile</a> Messages</h2></a>
+<a href="clCollect.htm#tiles">Quintile</a> Messages</h2>
 
 <p>You may wish to determine the rank of each company in a list based on
 one of its data values. In <i>fullList</i>, for example, the company with
@@ -821,8 +792,7 @@ Boeing Co               15355.00    3   1.38     2
 <p>
 <hr>
 
-<a name="The groupedBy: Message"><h2>The <a href="clCollect.htm#groups">"groupedBy:"</a> Message</a>
-</h2>
+<h2 id="The groupedBy: Message">The <a href="clCollect.htm#groups">"groupedBy:"</a> Message</h2>
 
 <p>The <i>groupedBy:</i> message provides you with a powerful tool for
 aggregation, enabling you to simultaneously analyze information at a detailed
@@ -1054,8 +1024,8 @@ this report for all companies.
 
 <hr>
 
-<a name="Statistical Messages" href="clCollect.htm#compute">
-<h2>Statistical Messages</h2></a>
+<a href="clCollect.htm#compute">
+<h2 id="Statistical Messages">Statistical Messages</h2></a>
 
 <p>Vision offers various messages for calculating summary statistics about
 a list. For example, if you wish to calculate the average sales for the
@@ -1229,7 +1199,7 @@ Sector Totals:                 199700.89              6.66
 </ul>
 <hr>
 
-<a name="Other List Messages"><h2><b>Other List Messages</b></h2></a>
+<h2 id="Other List Messages">Other List Messages</h2>
 
 <p>Many applications require merging several lists together. Vision offers
 several messages to support these operations. Start by creating two lists:
@@ -1438,7 +1408,7 @@ Travelers Corp          8</pre>
 
 <hr>
 
-<h2>See Also<a name="See Also"></a></h2>
+<h2 id="SeeAlso">See Also</h2>
 
 <p>
 

@@ -1,24 +1,21 @@
 ---
 title: "Case Study 5: Advanced Classification Techniques"
 ---
-<h2>Case Study 5: Advanced Classification Techniques</h2>
-
-<p>
-     | <a href="vconcep.htm">Home</a> 
-     | <a href="vtutor.htm">Tutorials</a> 
-     | <a href="clClassify.htm">Classifications</a> 
-     | <a href="clIList.htm">IndexedLists</a> |
-<hr>
-<p>
 
 <blockquote><hr>
-<center><b><font size+1>Reminder!</font></b> </a></center>
+<center><b><font size+1>Reminder!</font></b></center>
 To run these examples, you should first start a new session and then load the sample database using:
-<pre><tt><b>     "/localvision/samples/general/sample.load" asFileContents evaluate ;</b></tt></pre>
+<pre>
+  "/localvision/samples/general/sample.load" asFileContents evaluate ;
+</pre>
 and load <i>testList</i> using:
-<ul type=disc><pre>!testList <- Company masterList 
+<ul type=disc>
+<pre>
+!testList <- Company masterList 
     rankDown: [ sales ] . 
-    select: [ rank <= 20 ] ; </pre></ul>
+    select: [ rank <= 20 ] ;
+</pre>
+</ul>
 
 
 Any other files referenced can be read from the <i>/localvision/samples/general/</i>
@@ -28,15 +25,7 @@ directory.
 <p>
 <hr>
 <p>
-<h2>Topics Covered:</h2>
-<ul type="square">
-<li><a href="#overview">Overview</a><br>
-<li><a href="#sample">Sample Region Data</a><br>
-<li><a href="#hierarchy">Using the Hierarchy</a><br>
-<li><a href="#many">Multiple Regions</a><br>
-</ul>
-<hr>
-<h3 id="overview">Overview</h2>
+<h2 id="overview">Overview</h2>
 <p>
 The goal of the examples in this section is to illustrate some techniques that
 support complex classification requirements. In many of the other examples,
@@ -53,7 +42,7 @@ Support for many-to-many relationships.</a>
 </ol>
 <p>
 <hr>
-<h3 id="sample">Sample Region Data</h2>
+<h2 id="sample">Sample Region Data</h2>
 <p>
 The examples in this section use the class <i>Region</i>.
 A region can reference a large area such as "Northeast" or
@@ -68,7 +57,8 @@ used for grouping purposes and which may aggregate into
 other instances of the same class.  Classes such as <i>Industry</i>
 and <i>Region</i> are normally created as subclasses of <i>Classification</i>.
 The following Vision code creates the
-<i>Region</i> class and some sample instances:<pre><tt><b>
+<i>Region</i> class and some sample instances:
+<pre>
      #--  Create Region subclass
      Classification createSubclass: "Region" ;
 
@@ -104,7 +94,7 @@ The following Vision code creates the
          setParentTo: Named Region Northeast ;
      Region createInstance: "Other" .
          setNameTo: "Rest of the World" ;
-</b></tt></pre>
+</pre>
 <p>
 The first step is to create the new class, <i>Region</i> using the
 <a href="clEntity.htm#subclass"><i>createSubclass:</i></a> message.
@@ -120,24 +110,33 @@ instance.  The message <i>setParentTo:</i> allows you to set up these
 relationships.  
 <p>
 You can reference a specific region using:
-<pre><tt><b>     Named Region NYC name printNL ;</b></tt></pre>
+<pre>
+     Named Region NYC name printNL ;
+</pre>
 You can reference a specific region's parent region using:
-<pre><tt><b>     Named Region NYC parent name printNL ;</b></tt></pre>
+<pre>
+     Named Region NYC parent name printNL ;
+</pre>
 You can reference a specific region's parent's parent using:
-<pre><tt><b>     Named Region NYC parent parent name printNL ;</b></tt></pre>
+<pre>
+     Named Region NYC parent parent name printNL ;
+</pre>
 The message <i>displayHierarchy</i> displays 
 the region's full parent hierarchy:
-<pre><tt><b>     Named Region NYC displayHierarchy ;</b></tt></pre>
+<pre>
+     Named Region NYC displayHierarchy ;
+</pre>
 <p>
 When new instances are created, the <i>parent</i> property is
 initialized to return the new instance.  The <i>isParent</i> message
 returns <i>TRUE</i> if the recipient is its own parent instance.
 <p>
 <hr>
-<h3 id="hierarchy">Using the Hierarchy</h2>
+<h2 id="hierarchy">Using the Hierarchy</h2>
 <p>
 The following Vision code can be used to assign a primary region
-to each company in the sample database:<pre><tt><b>
+to each company in the sample database:
+<pre>
      #--  Create property to store the region
      Company defineFixedProperty: 'primaryRegion' 
                      withDefault: Named Region Other ;
@@ -161,7 +160,7 @@ to each company in the sample database:<pre><tt><b>
         do: [ :primaryRegion <- ^global Named Region NewEngland ] ;
      Named Company send: [ IBM, NYN, PEP ] .
         do: [ :primaryRegion <- ^global Named Region TriState] ;
-</b></tt></pre>
+</pre>
 <p>
 The first step is to define a new property at the <i>Company</i>
 class which will be used to store the value of a company's
@@ -178,23 +177,28 @@ that some companies are assigned to very specific regions such
 as <i>NJN</i> (e.g., XON in northern New Jersey) while other companies are
 assigned to fairly broad regions such as <i>Northeast</i>.  The
 <i>displayHierarchy</i> message will display the number of levels
-appropriate for the region.  For example:<pre><tt><b>
+appropriate for the region.  For example:
+<pre>
      Named Company XON primaryRegion displayHierarchy
-</b></tt></pre>
+</pre>
 includes three levels (northern New Jersey, tri-state area, northeast) 
-while:<pre><tt><b>
+while:
+<pre>
      Named Company DOW primaryRegion displayHierarchy
-</b></tt></pre>
-includes two levels (mid-atlantic, northeast) and:<pre><tt><b>
+</pre>
+includes two levels (mid-atlantic, northeast) and:
+<pre>
      Named Company GM primaryRegion displayHierarchy
-</b></tt></pre>
+</pre>
 includes one level (northeast).  To display the region for each
-company:<pre><tt><b>
+company:
+<pre>
      Company masterList
      do: [ code print: 10 ; primaryRegion code printNL ] ;
-</b></tt></pre>
+</pre>
 To display the region for each company, grouping the companies by parent
-region use:<pre><tt><b>
+region use:
+<pre>
      Company masterList groupedBy: [ primaryRegion parent ] .
      do: [ "Parent: " print ; name printNL ;
            groupList
@@ -203,18 +207,20 @@ region use:<pre><tt><b>
                ];
            newLine print ;
          ] ;
-</b></tt></pre>
+</pre>
 It is often useful to be able to return the most aggregate parent
 in a classification hierarchy.  You can define a method to return
-the "major" region using:<pre><tt><b>
+the "major" region using:
+<pre>
      Region defineMethod: [ | major |
           isParent ifTrue: [ asSelf ] ifFalse: [ parent major ] 
      ] ;
-</b></tt></pre>
+</pre>
 This method checks to see if an instance is its own parent.  If
 it is, you have reached the top of the hierarchy and the value
 of the instance is returned; otherwise, the <i>major</i> message
-is sent to the current instance's parent object.  For example:<pre><tt><b>
+is sent to the current instance's parent object.  For example:
+<pre>
      Company masterList groupedBy: [ primaryRegion major ] .
      do: [ "Major: " print ; code print: 10 ; name printNL ;
            groupList
@@ -223,7 +229,7 @@ is sent to the current instance's parent object.  For example:<pre><tt><b>
                ];
            newLine print ;
          ] ;
-</b></tt></pre>
+</pre>
 <p>
 <blockquote><hr>
 <center id="recursion.warn"><b>Warning!! </b>  </center>
@@ -235,12 +241,13 @@ return itself.  Otherwise your method will not terminate.
 <hr></blockquote>
 <p>
 <hr>
-<h3 id="many">Multiple Regions</h2>
+<h2 id="many">Multiple Regions</h2>
 <p>
 The <i>primaryRegion</i> property allows you to associate a specific
 region instance with a company instance.  The following Vision code can be
 used to assign multiple regions to each company in the sample 
-database:<pre><tt><b>
+database:
+<pre>
      #--  Create property to store regions
      Company defineFixedProperty: 'regions'  ;
 
@@ -250,7 +257,7 @@ database:<pre><tt><b>
      #--  company
      Company instanceList
        do: [ :regions <- ^global IndexedList clusterNew ] ;
-</b></tt></pre>
+</pre>
 <p>
 The first step is to define a new property at the <i>Company</i>
 class which will be used to store an indexed list of regions in
@@ -263,35 +270,41 @@ storage cluster.
 about clustering and other initialization issues is available.
 <p>
 Initially, this <i>regions</i> message returns an empty list
-for all companies.  For example:<pre><tt><b>
+for all companies.  For example:
+<pre>
      Named Company IBM regions count printNL ;
-</b></tt></pre>
+</pre>
 displays the value <i>0</i>.  To add the 
 value of the <i>primaryRegion</i> as an entry in the <i>regions</i>
-list, use:<pre><tt><b>
+list, use:
+<pre>
      #--  Add the primaryRegion as an initial region for all
      Company instanceList
         do: [ regions at: primaryRegion put: primaryRegion ] ;
-</b></tt></pre>
+</pre>
 The <a href="mIList.htm#at:put:"><i>at:put:</i></a> message
 is used to add the object supplied as the second parameter to the
 recipient indexed list and store a direct index to this object using
 the first parameter.  Each company will now have one region in its
-<i>regions</i> list.  To access all the regions for a company use:<pre><tt><b>
+<i>regions</i> list.  To access all the regions for a company use:
+<pre>
      Named Company IBM regions
      do: [ displayInfo ] ;
-</b></tt></pre>
-To test if a company is part of a specific region use:<pre><tt><b>
+</pre>
+To test if a company is part of a specific region use:
+<pre>
      Named Company IBM regions at: Named Region TriState
-</b></tt></pre>
+</pre>
 If the region is in IBM's region list, the region object will be returned;
 otherwise, the value <i>NA</i> is returned.  To find all the companies
-that do business in the <i>Mass</i> region use:<pre><tt><b>
+that do business in the <i>Mass</i> region use:
+<pre>
      Company masterList 
          select: [ regions at: ^global Named Region Mass . isntNA ] .
      do: [ displayInfo ] ;
-</b></tt></pre>
-To include additional regions for some companies use:<pre><tt><b>
+</pre>
+To include additional regions for some companies use:
+<pre>
      #--  Add other regions for some companies
      Named Company IBM regions
           at: Named Region Mass put: Named Region Mass ;
@@ -299,40 +312,48 @@ To include additional regions for some companies use:<pre><tt><b>
           at: Named Region NJN put: Named Region NJN ;
      Named Company CI regions
           at: Named Region NJN put: Named Region NJN ;
-</b></tt></pre>
-Now the expression:<pre><tt><b>
+</pre>
+Now the expression:
+<pre>
      Named Company IBM regions count printNL ;
-</b></tt></pre>
-displays the value <i>3</i> and the expression:<pre><tt><b>
+</pre>
+displays the value <i>3</i> and the expression:
+<pre>
      Named Company IBM regions
      do: [ displayInfo ] ;
-</b></tt></pre>
+</pre>
 displays the regions <i>TriState, NJN,</i> and <i>Mass</i>.
 Rerun the query to find the companies that do business
-in the <i>Mass</i> region:<pre><tt><b>
+in the <i>Mass</i> region:
+<pre>
      Company masterList 
          select: [ regions at: ^global Named Region Mass . isntNA ] .
      do: [ displayInfo ] ;
-</b></tt></pre>
+</pre>
 This list now includes IBM.
 <p>
 You can define a property at the <i>Region</i> class that tracks
-all companies that do business in that region:<pre><tt><b>
+all companies that do business in that region:
+<pre>
      #--  Define the property
      Region defineFixedProperty: 'companyList' ;
 
      #--  Update the lists
      Company masterList mgroupedBy: [ regions ] .
      do: [ :companyList <- groupList ] ;
-</b></tt></pre>
+</pre>
 The <a href="mList.htm#mgroupedBy:"><i>mgroupedBy:</i></a> message
 provides an efficient way to generate groups from multi-valued properties.
 <p>
 To display the number of companies in the <i>Mass</i> region use:
-<pre><tt><b>     Named Region Mass companyList count</b></tt></pre>
+<pre>
+     Named Region Mass companyList count
+</pre>
 To display the companies in this region, use:
-<pre><tt><b>     Named Region Mass companyList
-     do: [ displayInfo ] ;</b></tt></pre>
+<pre>
+     Named Region Mass companyList
+     do: [ displayInfo ] ;
+</pre>
 <p>
 <hr>
 

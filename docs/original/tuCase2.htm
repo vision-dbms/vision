@@ -1,25 +1,20 @@
 ---
 title: "Case Study 2: Basic Tabular Reporting"
+
+toc: false
 ---
 
-<h2>Case Study 2: Basic Tabular Reporting</h2>
-
-<p>| <a href="vconcep.htm">Home</a> 
-   | <a href="vtutor.htm">Tutorials</a> | 
-<hr>
-
 <blockquote><hr>
-<center><b><font size+1>Reminder!</font></b> </a></center>
+<center><b><font size+1>Reminder!</font></b></center>
 To run these examples, you should first start a new session and then load the sample database using:
-<pre><tt><b>     "/localvision/samples/general/sample.load" asFileContents evaluate ; 
-</b></tt></pre>
+<pre>
+  "/localvision/samples/general/sample.load" asFileContents evaluate ; 
+</pre>
 Any other files referenced can be read from the <i>/localvision/samples/general/</i>
 directory.
 <p>
 <b>Note:</b> The <i>sample.load</i> file runs by default on a <i>Unix</i> environment.  If you are using a <i>Windows NT</i> platform, this location may be prefixed by a drive  and optional path (e.g. <i>d:/visiondb/localvision/samples/general/sample.load</i>).  Check with your Vision Administrator for further details.<hr></blockquote>
-<p>
 
-<hr>
 <p>
 It is often useful to display many data items for a list of entities.  Read 
 the file <i>example2.a</i> you should see:
@@ -36,7 +31,7 @@ of top 20 companies by sales.
 
 The file <i>example2.b</i> displays sample data for each company in this list:
 <ul>
-<Pre><b>
+<pre>
  "***  Multiple Company Data Sheet  ***" centerNL: 70 . print; 
  newLine print ; 
 
@@ -63,7 +58,7 @@ The file <i>example2.b</i> displays sample data for each company in this list:
 Execute this program.  You should see:
 
 <ul>
-<Pre><b>
+<pre>
              ***  Multiple Company Data Sheet  ***
 
 Ticker  Name                    Industry   Sales      P-E
@@ -88,7 +83,7 @@ price-earnings ratio are then displayed for each company.
 The file <i>example2.c</i> groups the companies into industries and displays the industry code and name followed by the companies in the industry for each industry present in the list:
 
 <ul>
-<Pre><b>
+<pre>
  "***  Multiple Company Data Sheet  ***" centerNL: 70 . print; 
  newLine print ; 
  "Ticker" print: 10 ; 
@@ -118,7 +113,7 @@ The file <i>example2.c</i> groups the companies into industries and displays the
 </ul>
 Execute this program.  You should see:
 <ul>
-<Pre><B>
+<pre>
                ***  Multiple Company Data Sheet  ***
 
 Ticker  Name                      Industry     Sales     P-E
@@ -160,7 +155,7 @@ defined as the average ratio for the companies in the industry.  The
 file <i>example2.d</i> includes the summary information:
 
 <ul>
-<Pre><b>
+<pre>
  "***  Multiple Company Data Sheet  ***" centerNL: 70 . print; 
  newLine print ; 
  "Ticker" print: 10 ; 
@@ -301,7 +296,8 @@ After grouping by industry, two temporary variables are created
 as part of each industry's subtotal line.  The expression:
 
 <ul>
-<pre>sales / ^my industrySales * 100 print: 10</b></tt></pre>
+<pre>
+sales / ^my industrySales * 100 print: 10</b></tt></pre>
 </ul>
 
 <p>
@@ -860,7 +856,7 @@ report for the top 2 sectors in 1989 for the entire company universe:
 
 Execute this program.  You should see:
 <ul>
-<Pre><b>
+<pre>
                 ***  Multiple Company Data Sheet  ***                 
                       Sector-Industry Breakdown                       
                         Top 2 Sectors By Sales                        

@@ -1,30 +1,26 @@
 ---
 title: "Case Study 1: Single Company Reporting"
+
+toc: false
 ---
 
-<h2>Case Study 1: Single Company Reporting</h2>
-
-<p>| <a href="vconcep.htm">Home</a> 
-   | <a href="vtutor.htm">Tutorials</a> | <hr>
-
 <blockquote><hr>
-<center><b><font size+1>Reminder!</font></b> </a></center>
+<center><b><font size+1>Reminder!</font></b></center>
 To run these examples, you should first start a new session and then load the sample database using:
-<pre><tt><b>     "/localvision/samples/general/sample.load" asFileContents evaluate ; 
-</b></tt></pre>
+<pre>
+  "/localvision/samples/general/sample.load" asFileContents evaluate ; 
+</pre>
 Any other files referenced can be read from the <i>/localvision/samples/general/</i>
 directory.
 <p>
 <b>Note:</b> The <i>sample.load</i> file runs by default on a <i>Unix</i> environment.  If you are using a <i>Windows NT</i> platform, this location may be prefixed by a drive  and optional path (e.g. <i>d:/visiondb/localvision/samples/general/sample.load</i>).  Check with your Vision Administrator for further details.<hr></blockquote>
-<p>
-
-<hr>
 
 <p>It is often useful to display many data items over time for a single
 company. Read the file <i>example1.a</i> You should see the following:
 
 <ul>
-<pre>Named Company GM 
+<pre>
+Named Company GM 
 do: [ 
      !dr <- 90 to: 88 by: 1 yearEnds ;          #--create date range 
      " " print: 15 ;                            #--indent

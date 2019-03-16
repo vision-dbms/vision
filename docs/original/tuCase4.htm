@@ -1,28 +1,28 @@
 ---
 title: "Case Study 4: Simple Report Writer"
+
+toc: false
 ---
 
-<h2>Case Study 4: Simple Report Writer</h2>
-
-<p>| <a href="vconcep.htm">Home</a> 
-   | <a href="vtutor.htm">Tutorials</a> |
-<hr>
-
 <blockquote><hr>
-<center><b><font size+1>Reminder!</font></b> </a></center>
+<center><b><font size+1>Reminder!</font></b></center>
 To run these examples, you should first start a new session and then load the sample database using:
-<pre><tt><b>     "/localvision/samples/general/sample.load" asFileContents evaluate ;</b></tt></pre>
+<pre>
+  "/localvision/samples/general/sample.load" asFileContents evaluate ;
+</pre>
 and load <i>testList</i> using:
-<ul type=disc><pre>!testList <- Company masterList 
+<ul type=disc>
+<pre>
+!testList <- Company masterList 
     rankDown: [ sales ] . 
-    select: [ rank <= 20 ] ; </pre></ul>
+    select: [ rank <= 20 ] ;
+</pre>
+</ul>
 Any other files referenced can be read from the <i>/localvision/samples/general/</i>
 directory.<p>
 <b>Note:</b> The <i>sample.load</i> file runs by default on a <i>Unix</i> environment.  If you are using a <i>Windows NT</i> platform, this location may be prefixed by a drive  and optional path (e.g. <i>d:/visiondb/localvision/samples/general/sample.load</i>).  Check with your Vision Administrator for further details.
 <hr></blockquote>
-<p>
 
-<hr>
 <p>
 In the previous example, you learned how to write a generic application 
 that produces a cross-tabular form of report for any type of data.  
