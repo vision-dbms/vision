@@ -1,43 +1,53 @@
 ---
 title: "Vision Tutorial 1: Vision Basics"
+
+related_topics:
+  - url: "clNumber.htm"
+    title: "Numbers"
+  - url: "clString.htm"
+    title: "Strings"
+  - url: "Lang.htm"
+    title: "Language"
+  - url: "tuLoad.htm"
+    title: "Creating a Demo Database"
+  - url: "tuSingle.htm"
+    title: "Single Object Access" 
+  - url: "tuList.htm"
+    title: "Using Lists"
+  - url: "tuTS.htm"
+    title: "Using Dates and TimeSeries"
+
 ---
-
-<h2>Vision Tutorial 1: Vision Basics</h2>
-
 <p>
-| <a href="vconcep.htm">Home</a> 
-| <a href="vtutor.htm">Tutorials</a> 
-| <a href="clNumber.htm">Numbers</a>
-| <a href="clString.htm">Strings</a>
-| <a href="Lang.htm">Language</a> | 
-<hr >
-
-<blockquote><hr>
+<blockquote>
 <center><b><font size+1>Reminder!</font></b> </a></center>
 To run these examples, you should first start a new session then load the sample database using:
-<pre><tt><b>     "/localvision/samples/general/sample.load" asFileContents evaluate ; 
-</b></tt></pre>
+<pre>
+     "/localvision/samples/general/sample.load" asFileContents evaluate ; 
+</pre>
 Any other files referenced can be read from the <i>/localvision/samples/general/</i>
 directory.
 
 <p>
 <b>Note:</b> The <i>sample.load</i> file runs by default on a <i>Unix</i> environment.  If you are using a <i>Windows NT</i> platform, this location may be prefixed by a drive  and optional path (e.g. <i>d:/visiondb/localvision/samples/general/sample.load</i>).  Check with your Vision Administrator for further details.
-<hr></blockquote>
+</blockquote>
 
-<hr>
-
-<a name="Working with Numbers and Strings"><h3><b>Working with Numbers and Strings</b></h3></a>
+<h2 id="WorkingWithNumbersAndStrings"><b>Working with Numbers and Strings</b></h2>
 
 <p>Type the expression:
 
 <ul>
-<pre>3</pre>
+<pre>
+3
+</pre>
 </ul>
 
 Submit the request to Vision. You should see
 
 <ul>
-<pre>3</pre>
+<pre>
+3
+</pre>
 </ul>
 
 displayed as the result.
@@ -45,13 +55,17 @@ displayed as the result.
 <p>Now type: 
 
 <ul>
-<pre>1.23</pre>
+<pre>
+1.23
+</pre>
 </ul>
 
 You will see:
 
 <ul>
-<pre>1.23</pre>
+<pre>
+1.23
+</pre>
 </ul>
 
 displayed. In fact, if you submit any number - positive, negative, integer,
@@ -62,34 +76,44 @@ A string is any combination of characters enclosed in double quotes.
 <p>For example, type: 
 
 <ul>
-<pre>"This is a string"</pre>
+<pre>
+"This is a string"
+</pre>
 </ul>
 
 and submit this request. You will see: 
 
 <ul>
-<pre>This is a string</pre>
+<pre>
+This is a string
+</pre>
 </ul>
 
 displayed. Vision can do more than merely redisplay whatever you submit.
 For example, type: 
 
 <ul>
-<pre>22 + 5</pre>
+<pre>
+22 + 5
+</pre>
 </ul>
 
 The answer, 27, will be displayed. Try this with strings. For example,
 type: 
 
 <ul>
-<pre>"This is a string" + 5</pre>
+<pre>
+"This is a string" + 5
+</pre>
 </ul>
 
 You should see:
 
 <ul>
-<pre>>>> Selector '+' Not Found <<< 
-     NA</pre>
+<pre>
+>>> Selector '+' Not Found <<< 
+     NA
+</pre>
 </ul>
 
 displayed. What does this response mean and why was it only displayed
@@ -105,13 +129,17 @@ not perform. In this case, the operation is <i>;</i>
 <p>Now try this experiment. Submit the request:
 
 <ul>
-<pre>"This is a string" count</pre>
+<pre>
+"This is a string" count
+</pre>
 </ul>
 
 You should see: 
 
 <ul>
-<pre>16</pre>
+<pre>
+16
+</pre>
 </ul>
 
 The count operation is defined to count the number of characters in
@@ -120,14 +148,18 @@ a string. The answer indicates that the supplied string contains 16 characters.
 <p>Submit:
 
 <ul>
-<pre>3 count</pre>
+<pre>
+3 count
+</pre>
 </ul>
 
 <p>You should see
 
 <ul>
-<pre> > Selector 'count' Not Found <<< 
- NA</pre>
+<pre>
+ > Selector 'count' Not Found <<< 
+ NA
+</pre>
 </ul>
 
 If you ask Vision to perform the operation <i>count</i> for a string,
@@ -141,13 +173,17 @@ identifies that <i>count</i> is the operation that could not be performed.
 <p>Now submit: 
 
 <ul>
-<pre>"This is a string" count + 3</pre>
+<pre>
+"This is a string" count + 3
+</pre>
 </ul>
 
 You should see: 
 
 <ul>
-<pre>19.00</pre>
+<pre>
+19.00
+</pre>
 </ul>
 
 Although you cannot add 3 to a string, you can add 3 to the number of
@@ -178,7 +214,9 @@ set of messages.
 <p>In the example: 
 
 <ul>
-<pre>"This is a string" count + 3 </pre>
+<pre>
+"This is a string" count + 3 
+</pre>
 </ul>
 
 the message <i>count</i> is sent to the string "This is a string"
@@ -186,7 +224,9 @@ and the number 16 is returned. The message <i>+ 3</i> is then automatically
 sent to the number 16, producing the result 19. In the example: 
 
 <ul>
-<pre>3 count</pre>
+<pre>
+3 count
+</pre>
 </ul>
 
 the message <i>count</i> is sent to the number 3. Since the class Number
@@ -198,7 +238,9 @@ to the message <a href="mObject.htm#displayMessages">displayMessages</a> by disp
 the list of messages defined for object. For example, type: 
 
 <ul>
-<pre>3 displayMessages</pre>
+<pre>
+3 displayMessages
+</pre>
 </ul>
 
 Your should see the messages that are valid to send to the number 3.
@@ -207,7 +249,7 @@ will always provide an up-to-date list.
 
 <hr>
 
-<a name="Printing"><h3><b>Printing</b></h3></a>
+<h2 id="Printing"><b>Printing</b></h2>
 
 <p>All objects in the system have a default way in which they print. For
 example, integers are right justified in a 9 character field and print
@@ -219,26 +261,34 @@ they are printed.
 to the final result. In other words, when you submit the request: </p>
 
 <ul>
-<pre>3</pre>
+<pre>
+3
+</pre>
 </ul>
 
 Vision actually evaluates the expression: 
 
 <ul>
-<pre>3 print</pre>
+<pre>
+3 print
+</pre>
 </ul>
 
 and therefore prints the value 3 when it is done. Try submitting the
 request: 
 
 <ul>
-<pre>3 print</pre>
+<pre>
+3 print
+</pre>
 </ul>
 
 You will see the result: 
 
 <ul>
-<pre>3         3</pre>
+<pre>
+3         3
+</pre>
 </ul>
 
 The 3 is printed twice. The first 3 is the one you explicitly requested;
@@ -250,13 +300,17 @@ followed by the number.
 to print the number 1.1 to 3 decimals places. Submit the expression: </p>
 
 <ul>
-<pre>1.1 print: 8.3</pre>
+<pre>
+1.1 print: 8.3
+</pre>
 </ul>
 
 You will see the result: 
 
 <ul>
-<pre>1.100 1.10</pre>
+<pre>
+1.100 1.10
+</pre>
 </ul>
 
 The first value is the result of the <i>print:</i> message. The second
@@ -265,13 +319,17 @@ this second value, place a semi-colon at the end of your input line as
 shown below: 
 
 <ul>
-<pre>1.1 print: 8.3 ;</pre>
+<pre>
+1.1 print: 8.3 ;
+</pre>
 </ul>
 
 You will see the result:
 
 <ul>
-<pre>1.100</pre>
+<pre>
+1.100
+</pre>
 </ul>
 
 The print format of 8.3 indicates that you wanted your result printed
@@ -285,27 +343,35 @@ A few simple messages are described below.
 <p>To print the number 5 million with commas, type the following: 
 
 <ul>
-<pre>5000000 printWithCommas: 12 ;</pre>
+<pre>
+5000000 printWithCommas: 12 ;
+</pre>
 </ul>
 
 You should see:
 
 <ul>
-<pre>5,000,000</pre>
+<pre>
+5,000,000
+</pre>
 </ul>
 
 To start a new line after the value is printed use the <i>printNL</i>
 or <i>printNL:</i> message. For example, type: 
 
 <ul>
-<pre>3 printNL</pre>
+<pre>
+3 printNL
+</pre>
 </ul>
 
 You should see: 
 
 <ul>
-<pre>3 
-3</pre>
+<pre>
+3 
+3
+</pre>
 </ul>
 
 The second 3 is the result of Vision's automatic print message. It appears
@@ -317,14 +383,20 @@ with 9 characters.
 value for the parameter. For example, the expression: 
 
 <ul>
-<pre>3 printNL: -9</pre>
+<pre>
+3 printNL: -9
+</pre>
 </ul>
 
 displays the output: 
 
 <ul>
-<pre>3########        (where # indicates a blank space) 
-########3</pre>
+<pre>
+
+3########        (where # indicates a blank space) 
+########3
+
+</pre>
 </ul>
 
 The first 3 is left justified in 9 character positions. The second 3
@@ -344,38 +416,50 @@ than the supplied width will have its rightmost characters truncated.
 <p>For example, the expression:
 
 <ul>
-<pre>"xyz" print: 2 ;</pre>
+<pre>
+"xyz" print: 2 ;
+</pre>
 </ul>
 
 displays
 
 <ul>
-<pre>xy</pre>
+<pre>
+xy
+</pre>
 </ul>
 
 and the expression: 
 
 <ul>
-<pre>"xyz" print: 10 ;</pre>
+<pre>
+"xyz" print: 10 ;
+</pre>
 </ul>
 
 displays the output: 
 
 <ul>
-<pre>xyz#######       (where # indicates a blank space) </pre></b>
+<pre>
+xyz#######       (where # indicates a blank space) 
+</pre></b>
 </ul>
 
 To right justify a string, send it the <i>print: </i>message with a
 negative value for the parameter. For example, the expression: 
 
 <ul>
-<pre>"x" print: -20 ;</pre>
+<pre>
+"x" print: -20 ;
+</pre>
 </ul>
 
 Produces the output:
 
 <ul>
-<pre>      #19 spaces                <b>x</pre>
+<pre>
+      #19 spaces                <b>x
+</pre>
 </ul>
 
 The message <i>center:</i> can be sent to a string to center it over
@@ -383,13 +467,17 @@ a specified number of columns. For example to center a title over the 80
 columns type:
 
 <ul>
-<pre>"My Title" center: 80 </pre>
+<pre>
+"My Title" center: 80 
+</pre>
 </ul>
 
 You should see:
 
 <ul>
-<pre>             My Title</pre>
+<pre>
+             My Title
+</pre>
 </ul>
 
 The message <i>centerNL</i>: works in the same way as <i>center:</i>,
@@ -398,7 +486,7 @@ but follows the output by a carriage return.
 <p>
 <hr>
 
-<a name="Parameters"><h3><b>Parameters</b></h3></a>
+<h2 id="Parameters"><b>Parameters</b></h2>
 
 <p>The <i>print:</i> message differs from the standard print message in
 one important way; it has a parameter. A <a href="Lang.htm#parameter">Parameter</a>
@@ -408,7 +496,9 @@ the column width and number of decimal places to use when printing the
 value. In the example: 
 
 <ul>
-<pre>1.1 print: 8.3 ;</pre>
+<pre>
+1.1 print: 8.3 ;
+</pre>
 </ul>
 
 the parameter <b>8.3</b> indicates that the result should occupy 8 character
@@ -417,15 +507,19 @@ positions and that the result should be rounded to 3 decimal places.
 <p>Try omitting this parameter as shown below: 
 
 <ul>
-<pre>3 print:</pre>
+<pre>
+3 print:
+</pre>
 </ul>
 
 You should see the response: 
 
 <ul>
-<pre>>> 'syntax error' near source line 1, character 11 <<< 
+<pre>
+>> 'syntax error' near source line 1, character 11 <<< 
 3 print: 
-**      ^</pre>
+**      ^
+</pre>
 </ul>
 
 Since Vision was expecting a value following the <i>print:</i> message
@@ -441,15 +535,19 @@ namely a number that you wish to add to the original number. Try leaving
 off this parameter as shown below: 
 
 <ul>
-<pre>3 +</pre>
+<pre>
+3 +
+</pre>
 </ul>
 
 You should see: 
 
 <ul>
-<pre>>> 'syntax error' near source line 1, character 4 <<<
+<pre>
+>> 'syntax error' near source line 1, character 4 <<<
 3 + 
-** ^ </pre>
+** ^ 
+</pre>
 </ul>
 
 As you can see, the error message is the same as in the prior example.
@@ -459,7 +557,7 @@ that Vision needed to execute your request.
 
 <hr>
 
-<a name="Programs"><h3><b>Programs</b></h3></a>
+<h2 id="Programs"><b>Programs</b></h2>
 
 <p>Whether you realize it or not, you have already written your first Vision
 program. A <a href="Program.htm">program</a> is merely a set of one
@@ -471,14 +569,18 @@ a simple mechanism for accomplishing this.
 <p>For example, submit the following: 
 
 <ul>
-<pre>"The Answer Is: " print ; 
-2 + 2 </pre>
+<pre>
+"The Answer Is: " print ; 
+2 + 2 
+</pre>
 </ul>
 
 You should see: 
 
 <ul>
-<pre>The Answer Is: 4.00</pre>
+<pre>
+The Answer Is: 4.00
+</pre>
 </ul>
 
 The semi-colon is used to separate expressions within a Vision program.
@@ -491,10 +593,12 @@ the last expression with a semi-colon, the automatic printing is suppressed.
 sequence of steps. The general form for a block is illustrated below: 
 
 <ul>
-<pre>[ statement 1 ; 
+<pre>
+[ statement 1 ; 
   statement 2 ; 
    . . . 
-] </pre>
+] 
+</pre>
 </ul>
 
 Blocks always return the value of the last statement executed. Blocks
@@ -503,9 +607,11 @@ message requires two parameters that are blocks that contain the program
 to run if a specific condition is (is not) met. For example: 
 
 <ul>
-<pre>myList count > 100 
+<pre>
+myList count > 100 
     ifTrue: [ "This is a big list." print; ] 
-   ifFalse: [ "This is a small list." print; ]; </pre>
+   ifFalse: [ "This is a small list." print; ]; 
+</pre>
 </ul>
 
 If the number of elements in the list <i>myList</i> is greater than
@@ -517,19 +623,23 @@ program supplied by the second block is executed. In this case the string
 <hr>
 
 <p>
-<a name="Variables"><h3><b>Variables</b></h3></a>
+<h2 id="Variables"><b>Variables</b></h2>
 
 <p>It is often useful to save the results of specific tasks for later use.
 For example, type in the following program:
 
 <ul>
-<pre>!x <- 2 + 2</pre>
+<pre>
+!x <- 2 + 2
+</pre>
 </ul>
 
 The answer 4 should appear. Now type: 
 
 <ul>
-<pre>x + 1</pre>
+<pre>
+x + 1
+</pre>
 </ul>
 
 You should see the answer 5. 
@@ -545,7 +655,8 @@ session or until you redefine the variable.
 For example, enter the following program: 
 
 <ul>
-<pre>!x <- 2 ; 
+<pre>
+!x <- 2 ; 
 !y <- 3 ; 
 !z <- x + y ; 
 "The Value Of x is: " print; 
@@ -553,15 +664,18 @@ x printNL;
 "The Value Of y is: " print ; 
 y printNL ; 
 "The Value of x + y (z) is: " print; 
-z printNL ; </pre>
+z printNL ; 
+</pre>
 </ul>
 
 Your should see: 
 
 <ul>
-<pre>The Value Of x is:        2
+<pre>
+The Value Of x is:        2
 The Value Of y is:        3 
-<br>The Value of x + y (z) is:     5.00 </pre>
+<br>The Value of x + y (z) is:     5.00 
+</pre>
 </ul>
 
 Variables can be used to store values other than numbers. For example,
@@ -569,30 +683,26 @@ create a variable called <i>answer</i> containing the string: "The
 Answer Is:" as illustrated below: 
 
 <ul>
-<pre>!answer <- "The Answer Is: " </pre>
+<pre>
+!answer <- "The Answer Is: " 
+</pre>
 </ul>
 
 Now try the following program: 
 
 <ul>
-<pre>answer print; 
-2 + 2 </pre>
+<pre>
+answer print; 
+2 + 2 
+</pre>
 </ul>
 
 You should see: 
 
 <ul>
-<pre>The Answer Is:     4.00</pre>
+<pre>
+The Answer Is:     4.00
+</pre>
 </ul>
-
-<p>
-<hr>
-<a name="SeeAlso:"><b><h3>See Also:</h3></b></a>
-
-| <a href="tuLoad.htm">Creating a Demo Database</a>
-| <a href="tuSingle.htm">Single Object Access</a> 
-| <a href="tuList.htm">Using Lists</a>
-| <a href="tuTS.htm">Using Dates and TimeSeries</a> |
-
 
 {% include doc-footer.htm copydates="1999" %}

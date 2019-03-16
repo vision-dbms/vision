@@ -8,14 +8,14 @@ title: "Vision Upload Format: SecurityXRef "
 <font size=+2><b>Data Feed: </b><i>SecurityXRef</i></font><p>
 <font size=+1><b>Category: </b><i>XRefFeed</i></font><p>
 
-<h3>Summary:</h3>
+<h2>Summary:</h2>
 <p>
 <ul>
 The <i>SecurityXRef</i> feed is used to load alternative identifiers for a <b>Security</b>.  Alternative identifiers are stored in <a href="clDict.htm#xref"> cross reference dictionaries (<i>XRef's</i></a>) defined for the <b>Security</b> class.  XRef's provide a convenient way to track identifiers that are uniquely assigned by a specific source but may overlap with identifiers assigned by other sources.  Depending on the source, this feed may also update the identifier in the primary naming dictionary as well.  The related feed, <a href="pma_SecurityAliases.htm"><i>Security Aliases</i></a>, adds ids to the primary naming dictionary only.
 </ul>
 <p>
 
-<h3>Available Fields:</h3>
+<h2>Available Fields:</h2>
 <p>
 <center><table border=1 width=80% cellpadding=4 cellspacing=2>
 <tr><th>Field<th>Type<th>Description
@@ -37,7 +37,7 @@ The <i>SecurityXRef</i> feed is used to load alternative identifiers for a <b>Se
 </table></center>
 <p>
 
-<h3>Special Processing Rules:</h3>
+<h2>Special Processing Rules:</h2>
 <p>
 <ul type=disc>
   <li>The <i>entityId</i> must correspond to an existing <b>Security</b> instance.  Any primary    security alias can be used to identify the security.  <p>
@@ -48,14 +48,14 @@ The <i>SecurityXRef</i> feed is used to load alternative identifiers for a <b>Se
   <li>If multiple <i>symbols</i> are supplied for an <i>entityId/SourceId</i> combination, only the first occurrence is used.  If the same <i> sourceId/symbol</i> combination is supplied for more than one <i>entityId</i>, only the first occurrence is used.<p>
 </ul><p>
 
-<a name="related"><h3>Related Feeds:</h3>
+<a name="related"><h2>Related Feeds:</h2>
 <p>
 <ul type=disc>
   <li><a href="pma_SecurityMaster.htm"><i>SecurityMaster</i></a>: defines Security instances     referenced by this feed<p>
   <li><a href="pma_IdSourceMaster.htm"><i>IdSourceMaster</i></a>: defines IdSource instances     referenced by this feed<p>
   <li><a href="pma_SecurityAliases.htm"><i>SecurityAliases</i></a>: defines aliases independent     of source<p>
 </ul><p>
-<h3>Sample Upload:</h3><p>
+<h2>Sample Upload:</h2><p>
 The following tab-delimited feed could be used to update security cross references:
 
 <pre><tt><b>
