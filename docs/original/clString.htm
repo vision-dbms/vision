@@ -38,22 +38,23 @@ delimited by double quotes.  For example:
 Any character may be included in a string.  If you need to include a
 double quote in the string, it must be <i>escaped</i> using the '\'
 character to avoid confusion with the string delimiters.  For
-example:<pre><tt><b>
-     "He said, \"The Vision language is fun\" "
-</b></tt></pre>
-returns the string:<pre><tt><b>
-     He said, "The Vision language is fun"
-</b></tt></pre>
+example:
+<pre>
+  "He said, \"The Vision language is fun\" "
+</pre>
+returns the string:
+<pre>
+  He said, "The Vision language is fun"
+</pre>
 <p>
 The <i>String</i> class is a direct subclass of the class <i>Ordinal</i>:
-<font size=+1><pre>
-          <a href="clObject.htm">Object</a>
-             |
-             Ordinal
-                |
-                <b>String</b>
-
-</pre></font>
+<pre>
+  <a href="clObject.htm">Object</a>
+     |
+     Ordinal
+        |
+        <b>String</b>
+</pre>
 <p>
 <hr>
 <h2 id="basic">Basic String Messages</h2>
@@ -509,12 +510,13 @@ a list containing one or more elements?
 <blockquote><hr>
 <center><b>Warning!! </b></center>
 Two strings with the same content may not be the same object.
-For example:<pre><tt><b>
-     !string1 <- "abc" ;
-     !string2 <- "ABC" toLower ;
-     (string1 = string2) printNL ;
-     (string1 == string2) printNL ;
-</b></tt></pre>
+For example:
+<pre>
+  !string1 <- "abc" ;
+  !string2 <- "ABC" toLower ;
+  (string1 = string2) printNL ;
+  (string1 == string2) printNL ;
+</pre>
 Strings are equal (i.e., = ) when they have the same content.
 Strings are identical (i.e., == ) when they are the same object.
 Strings that are created directly in quotes or by manipulating
@@ -532,53 +534,56 @@ you need to use the identical string to access the element from the list.
 Several techniques are available to preserve string identity.  For 
 example, suppose you wanted to rate each currency with an A, B, or C
 value.  You could create class constants to hold unique
-versions of the strings:<pre><tt><b>
-     #-- define constant
-     Currency define: 'ratingA' toBe: "A" ;
-     Currency define: 'ratingB' toBe: "B" ;
-     Currency define: 'ratingC' toBe: "C" ;
+versions of the strings:
+<pre>
+  #-- define constant
+  Currency define: 'ratingA' toBe: "A" ;
+  Currency define: 'ratingB' toBe: "B" ;
+  Currency define: 'ratingC' toBe: "C" ;
 
-     #-- define property
-     Currency defineFixedProperty: 'rating' ;
+  #-- define property
+  Currency defineFixedProperty: 'rating' ;
 
-     #-- assign values
-     Named Currency send: [ USD, CAD ] .
-        do: [ :rating <- ratingA ] ;
+  #-- assign values
+  Named Currency send: [ USD, CAD ] .
+     do: [ :rating <- ratingA ] ;
 
-     #-- compare
-     (Named Currency USD rating == Named Currency CAD rating) printNL ;
-</b></tt></pre>
+  #-- compare
+  (Named Currency USD rating == Named Currency CAD rating) printNL ;
+</pre>
 The US and Canadian currencies will have identical values for their rating.
 <p>
 You can create a <a href="clDict.htm"><i>Dictionary</i></a> to hold
-an unique version of the string:<pre><tt><b>
-     #--  create dictionary
-     Currency define: "StringLookup" toBe: Dictionary new ;
-     Currency StringLookup at: "A" put: "A" ;
-     Currency StringLookup at: "B" put: "B" ;
-     Currency StringLookup at: "C" put: "C" ;
+an unique version of the string:
+<pre>
+  #--  create dictionary
+  Currency define: "StringLookup" toBe: Dictionary new ;
+  Currency StringLookup at: "A" put: "A" ;
+  Currency StringLookup at: "B" put: "B" ;
+  Currency StringLookup at: "C" put: "C" ;
 
-     #-- define property
-     Currency defineFixedProperty: 'rating' ;
+  #-- define property
+  Currency defineFixedProperty: 'rating' ;
 
-     #-- assign values
-     Named Currency send: [ USD, CAD ] .
-        do: [ :rating <- StringLookup at: "A" ] ;
+  #-- assign values
+  Named Currency send: [ USD, CAD ] .
+     do: [ :rating <- StringLookup at: "A" ] ;
 
-     #-- compare
-     (Named Currency USD rating == Named Currency CAD rating) printNL ;
-</b></tt></pre>
+  #-- compare
+  (Named Currency USD rating == Named Currency CAD rating) printNL ;
+</pre>
 <p>
 Alternatively, you could create 
 a new class of rating values and assign each value to an entry in this table 
-as illustrated below:<pre><tt><b>
-     Entity createSubclass: "Rating" ;
-     Rating createInstance: "A" ; 
-     Rating createInstance: "B" ; 
-     Rating createInstance: "C" ; 
-     Named Currency USD :rating <- Named Rating A ; 
-     Named Currency CAD :rating <- Named Rating A ; 
-</b></tt></pre>
+as illustrated below:
+<pre>
+  Entity createSubclass: "Rating" ;
+  Rating createInstance: "A" ; 
+  Rating createInstance: "B" ; 
+  Rating createInstance: "C" ; 
+  Named Currency USD :rating <- Named Rating A ; 
+  Named Currency CAD :rating <- Named Rating A ; 
+</pre>
 
 <p>
 <hr>

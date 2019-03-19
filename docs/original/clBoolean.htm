@@ -26,16 +26,15 @@ Logical value are represented by the two subclasses of
 for booleans is actually implemented at these subclasses.  
 <p>
 The <b>Boolean</b> class is a direct subclass of Object:
-<font size=+1><pre>
-          <a href="clObject.htm">Object</a>
-             |
-             <b>Boolean</b>
-                |
-                |-- FALSE
-                |
-                |-- TRUE
-
-</pre></font>
+<pre>
+    <a href="clObject.htm">Object</a>
+       |
+       <b>Boolean</b>
+          |
+          |-- FALSE
+          |
+          |-- TRUE
+</pre>
 
 <p>
 <hr>
@@ -46,21 +45,24 @@ The messages <i>TRUE</i> and <i>FALSE</i> are defined at the class
 values.  You can assign these values to 
 <a href="Lang.htm#variable">variables</a> and
 <a href="Fund.htm#fixed">properties</a> using the standard procedures.
-For example:<pre><tt><b>
-     !trueValue <- TRUE ; 
-     Currency defineFixedProperty: 'status' ;
-     Named Currency USD :status <- FALSE ;
-</b></tt></pre>
+For example:
+<pre>
+  !trueValue <- TRUE ; 
+  Currency defineFixedProperty: 'status' ;
+  Named Currency USD :status <- FALSE ;
+</pre>
 <p>
 Many messages return one of these values.  The <b>relational messages</b>
 <i>=, ==, !=, !==, <, <=, >, >= </i>
 return a <i>TRUE</i> or <i>FALSE</i> value when used to
-compare two objects of the same class.  For example:<pre><tt><b>
-     3 < 4
-</b></tt></pre>
-returns the object <i>TRUE</i> and:<pre><tt><b>
-     "3" > "4"
-</b></tt></pre>
+compare two objects of the same class.  For example:
+<pre>
+  3 < 4
+</pre>
+returns the object <i>TRUE</i> and:
+<pre>
+  "3" > "4"
+</pre>
 returns the object <i>FALSE</i>.
 <p>
 Whenever a new class is created, the message is<i>XXX</i> 
@@ -71,20 +73,24 @@ class is <i>FALSE</i>.  These messages are automatically defined
 when you create new classes using the
 <a href="Classes.htm#subclass"><i>createSubclass:</i></a>
 message.  For example, when you create a new class <i>TestClass</i> 
-using:<pre><tt><b>
-     Object createSubclass: "TestClass" ;
-</b></tt></pre>
-the message <i>isTestClass</i> is automatically defined using:<pre><tt><b>
-     TestClass define: 'isTestClass' toBe: TRUE ;
-     Object define: 'isTestClass' toBe: FALSE ;
-</b></tt></pre>
-The expression:<pre><tt><b>
-     TestClass isTestClass
-</b></tt></pre>
+using:
+<pre>
+  Object createSubclass: "TestClass" ;
+</pre>
+the message <i>isTestClass</i> is automatically defined using:
+<pre>
+  TestClass define: 'isTestClass' toBe: TRUE ;
+  Object define: 'isTestClass' toBe: FALSE ;
+</pre>
+The expression:
+<pre>
+  TestClass isTestClass
+</pre>
 returns <i>TRUE</i> since this object is an instance of <i>TestClass</i>.
-The expression:<pre><tt><b>
-     3 isTestClass
-</b></tt></pre>
+The expression:
+<pre>
+  3 isTestClass
+</pre>
 returns <i>FALSE</i> since the integer object will use the implementation
 of <i>isTestClass</i> defined at <i>Object</i>.
 <p>
@@ -206,25 +212,28 @@ the block only needs to be evaluated if the recipient is <i>TRUE</i>.
 Likewise, the <i>||</i> message returns <i>TRUE</i> if the recipient
 object is <i>TRUE</i> independent of the parameter.  If you do not
 supply the parameter as a block, it is evaluated prior to being
-passed to the message.  For example:<pre><tt><b>
-    !object <- 3 ;
-    object isString && object count < 5
-</b></tt></pre>
+passed to the message.  For example:
+<pre>
+ !object <- 3 ;
+ object isString && object count < 5
+</pre>
 generates the <i>Selector 'count' Not Found</i> error since the
 message <i>count</i> is being sent to a numeric object.  If you
-supply this parameter as a block:<pre><tt><b>
-    !object <- 3 ;
-    object isString && [ object count < 5 ] 
-</b></tt></pre>
+supply this parameter as a block:
+<pre>
+  !object <- 3 ;
+  object isString && [ object count < 5 ] 
+</pre>
 the value <i>FALSE</i> is
 returned (since <i>object</i> is not a string) and no error message
 is generated.  
 <p>
 The message <i>not</i> is defined for the <i>Boolean</i> classes
 to return <i>TRUE</i> when sent to <i>FALSE</i> and to return
-<i>FALSE</i> when sent to <i>TRUE</i>.  For example:<pre><tt><b>
-     ( 3 < 4 ) not
-</b></tt></pre>
+<i>FALSE</i> when sent to <i>TRUE</i>.  For example:
+<pre>
+  ( 3 < 4 ) not
+</pre>
 returns <i>FALSE</i>.
 <p>
 <hr>
@@ -256,36 +265,39 @@ the block.  If the recipient is <i>TRUE</i>, the <i>NA</i> value is
 returned.  The <i>ifTrue:ifFalse:</i> message evaluates its 
 first block parameter if the recipient is <i>TRUE</i> and
 evaluates its second block parameter if the recipient is <i>FALSE</i>.
-The result of the block evaluation is returned.  For example:<pre><tt><b>
-     !result <- 3 > 2
-       ifTrue: [ " this is true" print ;
-                 100
-               ] ;
-</b></tt></pre>
+The result of the block evaluation is returned.  For example:
+<pre>
+  !result <- 3 > 2
+    ifTrue: [ " this is true" print ;
+              100
+            ] ;
+</pre>
 Since the expression <i>3 > 2</i> evaluates to <i>TRUE</i>, 
 the block is evaluated.  The string "this is true" is displayed
 and the variable <i>result</i> is set to <i>100</i>, the
-value returned by the block.  In the expression:<pre><tt><b>
-     !result <- 3 > 4
-       ifTrue: [ " this is true" print ;
-                 100
-               ] ;
-</b></tt></pre>
+value returned by the block.  In the expression:
+<pre>
+  !result <- 3 > 4
+    ifTrue: [ " this is true" print ;
+              100
+            ] ;
+</pre>
 the block is not evaluated, since the expression <i>3 > 4</i>
 evaluates to <i>FALSE</i>.  In this case the variable <i>result</i>
 is set to <i>NA</i>, the value returned by the <i>ifTrue:</i> message
 when the block is not evaluated.
 <p>
 The message <i>ifTrue:ifFalse:</i> allows you to supply different
-blocks for the two cases.  For example:<pre><tt><b>
-     !result <- Currency instanceList count > 100
-       ifTrue: [ "Many Currencies" printNL;
-                 100
-               ] 
-      ifFalse: [ "Few Currencies" printNL ;
-                  1
-               ] ;
-</b></tt></pre>
+blocks for the two cases.  For example:
+<pre>
+  !result <- Currency instanceList count > 100
+    ifTrue: [ "Many Currencies" printNL;
+              100
+            ] 
+   ifFalse: [ "Few Currencies" printNL ;
+               1
+            ] ;
+</pre>
 If the expression <i>Currency instanceList count > 100</i>
 evaluates to <i>TRUE</i>, the first block is evaluated.  
 The string "Many Currencies" is displayed
@@ -299,30 +311,32 @@ value returned by the block.
 <p id="nested">
 Since the blocks supplied as parameters are Vision programs,
 they can be used to create nested control structures.  For 
-example:<pre><tt><b>
-     !myList <- 200 sequence ;
-     !result <- myList count > 100 
-        ifTrue: [ myList count > 1000 
-                     ifTrue: [ "This is a very big list." ] 
-                    ifFalse: [ "This is a big list." ] 
-                ] 
-       ifFalse: [ "This is a small list." ] ;
-    result print ;
-</b></tt></pre>
+example:
+<pre>
+  !myList <- 200 sequence ;
+  !result <- myList count > 100 
+     ifTrue: [ myList count > 1000 
+                  ifTrue: [ "This is a very big list." ] 
+                 ifFalse: [ "This is a big list." ] 
+             ] 
+    ifFalse: [ "This is a small list." ] ;
+  result print ;
+</pre>
 This program will return one of the 3 strings, depending on the
 number of elements in the list <i>myList</i> and store the string
 in the variable <i>result</i>.  This program can be streamlined
 using the 
 <a href="mObject.htm#elseIf:then:"><i>elseIf:then:</i></a> and 
-<a href="mObject.htm#else:"><i>else:</i></a> messages:<pre><tt><b>
-     !myList <- Currency masterList ;
-     !result <- myList count > 1000
-        ifTrue: [ "This is a very big list." ] .
-        elseIf: [ myList count > 100 ] 
-          then: [ "This is a big list." ] .
-          else: [ "This is a small list." ] ;
-    result print ;
-</b></tt></pre>
+<a href="mObject.htm#else:"><i>else:</i></a> messages:
+<pre>
+  !myList <- Currency masterList ;
+  !result <- myList count > 1000
+     ifTrue: [ "This is a very big list." ] .
+     elseIf: [ myList count > 100 ] 
+       then: [ "This is a big list." ] .
+       else: [ "This is a small list." ] ;
+  result print ;
+</pre>
 
 <p>
 
@@ -333,32 +347,35 @@ using the
 A common source of <a href="Error.htm#snf"><i>Selector Not Found</i></a>
 errors are the result of sending the <i>ifTrue:</i>, <i>ifFalse:</i>,
 or <i>ifTrue:ifFalse</i> messages to non-boolean values.  For
-example:<pre><tt><b>
-     !object <- NA ;
-     object > 0
-       ifTrue: [ "Good " ] ifFalse: [ "Bad " ] 
-</b></tt></pre>
+example:
+<pre>
+  !object <- NA ;
+  object > 0
+    ifTrue: [ "Good " ] ifFalse: [ "Bad " ] 
+</pre>
 Since the expression <i>object > 0</i> returns <i>NA</i> and the
 <i>ifTrue:ifFalse:</i> message is not defined for this class,
 the warning message <i>Selector 'ifTrue:ifFalse:' Not Found</i>
 will be displayed.  To avoid this message, an extra conditional
-test could be performed:<pre><tt><b>
-     !object <- NA ;
-     object isNumber
-     ifTrue: [ object > 0 
-                 ifTrue: [ "Good " ] ifFalse: [ "Bad " ] . print ;
-             ] ;
-</b></tt></pre>
+test could be performed:
+<pre>
+  !object <- NA ;
+  object isNumber
+  ifTrue: [ object > 0 
+              ifTrue: [ "Good " ] ifFalse: [ "Bad " ] . print ;
+          ] ;
+</pre>
 In this case, the <i>ifTrue:</i> block is only evaluated if the
 variable <i>object</i> is a number.  If it is, then the string
 "Good" is printed, otherwise the string "Bad" is printed.
 No <i>Selector Not Found</i> messages are generated in this form.
 Several alternatives exist for writing this program without
-generating the warning messages.  For example:<pre><tt><b>
-     !object <- NA ;
-     object > 0
-        ifTrue: [ "Good" ] ifFalse: [ "Bad" ] else: [ ] . print ;
-</b></tt></pre>
+generating the warning messages.  For example:
+<pre>
+  !object <- NA ;
+  object > 0
+     ifTrue: [ "Good" ] ifFalse: [ "Bad" ] else: [ ] . print ;
+</pre>
 In this form, the string "Good" is printed if <i>object > 0 </i>
 evaluates to <i>TRUE</i>, the string "Bad" is printed if it
 evaluates to <i>FALSE</i>, and nothing is printed if it

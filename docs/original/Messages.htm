@@ -32,13 +32,15 @@ Four types of message can be defined:
 A message is a request for an object to return the value of one of
 its properties or execute one of its methods.
 You do not need to know what type of message has been defined in
-order to use the message.  In all cases, the form:<pre>
+order to use the message.  In all cases, the form:
+<pre>
      object messageName 
 </pre>
 is used to request that the recipient object carry out the specific
 function indicated by the message.
 <p>
-To view a method, you prepend the : character to the message:<pre>
+To view a method, you prepend the : character to the message:
+<pre>
      Number :absoluteValue
 </pre>
 This 
@@ -46,7 +48,8 @@ displays the definition of the method <i>absoluteValue</i>
 instead of evaluating
 it.  If you wish to display the definition of a method that has
 multiple parameters, you must supply "dummy" values for each
-parameter.  For example, the expression:<pre>
+parameter.  For example, the expression:
+<pre>
      Number :log: 0
 </pre>
 displays the definition of the <i>log:</i> method.  If the
@@ -59,18 +62,18 @@ There is a special type of message known as a
 Primitive messages are defined as part of the process
 of bootstrapping a Vision database.  The implementation for a Primitive
 cannot be viewed.  Instead you will see the name of the primitive as
-illustrated below:<pre>
+illustrated below:
+<pre>
      Object :do: 0
-
-</b>displays:<b>
-
+</pre>displays:<pre>
      &ltSendForExecution&gt
 </pre>
 <p>
 The message <i>selectorList</i> can be sent to any object and returns
 a list of <i>String</i> objects representing the messages that have
 been defined directly at the recipient object's class.  For example,
-the expression:<pre>
+the expression:
+<pre>
      Number selectorList do: [ printNL ] ;
 </pre>
 returns and prints a list that includes the strings "absoluteValue" and "log:".
@@ -95,7 +98,8 @@ class are NOT
 created automatically.  Each time you use one of the <i>define</i>
 messages, the class is flagged to indicate
 that new messages are pending.  To process and refresh all messages,
-execute the expression:<pre>
+execute the expression:
+<pre>
      Schema processAllMessages
 </pre>
 This process creates and refreshes message descriptors in the
@@ -105,7 +109,8 @@ last time this processing was run, the update time will range from a
 few seconds to a few minutes.  In general, you will probably want to
 incorporate this procedure into a standard nightly update.
 <p>
-The expression:<pre>
+The expression:
+<pre>
      object getMessage: "message"
 </pre>
 is used to access the descriptor associated with a specific
@@ -114,10 +119,12 @@ returns an instance of the class <i>Schema
 MessageImplementationDescriptor</i>.
 The messages <i>displayInfo</i> and <i>describe</i> display
 useful information about this message in a short and long format.
-For example, the expression:<pre>
+For example, the expression:
+<pre>
      Number getMessage: "absoluteValue" . describe
 </pre>
-displays a report in the form:<pre>
+displays a report in the form:
+<pre>
      Message:                 absoluteValue
      Class:                   Number
      Created:                 10/30/1992
@@ -133,7 +140,8 @@ displays a report in the form:<pre>
 <hr>
 <h2 id="access">Access Techniques</h2>
 <p>
-The expression:<pre>
+The expression:
+<pre>
      object showMessages
 </pre>
 can be used to display all the messages defined for the object
@@ -143,10 +151,12 @@ extension are displayed first.
 Messages that have been created or changed since the last Schema 
 database update are flagged.
 <p>
-For example, the expression:<pre>
+For example, the expression:
+<pre>
      Number showMessages
 </pre>
-produces:<pre>
+produces:
+<pre>
      Messages Defined At Class: Number
      !=                            Method
      >                             Method
@@ -158,16 +168,19 @@ produces:<pre>
      asAPowerOf:                   Method
      asDate                        Method
 </pre>
-The expression:<pre>
+The expression:
+<pre>
      Object showMessagesX
 </pre>
 can be used to display all the messages defined for the object and
 any of its super classes excluding Object.
 Messages that have not been posted to the Schema database are also excluded.
-For example, the expression:<pre>
+For example, the expression:
+<pre>
      Number showMessagesX
 </pre>
-produces:<pre>
+produces:
+<pre>
      Messages Defined In Class Hierarchy Of: Number
        --> Excludes Messages Defined At Object 
      
@@ -187,16 +200,19 @@ produces:<pre>
      within:percentOf:                  Method       Number
 
 </pre>
-The expression:<pre>
+The expression:
+<pre>
      object showProperties
 </pre>
 can be used to display all the fixed and time series properties
 defined for the object and any of its super classes.  Messages that
 have not been posted are excluded from this report.  For example,
-the expression:<pre>
+the expression:
+<pre>
      Object showProperties
 </pre>
-produces:<pre>
+produces:
+<pre>
      Properties Defined In Class Hierarchy Of: Object
        --> Excludes New Messages Not In Schema
      
@@ -207,16 +223,19 @@ produces:<pre>
      creationDate                       Fixed        Object
      defaultFlag                        Fixed        Object
 </pre>
-The expression:<pre>
+The expression:
+<pre>
     object showMessagesDefining: "message"
 </pre>
 displays a list of all implementations of the supplied message
 defined for the object or any of its super or sub classes.
-For example, the expression:<pre>
+For example, the expression:
+<pre>
     Object showMessagesDefining: "="
 </pre>
 shows all the classes that have re-defined the "=" messages as
-illustrated below:<pre>
+illustrated below:
+<pre>
      Message                            Type         Defined At
      -----------------------------------------------------------
      =                                  Method       Date
@@ -227,11 +246,13 @@ illustrated below:<pre>
      =                                  Primitive    String
      =                                  Method       Utility UnixSeconds
 </pre>
-The expression:<pre>
+The expression:
+<pre>
      Number showMessagesDefining: "="
 </pre>
 shows only the classes related to <i>Number</i> that have redefined this
-message:<pre>
+message:
+<pre>
      Message                            Type         Defined At
      -----------------------------------------------------------
      =                                  Primitive    Double
@@ -240,17 +261,20 @@ message:<pre>
      =                                  Primitive    Object
 
 </pre>
-The expression:<pre>
+The expression:
+<pre>
     object showMessageNamesContaining: "substring"
 </pre>
 displays a list of all messages
 defined for the object or any of its super or sub classes
 that contain the supplied substring as part of their message name.
-For example, the expression:<pre>
+For example, the expression:
+<pre>
      Object showMessageNamesContaining: "showM"
 </pre>
 lists all the message names that contain the string "showM" as
-illustrated below:<pre>
+illustrated below:
+<pre>
      Message                            Type         Defined At
      -----------------------------------------------------------
      showMessageNamesContaining:        Method       Object
@@ -265,18 +289,21 @@ The substring argument can contain wild-card characters suitable for your
 machine.  For example, on Unix machines you can restrict the search to
 messages beginning with the string "show" by using the substring "^show".
 <p>
-The expression:<pre>
+The expression:
+<pre>
      object showMessagesUsing: "string"
 </pre>
 displays a list of all implementations 
 defined for the object or any of its super or sub classes
 that contain the supplied
 substring as part of its method definition.
-For example, the expression:<pre>
+For example, the expression:
+<pre>
      Object showMessagesUsing: "asDate"
 </pre>
 lists all methods that use the message <i>asDate</i> as illustrated
-below: <pre>
+below:
+<pre>
      Message                            Type         Defined At
      -----------------------------------------------------------
      *                                  Method       DateOffset
@@ -289,7 +316,8 @@ below: <pre>
      asDateFromMMDDYY                   Method       Integer
      . . . 
 </pre>
-The expression:<pre>
+The expression:
+<pre>
      Object showMethodsUsing: "asDate"
 </pre>
 displays the actual method for each implementation found.
@@ -297,7 +325,8 @@ displays the actual method for each implementation found.
 Most of the "show" messages have a "get" equivalent which returns
 a list of <i>Schema MessageImplementationDescriptor</i> instances
 instead of displaying them.  You can use any of the list messages on
-this result.  For example:<pre>
+this result.  For example:
+<pre>
      Object getMessagesUsing: "asDate" .
      do: [ displayInfo ] ;
 </pre>
@@ -317,21 +346,25 @@ The following messages have been defined to return a list of
 <hr>
 <h2 id="history">Viewing Method History</h2>
 <p>
-The expression:<pre>
+The expression:
+<pre>
      Schema processAllMessages
 </pre>
 is used to update the Schema classes with all new and changed methods.
-To find the last time a message was updated use:<pre>
+To find the last time a message was updated use:
+<pre>
      Number getMessage: "absoluteValue" . updateDate
 </pre>
 To display all the messages defined at the class <i>Number</i> that
-have changed since 3 months ago, use:<pre>
+have changed since 3 months ago, use:
+<pre>
      Number getMessages select: [ updateDate > ^today - 3 months ] .
      do: [ displayInfo ] ;
 </pre>
 Prior versions of methods are preserved in the time series property
 <i>implementationSource.</i>  To display the implementation history for a 
-particular method use:<pre>
+particular method use:
+<pre>
      Number getMessage: "absoluteValue" .
      :implementationSource     #- returns time series of strings
      do: [ "Implementation As Of: " print; ^date printNL ;
@@ -343,7 +376,8 @@ particular method use:<pre>
 <hr>
 <h2 id="format">Preserving Method Format</h2>
 <p>
-The expression:<pre>
+The expression:
+<pre>
      class defineMethod:
      "[ | selector |
       #--  Code follows this line
@@ -353,7 +387,8 @@ The expression:<pre>
 is identical to the <i>defineMethod:</i> message except that the 
 parameter is provided as a string.   In this form, the Schema tools
 are able to preserve all comments and formatting defined within the
-method.  For example, the expression:<pre>
+method.  For example, the expression:
+<pre>
      Number  defineMethod:
      "[ | absoluteValue |
      #--  this version has comments and indentation
@@ -364,7 +399,8 @@ method.  For example, the expression:<pre>
 </pre>
 can be used to redefine the <i>absoluteValue</i>
 message at <i>Number</i> to include comments.  To confirm the new
-implementation, describe it again:<pre>
+implementation, describe it again:
+<pre>
      Number getMessage: "absoluteValue" . describe
 
      Message:                 absoluteValue
@@ -386,7 +422,8 @@ Notice that the method's comments and format have been preserved.
 <p>
 If your method includes the quote (") character, you must
 precede it with the backslash character (\) if you define your
-method as a string.  For example:<pre>
+method as a string.  For example:
+<pre>
      Entity defineMethod:
      "[ | describe |
         #--  print label in quotes; the " must be preceded by \
@@ -405,9 +442,10 @@ When a property is defined for a class using the
 <i>defineFixedProperty:</i> or <i>define:</i> message,
 the initial value of the property is <a href="clNA.htm"><i>NA</i></a>
 for all instances of the class and for any new instance when it is
-created.  The expression:<pre>
+created.  The expression:
+<pre>
      class defineFixedProperty: 'name' withDefault: object
-</b>or<b>
+</pre>or<pre>
      class define: 'name' withDefault: object
 </pre>
 runs the <i>defineFixedProperty:</i> or <i>define:</i>
@@ -417,7 +455,8 @@ object.  All existing instances are initialized to have this value.
 In addition, this property will be set to this default value as part
 of the execution of the 
 <a href="Classes.htm#instance"><i>createInstance</i></a>
-method.  For example:<pre>
+method.  For example:
+<pre>
      !NewClass <- Object createSubclass ;
      NewClass defineFixedProperty: 'p' withDefault: 10 ;
      !NewInstance <- NewClass createInstance ;
@@ -454,14 +493,16 @@ additional level of classification for cross-referencing messages.
 All of these messages return the current message implementation
 descriptor and can therefore be streamed together.  
 For example, to add descriptive information to the <i>absoluteValue</i>
-message defined at <i>Number</i>:<pre>
+message defined at <i>Number</i>:
+<pre>
      Number getMessage: "absoluteValue" .
         setDescriptionTo: "Returns the absolute value of the recipient" .
         setReturnObjectTypeTo: Number .
         setFunctionTypeTo: "Calc" .
         describe ;
 </pre>
-producing:<pre>
+producing:
+<pre>
      Message:                 absoluteValue
      Class:                   Number
      Created:                 10/30/1992
@@ -479,7 +520,8 @@ producing:<pre>
 <h2 id="delete">Deleting Messages</h2>
 <p>
 The <i>deleteMessage:</i> message is used to delete a message from a class.
-The general form for message deletion is:<pre>
+The general form for message deletion is:
+<pre>
        object deleteMessage: "message"
 </pre>
 

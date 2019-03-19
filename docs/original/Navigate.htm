@@ -19,10 +19,12 @@ title: Navigating a Vision Database
 <h2 id="object">Describing an Object</h2>
 <p>
 All objects respond to the message <i>whatAmI</i> by returning the
-name of their class as a string.  For example:<pre>
+name of their class as a string.  For example:
+<pre>
      3 whatAmI
 </pre>
-returns the string <i>"Integer"</i> and: <pre>
+returns the string <i>"Integer"</i> and:
+<pre>
      "3" whatAmI
 </pre>
 returns the string <i>"String"</i>.  All objects have a default way
@@ -31,7 +33,8 @@ depending on their class.  By default, an object
 will print its <i>whatAmI</i> value.  Many classes redefine the
 <i>print</i> message to display more specific information about the
 object.  For example, numbers and strings display their actual value
-in response to the <i>print</i> message:<pre>
+in response to the <i>print</i> message:
+<pre>
      3 whatAmI printNL ;              #-   <i>Integer</i>
      3 printNL ;                      #-   <i>        3</i>
      (3 + 3) whatAmI printNL ;        #-   <i>Double</i>
@@ -41,19 +44,22 @@ in response to the <i>print</i> message:<pre>
 </pre>
 If you do not terminate your request with a ';' character, the
 <i>print</i> message is <a href="Lang.htm#printing">automatically sent</a>
-to the object returned by the request.  Therefore:<pre>
+to the object returned by the request.  Therefore:
+<pre>
      "19951231" asNumber asInteger asDate
 </pre>
 automatically prints the object returned, in this case the Date object
 representing December 31, 1995.  You can confirm that this is a date
-object using:<pre>
+object using:
+<pre>
      "19951231" asNumber asInteger asDate whatAmI
 </pre>
 <p>
 The properties <i>code</i> and <i>creationDate</i> are defined for 
 all objects.  The <i>code</i> normally contains a string that identifies
 the object.  The <i>creationDate</i> contains the date that the object
-was created.  For example:<pre>
+was created.  For example:
+<pre>
      Named Currency US
      do: [ whatAmI print: 30 ;
            code print: 10 ; 
@@ -73,7 +79,8 @@ The message
 is defined to display an object's class name and value followed by
 a carriage return.  Some classes, such as 
 <a href="mEntity.htm#displayInfo">Entity</a> redefine this message to display
-additional information.  For example, the expression:<pre>
+additional information.  For example, the expression:
+<pre>
      Named Currency US displayInfo ; 
 </pre>
 displays the <i>code</i> and <i>name</i> of the object representing the
@@ -83,7 +90,8 @@ The message <a href="mObject.htm#profile"><i>profile</i></a>
 is defined to display a descriptive report for an object.
 Some classes, such as 
 <a href="mEntity.htm#profile">Entity</a> redefine this message to display
-additional information.  For example, the expression:<pre>
+additional information.  For example, the expression:
+<pre>
      Named Currency US profile ; 
 </pre>
 displays a descriptive report about the object representing the
@@ -95,10 +103,12 @@ US currency.
 The message 
 <a href="mObject.htm#showInheritance"><i>showInheritance</i></a>
 can be sent to an object to see the
-classes in its hierarchy.  For example, the expression:<pre>
+classes in its hierarchy.  For example, the expression:
+<pre>
      Integer showInheritance
 </pre>
-displays the following:<pre>
+displays the following:
+<pre>
       ***  Inheritance Map For Class: Integer  ***
 
       Object
@@ -115,7 +125,8 @@ The expression <i>3 showInheritance</i> is identical to the expression
 <i>Integer showInheritance</i>.
 <p>
 If you send the <i>showInheritance</i> message to a class that has subclasses,
-each subclass will be displayed recursively.  The expression:<pre>
+each subclass will be displayed recursively.  The expression:
+<pre>
      Object showInheritance
 </pre>
 can be used to display all the classes in your Vision database.
@@ -124,29 +135,34 @@ All objects respond to the message
 <a href="mObject.htm#instanceList"><i>instanceList</i></a>
 by returning an
 object containing the list of all instances in the recipient's class.  The
-expression:<pre>
+expression:
+<pre>
      Currency instanceList 
 </pre>
 returns the list of instances in the class <i>Currency</i>.  The
-expression:<pre>
+expression:
+<pre>
      Currency instanceList do: [ displayInfo ] ;
 </pre>
 displays the <i>code</i> and <i>name</i> of each currency instance.
 The <a href="mObject.htm#masterList"><i>masterList</i></a>
 message has been defined to return the non-default, 
 <a href="Classes.htm#access">base object instances</a>
-associated with a class.  For example, the expression:<pre>
+associated with a class.  For example, the expression:
+<pre>
     Currency masterList do: [ displayInfo ] ;
 </pre>
 will not include the default currency instance.
 <p>
 You can write a method that executes the <i>displayInfo</i> message
-for each instance in the class.  For example:<pre>
+for each instance in the class.  For example:
+<pre>
      Entity defineMethod: [ | displayInstances | 
         ^self masterList do: [ displayInfo ] ;
      ] ;
 </pre>
-To run this method for any Entity subclass, use:<pre>
+To run this method for any Entity subclass, use:
+<pre>
      Currency displayInstances
 </pre>
 <p>
@@ -222,11 +238,12 @@ private user information.
 <p>
 You can access data stored in another object space independent of
 your <a href="Running.htm#top">top-level environment</a>.  The
-expressions:<pre>
+expressions:
+<pre>
      Environment User id           #  Environment User at: "id" .
-</b>or<b>
+</pre>or<pre>
      Environment DBA id            #  Environment DBA at: "id"  .
-</b>or<b>
+</pre>or<pre>
      Environment DB id             #  Environment DB at: "id" .
 </pre>
 can be used to navigate to the top level of a private user, general
@@ -234,23 +251,24 @@ administration or database space.  The supplied id can be the
 identifier used to create the space or the space number.  The object
 returned is the top-level of that space.  As a result, any messages
 defined for that space can be accessed.  For example, the 
-expression:<pre>
+expression:
+<pre>
      Environment DBA at: "5" . displayInfo
-
-</b>displays:<b>
-
+</pre>displays:<pre>
      Object Space Number:         5
      This Space Contains: Schema Management Tools
      Shared Access Via: Environment DBA Schema
 </pre>
 <p>
 To access a list of all the top level spaces created after object
-space 3, use the expression:<pre>
+space 3, use the expression:
+<pre>
      Environment MaintenanceTools spaceList
 </pre>
 This returns a list of all the top level environments.  You can
 use this list to generate a report describing all spaces.  For
-example:<pre>
+example:
+<pre>
      Environment MaintenanceTools spaceList
      do: [ number print: -5 ;         #- object space number
            whatAmI printNL ;          #- full access path
@@ -268,7 +286,8 @@ database.  For example, the expression <i>3 isInteger</i> returns
 the value <i>TRUE</i> and the expression <i>"xyz" isInteger</i>
 returns the value <i>FALSE</i>.  
 To determine if an object belongs to a particular class, you can
-send it an appropriate <i>"is"</i> message.  For example:<pre>
+send it an appropriate <i>"is"</i> message.  For example:
+<pre>
     !value <- myObject isNumber
          ifTrue: [ myObject ] 
         ifFalse: [ 100 ] ;
@@ -308,10 +327,12 @@ these messages return different results.
 For example, the <i>integer 3</i> is equal to the <i>double 3.0</i> because
 they have the same value.  The 
 <i>integer 3</i> is not identical to the
-<i>double 3.0</i> because they are not the same object.  Therefore:<pre>
+<i>double 3.0</i> because they are not the same object.  Therefore:
+<pre>
      3 = 3.0
 </pre>
-returns <i>TRUE</i> and:<pre>
+returns <i>TRUE</i> and:
+<pre>
      3 == 3.0
 </pre>
 returns <i>FALSE</i>.  The <i>=</i> and <i>!=</i>
@@ -328,10 +349,12 @@ The message
 extensions from an object.  
 It is often useful to send this message
 to the recipient and parameter objects prior to performing any
-equality tests.  For example:<pre>
+equality tests.  For example:
+<pre>
     Named Currency US = (Named Currency US extendBy: [ !x ] )
 </pre>
-returns <i>FALSE</i>, whereas:<pre>
+returns <i>FALSE</i>, whereas:
+<pre>
     Named Currency US = (Named Currency US extendBy: [ !x ] ) asSelf
 </pre>
 returns <i>TRUE</i>.

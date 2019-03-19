@@ -122,7 +122,8 @@ displayed in <i>euros</i>.  For example, assume the following:
 <li>The fixed conversion rate from DEM to EUR is 2
 </ul></ul>
 <p>
-The Vision expression:<pre>
+The Vision expression:
+<pre>
      981231 evaluate: [ Named Security GermanSec price] </pre>
 will return the value of 50 <i>euros</i>, since price data is
 automatically converted from reported currency to the security's
@@ -136,7 +137,8 @@ that are being changed to the <i>euro</i>.  The cover method
 otherwise.
 <p>
 If desired, a new currency, <i>LEGACY</i>, can be introduced to support
-the Vision expression:<pre>
+the Vision expression:
+<pre>
      Named Currency LEGACY evaluate:
        [ securityList do: [ ] ;
        ] ;
@@ -212,7 +214,8 @@ This approach assumes that you continue to update the legacy currency
 exchange rates after 1/1/99.  These rates will continue to provide
 the Legacy to US exchange rate.  If your currency source does not 
 provide these values, they can be computed and stored daily using
-the calculation:<pre>legacy fixed rate to EUR * daily EUR to US rate
+the calculation:
+<pre>legacy fixed rate to EUR * daily EUR to US rate
 </pre>
 </blockquote>
 

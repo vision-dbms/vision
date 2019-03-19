@@ -98,15 +98,14 @@ environment.  The <b>Interface HtmlAccess</b> class is included here.
 <p>
 Because all these classes inherit from and are named at
 <b>Interface</b>, methods defined at any of the subclasses can
-reference the other classes using a relative name.  For example:<pre>
+reference the other classes using a relative name.  For example:
+<pre>
      Interface ApplicationWS 
      defineMethod: 
      [ | displayGlobalMessages |
        Global displayMessages ;
      ] ;
-
-</b>is equivalent to:<b>
-
+</pre>is equivalent to:<pre>
      Interface ApplicationWS 
      defineMethod: 
      [ | displayGlobalMessages |
@@ -121,25 +120,22 @@ At its simplest level, the <b>Interface</b> class can execute an
 arbitrary Vision expression supplied as a block or a string.
 For example:<pre>
      Interface runExpression: "2 + 2" ;
-</b>or<b>
+</pre>or<pre>
      Interface runExpression: [ 2 + 2 ] ;
-
 </pre>
-An arbitrary amount of output can be returned.  For example:<pre>
-     Interface runExpression: 
-        "Currency masterList 
-            sortUp: [ name ] .   
-         do: [ code print: 5 ; name print: 25 ; usExchange printNL ] ;
-        " ;
-
+An arbitrary amount of output can be returned.  For example:
+<pre>
+  Interface runExpression: 
+     "Currency masterList 
+         sortUp: [ name ] .   
+      do: [ code print: 5 ; name print: 25 ; usExchange printNL ] ;
+     " ;
 </pre>generates:<pre>
-
-     AUD  Australian Dollar             1.34
-     BEF  Belgian Franc                29.93
-     GBP  British Pound                 0.65
-     CAD  Canadian Dollar               1.35
-     . . . 
-
+  AUD  Australian Dollar             1.34
+  BEF  Belgian Franc                29.93
+  GBP  British Pound                 0.65
+  CAD  Canadian Dollar               1.35
+  . . . 
 </pre>
 Although these expressions could be evaluated by Vision directly
 without using the <b>Interface</b> class, this class allows
@@ -176,10 +172,9 @@ access and display.  The variables currently defined are:
 A global value remains in effect for the remainder of your Vision
 session or until you reset the value.  To reset all globals to their
 default values use one of:<pre>
-     Interface resetGlobals ;
-</b>or<b>
-     Interface Global reset ;
-
+  Interface resetGlobals ;
+</pre>or<pre>
+  Interface Global reset ;
 </pre>
 To set a global value, use one or more of the following messages,
 sent to <i>Interface Global</i>:
@@ -217,7 +212,8 @@ In this example, the exchange rate data is retrieved as of year-end
 the "set" messages all return the <b>Interface Global</b> object
 so multiple messages can be streamed in a sequence as shown here.
 You can send the <i>profile</i> message to see the current global
-settings: <pre>
+settings:
+<pre>
      Interface Global profile ;
 
 </pre>generates:<pre>
@@ -250,7 +246,8 @@ example:<pre>
 </pre>
 Set the limit to <i>0</i> to suppress all output.  To retrieve a
 subset of rows use the <i>displayRowsFrom:to:</i> message.  For
-example: <pre>
+example:
+<pre>
      Interface displayRowsFrom: 2 to: 5 ;
 
 </pre>generates:<pre>
@@ -536,7 +533,8 @@ present.
 <p>
 The message <i>setNumberFormatTo:</i> can be used to set the width,
 decimal places, and a comma indicator for any numeric data displayed.
-The value should be a number in the form: <pre>
+The value should be a number in the form:
+<pre>
      width.decimal
 </pre>
 such as 15.3 to indicate that numbers should be displayed with an 
@@ -607,22 +605,21 @@ The entity list can be set in one of two ways.  You can explicitly
 supply a list of entity identifiers that correspond to the current
 entity type.  This list can be supplied as a list of strings or a 
 a single string containing comma-separated identifiers.  For 
-example:<pre>
-     Interface ExtractWS
-          setOrientationTo: "EI" .
-          setEntityTypeTo: Company .
-          setEntityListTo: "IBM", "GM", "XON" .   </b>#--  list of strings<b> 
-          setItemListTo: "ticker", "price", "price@93" .
-     run ;
-
-</b>or<b>
-     Interface ExtractWS
-          setOrientationTo: "EI" .
-          setEntityTypeTo: Company .
-          setEntityListTo: "IBM, GM, XON" .       </b>#--  single string<b> 
-          setItemListTo: "ticker", "price", "price@93" .
-     run ;
-
+example:
+<pre>
+  Interface ExtractWS
+       setOrientationTo: "EI" .
+       setEntityTypeTo: Company .
+       setEntityListTo: "IBM", "GM", "XON" .   </b>#--  list of strings<b> 
+       setItemListTo: "ticker", "price", "price@93" .
+  run ;
+</pre>or<pre>
+  Interface ExtractWS
+       setOrientationTo: "EI" .
+       setEntityTypeTo: Company .
+       setEntityListTo: "IBM, GM, XON" .       </b>#--  single string<b> 
+       setItemListTo: "ticker", "price", "price@93" .
+  run ;
 </pre>
 These forms both set the entity list to the three companies
 indicated.  You can also derive a set of entities by supplying
@@ -630,17 +627,19 @@ a Vision expression that evaluates to a list when sent to
 a specific entity.  For example, if the class <b>Industry</b>
 responds to the message <i>companyList</i> with the list of
 companies in that industry, you could generate a list of company
-entities using:<pre>
-     Interface ExtractWS
-          setOrientationTo: "EI" .
-          setEntityTypeTo: Industry .
-          setEntityTo: "Auto" .
-          setEntityListTo: [ companyList ] .
-          setItemListTo: "ticker", "price", "price@93" .
-     run ;
+entities using:
+<pre>
+  Interface ExtractWS
+       setOrientationTo: "EI" .
+       setEntityTypeTo: Industry .
+       setEntityTo: "Auto" .
+       setEntityListTo: [ companyList ] .
+       setItemListTo: "ticker", "price", "price@93" .
+  run ;
 </pre>
-This assumes that the expression:<pre>
-     Named Industry Auto companyList
+This assumes that the expression:
+<pre>
+  Named Industry Auto companyList
 </pre>
 returns the list of companies you wish to extract.  Note that in this
 case you set the entity type to <i>Industry</i> and supplied the id
@@ -741,18 +740,16 @@ method which interprets and processes the inputs and presents results.
 <p>
 To interact with the <b>Interface ApplicationWS</b> class, you need to
 specify an application name and a list of parameter values.
-Two general formats are available:<pre>
+Two general formats are available:
+<pre>
      Interface ApplicationWS runWith: "appName", p1, p2, ... pn ;
-
-</b>and<b>
-
+</pre>and<pre>
      Interface ApplicationWS 
           setApplicationTo: "appName" .
           set: "param1" to: p1 .
           set: "param2" to: p2 .
           set: "paramn" to: pn .
      run ;
-
 </pre>
 In the first format, you supply a list of inputs to the <i>runWith:</i>
 message where the first element in this list is the name of the method
@@ -902,16 +899,15 @@ positionally from the supplied parameter list.  If the argument to
 this message is a string, the parameter associated with the name
 indicated by the string is retrieved.  For example, a basic profile
 application can be defined to accept two inputs, the class and the
-instance id, then run the <i>profile</i> message for this object:<pre>
+instance id, then run the <i>profile</i> message for this object:
+<pre>
      Interface ApplicationWS defineMethod: [ | BasicProfile |
         !class <- ^self getParameter: 1 ;
         !id <- ^self getParameter: 2 . stripBoundingBlanks ;
         !entity <- id as: class ;
         entity profile ;
      ] ;
-
-</b>To run:<b>
-
+</pre>To run:<pre>
      Interface ApplicationWS runWith: "BasicProfile", Currency, "CAD" ;
 </pre>
 Alternatively, you could have defined this method to use named
@@ -922,9 +918,7 @@ parameters:<pre>
         !entity <- id as: class ;
         entity profile ;
      ] ;
-
-</b>To run:<b>
-
+</pre>To run:<pre>
      Interface ApplicationWS reset
         setApplicationTo: "BasicProfile" .
         set: "class" to: Currency .
@@ -935,7 +929,8 @@ parameters:<pre>
 You could also define this method to accept either order-based or
 named parameters.  The <i>getParameter:orName:</i> message will
 retrieve the parameter positionally if present, by name otherwise.
-For example:<pre>
+For example:
+<pre>
      Interface ApplicationWS defineMethod: [ | BasicProfile |
         !class <- ^self getParameter: 1 orName: "class" ;
         !id <- ^self getParameter: 2 orName: "objectId" .
@@ -943,24 +938,22 @@ For example:<pre>
         !entity <- id as: class ;
         entity profile ;
      ] ;
-
-</b>To run:<b>
-
+</pre>To run:<pre>
      Interface ApplicationWS runWith: "BasicProfile", Currency, "CAD" ;
-</b>or<b>
+</pre>or<pre>
      Interface ApplicationWS reset
         setApplicationTo: "BasicProfile" .
         set: "class" to: Currency .
         set: "objectId" to: "CAD" .
         run ;
-
 </pre>
 <p>
 <h4 id="appErrors">Error Handling</h4>
 <p>
 The prior application does not test on the validity of the inputs.
 You can add explicit tests and error messages directly to the
-method.  For example:<pre>
+method.  For example:
+<pre>
      Interface ApplicationWS defineMethod: [ | BasicProfile |
         !class <- ^self getParameter: 1 ;
         !id <- ^self getParameter: 2 . stripBoundingBlanks ;
@@ -971,9 +964,7 @@ method.  For example:<pre>
      ] ;
 
      Interface ApplicationWS runWith: "BasicProfile", Currency, "XYZ";
-
 </pre>generates:<pre>
-
      >>> Bad class or id supplied.
 </pre>
 You can create whatever conventions you need to report errors in this
@@ -1089,7 +1080,7 @@ environments without changing the methods that produce the output.
 As with all ToolKits, subclasses of the <b>FormatTools</b> ToolKit are
 named relative to <b>FormatTools</b>.  The subclass hierarchy is
 shown below:
-<font size=+1><pre>
+<pre>
           <a href="clObject.htm">Object</a>
              |
           ToolKit
@@ -1098,7 +1089,7 @@ shown below:
                 |
                 FormatTools Html
 
-</pre></font>
+</pre>
 By default, the subclass <b>FormatTools Html</b> is included with
 this <b>ToolKit</b>.  You can create any number of additional subclasses, as
 needed.
@@ -1141,11 +1132,10 @@ display the code in bold followed by the name of the instance:<pre>
         name printNL ;
      ] ;
 </pre>
-Run this method using:<pre>
+Run this method using:
+<pre>
      Named Currency CAD demoFormat ;
-
-</b>generating:<b>
-
+</pre>generating:<pre>
      CAD Canadian Dollar
 </pre>
 Note that no special formatting appears since the default
@@ -1153,9 +1143,7 @@ Note that no special formatting appears since the default
 expression within an <i>evaluate:</i> block:<pre>
      FormatTools Html evaluate:
         [ Named Currency CAD demoFormat ; ] ;
-</pre>
-</b>generating:<b><pre>
-
+</pre>generating:<pre>
      &lt b&gt CAD&lt/b&gt Canadian Dollar
 </pre>
 </pre>

@@ -150,7 +150,8 @@ an object is created with the <i>new</i> or
 <i>createInstance</i> message, Vision automatically
 creates a new layer for each class in the object's superclass chain. It
 links those newly created layers together so that each layer can uniquely
-find its superior. For example:<pre>
+find its superior. For example:
+<pre>
   Object createSubclass: "MySubclass" ;
   !instance1 <- MySubclass createInstance;
 </pre>
@@ -160,8 +161,10 @@ for properties defined at its associated class. For example, if <i>MySubclass</i
 defines two fixed properties,<i> x</i> and<i> y</i>,</p>
 
 <ul>
-<pre>MySubclass defineFixedProperty: 'x';
-MySubclass defineFixedProperty: 'y';</pre>
+<pre>
+MySubclass defineFixedProperty: 'x';
+MySubclass defineFixedProperty: 'y';
+</pre>
 </ul>
 
 <p>and <i>Object</i> defines the fixed property, <i>code</i>:</p>
@@ -196,7 +199,8 @@ important Vision messages. One of those messages is <i>extendBy:</i>. The
 <i>extendBy:</i> message is defined for all objects. It takes a single
 argument which is expected to be a block. It returns its recipient with
 an added layer. That added layer contains the values of the local variables
-computed during the execution of the block:<pre>
+computed during the execution of the block:
+<pre>
   !instance1a <- instance1
     extendBy: [ !greeting <- "Hi, I'm instance 1a" ];
 </pre>
@@ -227,7 +231,8 @@ layers can inherit from the same layer. For example, the expression:</p>
 <p>Objects created using object specialization operations like <i>extendBy:</i>
 are full fledged Vision objects in all respects. For example, <i>instance1a</i>
 is a member of a unique subclass of <i>MySubclass</i> which can be instantiated
-by sending the <i>createInstance</i> message to <i>instance1a</i>:<pre>
+by sending the <i>createInstance</i> message to <i>instance1a</i>:
+<pre>
   !instance2a <- instance1a createInstance;
   instance2a :greeting <- "Hi, I'm instance 2a" ;
   instance2a :x <- -17.6;
@@ -746,7 +751,8 @@ needs to choose an object from which it will inherit. The following examples
 illustrate how Vision makes that choice.</p>
 
 <p>To start with, assume that <i>Subclass1</i> and <i>Subclass2</i> are
-defined by the following Vision code:<pre>
+defined by the following Vision code:
+<pre>
   Object createSubclass: "Subclass1" ;
   Subclass1 createSubclass: "Subclass2" ;
 
@@ -1585,7 +1591,8 @@ method. Basically, this method asks <i>^local</i> for a currency to use
 as a target.</p>
 
 <p>The following illustrates how this capability works in a real data base.
-This expression displays GM's sales in each of four currencies:<pre>
+This expression displays GM's sales in each of four currencies:
+<pre>
   Named Currency
   send: [DEM, GBP, USD, XAF].
   do: [
@@ -1595,7 +1602,8 @@ This expression displays GM's sales in each of four currencies:<pre>
           ] ;
       ] ;
 </pre>
-This is what gets displayed:<pre>
+This is what gets displayed:
+<pre>
   German Deutschmark            235869.64
   British Pound                  97265.30
   United States Dollar          152172.00

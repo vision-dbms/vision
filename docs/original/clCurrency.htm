@@ -27,24 +27,25 @@ in which monetary transactions are performed such as "US Dollars" or
 
 <p>
 The Currency class is a direct subclass of Entity:
-<font size=+1><pre>
-          <a href="clObject.htm">Object</a>
-             |
-          <a href="clEntity.htm">Entity</a>
-             |
-             <b>Currency</b>
-</pre></font>
+<pre>
+    <a href="clObject.htm">Object</a>
+       |
+    <a href="clEntity.htm">Entity</a>
+       |
+    <b>Currency</b>
+</pre>
 <hr>
 <p>
 <h2 id="access">Basic Access</h2>
 <p>
 Your Vision system has a number of currencies pre-defined
 using the ISO standard identifiers and names.  To display the
-code and name for each defined currency use:<pre><tt><b>
-     Currency masterList
-        sortUp: [ name ] .
-     do: [ code print: 15 ; name printNL ] ;
-</b></tt></pre>
+code and name for each defined currency use:
+<pre>
+  Currency masterList
+     sortUp: [ name ] .
+  do: [ code print: 15 ; name printNL ] ;
+</pre>
 <p>
 The time series <i>usExchange</i> tracks daily exchange rates
 to convert a specific currency into US Dollars.  Exchange rates
@@ -52,23 +53,27 @@ are stored as the number of foreign currency units that are
 equivalent to one US Dollar.  This time series is
 usually updated daily as part of the production processing.  
 To set the exchange rate for a specific currency as of a date,
-just update the time series directly.  For example, the expression:<pre><tt><b>
-     Named Currency CAD :usExchange asOf: 9512 put: 1.32 ;
-</b></tt></pre>
+just update the time series directly.  For example, the expression:
+<pre>
+  Named Currency CAD :usExchange asOf: 9512 put: 1.32 ;
+</pre>
 <p>
 Since <i>usExchange</i> is a time series property, you can use any
 of the standard <a href="mTS.htm">TimeSeries messages</a> with it.  For
-example:<pre><tt><b>
-     Named Currency CAD :usExchange asOf: 9512 
-</b>and<b>
-     9512 evaluate: [ Named Currency CAD usExchange ] 
-</b></tt></pre>
+example:
+<pre>
+  Named Currency CAD :usExchange asOf: 9512 
+</pre>and
+<pre>
+   9512 evaluate: [ Named Currency CAD usExchange ] 
+</pre>
 return the value of the Canadian exchange rate as of December 1995
-(i.e., 1.32) and the expression:<pre><tt><b>
-     Named Currency CAD :usExchange 
-        from: 950101 to: 951231 .
-        displayAll 
-</b></tt></pre>
+(i.e., 1.32) and the expression:
+<pre>
+  Named Currency CAD :usExchange 
+     from: 950101 to: 951231 .
+     displayAll 
+</pre>
 displays all the Canadian exchange rate values stored for 1995.
 <p>
 The message <i>exchangeTo: targetCurr relativeTo: date</i> is used to
@@ -76,18 +81,20 @@ access the exchange rate between the recipient and a target
 currency as of a specific date.  The result is returned in units of
 target currency to source currency so it can be used to multiply
 values in the source currency to convert to results in the target
-currency.  For example:<pre><tt><b>
-     Named Currency USD
-        exchangeTo: Named Currency CAD relativeTo: 9512 
-</b></tt></pre>
+currency.  For example:
+<pre>
+  Named Currency USD
+     exchangeTo: Named Currency CAD relativeTo: 9512 
+</pre>
 returns the exchange rate in units of Canadian dollars to US dollars
 (i.e., 1.32).
 You can multiply a value expressed in US dollars by this exchange
 rate to create an equivalent amount in Canadian dollars.
-The expression:<pre><tt><b>
-     Named Currency CAD
-        exchangeTo: Named Currency USD relativeTo: 9512 .
-</b></tt></pre>
+The expression:
+<pre>
+  Named Currency CAD
+     exchangeTo: Named Currency USD relativeTo: 9512 .
+</pre>
 returns the exchange rate in units of US dollars to Canadian dollars
 (i.e., .76).
 You can multiply a value expressed in Canadian dollars by this exchange rate
@@ -99,13 +106,14 @@ Monetary values are sometimes expressed in a variation of a currency.
 For example, you may have some data expressed in pence instead of
 pounds, but your exchange rate data is only available in pounds.
 You can establish the relationship between pence and pounds as
-illustrated below:<pre><tt><b>
-     Currency createInstance: "UKPound" ; 
+illustrated below:
+<pre>
+  Currency createInstance: "UKPound" ; 
 
-     Currency createInstance: "UKPence" .
-       setUnderlyingCurrencyTo: Named Currency UKPound 
-                  withExchange: 100 ; 
-</b></tt></pre>
+  Currency createInstance: "UKPence" .
+    setUnderlyingCurrencyTo: Named Currency UKPound 
+               withExchange: 100 ; 
+</pre>
 These expressions create two new currency instances.  The "true"
 currency is the UKPound currency.  You will maintain the
 <i>usExchange</i> time series for this currency.
@@ -120,13 +128,14 @@ The message
 <i>isTrueCurrency</i> can be used to find the "true" currency instances.
 The properties <i>underlyingCurrency</i> and <i>underlyingExchange</i> are
 used to track the related currency and conversion units for
-"non-true" currencies.  For example, the expression:<pre><tt><b>
-     Currency masterList select: [ isTrueCurrency not ] .
-     do: [ code print: 10 ;
-           underlyingCurrency code print: 10 ; 
-           underlyingExchange printNL ;
-         ] ;
-</b></tt></pre>
+"non-true" currencies.  For example, the expression:
+<pre>
+  Currency masterList select: [ isTrueCurrency not ] .
+  do: [ code print: 10 ;
+        underlyingCurrency code print: 10 ; 
+        underlyingExchange printNL ;
+      ] ;
+</pre>
 displays the underlying currency and exchange rate for all
 currencies that are not "real".
 <p><hr><p>
@@ -143,11 +152,13 @@ the process of restating values in alternative currencies.
 To set the value for the <i>baseCurrency</i> property, use the message
 <i>setBaseCurrencyTo:</i>.  The parameter to this message can be a currency
 instance or a string that refers to a currency instance.  For
-example:<pre><tt><b>
-     Named Company GM setBaseCurrencyTo: Named Currency USD ;
-</b>or<b>
-     Named Company GM setBaseCurrencyTo: "USD" ;
-</b></tt></pre>
+example:
+<pre>
+  Named Company GM setBaseCurrencyTo: Named Currency USD ;
+</pre>or
+<pre>
+  Named Company GM setBaseCurrencyTo: "USD" ;
+</pre>
 Normally, you do not change the base currency of an instance once it
 has been defined.
 <p>
@@ -167,92 +178,101 @@ to evaluate all expressions in the supplied block using the recipient
 currency.  This message redefines the currency override
 for the duration of the block's execution.  Expressions within the
 block can redefine the currency again, if desired.  For example,
-to display GM's data in Canadian dollars use:<pre><tt><b>
-     Named Currency CAD evaluate: [
-       Named Security GM
-       do: [ price printNL ;
-             "Base Currency: " print ; baseCurrency printNL ;
-             "Currency Used: " print ; currency printNL ;
-           ]
-     ] ; 
-</b></tt></pre>
+to display GM's data in Canadian dollars use:
+<pre>
+  Named Currency CAD evaluate: [
+    Named Security GM
+    do: [ price printNL ;
+          "Base Currency: " print ; baseCurrency printNL ;
+          "Currency Used: " print ; currency printNL ;
+        ]
+  ] ; 
+</pre>
 Note that the <i>baseCurrency</i> will continue to be US but the
 <i>currency</i> will be the Canadian currency inside the block.
 To display the price in both currencies, you could use the
-expression:<pre><tt><b>
-     Named Currency CAD evaluate: [
-       Named Security GM
-       do: [ price print ; 
-             baseCurrency evaluate: [ price print ] ;
-             "Base Currency: " print ; baseCurrency printNL ;
-             "Currency Used: " print ; currency printNL ;
-           ]
-     ] ; 
-</b></tt></pre>
+expression:
+<pre>
+  Named Currency CAD evaluate: [
+    Named Security GM
+    do: [ price print ; 
+          baseCurrency evaluate: [ price print ] ;
+          "Base Currency: " print ; baseCurrency printNL ;
+          "Currency Used: " print ; currency printNL ;
+        ]
+  ] ; 
+</pre>
 The first price will be displayed in Canadian dollars; the second
 will be displayed in the base currency.
 <p>
 The message <i>asCurrency</i> can be sent to a string to convert it into
-a currency instance.  The previous example could be rewritten as:<pre><tt><b>
-     "CAD" asCurrency evaluate: [
-       Named Security GM
-       do: [ price print ; 
-             baseCurrency evaluate: [ price print ] ;
-             "Base Currency: " print ; baseCurrency printNL ;
-             "Currency Used: " print ; currency printNL ;
-           ]
-     ] ; 
-</b></tt></pre>
+a currency instance.  The previous example could be rewritten as:
+<pre>
+  "CAD" asCurrency evaluate: [
+    Named Security GM
+    do: [ price print ; 
+          baseCurrency evaluate: [ price print ] ;
+          "Base Currency: " print ; baseCurrency printNL ;
+          "Currency Used: " print ; currency printNL ;
+        ]
+  ] ; 
+</pre>
 <p>
 The message: <i>inCurrency:do:</i> 
 provides an alternative technique that is sometimes more readable.
 The currency parameter can be either a string or an actual
-currency.  The previous example could be rewritten as:<pre><tt><b>
-      Named Security GM
-        inCurrency: "CAD"
-       do: [ price print ; 
-             baseCurrency evaluate: [ price print ] ;
-             "Base Currency: " print ; baseCurrency printNL ;
-             "Currency Used: " print ; currency printNL ;
-           ] ;
-</b></tt></pre>
+currency.  The previous example could be rewritten as:
+<pre>
+   Named Security GM
+     inCurrency: "CAD"
+    do: [ price print ; 
+          baseCurrency evaluate: [ price print ] ;
+          "Base Currency: " print ; baseCurrency printNL ;
+          "Currency Used: " print ; currency printNL ;
+        ] ;
+</pre>
 The message <i>setAsDefault</i> is defined at Currency and 
 is used to change the currency override for all
 subsequent executions in your session.  The new value is in
 effect until changed to a different value or cleared.  You can 
 override this default using the <i>Currency evaluate:</i> and
 <i>inCurrency:do:</i> messages described above.  For example,
-if you execute:<pre><tt><b>
-     Named Currency CAD setAsDefault 
-</b></tt></pre>
-in your session, then the expression:<pre><tt><b>
-       Named Security GM
-       do: [ price print ; 
-             "Base Currency: " print ; baseCurrency printNL ;
-             "Currency Used: " print ; currency printNL ;
-           ] ;
-</b></tt></pre>
-will automatically execute using Canadian dollars.  The expression:<pre><tt><b>
-      Named Currency USD evaluate: [
-       Named Security GM
-       do: [ price print ; 
-             "Base Currency: " print ; baseCurrency printNL ;
-             "Currency Used: " print ; currency printNL ;
-           ] ;
-     ] ; 
-</b></tt></pre>
+if you execute:
+<pre>
+  Named Currency CAD setAsDefault 
+</pre>
+in your session, then the expression:
+<pre>
+    Named Security GM
+    do: [ price print ; 
+          "Base Currency: " print ; baseCurrency printNL ;
+          "Currency Used: " print ; currency printNL ;
+        ] ;
+</pre>
+will automatically execute using Canadian dollars.  The expression:
+<pre>
+   Named Currency USD evaluate: [
+    Named Security GM
+    do: [ price print ; 
+          "Base Currency: " print ; baseCurrency printNL ;
+          "Currency Used: " print ; currency printNL ;
+        ] ;
+  ] ; 
+</pre>
 will execute using US dollars even if the global override has been set.
 The message <i>clearDefault</i> is defined at the Currency class and is
 used to clear the currency override value.
-It is sent to the class itself using:<pre><tt><b>
-   Currency clearDefault ;
-</b></tt></pre>
+It is sent to the class itself using:
+<pre>
+  Currency clearDefault ;
+</pre>
 If the global override for Currency has been cleared, the
 <i>baseCurrency</i> is used by default.  The <i>displayGlobalOverride</i>
 message defined for Currency
-can be used to display the current override:<pre><tt><b>
-     Currency displayGlobalOverride
-</b></tt></pre>
+can be used to display the current override:
+<pre>
+  Currency displayGlobalOverride
+</pre>
 <p><hr><p>
 <h2 id="methods">Writing Currency-Adjusted Methods</h2>
 <p>
@@ -264,18 +284,19 @@ total market value of the account in its base currency.  The message
 <i>totalMarketValue</i> returns the value in the current currency (i.e.,
 the override value if it exists, the base currency otherwise).
 <p>
-The property and method could be defined as illustrated below:<pre><tt><b>
-     #--  Define actual value for time series in base currency
-     Account define: '_totalMarketValue' ;
+The property and method could be defined as illustrated below:
+<pre>
+  #--  Define actual value for time series in base currency
+  Account define: '_totalMarketValue' ;
 
-     #--  Define access method in current currency
-     Account
-     defineMethod:
-     [ | totalMarketValue |
-       _totalMarketValue *
-       ( baseCurrency exchangeTo: currency relativeTo: ^date)
-     ] ;
-</b></tt></pre>
+  #--  Define access method in current currency
+  Account
+  defineMethod:
+  [ | totalMarketValue |
+    _totalMarketValue *
+    ( baseCurrency exchangeTo: currency relativeTo: ^date)
+  ] ;
+</pre>
 The method accesses the exchange rate between the base currency
 (i.e., the currency in which the value is stored) and the "active"
 currency (i.e., the current override value for the currency) as of
@@ -283,40 +304,45 @@ the current evaluate date.  Note that the exchange rate will be 1 if no
 currency override is in effect.  The unadjusted market value number is
 multiplied by this exchange rate to restate it in the current
 currency.  
-The expression:<pre><tt><b>
-     Named Account XYZ totalMarketValue
-</b></tt></pre>
-returns the value in the base currency, and the expression:<pre><tt><b>
-     "CAD" asCurrency
-         evaluate: [ Named Account XYZ totalMarketValue ]
-</b></tt></pre>
+The expression:
+<pre>
+  Named Account XYZ totalMarketValue
+</pre>
+returns the value in the base currency, and the expression:
+<pre>
+  "CAD" asCurrency
+      evaluate: [ Named Account XYZ totalMarketValue ]
+</pre>
 accesses the value in the Canadian currency.  
 <p>
 You can change the
-currency and evaluation date using a number of variations including:<pre><tt><b>
-     9511 evaluate: 
-       [ "CAD" asCurrency 
-         evaluate: 
-           [ Named Account XYZ totalMarketValue 
-           ]
-       ]
-</b>or<b>
-    "CAD" asCurrency evaluate:
-       [ 9511 evaluate:
-           [ Named Account XYZ totalMarketValue 
-           ]
-       ] 
-</b></tt></pre>
+currency and evaluation date using a number of variations including:
+<pre>
+  9511 evaluate: 
+    [ "CAD" asCurrency 
+      evaluate: 
+        [ Named Account XYZ totalMarketValue 
+        ]
+    ]
+</pre>or
+<pre>
+ "CAD" asCurrency evaluate:
+    [ 9511 evaluate:
+        [ Named Account XYZ totalMarketValue 
+        ]
+    ] 
+</pre>
 The message <i>currencyFactor</i> has been defined at Object to return
 the exchange rate between the base currency for an object and
 the override currency as of the current evaluate date.  The
-<i>totalMarketValue</i> method could therefore be rewritten as:<pre><tt><b>
-     Account
-     defineMethod:
-     [ | totalMarketValue |
-       _totalMarketValue * currencyFactor
-     ] ;
-</b></tt></pre>
+<i>totalMarketValue</i> method could therefore be rewritten as:
+<pre>
+  Account
+  defineMethod:
+  [ | totalMarketValue |
+    _totalMarketValue * currencyFactor
+  ] ;
+</pre>
 <p>
 
 
@@ -400,7 +426,8 @@ displayed in <i>euros</i>.  For example, assume the following:
 <li>The fixed conversion rate from DEM to EUR is 2
 </ul></ul>
 <p>
-The Vision expression:<pre>
+The Vision expression:
+<pre>
      981231 evaluate: [ Named Security GermanSec price] </pre>
 will return the value of 50 <i>euros</i>, since price data is
 automatically converted from reported currency to the security's
@@ -416,7 +443,8 @@ modified in release 6.1.2 to automatically set the <i>_legacyCurrency</i>
 when you change the base currency to <i>EUR</i>.
 <p>
 To display data in the <i>LEGACY</i> currency, use 
-the Vision expression:<pre>
+the Vision expression:
+<pre>
      Named Currency LEGACY evaluate:
        [ securityList do: [ ] ;
        ] ;
@@ -433,7 +461,8 @@ exchange rates after 1/1/99.  These rates will continue to provide
 the Legacy to US exchange rate.  If your currency source does not 
 provide these values, they can be computed and stored daily using
 the calculation:
-<ul type=disc><pre>legacy fixed rate to EUR * daily EUR to US rate</pre></ul>
+<ul type=disc>
+<pre>legacy fixed rate to EUR * daily EUR to US rate</pre></ul>
 
 The <i>ExchangeRateFeed</i> data feed computes these legacy rates automatically.
 <p>

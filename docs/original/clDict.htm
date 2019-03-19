@@ -27,20 +27,19 @@ are String objects when you work with a Dictionary.
 <p>
 The Dictionary class is a direct subclass of Object:
 <pre>
-          <a href="clObject.htm">Object</a>
-             |
-             <b>Dictionary</b>
-                |
-                |-- Environment
-                |
-                |-- LocalDBDictionary
-                |
-                |-- <a href="#named">Named</a>
-                |
-                |-- <a href="#sys">SystemDictionary</a>
-                |
-                |-- <a href="#xref">XRef</a>
-
+  <a href="clObject.htm">Object</a>
+     |
+     <b>Dictionary</b>
+        |
+        |-- Environment
+        |
+        |-- LocalDBDictionary
+        |
+        |-- <a href="#named">Named</a>
+        |
+        |-- <a href="#sys">SystemDictionary</a>
+        |
+        |-- <a href="#xref">XRef</a>
 </pre>
 <hr>
 <p>
@@ -48,16 +47,16 @@ The Dictionary class is a direct subclass of Object:
 <p>
 To create a new Dictionary, use:
 <pre>
-     !newDictionary <- Dictionary new ;
+  !newDictionary <- Dictionary new ;
 </pre>
 Initially the Dictionary is empty.  You add objects to the dictionary
 by providing a name for referencing the object.  For
 example, you can create a dictionary to translate externally defined
 codes into descriptive names using:
 <pre>
-     !Lookups <- Dictionary new ;
-     Lookups at: "USA" put: "United States of America" ;
-     Lookups at: "CAN" put: "Canada" ;
+  !Lookups <- Dictionary new ;
+  Lookups at: "USA" put: "United States of America" ;
+  Lookups at: "CAN" put: "Canada" ;
 </pre>
 The variable <i>Lookups</i> is defined to be a new
 Dictionary object.  
@@ -69,7 +68,7 @@ with the String object "United States of America" and the name
 <a href="mDict.htm#at:"><i>at: id </i> </a>message is used to access the
 object associated with the specific id.  For example:
 <pre>
-     Lookups at: "USA"
+  Lookups at: "USA"
 </pre>
 returns the String "United States of America" and
 <pre>
@@ -359,17 +358,17 @@ This expression adds the id <i>1</i> to the XRef and
 sets the value of the "source1Code" property
 for currency US to "1".  The expression:
 <pre>
-     Currency XRef Source1 at: "1" . 
+  Currency XRef Source1 at: "1" . 
 </pre>
 returns the US currency instance.  The expressions:
 <pre>
-     Currency XRef Source1 at: "1" .
+  Currency XRef Source1 at: "1" .
 
-     Currency XRef Source1 \1
+  Currency XRef Source1 \1
 </pre>
 and
 <pre>
-     Named Currency US
+  Named Currency US
 </pre>
 all return the same instance.
 <p>
@@ -380,14 +379,15 @@ class Currency.  The message <i>updateBlock</i> defines a block that
 returns the property associated with a particular XRef.  For
 example:
 <pre>
-     Currency XRef Source1 updateBlock
+  Currency XRef Source1 updateBlock
 </pre>
 returns:
-<pre><tt>     [ :source1Code ] 
-</tt></pre>
+<pre>
+  [ :source1Code ] 
+</pre>
 and the expression:
 <pre>
-     Named Currency US source1Code
+  Named Currency US source1Code
 </pre>
 returns the value <i>1</i>.
 <p>
@@ -399,11 +399,11 @@ example, the expression:
 </pre>
 displays:
 <pre>
-     Currency XRef Source1  For Item: [:source1Code]
-     Code      Name                          XRef Value
-     . . .
-     US        U.S. Dollar                    : 1 /
-     . . .
+  Currency XRef Source1  For Item: [:source1Code]
+  Code      Name                          XRef Value
+  . . .
+  US        U.S. Dollar                    : 1 /
+  . . .
 </pre>
 Any number of aliases can be defined.  If Source1 also uses the code
 "USA1" for the US currency, then you can set and use either alias.

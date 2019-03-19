@@ -39,22 +39,21 @@ modified and expanded as needed.  As always, you can define any
 number of new messages for the class.
 <p>
 The <i>IndexedList</i> class is a direct subclass of IndexedCollection:
-<font size=+1><pre>
-          <a href="clObject.htm">Object</a>
+<pre>
+    <a href="clObject.htm">Object</a>
+       |
+       Function
+          |
+          EnumeratedFunction
              |
-             Function
+             Collection
                 |
-                EnumeratedFunction
+                IndexedCollection
                    |
-                   Collection
-                      |
-                      IndexedCollection
-                         |
-                         |-- <b>IndexedList</b>
-                         |
-                         |-- <a href="clTS.htm">TimeSeries</a>
-
-</pre></font>
+                   |-- <b>IndexedList</b>
+                   |
+                   |-- <a href="clTS.htm">TimeSeries</a>
+</pre>
 <p>
 <hr>
 <h2 id="basic">IndexedList Basics</h2>
@@ -67,17 +66,19 @@ The index can be any object except a <i>String</i>.
 The value can be any object.  The index and value can be the same object.
 <p>
 You use the <i>new</i> message to create a new <i>IndexedList</i> 
-object:<pre><tt><b>
-     !ilist <- IndexedList new ;
-     ilist count printNL ;
-</b></tt></pre>
+object:
+<pre>
+  !ilist <- IndexedList new ;
+  ilist count printNL ;
+</pre>
 Initially an <i>IndexedList</i> contains 0 elements.  The
 <i>at:put:</i> message is used to update
-this list:<pre><tt><b>
-     ilist at: -100 put: 0 ; 
-     ilist at:  -50 put: 10 ; 
-     ilist at:   10 put: 20 ; 
-</b></tt></pre>
+this list:
+<pre>
+  ilist at: -100 put: 0 ; 
+  ilist at:  -50 put: 10 ; 
+  ilist at:   10 put: 20 ; 
+</pre>
 <p>
 The variable <i>ilist</i> now refers to an <i>IndexedList</i>
 containing 3 elements.  The 
@@ -85,48 +86,52 @@ containing 3 elements.  The
 element in this list.  The supplied parameter is the object
 representing the index associated with the object you wish to access.
 If there is no object associated with that index, the <i>NA</i> value 
-is returned.  For example, the expression:  <pre><tt><b>
-     ilist at: 10 .
-</b></tt></pre>
-returns the value <i>20</i> and the expression:<pre><tt><b>
-     ilist at: 3 .
-</b></tt></pre>
+is returned.  For example, the expression:
+<pre>
+  ilist at: 10 .
+</pre>
+returns the value <i>20</i> and the expression:
+<pre>
+  ilist at: 3 .
+</pre>
 returns the value <i>NA</i>.  
 <p>
 The <i>delete:</i> message is used to delete
-an index from the list.  For example, the expression:  <pre><tt><b>
-     ilist delete: -50 .
-</b></tt></pre>
+an index from the list.  For example, the expression:
+<pre>
+  ilist delete: -50 .
+</pre>
 deletes this element from the list, leaving a list of 2 elements.
-You can display these elements using:<pre><tt><b>
-     ilist do: [ printNL ] ;
-</b></tt></pre>
+You can display these elements using:
+<pre>
+  ilist do: [ printNL ] ;
+</pre>
 <p>
 The index value need not be numeric.  For example, you could
 create an <i>IndexedList</i> to override some currency exchange
-rates using:<pre><tt><b>
-     #--  Create new IndexedList to hold overrides
-     !currencyOverrides <- IndexedList new ; 
+rates using:
+<pre>
+  #--  Create new IndexedList to hold overrides
+  !currencyOverrides <- IndexedList new ; 
 
-     #--  Define overrides for specific Currencies
-     currencyOverrides at: Named Currency USD put: 3.1 ;
-     currencyOverrides at: Named Currency CAD put: 5.2 ;
+  #--  Define overrides for specific Currencies
+  currencyOverrides at: Named Currency USD put: 3.1 ;
+  currencyOverrides at: Named Currency CAD put: 5.2 ;
 
-     #--  Display value for USD
-     currencyOverrides at: Named Currency USD . printNL ;
+  #--  Display value for USD
+  currencyOverrides at: Named Currency USD . printNL ;
 
-     #--  Display override for currency if it exists, 
-     #--     exchange rate otherwise
-     Currency instanceList
-     do: [ !rate <- ^global currencyOverrides at: ^self ;
-           code print: 10 ;
-           rate else: usExchange . print ;
-           rate isntNA
-              ifTrue: [ " (override) " print ] ;
-           newLine print ;
-         ] ;
-
-</b></tt></pre>
+  #--  Display override for currency if it exists, 
+  #--     exchange rate otherwise
+  Currency instanceList
+  do: [ !rate <- ^global currencyOverrides at: ^self ;
+        code print: 10 ;
+        rate else: usExchange . print ;
+        rate isntNA
+           ifTrue: [ " (override) " print ] ;
+        newLine print ;
+      ] ;
+</pre>
 Any object can be used
 as an index.  The object used with the <i>at:</i> message to
 access a value must be <b>identical</b> to the object used as
@@ -144,13 +149,15 @@ available to <i>IndexedList</i> objects as well.
 <p>
 The <i>toList</i> message can be used to convert an
 <i>IndexedList</i> into a standard <i>List</i> object.
-For example:<pre><tt><b>
-     currencyOverrides at: 1 .
-</b></tt></pre>
+For example:
+<pre>
+  currencyOverrides at: 1 .
+</pre>
 returns <i>NA</i> since <i>1</i> has not been defined as an index
-in this <i>IndexedList</i>.  The expression:<pre><tt><b>
-     currencyOverrides toList at: 1 .
-</b></tt></pre>
+in this <i>IndexedList</i>.  The expression:
+<pre>
+  currencyOverrides toList at: 1 .
+</pre>
 returns the value <i>3.1</i> which is the first value positionally
 after the <i>IndexedList</i> has been converted to a <i>List</i>.
 <p>
@@ -385,30 +392,33 @@ the indices currently in use.  In many cases, the object will
 be the same as the index or will contain information that allows
 you to determine the index.  If this is not the case and you need
 to be access the index, you can provide it as an extension to the
-object being stored.  For example:<pre><tt><b>
-     !ilist <- IndexedList new ;
-     ilist at: Named Currency USD
-          put: (3.1 extendBy: [ !index <- ^global Named Currency US ]) ; 
-     ilist at: Named Currency CAD
-          put: (5.2 extendBy: [ !index <- ^global Named Currency CAD ]) ; 
-</b></tt></pre>
+object being stored.  For example:
+<pre>
+  !ilist <- IndexedList new ;
+  ilist at: Named Currency USD
+       put: (3.1 extendBy: [ !index <- ^global Named Currency US ]) ; 
+  ilist at: Named Currency CAD
+       put: (5.2 extendBy: [ !index <- ^global Named Currency CAD ]) ; 
+</pre>
 To display the index and value for each element in <i>ilist</i>
-use:<pre><tt><b>
-     ilist do: [ index print ; printNL ] ;
-</b></tt></pre>
-You could write a method to perform this function:<pre><tt><b>
-     #--  Define Method
-     IndexedList defineMethod:
-     [ | at: index putAndIndex: object | 
-       !xobject <- object extendBy: [ !index <- ^my index ] ;
-       ^self at: index put: xobject ;
-       ^self
-     ] ;
+use:
+<pre>
+  ilist do: [ index print ; printNL ] ;
+</pre>
+You could write a method to perform this function:
+<pre>
+  #--  Define Method
+  IndexedList defineMethod:
+  [ | at: index putAndIndex: object | 
+    !xobject <- object extendBy: [ !index <- ^my index ] ;
+    ^self at: index put: xobject ;
+    ^self
+  ] ;
 
-     #--  And Run it
-     ilist at: Named Currency DEM putAndIndex: 7.3 ;
-     ilist do: [ index print ; printNL ] ;
-</b></tt></pre>
+  #--  And Run it
+  ilist at: Named Currency DEM putAndIndex: 7.3 ;
+  ilist do: [ index print ; printNL ] ;
+</pre>
 <p>
 <hr>
 <h2 id="errors">Common Errors with IndexedList</h2>
@@ -442,9 +452,10 @@ you may want to consider using a
 Unlike most user-defined classes, 
 you do not usually need to look at all the instances of the
 built-in classes as a single list.  
-The expression:<pre><tt><b>
-     IndexedList instanceList count printNL ;
-</b></tt></pre>
+The expression:
+<pre>
+  IndexedList instanceList count printNL ;
+</pre>
 displays the value <i>1</i>.  This does not mean that there is only
 one <i>IndexedList</i> object in the database.  The <i>instanceList</i>
 message actually returns the <i>List</i> of instances in the same
@@ -457,34 +468,33 @@ To create new instances in the same physical structure as the recipient,
 you need to use the <i>clusterNew</i> message instead of the <i>new</i>
 message to create the new <i>IndexedList</i> object.  These messages are
 identical for most classes, since the default behavior is to cluster
-new instances.  For example:<pre><tt><b>
-     #-- create a new indexed list in its own cluster
-     !newList <- IndexedList new ; 
+new instances.  For example:
+<pre>
+  #-- create a new indexed list in its own cluster
+  !newList <- IndexedList new ; 
 
-     #-- a cluster contains the single list by default
-     newList instanceList count printNL ;
+  #-- a cluster contains the single list by default
+  newList instanceList count printNL ;
 
-     #-- create new lists in the same cluster
-     !newList1 <- newList clusterNew ;
-     !newList2 <- newList clusterNew ;
-     !newList3 <- newList clusterNew ;
+  #-- create new lists in the same cluster
+  !newList1 <- newList clusterNew ;
+  !newList2 <- newList clusterNew ;
+  !newList3 <- newList clusterNew ;
 
-     #-- instanceList includes all lists in cluster
-     newList instanceList count printNL ;
+  #-- instanceList includes all lists in cluster
+  newList instanceList count printNL ;
+   #--  update the different lists in cluster
+  newList1 at: 1 put: 10 ;
+  newList1 at: 2 put: 20 ;
+  newList2 at: Named Currency USD put: Named Currency USD ;
 
-     #--  update the different lists in cluster
-     newList1 at: 1 put: 10 ;
-     newList1 at: 2 put: 20 ;
-     newList2 at: Named Currency USD put: Named Currency USD ;
-
-    #--   display counts for each list in cluster
-    newList instanceList numberElements
-    do: [ position print ;      #- position in cluster
-          whatAmI print ;       #- each element is an indexed list
-          count printNL ;       #- elements in indexed list
-        ] ;
-
-</b></tt></pre>
+ #--   display counts for each list in cluster
+ newList instanceList numberElements
+ do: [ position print ;      #- position in cluster
+       whatAmI print ;       #- each element is an indexed list
+       count printNL ;       #- elements in indexed list
+     ] ;
+</pre>
 More information about 
 <a href="Classes.htm#cluster">general clustering rules</a>
 is available.
@@ -497,45 +507,47 @@ is important when you are updating properties with
 <p>
 A property can be updated to contain an <i>IndexedList</i> using the
 <a href="Fund.htm#update">standard assignment</a>
-messages.  For example:<pre><tt><b>
-     #-- Define a new class and some properties
-     Object createSubclass: "NewClass" ;
-     NewClass defineFixedProperty: "p1" ;
+messages.  For example:
+<pre>
+  #-- Define a new class and some properties
+  Object createSubclass: "NewClass" ;
+  NewClass defineFixedProperty: "p1" ;
 
-     #--  Update the properties with list values
-     NewClass :p1 <- IndexedList new ;
-     NewClass p1 at: 1 put: 10 ;
-     NewClass p1 at: 2 put: 20 ;
-</b></tt></pre>
+  #--  Update the properties with list values
+  NewClass :p1 <- IndexedList new ;
+  NewClass p1 at: 1 put: 10 ;
+  NewClass p1 at: 2 put: 20 ;
+</pre>
 For efficiency reasons, it is preferable to store an <i>IndexedList</i>
 from the same
 cluster when you update the same property for different instances.
 By convention, a "prototype indexed list" is defined for the class.  Properties
 are assigned to new instances in this prototype's cluster.  For
-example:<pre><tt><b>
-     #--  Define a prototype indexed list for p1 property
-     NewClass define: 'p1PrototypeList' toBe: IndexedList new ;
+example:
+<pre>
+  #--  Define a prototype indexed list for p1 property
+  NewClass define: 'p1PrototypeList' toBe: IndexedList new ;
 
-     #-- Create new instance and update its value
-     NewClass createInstance
-     do: [ :p1 <- p1PrototypeList clusterNew ;
-           p1 at: 1 put: 10 ;
-           p1 at: 2 put: 20 ;
-         ] ;
-
-</b></tt></pre>
+  #-- Create new instance and update its value
+  NewClass createInstance
+  do: [ :p1 <- p1PrototypeList clusterNew ;
+        p1 at: 1 put: 10 ;
+        p1 at: 2 put: 20 ;
+      ] ;
+</pre>
 This initialization is normally added to the 
 <a href="Classes.htm#instance"><i>initializeLocalAttributes</i> method</a>
 for the class, since
 this is automatically run when you create a new instance.
-For example:<pre><tt><b>
-     NewClass defineMethod:
-     [ | initializeLocalAttributes | 
-       ^super initializeLocalAttributes ;
-       :p1 <- p1PrototypeList clusterNew ;
-       ^self
-    ] ;
-</b></tt></pre>
+For example:
+<pre>
+  NewClass defineMethod:
+  [ | initializeLocalAttributes | 
+    ^super initializeLocalAttributes ;
+    :p1 <- p1PrototypeList clusterNew ;
+    ^self
+ ] ;
+</pre>
 
 <p>
 <hr>

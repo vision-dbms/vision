@@ -71,8 +71,11 @@ You can read the <i>sample.load</i> file into your favorite
 code in this file using the
 <a href="Input.htm#program">asFileContents evaluate</a>
 expression:
-<ul type=disc><pre><tt><b>"/localvision/samples/general/sample.load" asFileContents evaluate ;
-</b></tt></pre></ul>
+<ul type=disc>
+<pre>
+  "/localvision/samples/general/sample.load" asFileContents evaluate ;
+</pre>
+</ul>
 <p>
 <b>Note:</b> The <i>sample.load</i> file runs by default on a <i>Unix</i> environment.  If you are using a <i>Windows NT</i> platform, this location may be prefixed by a drive and optional path (e.g., <i>d:/visiondb/localvision/samples/general/sample.load</i>).  In addition, the <i>sample.load</i> file must be edited by your Vision Administrator to reflect the correct location.
 <p>
@@ -83,32 +86,34 @@ The file <i>sector.dat</i> contains one line per sector.  Each line
 contains a sector identifier and a sector name, separated by the vertical
 bar ( | ) character.  The first few lines of this file are displayed
 below:
-<pre><tt>     NONDUR|Non-durables
-     DUR|Durables
-</tt></pre>
+<pre>
+  NONDUR|Non-durables
+  DUR|Durables
+</pre>
 The techniques described in
 <a href="Input.htm#data"><i>Loading Data Files</i></a>
 are used to parse this data file to create new sectors.
 <p>
 This subset of the Vision code in the <i>sample.load</i> file is used
 for defining sectors:
-<pre><tt><b>     #--------------------
-     #  Create The Class
-     #--------------------
-     Entity createSubclass: "Sector" ;
+<pre>
+  #--------------------
+  #  Create The Class
+  #--------------------
+  Entity createSubclass: "Sector" ;
      
-     #--------------------
-     #  Read and process the vertical bar-delimited file
-     #  Fields are: id | name
-     #--------------------
-     "/localvision/samples/general/sector.dat" asFileContents asLines
-     do: [ !fields <- ^self breakOn: "|" ;
-           !id <- fields at: 1 . stripBoundingBlanks ;
-           !name <- fields at: 2 . stripBoundingBlanks ;
-           id isBlank not && name isBlank not
-              ifTrue: [ ^global Sector createInstance: id . setNameTo: name ] ;
-         ] ;
-</b></tt></pre>
+  #--------------------
+  #  Read and process the vertical bar-delimited file
+  #  Fields are: id | name
+  #--------------------
+  "/localvision/samples/general/sector.dat" asFileContents asLines
+  do: [ !fields <- ^self breakOn: "|" ;
+        !id <- fields at: 1 . stripBoundingBlanks ;
+        !name <- fields at: 2 . stripBoundingBlanks ;
+        id isBlank not && name isBlank not
+           ifTrue: [ ^global Sector createInstance: id . setNameTo: name ] ;
+      ] ;
+</pre>
 <p>
 The first step is to create the new class, <i>Sector</i> using the
 <a href="clEntity.htm#subclass"><i>createSubclass:</i></a> message.
@@ -145,14 +150,16 @@ these properties do not need to be explicitly defined for the
 <p>
 After the sectors have been created you can display the list of
 all sectors using:
-<pre><tt><b>     Sector masterList
-     do: [ code print: 10 ; 
-           name printNL ;
-         ] ;
-</b></tt></pre>
+<pre>
+  Sector masterList
+  do: [ code print: 10 ; 
+        name printNL ;
+      ] ;
+</pre>
 You can reference a specific sector using:
-<pre><tt><b>     Named Sector at: "DUR" . name printNL ;
-</b></tt></pre>
+<pre>
+    Named Sector at: "DUR" . name printNL ;
+</pre>
 <p>
 <hr>
 <h2 id="industry">Loading Industry Data</h2>
@@ -162,43 +169,45 @@ contains an industry identifier, an industry name, and a sector identifier,
 separated by the vertical bar ( | )
 character.  The first few lines of this file are displayed
 below:
-<pre><tt>     FBT|Food, Beverage, Tobacco|NONDUR
-     HH|Household Products|NONDUR
-</tt></pre>
+<pre>
+  FBT|Food, Beverage, Tobacco|NONDUR
+  HH|Household Products|NONDUR
+</pre>
 The techniques described in
 <a href="Input.htm#data"><i>Loading Data Files</i></a>
 are used to parse this data file to create new industries.
 <p>
 This subset of the Vision code in the <i>sample.load</i> file is used
 for defining industries:
-<pre><tt><b>     #--------------------
-     #  Create The Class
-     #--------------------
-     Entity createSubclass: "Industry" ;
+<pre>
+  #--------------------
+  #  Create The Class
+  #--------------------
+  Entity createSubclass: "Industry" ;
      
-     #--------------------
-     #  Define the sector property
-     #--------------------
-     Industry defineFixedProperty: 'sector' withDefault: Sector ;
+  #--------------------
+  #  Define the sector property
+  #--------------------
+  Industry defineFixedProperty: 'sector' withDefault: Sector ;
      
-     #--------------------
-     #  Read and process the vertical bar-delimited file
-     #  Fields are: id  name  sectorId
-     #--------------------
-     "/localvision/samples/general/industry.dat" asFileContents asLines
-     do: [ !fields <- ^self breakOn: "|" ;
-           !id <- fields at: 1 . stripBoundingBlanks ;
-           !name <- fields at: 2 . stripBoundingBlanks ;
-           !sectID <- fields at: 3 . stripBoundingBlanks ;
-           !sector <- ^global Named Sector uniformAt: sectID ;
-           id isBlank not && name isBlank not
-           ifTrue: 
-             [ !newOne <- ^global Industry createInstance: id . 
-                   setNameTo: name;
-               newOne :sector <- sector ;
-             ] ;
-         ] ;
-</b></tt></pre>
+  #--------------------
+  #  Read and process the vertical bar-delimited file
+  #  Fields are: id  name  sectorId
+  #--------------------
+  "/localvision/samples/general/industry.dat" asFileContents asLines
+  do: [ !fields <- ^self breakOn: "|" ;
+        !id <- fields at: 1 . stripBoundingBlanks ;
+        !name <- fields at: 2 . stripBoundingBlanks ;
+        !sectID <- fields at: 3 . stripBoundingBlanks ;
+        !sector <- ^global Named Sector uniformAt: sectID ;
+        id isBlank not && name isBlank not
+        ifTrue: 
+          [ !newOne <- ^global Industry createInstance: id . 
+                setNameTo: name;
+            newOne :sector <- sector ;
+          ] ;
+      ] ;
+</pre>
 <p>
 The first step is to create the new class, <i>Industry</i> using the
 <a href="clEntity.htm#subclass"><i>createSubclass:</i></a> message.
@@ -243,23 +252,26 @@ industry's <i>sector</i> property.
 <p>
 After the industries have been created you can display the list of
 all industries grouped into sectors using:
-<pre><tt><b>     Industry masterList
-          groupedBy: [ sector ] .
-     do: [ "Sector: " print ; code print: 10 ; name printNL ;
-           groupList 
-           do: [ "   Ind: " print ; 
-                 code print: 10 ;
-                 name printNL ;
-               ] ;
-           newLine print ;
-         ] ;
-</b></tt></pre>
+<pre>
+  Industry masterList
+       groupedBy: [ sector ] .
+  do: [ "Sector: " print ; code print: 10 ; name printNL ;
+        groupList 
+        do: [ "   Ind: " print ; 
+              code print: 10 ;
+              name printNL ;
+            ] ;
+        newLine print ;
+      ] ;
+</pre>
 You can reference a specific industry using:
-<pre><tt><b>     Named Industry at: "FBT" . name printNL ;
-</b></tt></pre>
+<pre>
+  Named Industry at: "FBT" . name printNL ;
+</pre>
 You can reference a specific industry's sector using:
-<pre><tt><b>     Named Industry at: "FBT" . sector name printNL ;
-</b></tt></pre>
+<pre>
+  Named Industry at: "FBT" . sector name printNL ;
+</pre>
 <p>
 <hr>
 <h2 id="company">Loading Company Data</h2>
@@ -269,48 +281,50 @@ contains a company identifier, a company name, a price, and an industry
 identifier separated by the vertical bar ( | )
 character.  The first few lines of this file are displayed
 below:
-<pre><tt>     AET|Aetna Life & Cas| 40.875|INSUR
-     T|American Tel & Tel| 43.625|TEL
-</tt></pre>
+<pre>
+  AET|Aetna Life & Cas| 40.875|INSUR
+  T|American Tel & Tel| 43.625|TEL
+</pre>
 The techniques described in
 <a href="Input.htm#data"><i>Loading Data Files</i></a>
 are used to parse this data file to create new companies.
 <p>
 This subset of the Vision code in the <i>sample.load</i> file is used
 for defining Companies:
-<pre><tt><b>     #--------------------
-     #  Create The Class
-     #--------------------
-     Entity createSubclass: "Company" ;
+<pre>
+  #--------------------
+  #  Create The Class
+  #--------------------
+  Entity createSubclass: "Company" ;
      
-     #--------------------
-     #  Define some basic properties
-     #--------------------
-     Company defineFixedProperty: 'ticker' ;
-     Company defineFixedProperty: 'price' ;
-     Company defineFixedProperty: 'industry' withDefault: Industry ;
-     
-     #--------------------
-     #  Read and process the vertical bar-delimited file
-     #  Fields are: id  name  price  industryId
-     #--------------------
-     "/localvision/samples/general/company.dat" asFileContents asLines
-     do: [ !fields <- ^self breakOn: "|" ;
-           !id <- fields at: 1 . stripBoundingBlanks ;
-           !name <- fields at: 2 . stripBoundingBlanks ;
-           !price <- fields at: 3 . asNumber ;
-           !indID <- fields at: 4 . stripBoundingBlanks ;
-           !industry <- ^global Named Industry uniformAt: indID ;
-           id isBlank not && name isBlank not
-           ifTrue: 
-             [ !newOne <- ^global Company createInstance: id . 
-                  setNameTo: name;
-               newOne :ticker <- id ;
-               newOne :price <- price ;
-               newOne :industry <- industry ;
-             ] ;
-         ] ;
-</b></tt></pre>
+  #--------------------
+  #  Define some basic properties
+  #--------------------
+  Company defineFixedProperty: 'ticker' ;
+  Company defineFixedProperty: 'price' ;
+  Company defineFixedProperty: 'industry' withDefault: Industry ;
+  
+  #--------------------
+  #  Read and process the vertical bar-delimited file
+  #  Fields are: id  name  price  industryId
+  #--------------------
+  "/localvision/samples/general/company.dat" asFileContents asLines
+  do: [ !fields <- ^self breakOn: "|" ;
+        !id <- fields at: 1 . stripBoundingBlanks ;
+        !name <- fields at: 2 . stripBoundingBlanks ;
+        !price <- fields at: 3 . asNumber ;
+        !indID <- fields at: 4 . stripBoundingBlanks ;
+        !industry <- ^global Named Industry uniformAt: indID ;
+        id isBlank not && name isBlank not
+        ifTrue: 
+          [ !newOne <- ^global Company createInstance: id . 
+               setNameTo: name;
+            newOne :ticker <- id ;
+            newOne :price <- price ;
+            newOne :industry <- industry ;
+          ] ;
+      ] ;
+</pre>
 The first step is to create the new class, <i>Company</i> using the
 <a href="clEntity.htm#subclass"><i>createSubclass:</i></a> message.
 By creating <i>Company</i> as a subclass of <i>Entity</i>, the
@@ -362,26 +376,30 @@ company's <i>industry</i> property.
 <p>
 After the companies have been created you can display the list of
 all companies grouped into industries using:
-<pre><tt><b>     Company masterList
-          groupedBy: [ industry ] .
-     do: [ "Industry: " print ; code print: 10 ; name printNL ;
-           groupList 
-           do: [ code print: 10 ;
-                 name print: 30 ; 
-                 price printNL ;
-               ] ;
-           newLine print ;
-         ] ;
-</b></tt></pre>
+<pre>
+  Company masterList
+       groupedBy: [ industry ] .
+  do: [ "Industry: " print ; code print: 10 ; name printNL ;
+        groupList 
+        do: [ code print: 10 ;
+              name print: 30 ; 
+              price printNL ;
+            ] ;
+        newLine print ;
+      ] ;
+</pre>
 You can reference a specific company using:
-<pre><tt><b>     Named Company at: "T" . name printNL ;
-</b></tt></pre>
+<pre>
+  Named Company at: "T" . name printNL ;
+</pre>
 You can reference a specific company's industry using:
-<pre><tt><b>     Named Company at: "T" . industry name printNL ;
-</b></tt></pre>
+<pre>
+  Named Company at: "T" . industry name printNL ;
+</pre>
 You can reference a specific company's sector using:
-<pre><tt><b>     Named Company at: "T" . industry sector name printNL ;
-</b></tt></pre>
+<pre>
+  Named Company at: "T" . industry sector name printNL ;
+</pre>
 <p>
 <hr>
 <h2 id="ts">Updating TimeSeries Properties</h2>
@@ -393,9 +411,10 @@ earnings per share, net income, and common equity value for the
 company for the year separated by the vertical bar ( | )
 character.  The first few lines of this file are displayed
 below:
-<pre><tt>     AET|90| 22114.11| 7.48| 920.60| 6084.80
-     AET|89| 20482.91| 6.18| 1043.10| 5497.19
-</tt></pre>
+<pre>
+  AET|90| 22114.11| 7.48| 920.60| 6084.80
+  AET|89| 20482.91| 6.18| 1043.10| 5497.19
+</pre>
 The techniques described in
 <a href="Input.htm#data"><i>Loading Data Files</i></a>
 are used to parse this data file to update time series
@@ -403,39 +422,40 @@ properties for existing companies.
 <p>
 This subset of the Vision code in the <i>sample.load</i> file is used
 for updating the company data:
-<pre><tt><b>     #--------------------
-     #  Define some time series properties
-     #--------------------
-     Company define: 'sales' ;
-     Company define: 'earningsPerShare' ;
-     Company define: 'netIncome' ;
-     Company define: 'commonEquity' ;
+<pre>
+  #--------------------
+  #  Define some time series properties
+  #--------------------
+  Company define: 'sales' ;
+  Company define: 'earningsPerShare' ;
+  Company define: 'netIncome' ;
+  Company define: 'commonEquity' ;
      
-     #--------------------
-     #  Read and process the vertical bar-delimited file
-     #  Fields are: id year sales earningsPerShare netIncome commonEquity
-     #--------------------
-     "/localvision/samples/general/company2.dat" asFileContents asLines
-     do: [ !fields <- ^self breakOn: "|" ; 
-           !id <- fields at: 1 . stripBoundingBlanks ;
-           !company <- ^global Named Company at: id ;
-           !date <- fields at: 2 . asNumber asDate ;
-           !sales <- fields at: 3 . asNumber ;
-           !eps <- fields at: 4 . asNumber ;
-           !netinc <- fields at: 5 . asNumber ;
-           !commone <- fields at: 6 . asNumber ;
-     
-           company isntNA
-           ifTrue: 
-             [ company :sales asOf: date put: sales ;
-               company :earningsPerShare asOf: date put: eps ;
-               company :netIncome asOf: date put: netinc ;
-               company :commonEquity asOf: date put: commone ;
-             ] 
-          ifFalse:
-             [ ">>> Company not Found: " print ; id printNL ] ;
-         ] ;
-</b></tt></pre>
+  #--------------------
+  #  Read and process the vertical bar-delimited file
+  #  Fields are: id year sales earningsPerShare netIncome commonEquity
+  #--------------------
+  "/localvision/samples/general/company2.dat" asFileContents asLines
+  do: [ !fields <- ^self breakOn: "|" ; 
+        !id <- fields at: 1 . stripBoundingBlanks ;
+        !company <- ^global Named Company at: id ;
+        !date <- fields at: 2 . asNumber asDate ;
+        !sales <- fields at: 3 . asNumber ;
+        !eps <- fields at: 4 . asNumber ;
+        !netinc <- fields at: 5 . asNumber ;
+        !commone <- fields at: 6 . asNumber ;
+  
+        company isntNA
+        ifTrue: 
+          [ company :sales asOf: date put: sales ;
+            company :earningsPerShare asOf: date put: eps ;
+            company :netIncome asOf: date put: netinc ;
+            company :commonEquity asOf: date put: commone ;
+          ] 
+       ifFalse:
+          [ ">>> Company not Found: " print ; id printNL ] ;
+      ] ;
+</pre>
 The first step is to create four new time series properties for
 storing the sales, earnings, income, and common equity values.
 By default, there are no data points in these time series and
@@ -470,14 +490,16 @@ is displayed.
 <p>
 After the  data has been updated, you can look at a specific sales
 value for a company using:
-<pre><tt><b>     Named Company T sales printNL;                #- most recent
-     Named Company T :sales asOf: 88 . printNL ;   #- as of 88
-     88 evaluate:                                  #- as of 88
-         [ Named Company T sales printNL ] ;       #- alternative
-</b></tt></pre>
+<pre>
+  Named Company T sales printNL;                #- most recent
+  Named Company T :sales asOf: 88 . printNL ;   #- as of 88
+  88 evaluate:                                  #- as of 88
+      [ Named Company T sales printNL ] ;       #- alternative
+</pre>
 You can display all the sales values for a specific company using:
-<pre><tt><b>     Named Company at: "T" . :sales displayAll ;
-</b></tt></pre>
+<pre>
+  Named Company at: "T" . :sales displayAll ;
+</pre>
 <p>
 <hr>
 <a name="SeeAlso:"><b><h2>See Also:</h2></b></a>

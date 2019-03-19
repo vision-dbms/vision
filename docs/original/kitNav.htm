@@ -224,8 +224,8 @@ For example:
 
 <center><font face="Arial" color="darkblue" size=2 >
 <p><h4>Full Class Hierarchy for: Vision Demonstration Database</h4>
-</center></font><font size=-1><pre>
-
+</center></font>
+<pre>
      Object
        |
        +--- Boolean
@@ -245,9 +245,9 @@ For example:
        +--- DateRange
        |
        +--- Dictionary
-     
+
        . . .
-</pre></font>
+</pre>
 
 </tr></table></Center></font><p>
 In this report, you can click on any of the classes, 
@@ -298,7 +298,7 @@ define new messages for any of these classes.
        |      |
        |      +--- TimeSeriesProperty
        . . . 
-</pre></font>
+</pre>
 
 </tr></table></Center><p>
 This report displays a description of the class type, followed by a
@@ -335,7 +335,6 @@ real-world entities.
 <p><hr width=70%></blockquote>
 </center><p>
 <pre>
-
      Object
        | 
        +--- <b>Entity</b>
@@ -346,8 +345,7 @@ real-world entities.
             +--- SystemTable  -> 
             +--- Table
             +--- Universe
-
-</pre></font>
+</pre>
 <p><hr align=left width=70% ><p>
 
 <center><table border=1 width=65% cellspacing=2 cellpadding=1>
@@ -655,7 +653,6 @@ analysis, and dynamic modifications to the database.
 <p><hr width=70%></center></blockquote><p>
 <pre>
 <blockquote>
-<blockquote>
      Object
        |  
        +--- Entity
@@ -673,8 +670,7 @@ analysis, and dynamic modifications to the database.
        +--- DataRecord
        |  
        +--- LinkRecord
-
-</blockquote></blockquote></pre></font>
+</blockquote></pre>
 
 </tr></table></Center>
 <p>
@@ -1176,19 +1172,17 @@ All the navigator reports are accessible via the
 <a href="tkInterface.htm#apps"><b>Interface Application</b></a> class.
 To interact with the <b>Interface ApplicationWS</b> class, you need to
 specify an application name and a list of parameter values.
-Two general formats are available:<pre><tt><b>
-     Interface ApplicationWS runWith: "appName", p1, p2, ... pn ;
-
-</b>and<b>
-
-     Interface ApplicationWS reset
-          setApplicationTo: "appName" .
-          set: "param1" to: p1 .
-          set: "param2" to: p2 .
-          set: "paramn" to: pn .
-     run ;
-
-</b></tt></pre>
+Two general formats are available:
+<pre>
+  Interface ApplicationWS runWith: "appName", p1, p2, ... pn ;
+</pre>and<pre>
+  Interface ApplicationWS reset
+       setApplicationTo: "appName" .
+       set: "param1" to: p1 .
+       set: "param2" to: p2 .
+       set: "paramn" to: pn .
+  run ;
+</pre>
 In the first format, you supply a list of inputs to the <i>runWith:</i>
 message where the first element in this list is the name of the application
 to run and the remaining list elements are the input values.  
@@ -1261,19 +1255,21 @@ The navigator applications and their parameters are summarized below:
               <tr><td>4 <td>item <td>item that returns a collection
 </tr></table></Center><p>
 
-For example:<pre><tt><b>
-     Interface ApplicationWS 
-        runWith: "ShowDataModelClassSummary", "Company" ;
-</b></tt></pre>
+For example:
+<pre>
+  Interface ApplicationWS 
+     runWith: "ShowDataModelClassSummary", "Company" ;
+</pre>
 displays the data model summary for the class <b>Company</b> 
-and:<pre><tt><b>
-     Interface ApplicationWS 
-        reset
-        setApplicationTo: "ShowAllDataValues" .
-        set: "entityType" to: "Currency" .
-        set: "entityId" to: "CAD" .
-        run ;
-</b></tt></pre>
+and:
+<pre>
+  Interface ApplicationWS 
+     reset
+     setApplicationTo: "ShowAllDataValues" .
+     set: "entityType" to: "Currency" .
+     set: "entityId" to: "CAD" .
+     run ;
+</pre>
 displays the data values report for the Canadian currency.
 
 <p>
@@ -1281,113 +1277,114 @@ displays the data values report for the Canadian currency.
 <p>
 You can create static versions of these reports with <i>Html</i> 
 links embedded.  Create a new working directory, start an interactive Vision
-session, and execute the following:<pre><tt><b>
-     Interface HtmlAccess
-       setServerTo: "" .
-       setResourcePathTo: "" ;
+session, and execute the following:
+<pre>
+  Interface HtmlAccess
+    setServerTo: "" .
+    setResourcePathTo: "" ;
 
-     FormatTools Html evaluate: [ 
+  FormatTools Html evaluate: [ 
 
-     !header <-   "&lt&lt&ltVision Database Navigator - Demo Database&lt&lt" ;
+  !header <-   "&lt&lt&ltVision Database Navigator - Demo Database&lt&lt" ;
 
-     "index.html" substituteOutputOf: [ 
-        header printNL ;
-        Interface ApplicationWS runWith: "displayMainMenu" ;
+  "index.html" substituteOutputOf: [ 
+     header printNL ;
+     Interface ApplicationWS runWith: "displayMainMenu" ;
+     ] ;
+
+  #--------------------
+  #  Programmer Tools
+  #--------------------
+
+  !app <- "ShowClassXRefSummary" ;
+  app concat: ".htm" . substituteOutputOf: [ 
+     header printNL ;
+     Interface ApplicationWS runWith: app ;
+  ] ;
+  !app <- "ShowFullHierarchy" ;
+  app concat: ".htm" . substituteOutputOf: [ 
+     header printNL ;
+     Interface ApplicationWS runWith: app ;
+  ] ;
+
+  ClassType masterList select: [ code != "Unused" ] .
+  iterate: 
+    [ 
+    !app <- "ShowClassXRefDetails" ;
+    !file <- app concat: "-" . concat: code . concat: ".htm" ;
+    file substituteOutputOf: 
+       [ ^my header printNL ;
+         ^my Interface ApplicationWS runWith: app, name ;
+       ] ;
+   ] ; 
+
+ Schema CD instanceList
+     select: [ type code != "Unused" ] .
+ iterate:
+   [ !ws <- ^my Interface ApplicationWS ;
+     !app <- "ShowMessageXRef" ;
+     !file <- app concat: "-" . concat: name . concat: ".htm" . 
+        translate: " " to: "_" ;
+     file substituteOutputOf: 
+       [ ^my header printNL ;
+         ws runWith: app, name ;
+       ] ;
+ 
+     !app <- "ShowClassSummary" ;
+     !file <- app concat: "-" . concat: name . concat: ".htm" . 
+        translate: " " to: "_" ;
+     file substituteOutputOf: 
+       [ ^my header printNL ;
+         ws runWith: app, name ;
+       ] ;
+ 
+     !app <- "ShowMessageDetails" ;
+     !file <- app concat: "-" . concat: name . concat: ".htm" . 
+        translate: " " to: "_" ;
+     file substituteOutputOf: 
+       [ ^my header printNL ;
+         ws runWith: app, name ;
+       ] ;
+  ] ;
+
+  #--------------------
+  #  Data Model
+  #--------------------
+
+  "ShowDataModelClasses.htm" substituteOutputOf: [ 
+     header printNL ;
+     Interface ApplicationWS runWith: "ShowDataModelClasses" ;
+  ] ;
+
+  Schema CD instanceList
+     select: [ includeInDataModel ] .
+  iterate: [
+      !ws <- ^global Interface ApplicationWS ;
+      !app <- "ShowDataModelClassSummary" ;
+      !file <- app concat: "-" . concat: name . concat: ".htm" . 
+         translate: " " to: "_" ;
+      file substituteOutputOf: 
+        [ ^my header printNL ;
+          ws runWith: app, name ;
         ] ;
-
-     #--------------------
-     #  Programmer Tools
-     #--------------------
-
-     !app <- "ShowClassXRefSummary" ;
-     app concat: ".htm" . substituteOutputOf: [ 
-        header printNL ;
-        Interface ApplicationWS runWith: app ;
-     ] ;
-     !app <- "ShowFullHierarchy" ;
-     app concat: ".htm" . substituteOutputOf: [ 
-        header printNL ;
-        Interface ApplicationWS runWith: app ;
-     ] ;
-
-     ClassType masterList select: [ code != "Unused" ] .
-     iterate: 
-       [ 
-       !app <- "ShowClassXRefDetails" ;
-       !file <- app concat: "-" . concat: code . concat: ".htm" ;
-       file substituteOutputOf: 
-          [ ^my header printNL ;
-            ^my Interface ApplicationWS runWith: app, name ;
-          ] ;
-      ] ; 
-
-    Schema CD instanceList
-        select: [ type code != "Unused" ] .
-    iterate:
-      [ !ws <- ^my Interface ApplicationWS ;
-        !app <- "ShowMessageXRef" ;
-        !file <- app concat: "-" . concat: name . concat: ".htm" . 
-           translate: " " to: "_" ;
-        file substituteOutputOf: 
-          [ ^my header printNL ;
-            ws runWith: app, name ;
-          ] ;
  
-        !app <- "ShowClassSummary" ;
-        !file <- app concat: "-" . concat: name . concat: ".htm" . 
-           translate: " " to: "_" ;
-        file substituteOutputOf: 
-          [ ^my header printNL ;
-            ws runWith: app, name ;
-          ] ;
+     !app <- "ShowDataModelLinks" ;
+     !file <- app concat: "-" . concat: name . concat: ".htm" . 
+         translate: " " to: "_" ;
+     file substituteOutputOf: 
+       [ ^my header printNL ;
+         ws runWith: app, name ;
+       ] ;
  
-        !app <- "ShowMessageDetails" ;
-        !file <- app concat: "-" . concat: name . concat: ".htm" . 
-           translate: " " to: "_" ;
-        file substituteOutputOf: 
-          [ ^my header printNL ;
-            ws runWith: app, name ;
-          ] ;
-     ] ;
-
-     #--------------------
-     #  Data Model
-     #--------------------
-
-     "ShowDataModelClasses.htm" substituteOutputOf: [ 
-        header printNL ;
-        Interface ApplicationWS runWith: "ShowDataModelClasses" ;
-        ] ;
-
-     Schema CD instanceList
-        select: [ includeInDataModel ] .
-     iterate: [
-         !ws <- ^global Interface ApplicationWS ;
-         !app <- "ShowDataModelClassSummary" ;
-         !file <- app concat: "-" . concat: name . concat: ".htm" . 
-            translate: " " to: "_" ;
-         file substituteOutputOf: 
-           [ ^my header printNL ;
-             ws runWith: app, name ;
-           ] ;
- 
-        !app <- "ShowDataModelLinks" ;
-        !file <- app concat: "-" . concat: name . concat: ".htm" . 
-            translate: " " to: "_" ;
-        file substituteOutputOf: 
-          [ ^my header printNL ;
-            ws runWith: app, name ;
-          ] ;
- 
-        !app <- "ShowDataModelDetails" ;
-        !file <- app concat: "-" . concat: name . concat: "-FALSE-TRUE.htm" . 
-           translate: " " to: "_" ;
-        file substituteOutputOf: 
-          [ ^my header printNL ;
-            ws runWith: app, name, "FALSE", "TRUE" ;
-          ] ;
+     !app <- "ShowDataModelDetails" ;
+     !file <- app concat: "-" . concat: name . concat: "-FALSE-TRUE.htm" . 
+        translate: " " to: "_" ;
+     file substituteOutputOf: 
+       [ ^my header printNL ;
+         ws runWith: app, name, "FALSE", "TRUE" ;
        ] ;
     ] ;
-</b></tt></pre>
+ ] ;
+</pre>
 
 {% include doc-footer.htm copydates="1998" %}

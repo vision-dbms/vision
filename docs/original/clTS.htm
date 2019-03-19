@@ -47,20 +47,19 @@ modified and expanded as needed.  As always, you can define any
 number of new messages for the class.
 <p>
 The <i>TimeSeries</i> class is a direct subclass of IndexedCollection:
-<font size=+1><pre>
-          <a href="clObject.htm">Object</a>
+<pre>
+    <a href="clObject.htm">Object</a>
+       |
+       Function
+          |
+          EnumeratedFunction
              |
-             Function
+             Collection
                 |
-                EnumeratedFunction
-                   |
-                   Collection
-                      |
-                      IndexedCollection
-                         |-- <a href="clIList.htm">IndexedList</a>
-                         |-- <b>TimeSeries</b>
-
-</pre></font>
+                IndexedCollection
+                   |-- <a href="clIList.htm">IndexedList</a>
+                   |-- <b>TimeSeries</b>
+</pre>
 <p>
 <hr>
 <h2 id="basic">TimeSeries Basics</h2>
@@ -75,20 +74,24 @@ that is always indexed by a date.
 <li>As stand-alone objects.
 </ol>
 <p>
-The expression:<pre><tt><b>
-     Currency define: 'tsProperty' ;
-</b></tt></pre>
+The expression:
+<pre>
+  Currency define: 'tsProperty' ;
+</pre>
 creates a new time series property for the class Currency.  The
-expression:<pre><tt><b>
-     Named Currency USD :tsProperty 
-</b></tt></pre>
+expression:
+<pre>
+  Named Currency USD :tsProperty 
+</pre>
 retrieves this property for the US currency as a <i>TimeSeries</i>
-object.  The expression:<pre><tt><b>
-     !newTS <- TimeSeries new ;
-</b></tt></pre>
-creates a stand-alone <i>TimeSeries</i> object.  The expression:<pre><tt><b>
-     newTS
-</b></tt></pre>
+object.  The expression:
+<pre>
+  !newTS <- TimeSeries new ;
+</pre>
+creates a stand-alone <i>TimeSeries</i> object.  The expression:
+<pre>
+  newTS
+</pre>
 retrieves this object.  
 <p>
 These two forms of 
@@ -106,21 +109,24 @@ character.  This difference is described further in a
 <p>
 The message 
 <a href="mTS.htm#count"><i>count</i></a>
-returns the number of points in a time series.  For example:<pre><tt><b>
-     Named Currency USD :tsProperty count printNL ;
-     newTS count printNL ;
-</b></tt></pre>
+returns the number of points in a time series.  For example:
+<pre>
+  Named Currency USD :tsProperty count printNL ;
+  newTS count printNL ;
+</pre>
 Initially a <i>TimeSeries</i> contains 0 elements.  The
 <a href="mTS.htm#asOf:put:"><i>asOf:put:</i></a>
-message is used to update a <i>TimeSeries</i>:<pre><tt><b>
-     Named Currency USD :tsProperty asOf: 9501 put: 10.1 ; 
-     Named Currency USD :tsProperty asOf: 9502 put: 12.3 ; 
-     Named Currency USD :tsProperty asOf: 9503 put: 9.7 ; 
-     Named Currency USD :tsProperty count printNL ;
-or
-     newTS asOf: 960515 put: 3.4 ;
-     newTS count printNL ;
-</b></tt></pre>
+message is used to update a <i>TimeSeries</i>:
+<pre>
+  Named Currency USD :tsProperty asOf: 9501 put: 10.1 ; 
+  Named Currency USD :tsProperty asOf: 9502 put: 12.3 ; 
+  Named Currency USD :tsProperty asOf: 9503 put: 9.7 ; 
+  Named Currency USD :tsProperty count printNL ;
+</pre>or
+<pre>
+  newTS asOf: 960515 put: 3.4 ;
+  newTS count printNL ;
+</pre>
 <p>
 The property <i>tsProperty</i> for the US currency contains 3 points.
 The variable <i>newTS</i> now refers to a <i>TimeSeries</i>
@@ -136,17 +142,19 @@ a time varying property.
 <p>
 When you ask for the value of a time series property, by
 default you access the value that was most recently updated on or before
-the current date.  For example:<pre><tt><b>
-     Named Currency USD tsProperty printNL ;
-</b></tt></pre>
+the current date.  For example:
+<pre>
+  Named Currency USD tsProperty printNL ;
+</pre>
 returns the value <i>9.7</i> which represents the most recent value
 in the time series.
 The 
 <a href="mTS.htm#asOf:"><i>asOf:</i></a>
 message is used to access a specific
-point in the <i>TimeSeries</i>.  For example:<pre><tt><b>
-     Named Currency USD :tsProperty asOf: 9502 . printNL ;
-</b></tt></pre>
+point in the <i>TimeSeries</i>.  For example:
+<pre>
+  Named Currency USD :tsProperty asOf: 9502 . printNL ;
+</pre>
 retrieves and displays the value <i>12.3</i>.  A <i>TimeSeries</i>
 responds to the <i>asOf:</i> message by accessing the value of the
 series that was in effect on or before the date supplied as the
@@ -154,47 +162,49 @@ parameter.  The parameter should be a <i>Date</i> object or
 an <a href="clDate.htm#creation">integer equivalent</a>.
 <p>
 Pictorially, the <i>tsProperty</i> time series for the US currency
-can be viewed as a time line of three values: <pre><tt>
- 
-      10.1        12.3        9.7
-     ___|_____|_____|__________|__________|___
-        |     |     |          |          |
-      1/31/95 |   2/28/95    3/31/95    4/30/95
-              |
-           2/15/95
-
-</tt></pre>
+can be viewed as a time line of three values:
+<pre>
+   10.1        12.3        9.7
+  ___|_____|_____|__________|__________|___
+     |     |     |          |          |
+   1/31/95 |   2/28/95    3/31/95    4/30/95
+           |
+        2/15/95
+</pre>
 If you request data as of a date that is not in the time series, the
-value on or before that date will be returned. For example: <pre><tt><b>
-     Named Currency USD :tsProperty asOf: 950215 . printNL ;
-</b></tt></pre>
+value on or before that date will be returned. For example:
+<pre>
+  Named Currency USD :tsProperty asOf: 950215 . printNL ;
+</pre>
 returns the value <i>10.1</i>. Since no value is explicitly stored on 
 February 15, 1995,
 the first value prior to this date is returned.  In this case,
 the value is the value as of 1/31/95, the first value to the left of
 2/15/96 in the time line. If your "as of" date is earlier than
 the first available date, the value <i>NA</i> will be returned. 
-For example: <pre><tt><b>
-     Named Currency USD :tsProperty asOf: 94 . printNL ;
-</b></tt></pre>
+For example:
+<pre>
+  Named Currency USD :tsProperty asOf: 94 . printNL ;
+</pre>
 returns the value <i>NA</i>, since there is no time point on or before this
 date. If your "as of" date is later than the last available date,
 the value of the last point in the time series is returned. 
 <p>
 The message
 <a href="mTS.htm#displayAll"><i>displayAll</i></a> can be sent to a a
-<i>TimeSeries</i> to display all its points. For example: <pre><tt><b>
-     Named Currency USD :tsProperty displayAll ;
-
-</b>displays:<b>
-
-     1/31/1995   10.10
-     2/28/1995   12.30
-     3/31/1995    9.70
-</b></tt></pre>
-If you send this message to the Canadian currency:<pre><tt><b>
-     Named Currency CAD :tsProperty displayAll ;
-</b></tt></pre>
+<i>TimeSeries</i> to display all its points. For example:
+<pre>
+  Named Currency USD :tsProperty displayAll ;
+</pre>displays:
+<pre>
+  1/31/1995   10.10
+  2/28/1995   12.30
+  3/31/1995    9.70
+</pre>
+If you send this message to the Canadian currency:
+<pre>
+  Named Currency CAD :tsProperty displayAll ;
+</pre>
 you should not see any values since this property has not been
 updated for this currency.
 <p>
@@ -202,10 +212,11 @@ The
 <a href="mTS.htm#firstDate"><i>firstDate</i></a> and 
 <a href="mTS.htm#lastDate"><i>lastDate</i></a>
 messages are used to determine the first and last dates for which information
-has been stored in a <i>TimeSeries</i>.  For example:<pre><tt><b>
-     Named Currency USD :tsProperty firstDate printNL ;
-     Named Currency USD :tsProperty lastDate printNL ;
-</b></tt></pre>
+has been stored in a <i>TimeSeries</i>.  For example:
+<pre>
+  Named Currency USD :tsProperty firstDate printNL ;
+  Named Currency USD :tsProperty lastDate printNL ;
+</pre>
 <p>
 When you store a value into a time series as of a specific date, the
 value is assumed to <i>go into effect</i> on that date. It remains in effect
@@ -214,12 +225,15 @@ The messages
 <a href="mTS.htm#effectiveDateAsOf:"><i>effectiveDateAsOf:</i></a>
 and <a href="mTS.htm#nextDateAsOf:"><i>nextDateAsOf:</i></a>
 are used to determine the interval over which a value is in effect. 
-For example:<pre><tt><b>
-     Named Currency USD :tsProperty effectiveDateAsOf: 950215 .
-</b></tt></pre>
+For example:
+<pre>
+  Named Currency USD :tsProperty effectiveDateAsOf: 950215 .
+</pre>
 returns the date <i>1/31/95</i> 
-and:<pre><tt><b>          Named Currency USD :tsProperty nextDateAsOf: 950215 .
-</b></tt></pre>
+and:
+<pre>
+         Named Currency USD :tsProperty nextDateAsOf: 950215 .
+</pre>
 returns the date <i>2/28/95</i>.
 This indicates that the value you are retrieving for February 15,
 1995 was really stored on January 31, 1995 and next updated on
@@ -232,9 +246,10 @@ If no value is stored on the date, the value <i>NA</i> is returned.
 <p>
 The
 <i><a href="mTS.htm#delete:">delete:</a></i> message is used to delete
-a value as of a specific date. For example:<pre><tt><b>
-     Named Currency USD :tsProperty delete: 9503 .
-</b></tt></pre>
+a value as of a specific date. For example:
+<pre>
+  Named Currency USD :tsProperty delete: 9503 .
+</pre>
 deletes this point from the time series, leaving a time series with
 2 points.  
 <p>
@@ -247,24 +262,25 @@ Within the block supplied as the parameter, all messages are sent
 to each element in the recipient time series.  When the recipient
 is a <i>TimeSeries</i> object, the 
 <a href="Execution.htm#date">magic word <i>^date</i></a>
-is rebound to the specific date being analyzed.  For example:<pre><tt><b>
-     Named Currency USD :tsProperty
-     do: [ ^date print: 15 ;          #- display date of element
-           printNL ;                  #- print value of element
-         ] ;
-
-</b>displays:<b>
-
-     1/31/1995   10.10
-     2/28/1995   12.30
-     3/31/1995    9.70
-</b></tt></pre>
+is rebound to the specific date being analyzed.  For example:
+<pre>
+  Named Currency USD :tsProperty
+  do: [ ^date print: 15 ;          #- display date of element
+        printNL ;                  #- print value of element
+      ] ;
+</pre>displays:
+<pre>
+  1/31/1995   10.10
+  2/28/1995   12.30
+  3/31/1995    9.70
+</pre>
 <p>
 The <i>toList</i> message can be used to convert a
 <i>TimeSeries</i> into a standard <i>List</i> object.
-For example:<pre><tt><b>
-     Named Currency USD :tsProperty toList at: 1 .
-</b></tt></pre>
+For example:
+<pre>
+  Named Currency USD :tsProperty toList at: 1 .
+</pre>
 returns the value <i>10.1</i> which is the first value positionally
 after the <i>TimeSeries</i> has been converted to a <i>List</i>.
 Note that once the time series has been converted to a list, the
@@ -290,18 +306,20 @@ The <i>evaluate:</i> message is sent to a <i>Date</i> or an
 change the default date.  The parameter to this message is
 a block.  All messages within the block that access time series
 properties will access the values as of this date.
-For example:<pre><tt><b>
-     950315 evaluate:
-       [ Named Currency CAD usExchange printNL ] ;
-</b></tt></pre>
+For example:
+<pre>
+  950315 evaluate:
+    [ Named Currency CAD usExchange printNL ] ;
+</pre>
 In this case, the exchange rate is accessed as of March 15, 1995.
 The <a href="Execution.htm#date">magic word <i>^date</i></a> refers
-to this evaluation date.  For example:<pre><tt><b>
-     950315 evaluate:
-       [ ^date print: 15 ;
-         Named Currency CAD usExchange printNL ;
-       ] ;
-</b></tt></pre>
+to this evaluation date.  For example:
+<pre>
+  950315 evaluate:
+    [ ^date print: 15 ;
+      Named Currency CAD usExchange printNL ;
+    ] ;
+</pre>
 This example displays the date <i>3/15/1995</i> followed by the exchange
 rate as of that date.
 <p>
@@ -314,28 +332,30 @@ the most recent value before that date is retrieved.
 <p>
 <a name="nested"> </a>
 You can change the default date within the <i>evaluate:</i> block.
-For example:<pre><tt><b>
-     950315 evaluate:
-       [ ^date print: 15 ;
-         Named Currency CAD usExchange printNL ;
-         ^date + 5 businessDays evaluate:
-             [ ^date print: 15 ; Named Currency CAD usExchange printNL ] ;
-       ] ;
-</b></tt></pre>
+For example:
+<pre>
+  950315 evaluate:
+    [ ^date print: 15 ;
+      Named Currency CAD usExchange printNL ;
+      ^date + 5 businessDays evaluate:
+          [ ^date print: 15 ; Named Currency CAD usExchange printNL ] ;
+    ] ;
+</pre>
 This example displays the date <i>3/15/1995</i> followed by the exchange
 rate for that date.  It then displays the date and exchange rate for
 the date 5 business days later than the original date.
 <p>
 If you do not explicitly override it, Vision uses the current date as
 the default date. The message <i>^today</i> can be used to specify the
-current date. For example, the expressions: <pre><tt><b>
-     Named Currency CAD usExchange print; 
+current date. For example, the expressions:
+<pre>
+  Named Currency CAD usExchange print; 
 
-     Named Currency CAD :usExchange asOf: ^today .  print; 
-and
-     ^today evaluate:
-        [ Named Currency CAD usExchange print; ] ;
-</b></tt></pre>
+  Named Currency CAD :usExchange asOf: ^today .  print; 
+
+  ^today evaluate:
+     [ Named Currency CAD usExchange print; ] ;
+</pre>
 are all equivalent and return the Canadian exchange rate as of the
 current date. 
 <p>
@@ -372,14 +392,14 @@ default date including:
 <p>
 Instead of supplying an explicit date as a parameter, the messages in
 the second column use the current value of <i>^date</i> as the date. 
-For example:<pre><tt><b>
-     9511 evaluate: 
-        [ Named Currency CAD :usExchange put: 2.1 ] ;
-
-</b>is equivalent to:<b>
-
-     Named Currency CAD :usExchange asOf: 9511 put: 2.1 ;
-</b></tt></pre>
+For example:
+<pre>
+  9511 evaluate: 
+     [ Named Currency CAD :usExchange put: 2.1 ] ;
+</pre>is equivalent to:
+<pre>
+  Named Currency CAD :usExchange asOf: 9511 put: 2.1 ;
+</pre>
 <p>
 <a name="drange"> </a>
 <p>
@@ -387,12 +407,13 @@ The <i>evaluate:</i> message works with
 <a href="clDate.htm#dr"><i>DateRange</i> objects</a> as well as
 with <i>Dates</i>.  
 For example, to access the Canadian exchange rate for each
-month-end date in 1995, use:<pre><tt><b>
-     9501 to: 9512 by: 1 monthEnds .
-     evaluate: [ ^date print: 15 ; 
-                 Named Currency CAD usExchange printNL ;
-               ] ;
-</b></tt></pre>
+month-end date in 1995, use:
+<pre>
+  9501 to: 9512 by: 1 monthEnds .
+  evaluate: [ ^date print: 15 ; 
+              Named Currency CAD usExchange printNL ;
+            ] ;
+</pre>
 The supplied block prints the evaluation date and the exchange
 rate for each date in the date range.  Starting with the initial
 date, Vision increments the evaluation date by the date range's
@@ -412,17 +433,18 @@ the current evaluation date.  This derived date is defined as:
 <i>^date - offset</i>, where <i>offset</i> is the 
 <a href="clDate.htm#offset"><i>DateOffset</i></a> object
 supplied as the parameter to the <i>lag:</i> message.
-For example:<pre><tt><b>
-     Currency define: 'tsProperty' ;
-     Named Currency USD :tsProperty asOf: 9501 put: 10.1 ; 
-     Named Currency USD :tsProperty asOf: 9502 put: 12.3 ; 
-     Named Currency USD :tsProperty asOf: 9503 put: 9.7 ; 
+For example:
+<pre>
+  Currency define: 'tsProperty' ;
+  Named Currency USD :tsProperty asOf: 9501 put: 10.1 ; 
+  Named Currency USD :tsProperty asOf: 9502 put: 12.3 ; 
+  Named Currency USD :tsProperty asOf: 9503 put: 9.7 ; 
 
-     9502 evaluate:
-       [ Named Currency USD 
-            :tsProperty lag: 1 monthEnds . printNL ;
-       ] ;
-</b></tt></pre>
+  9502 evaluate:
+    [ Named Currency USD 
+         :tsProperty lag: 1 monthEnds . printNL ;
+    ] ;
+</pre>
 In this example, the evaluation date is <i>9502</i>.  Sending
 the <i>lag: 1 monthEnds</i> message to the time series is a request
 to access the data as of the prior month-end date.
@@ -435,20 +457,22 @@ the current evaluation date.  This derived date is defined as:
 <i>^date + offset</i>.
 <p>
 Suppose you wanted to compute the change in value between two points
-in time. For example:<pre><tt><b>
-       Named Currency USD 
-       do: [ (:tsProperty asOf: 9503) -
-             (:tsProperty asOf: 9502) printNL:10 ;
-           ] ;
-</b></tt></pre>
+in time. For example:
+<pre>
+    Named Currency USD 
+    do: [ (:tsProperty asOf: 9503) -
+          (:tsProperty asOf: 9502) printNL:10 ;
+        ] ;
+</pre>
 The message <i><a href="mTS.htm#changeLag:">changeLag:</a></i> provides
 a more streamlined way for requesting the same information. The expression
-could be rewritten using:<pre><tt><b>
-       9503 evaluate: [ 
-          Named Currency USD
-              :tsProperty changeLag: 1 monthEnds . printNL ;
-       ] ;
-</b></tt></pre>
+could be rewritten using:
+<pre>
+    9503 evaluate: [ 
+       Named Currency USD
+           :tsProperty changeLag: 1 monthEnds . printNL ;
+    ] ;
+</pre>
 The messages
 <i><a href="mTS.htm#pctChangeLag:">pctChangeLag:</a></i>,
 <i><a href="mTS.htm#changeLead:">changeLead:</a></i>, and
@@ -462,53 +486,55 @@ work in a similar fashion.
 Since the <i>TimeSeries</i> class is a subclass of <i>Collection</i>,
 you can use the <a href="clCollect.htm#select"><i>select:</i></a>
 message to restrict the time series to dates within a specific range.
-For example:<pre><tt><b>
-     Currency define: 'tsProperty' ;
-     Named Currency USD :tsProperty asOf: 9501 put: 10.1 ; 
-     Named Currency USD :tsProperty asOf: 9502 put: 12.3 ; 
-     Named Currency USD :tsProperty asOf: 9503 put: 9.7 ; 
+For example:
+<pre>
+  Currency define: 'tsProperty' ;
+  Named Currency USD :tsProperty asOf: 9501 put: 10.1 ; 
+  Named Currency USD :tsProperty asOf: 9502 put: 12.3 ; 
+  Named Currency USD :tsProperty asOf: 9503 put: 9.7 ; 
 
-     Named Currency USD :tsProperty
-         select: [ ^date > 9501 asDate ] .
-     do: [ ^date print: 15 ; printNL ] ;
-</b></tt></pre>
+  Named Currency USD :tsProperty
+      select: [ ^date > 9501 asDate ] .
+  do: [ ^date print: 15 ; printNL ] ;
+</pre>
 The messages
 <a href="mTS.htm#from:to:"><i>from:to:</i></a>,
 <a href="mTS.htm#from:"><i>from:</i></a>, and
 <a href="mTS.htm#to:"><i>to:</i></a>
 have been defined to return a new <i>TimeSeries</i> object which is
-the subset of the recipient:<pre><tt><b>
-     #-- Retrieve data from 9502 on
-     Named Currency USD :tsProperty from: 9502 .
-        do: [ ^date print: 15 ; printNL ] ;
+the subset of the recipient:
+<pre>
+  #-- Retrieve data from 9502 on
+  Named Currency USD :tsProperty from: 9502 .
+     do: [ ^date print: 15 ; printNL ] ;
 
-     #-- Retrieve data before 9503 on
-     Named Currency USD :tsProperty to: 9502 .
-        do: [ ^date print: 15 ; printNL ] ;
+  #-- Retrieve data before 9503 on
+  Named Currency USD :tsProperty to: 9502 .
+     do: [ ^date print: 15 ; printNL ] ;
 
-     #-- Retrieve data between two dates
-     Named Currency USD :tsProperty from: 9501 to: 9502 .
-        do: [ ^date print: 15 ; printNL ] ;
-</b></tt></pre>
+  #-- Retrieve data between two dates
+  Named Currency USD :tsProperty from: 9501 to: 9502 .
+     do: [ ^date print: 15 ; printNL ] ;
+</pre>
 <p>
 The message 
 <a href="mTS.htm#extractForDateRange:"><i>extractForDateRange:</i></a>
 returns a new <i>TimeSeries</i> object that contains a point for each
 value in the <i>DateRange</i> supplied as the parameter.  For
-example:<pre><tt><b>
-     !dr <- 9412 to: 9504 by: 1 monthEnds ;
-     !extract <- Named Currency USD :tsProperty 
-        extractForDateRange: dr ;
-     extract displayAll ;
-
-</b>displays<b>:
-
-     12/31/1994           NA 
-     01/31/1995         10.10
-     02/28/1995         12.30
-     03/31/1995          9.70
-     04/30/1995          9.70
-</b></tt></pre>
+example:
+<pre>
+  !dr <- 9412 to: 9504 by: 1 monthEnds ;
+  !extract <- Named Currency USD :tsProperty 
+     extractForDateRange: dr ;
+  extract displayAll ;
+</pre>displays
+<pre>:
+  12/31/1994           NA 
+  01/31/1995         10.10
+  02/28/1995         12.30
+  03/31/1995          9.70
+  04/30/1995          9.70
+</pre>
 The variable <i>extract</i> contains a <i>TimeSeries</i> object
 with a point for each date in <i>dr</i>.  Since there was no
 data prior to 1/31/95, an <i>NA</i> value is returned for 12/31/94.
@@ -999,37 +1025,39 @@ a default date represented by the <i>magic word ^date</i>.
 Methods that directly or indirectly reference time varying
 properties will also evaluate as of the current evaluation date.
 For example,, suppose you define a time varying property representing
-a currency's exchange rate and a method that doubles this value:<pre><tt><b>
-     #--  Define a time varying property
-     Currency define: 'exchangeRate' ;
+a currency's exchange rate and a method that doubles this value:
+<pre>
+  #--  Define a time varying property
+  Currency define: 'exchangeRate' ;
 
-     #--  Define a method to double the value
-     Currency defineMethod: 
-     [ | doubleIt | 
-       exchangeRate * 2
+  #--  Define a method to double the value
+  Currency defineMethod: 
+  [ | doubleIt | 
+    exchangeRate * 2
+  ] ;
+
+  #--  Populate some values
+  Named Currency USD :exchangeRate asOf: 93 put: 1.2 ;
+  Named Currency USD :exchangeRate asOf: 94 put: 2.3 ;
+  Named Currency USD :exchangeRate asOf: 95 put: 3.4 ;
+
+  #-- Display data over range of dates
+  Named Currency USD do: [
+  93 to: 95 by: 1 yearEnds . 
+  evaluate: 
+     [ 
+     ^date print: 15 ;       #-- print the evaluation date
+     exchangeRate print ;    #-- print value of ts
+     doubleIt printNL ;      #-- print value of calculation
      ] ;
-
-     #--  Populate some values
-     Named Currency USD :exchangeRate asOf: 93 put: 1.2 ;
-     Named Currency USD :exchangeRate asOf: 94 put: 2.3 ;
-     Named Currency USD :exchangeRate asOf: 95 put: 3.4 ;
-
-     #-- Display data over range of dates
-     Named Currency USD do: [
-     93 to: 95 by: 1 yearEnds . 
-     evaluate: 
-        [ 
-        ^date print: 15 ;       #-- print the evaluation date
-        exchangeRate print ;    #-- print value of ts
-        doubleIt printNL ;      #-- print value of calculation
-        ] ;
-     ] ;
-</b></tt></pre>
-You should see the result:<pre><tt><b>
-     12/31/1993          1.20     2.40
-     12/31/1994          2.30     4.60
-     12/31/1995          3.40     6.80
-</b></tt></pre>
+  ] ;
+</pre>
+You should see the result:
+<pre>
+  12/31/1993          1.20     2.40
+  12/31/1994          2.30     4.60
+  12/31/1995          3.40     6.80
+</pre>
 Notice that both the time series property and the method that
 references this property are both automatically evaluated as of 
 each date in the range.
@@ -1042,22 +1070,23 @@ is accessed as of that date. As a result, you usually do not need to know
 whether the message being sent is a method or a property. 
 <p>
 Messages such as <i>asOf:</i> also work with methods. For 
-example:<pre><tt><b>
-     Named Currency USD :doubleIt asOf: 94 .
-</b></tt></pre>
+example:
+<pre>
+  Named Currency USD :doubleIt asOf: 94 .
+</pre>
 In this case, all data required by the <i>doubleIt</i> method is accessed
 as of 12/94. Many messages work interchangeably with time series and methods
 including: <i>asOf:, lag:, changeLag:, pctChangeLag, extractForDateRange:
 </i>and<i> aveForDateRange:</i>. Certain operations are only meaningful
-in conjunction with pure time series data. For example:<pre><tt><b>
-     Named Currency USD :doubleIt displayAll
-
-</b>displays:<b>
-
-     *** Message Is Not A Time Series *** 
-     Defined As: 
-     ===> [|doubleIt| exchangeRate * 2 ] 
-</b></tt></pre>
+in conjunction with pure time series data. For example:
+<pre>
+  Named Currency USD :doubleIt displayAll
+</pre>displays:
+<pre>
+  *** Message Is Not A Time Series *** 
+  Defined As: 
+  ===> [|doubleIt| exchangeRate * 2 ] 
+</pre>
 Since <i>doubleIt</i> is not really a time series and can be evaluated
 as of any point in time, you cannot display all its values. Instead, the
 <i>displayAll</i> message displays the definition of the method. 
@@ -1065,13 +1094,15 @@ as of any point in time, you cannot display all its values. Instead, the
 A method is a program that can be evaluated as of any date. Actual data
 is stored in a time series, whereas no data is actually stored in a method.
 Therefore messages such as <a href="mTS.htm#asOf:put:"><i>asOf:put:</i></a> 
-are only meaningful for time series. For example:<pre><tt><b>
-     Named Currency USD :doubleIt
-         asOf: 93 put: 1000 ;
-</b></tt></pre>
-generates the warning:<pre><tt><b>
-     >>> Selector 'asOf:put:' Not Found <<< 
-</b></tt></pre>
+are only meaningful for time series. For example:
+<pre>
+  Named Currency USD :doubleIt
+      asOf: 93 put: 1000 ;
+</pre>
+generates the warning:
+<pre>
+  >>> Selector 'asOf:put:' Not Found <<< 
+</pre>
 Similarly the messages 
 <i><a href="mTS.htm#count">count</a>, 
 <a href="mTS.htm#firstDate">firstDate</a>,
@@ -1082,27 +1113,30 @@ for actual <i>TimeSeries</i> objects.
 <p>
 To determine if an object is a method or time series, print out its
 value. If it is a method, Vision will display the method definition; otherwise
-the message <i>aTimeSeries</i> will be displayed. For example:<pre><tt><b>
-     "--->  exchangeRate" printNL ;
-     Named Currency USD :exchangeRate printNL ;
-     "--->  doubleIt" printNL ;
-     Named Currency USD :doubleIt printNL ;
-</b></tt></pre>
+the message <i>aTimeSeries</i> will be displayed. For example:
+<pre>
+  "--->  exchangeRate" printNL ;
+  Named Currency USD :exchangeRate printNL ;
+  "--->  doubleIt" printNL ;
+  Named Currency USD :doubleIt printNL ;
+</pre>
 <p>
 The message 
 <i><a href="mBlock.htm#extractForDateRange:">extractForDateRange:</a></i>
 can be used to convert a method into a time series with values for each
-point in the date range. For example:<pre><tt><b>
-     !dr <- 94 to: 95 by: 1 yearEnds ;
-     Named Currency USD :doubleIt
-        extractForDateRange: dr . displayAll ;
-</b></tt></pre>
+point in the date range. For example:
+<pre>
+  !dr <- 94 to: 95 by: 1 yearEnds ;
+  Named Currency USD :doubleIt
+     extractForDateRange: dr . displayAll ;
+</pre>
 The message <a href="mDRange.htm#extract:for:"><i>extract:for:</i></a>
 is used to evaluate a block for an object over a date range, returning
-a <i>TimeSeries</i> object.  For example:<pre><tt><b>
-     94 to: 95 by: 1 yearEnds .
-        extract: [ usExchange ] for: Named Currency CAD
-</b></tt></pre>
+a <i>TimeSeries</i> object.  For example:
+<pre>
+  94 to: 95 by: 1 yearEnds .
+     extract: [ usExchange ] for: Named Currency CAD
+</pre>
 returns a time series of two year-end exchange rates for the
 Canadian currency.
 
@@ -1117,24 +1151,29 @@ Canadian currency.
 <li>As stand-alone objects.
 </ol>
 <p>
-The expression:<pre><tt><b>
-     Currency define: 'tsProperty' ;
-</b></tt></pre>
+The expression:
+<pre>
+  Currency define: 'tsProperty' ;
+</pre>
 creates a new time series property for the class Currency.  The
-expression:<pre><tt><b>
-     Named Currency USD :tsProperty 
-</b></tt></pre>
+expression:
+<pre>
+  Named Currency USD :tsProperty 
+</pre>
 retrieves this property for the US currency as a <i>TimeSeries</i>
-object.  The expressions:<pre><tt><b>
-     !newTS <- TimeSeries new ;
-and
-     !newTS <- Named Currency USD :tsPropety
-          extractForDateRange: (88 to: 90 by 1 years) ;
-</b></tt></pre>
+object.  The expressions:
+<pre>
+  !newTS <- TimeSeries new ;
+</pre>and
+<pre>
+  !newTS <- Named Currency USD :tsPropety
+       extractForDateRange: (88 to: 90 by 1 years) ;
+</pre>
 both
-create stand-alone <i>TimeSeries</i> objects.  The expression:<pre><tt><b>
-     newTS
-</b></tt></pre>
+create stand-alone <i>TimeSeries</i> objects.  The expression:
+<pre>
+  newTS
+</pre>
 retrieves this object.  
 These two forms of 
 <i>TimeSeries</i> object respond identically to the same set of
@@ -1156,32 +1195,33 @@ sent when you access a property without the
 initial <b><font size=+1>:</font></b>.  It is required if you
 want a stand-alone time series to return one of its values.
 <p>
-Some examples should help clarify these distinctions: <pre><tt><b>
-     #-- define property and stand-alone time series
-     Currency define: 'tsProperty' ;
-     !newTS <- TimeSeries new ;
+Some examples should help clarify these distinctions:
+<pre>
+  #-- define property and stand-alone time series
+  Currency define: 'tsProperty' ;
+  !newTS <- TimeSeries new ;
 
-     #-- populate values
-     Named Currency USD :tsProperty asOf: 88 put: 880 ; 
-     Named Currency USD :tsProperty asOf: 89 put: 890 ; 
-     Named Currency USD :tsProperty asOf: 90 put: 900 ; 
-     newTS asOf: 9501 put: 1 ;
-     newTS asOf: 9502 put: 2 ;
+  #-- populate values
+  Named Currency USD :tsProperty asOf: 88 put: 880 ; 
+  Named Currency USD :tsProperty asOf: 89 put: 890 ; 
+  Named Currency USD :tsProperty asOf: 90 put: 900 ; 
+  newTS asOf: 9501 put: 1 ;
+  newTS asOf: 9502 put: 2 ;
 
-     #-- Print the most recent value
-     Named Currency USD tsProperty print ;
-     newTS value printNL ;                               #- need value
+  #-- Print the most recent value
+  Named Currency USD tsProperty print ;
+  newTS value printNL ;                               #- need value
 
-     #--- Print the 1989 value
-     Named Currency USD :tsProperty asOf: 89 . print ;   #- need :
-     89 evaluate: [ Named Currency USD tsProperty print ] ; 
-     newTS asOf: 89 . print ;                            #- no : 
-     89 evaluate: [ newTS value printNL ] ;              #- need value
+  #--- Print the 1989 value
+  Named Currency USD :tsProperty asOf: 89 . print ;   #- need :
+  89 evaluate: [ Named Currency USD tsProperty print ] ; 
+  newTS asOf: 89 . print ;                            #- no : 
+  89 evaluate: [ newTS value printNL ] ;              #- need value
 
-     #-- Count the elements in the time series
-     Named Currency USD :tsProperty count print ;        #- need : 
-     newTS count printNL ;                               #- no :
-</b></tt></pre>
+  #-- Count the elements in the time series
+  Named Currency USD :tsProperty count print ;        #- need : 
+  newTS count printNL ;                               #- no :
+</pre>
 
 <p>
 <hr>
@@ -1203,20 +1243,24 @@ the femto-second (i.e., 1e-15, 0.000000000000001 seconds).
 Creating a high frequency time series requires that you supply an
 extra parameter indicating the resolution you wish when you create
 the property.  For example, to define a property for tracking real-time
-prices at security, you could use the expression:<b><pre>
+prices at security, you could use the expression:<b>
+<pre>
    Security define: 'rtPrice' withTimeIndex: LowResolutionTime ;
 
-</pre></b>
+</pre>
 You can continue to use the <i>asOf:put:</i> message to update high frequency
-time series.  The first parameter can be supplied in the form:<pre>
+time series.  The first parameter can be supplied in the form:
+<pre>
       yyyymmdd.hhmmssss
 </pre>
 to include both the date and time components.  For example, to update
-IBM's price as of 3:03 pm on April 14, 2000, use: <b><pre>
+IBM's price as of 3:03 pm on April 14, 2000, use: <b>
+<pre>
      Named Security IBM :rtPrice asOf: 20000414.1503 put: 102.25 ;
-</pre></b>
+</pre>
 You can continue to use the <i>asOf:</i> message to access a high
-frequency time series.  For example:<pre>
+frequency time series.  For example:
+<pre>
      #-- get the most recent price
      Named Security IBM rtPrice printNL ;
 
@@ -1227,7 +1271,8 @@ frequency time series.  For example:<pre>
     Named Security IBM :rtPrice asOf: 20000414 . printNL ;
 </pre>
 You can continue to use the standard <b>Collection</b> messages such
-as <i>do:</i> to access the entire time series:<pre>
+as <i>do:</i> to access the entire time series:
+<pre>
      Named Security IBM :rtPrice
      do: [ ^date print ; printNL ;
          ] ;
@@ -1236,7 +1281,8 @@ as <i>do:</i> to access the entire time series:<pre>
 When a time series object is indexed by time, it responds to the
 messages <i>hours</i>, <i>minutes</i>, and <i>seconds</i> as well
 as the messages <i>year</i>, <i>month</i>, and <i>day</i>.  For
-example: <pre>
+example:
+<pre>
      Named Security IBM :rtPrice
      do: [ ^date asDate print: 12 ; 
            ^date hours print ; ^date minutes print; ^date seconds print ;

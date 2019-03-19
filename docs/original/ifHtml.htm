@@ -77,9 +77,10 @@ session.  The remainder of the path is passed as an input to this
 session.  For example, if your server's name is <i>www.myserver.com</i>
 and you are using the <i>vquery</i> program to talk to the default
 Vision session, the URL in your <i>HREF</i> statement could 
-contain:<pre><tt><b>
-     http://www.myserver.com/cgi-bin/vquery/default/report1@param1@param2
-</b></tt></pre>
+contain:
+<pre>
+  http://www.myserver.com/cgi-bin/vquery/default/report1@param1@param2
+</pre>
 The <i>vquery</i> program strips the path through <i>default</i>
 to determine which Vision session to use,
 then passes the remaining string to the Vision session for parsing and
@@ -87,9 +88,10 @@ execution.
 <p>
 If your Web document contains an <i>ACTION</i> statement that
 references a CGI program, the inputs from the form are passed
-to this program as a string of name/value pairs in the form:<pre><tt>
-     control1=value1&control2=value2&control3=value3
-</tt></pre>
+to this program as a string of name/value pairs in the form:
+<pre>
+  control1=value1&control2=value2&control3=value3
+</pre>
 All explicit and hidden control values are shipped.  The CGI
 program must arrange to pass these inputs to Vision.  The
 <i>vquery</i> program supplies this string directly to Vision,
@@ -114,13 +116,14 @@ the <a href="#vquery"><i>vquery</i> program</a> passes the
 remainder of the path, the query string associated
 with a form, the remote host, and remote address of the
 client to the appropriate Vision session using the 
-expression:  <pre><tt><b>
-	Interface HtmlAccess
-           get: "PATH_INFO"
-           usingQuery: "QUERY_STRING"
-           for: "REMOTE_HOST"
-           at: "REMOTE_ADDR" ;
-</b></tt></pre>
+expression:
+<pre>
+  Interface HtmlAccess
+     get: "PATH_INFO"
+     usingQuery: "QUERY_STRING"
+     for: "REMOTE_HOST"
+     at: "REMOTE_ADDR" ;
+</pre>
 <p>
 The method <i>get:usingQuery:for:at:</i> 
 parses the PATH_INFO and QUERY_STRING strings and generates an HTTP
@@ -143,14 +146,16 @@ display the results.
 <p>
 The <i>get:usingQuery:for:at:</i> 
 method assumes that the PATH_INFO string is supplied in the
-format:<pre><tt>
-     ApplicationName@Parameter1@Parameter2@...@ParameterN
-</tt></pre>
+format:
+<pre>
+  ApplicationName@Parameter1@Parameter2@...@ParameterN
+</pre>
 where any number of parameters can be supplied, separated by the @
 character.  For example, if the URL in your <i>HREF</i> statement 
-contains:<pre><tt>
-     http://www.myserver.com/cgi-bin/vquery/default/Profile@Company@IBM
-</tt></pre>
+contains:
+<pre>
+  http://www.myserver.com/cgi-bin/vquery/default/Profile@Company@IBM
+</pre>
 the PATH_INFO would contain: <i>/Profile@Company@IBM</i>.  The
 method strips off the leading "/",
 then breaks this string into substrings using the @ character as
@@ -163,9 +168,10 @@ are executed to store these values in the current
 <p>
 The <i>get:usingQuery:for:at:</i> 
 method assumes that the QUERY_STRING string is supplied in the
-format:<pre><tt>
-     control1=value1&control2=value2&control3=value3&...
-</tt></pre>
+format:
+<pre>
+  control1=value1&control2=value2&control3=value3&...
+</pre>
 where the <i>control</i> strings represent the names of controls
 on the Html form submitted and the <i>value</i> strings are the
 corresponding values supplied for these controls.  For example,
@@ -209,20 +215,21 @@ associated with the PATH_INFO string is the one that is executed.
 <h4 id="output">Preparing the Output</h4>
 <p>
 When the application is run, a document in the following format is 
-generated:<pre><tt><b>
-     Content-Type: text/html
+generated:
+<pre>
+  Content-Type: text/html
 
-     &ltHTML&gt
-     &ltHEAD&gt
-     &ltTITLE&gt title based on inputs goes here &lt/TITLE&gt
-     &lt/HEAD&gt
-     &ltBODY&gt
-     &ltH2&gt standard title goes here &lt/H2&gt&ltHR&gt
+  &ltHTML&gt
+  &ltHEAD&gt
+  &ltTITLE&gt title based on inputs goes here &lt/TITLE&gt
+  &lt/HEAD&gt
+  &ltBODY&gt
+  &ltH2&gt standard title goes here &lt/H2&gt&ltHR&gt
 
-         output from ApplicationWS formatted with HTML tags
+      output from ApplicationWS formatted with HTML tags
 
-     &lt/BODY&gt&lt/HTML&gt
-</b></tt></pre>
+  &lt/BODY&gt&lt/HTML&gt
+</pre>
 An appropriate Html header and footer is created to surround the
 output from the application.  The application itself is executed
 within a 
@@ -234,14 +241,15 @@ so that any display tags are generated for Html.
 <p>
 <ol type="1">
 <li>
-<i>HREFs</i> used with anchors should be formed using:<pre><tt>
-   http://servername/cgi-bin/vquery/default/appName@p1@p2@p3...
-
-</tt></pre>
+<i>HREFs</i> used with anchors should be formed using:
+<pre>
+  http://servername/cgi-bin/vquery/default/appName@p1@p2@p3...
+</pre>
 <li>To ship inputs from a form, the <i>ACTION</i> statement should
-be formed using:<pre><tt>
-   http://servername/cgi-bin/vquery/
-</tt></pre>
+be formed using:
+<pre>
+  http://servername/cgi-bin/vquery/
+</pre>
 The form should contain a control (hidden or visible) named
 <i>appName</i> that specifies the name of the application to run.
 <p>
@@ -264,14 +272,16 @@ The class
 include the appropriate Html tags.  Recall that the
 <b>FormatTools</b> class can be used to provide a modular approach 
 to output generation.  The various formatting messages have 
-a default mode and an Html version.  For example the expression:<pre><tt><b>
-     FormatTools bold: "this string" . print ;
-</b></tt></pre>
+a default mode and an Html version.  For example the expression:
+<pre>
+  FormatTools bold: "this string" . print ;
+</pre>
 displays the supplied string with no special formatting.  The 
-expression: <pre><tt><b>
-     FormatTools Html
-          evaluate: [ FormatTools bold: "this string" . print ] ;
-</b></tt></pre>
+expression:
+<pre>
+  FormatTools Html
+       evaluate: [ FormatTools bold: "this string" . print ] ;
+</pre>
 displays the supplied string within <i>&ltb&gt</i> and <i>&lt/b&gt</i> tags.
 A description of the various <b>FormatTools</b> messages and their
 default and Html behavior is presented in the document
@@ -280,26 +290,29 @@ default and Html behavior is presented in the document
 <p>
 <h4 id="links">Embedding Links in Vision Documents</h4>
 <p>
-The general format for an Html link is:<pre><tt><b>
-     &lta HREF=URL&gt label &lt/a&gt
-</b></tt></pre>
+The general format for an Html link is:
+<pre>
+  &lta HREF=URL&gt label &lt/a&gt
+</pre>
 where URL is the name of the server that connects to Vision plus any
 additional information you wish to send.  This is the format 
 <a href="#io">described earlier</a> that is used to run <i>vquery</i>
 and pass a string containing the application name and parameters to
-a running Vision session.  For example:<pre><tt>
-     http://www.myserver.com/cgi-bin/vquery/default/Profile@Company@IBM
-</tt></pre>
+a running Vision session.  For example:
+<pre>
+  http://www.myserver.com/cgi-bin/vquery/default/Profile@Company@IBM
+</pre>
 In this case the server runs the CGI program <i>vquery</i> which
 submits the string <i>/Profile@Company@IBM</i> to the default
 session.  If you want to define a link within the <i>Profile</i>
 method that runs <i>Profile2</i>, you could include the following
-print statements in your Vision code:<pre><tt><b>
-   "&lta HREF='http://myserver/cgi-bin/vquery/default/" print ;
-   "Profile2@IBM'&gt" print ;
-   "IBM Profile 2 Link" print ;
-   "&lt/a&gt" printNL ;
-</b></tt></pre>
+print statements in your Vision code:
+<pre>
+  "&lta HREF='http://myserver/cgi-bin/vquery/default/" print ;
+  "Profile2@IBM'&gt" print ;
+  "IBM Profile 2 Link" print ;
+  "&lt/a&gt" printNL ;
+</pre>
 When this report is displayed in your Web Browser, the text 
 <b><i>IBM Profile 2 Link</i></b> will be represented as an anchor.  If you
 click on this link, <i>vquery</i> will ship the string
@@ -307,15 +320,16 @@ click on this link, <i>vquery</i> will ship the string
 information, it sets the current application to <i>Profile2</i> with
 the parameter <i>IBM</i> and returns the document created.  The
 <i>Profile2</i> method must be defined at the <b>ApplicationWS</b>
-class.  For example:<pre><tt><b>
-     Interface ApplicationWS defineMethod: [ | Profile2 | 
-          !id <- parameterList at: 1 ;     #- IBM
-          id as: ^global Company .
-          do: [ "This is Profile 2 for: " print ; 
-                displayInfo ;
-              ] ;
-     ] ;
-</b></tt></pre>
+class.  For example:
+<pre>
+  Interface ApplicationWS defineMethod: [ | Profile2 | 
+       !id <- parameterList at: 1 ;     #- IBM
+       id as: ^global Company .
+       do: [ "This is Profile 2 for: " print ; 
+             displayInfo ;
+           ] ;
+  ] ;
+</pre>
 <p>
 <h4 id="linkMessages">FormatTools: Link Creation Messages</h4>
 <p>
@@ -328,11 +342,12 @@ A number of messages have been defined for the
 This message creates an Html anchor.  The server URL is formed using current 
 <a href="#settings">session settings</a> followed by the application
 name and any parameters, separated by the @ character.
-This message formats an Html anchor statement in the form:<pre><tt>
-   &lta href=
-      "http://server/cgi-bin/vquery/SESSION/app@p1@p2@p3/?globalDate=yyyymmdd"
-   &gtlabel&lt/a&gt
-</tt></pre>
+This message formats an Html anchor statement in the form:
+<pre>
+  &lta href=
+     "http://server/cgi-bin/vquery/SESSION/app@p1@p2@p3/?globalDate=yyyymmdd"
+  &gtlabel&lt/a&gt
+</pre>
 <p>
 <hr size=1>
 <i>buildLinkForApp: app withLabel: label </i>
@@ -340,11 +355,12 @@ This message formats an Html anchor statement in the form:<pre><tt>
 This message creates an Html anchor.  The server URL is formed using current 
 <a href="#settings">session settings</a> followed by the application
 name.
-This message formats an Html anchor statement in the form:<pre><tt>
-   &lta href=
-      "http://server/cgi-bin/vquery/SESSION/app/?globalDate=yyyymmdd"
-   &gtlabel&lt/a&gt
-</tt></pre>
+This message formats an Html anchor statement in the form:
+<pre>
+  &lta href=
+     "http://server/cgi-bin/vquery/SESSION/app/?globalDate=yyyymmdd"
+  &gtlabel&lt/a&gt
+</pre>
 <p>
 <hr size=1>
 <i>buildLink: link withLabel: label </i>
@@ -352,9 +368,10 @@ This message formats an Html anchor statement in the form:<pre><tt>
 This message creates an Html anchor.  The <i>link</i> parameter is 
 displayed as the URL of the <i>HRef</i> attribute.  This string is
 displayed inside double quotes.  
-This message formats an Html anchor statement in the form:<pre><tt>
-   &lta href="link"&gtlabel&lt/a&gt
-</tt></pre>
+This message formats an Html anchor statement in the form:
+<pre>
+  &lta href="link"&gtlabel&lt/a&gt
+</pre>
 <p>
 <hr size=1>
 <i>buildLink: link withPath: path withLabel: label</i>
@@ -366,12 +383,13 @@ attribute.
 <hr size=1>
 <i>buildImage: file withPath: path withAlt: alt</i>
 <p>
-This message creates an Html image statement in the form:<pre><tt>
-   &ltimg src="imageFile" alt="alt" &gt
-</tt></pre>
+This message creates an Html image statement in the form:
+<pre>
+  &ltimg src="imageFile" alt="alt" &gt
+</pre>
 where the string <i>imageFile</i> is generated using the <i>file</i>
 and <i>path</i> parameters.
-</tt></pre>
+</pre>
 
 <p>
 <hr>
@@ -386,37 +404,39 @@ In addition, there are a number of session parameters you can set that
 control the URL links created and other aspects of the document generated.
 <p>
 A typical Vision script used to start one of these sessions is
-displayed below:<pre><tt><b>
-     ####################
-     #   Vision Script for a Session referenced by vquery
-     ####################
+displayed below:
+<pre>
+  ####################
+  #   Vision Script for a Session referenced by vquery
+  ####################
 
-     #--------------------
-     #  Establish a known channel - edit for each session started
-     #--------------------
-     !listener <- "inet/stream,p:7001" asOpenVisionChannel;
-     listener enableHandler;
-     listener displayInfo;
+  #--------------------
+  #  Establish a known channel - edit for each session started
+  #--------------------
+  !listener <- "inet/stream,p:7001" asOpenVisionChannel;
+  listener enableHandler;
+  listener displayInfo;
 
-     #--------------------
-     #  set various session attributes that control flow
-     #--------------------
-     Interface HtmlAccess
-       setServerTo: "http://www.myserver.com" .
-       setPathTo: "default/" .
-       setHomePathTo: "http://www.myserver.com/VFReport.htm" .
-       setResourcePathTo: "http://www.myserver.com/Misc" .
-       setTitleTo: "Vision Demo" .
-     ;
-
-</b></tt></pre>
+  #--------------------
+  #  set various session attributes that control flow
+  #--------------------
+  Interface HtmlAccess
+    setServerTo: "http://www.myserver.com" .
+    setPathTo: "default/" .
+    setHomePathTo: "http://www.myserver.com/VFReport.htm" .
+    setResourcePathTo: "http://www.myserver.com/Misc" .
+    setTitleTo: "Vision Demo" .
+  ;
+</pre>
 The first part of this script establishes socket 7001 on this machine
 as the handle for this session.  The second part of this script
 sets various parameters which control some of the output preparation.
 These attribute setting messages are described below.  There should
 be an entry in the <i>vquery.cfg</i> file that 
-contains:<pre><tt>     server default fred:7001
-</tt></pre>
+contains:
+<pre>
+  server default fred:7001
+</pre>
 assuming that this session is running on host <i>fred</i>.
 <p>
 <hr size=1>
@@ -526,13 +546,14 @@ is described later in this section.  The part of the path not used
 by <i>vquery</i>, the parameters passed as part of the URL, and the
 symbolic name (REMOTE_HOST) and address (REMOTE_ADDR) of the client
 making the request are passed to the Vision session using the
-request:  <pre><tt><b>
-	Interface HtmlAccess
-           get: "PATH_INFO"
-           usingQuery: "QUERY_STRING"
-           for: "REMOTE_HOST"
-           at: "REMOTE_ADDR" ;
-</b></tt></pre>
+request:
+<pre>
+  Interface HtmlAccess
+     get: "PATH_INFO"
+     usingQuery: "QUERY_STRING"
+     for: "REMOTE_HOST"
+     at: "REMOTE_ADDR" ;
+</pre>
 <p>
 The default implementation of the <i>get:usingQuery:for:at:</i> method
 parses the PATH_INFO and QUERY_STRING strings and generates an HTTP
@@ -554,11 +575,12 @@ configuration file.
 <p>
 In its simplest and least flexible form, the path component examined
 by <i>vquery</i> can simply be the name of a host combined with the
-number or name of a port on that host:  <pre><tt>
-	/fred:7001/VReport/xyz
-or
-	/fred:vqueryport/VReport/xyz
-</tt></pre>
+number or name of a port on that host:
+<pre>
+  /fred:7001/VReport/xyz
+</pre>or<pre>
+  /fred:vqueryport/VReport/xyz
+</pre>
 <p>
 The first example above attempts to find a Vision session listening
 at port 7001 on host <i>fred</i>; the second example assumes that a TCP port
@@ -572,14 +594,15 @@ absolute addresses 'wired-in', the task of changing the address of
 the server goes from formidable to impossible.  To avoid this
 problem, <i>vquery</i> supports the use of symbolic names resolved
 with the help of a configuration file.  The first example above can
-be restated using a symbolic name:  <pre><tt><b>
-	/localvision/VReport/xyz
-</b></tt></pre>
+be restated using a symbolic name:
+<pre>
+  /localvision/VReport/xyz
+</pre>
 assuming that the configuration file <i>/vision/lib/vquery.cfg</i> exists
-and contains a line that reads:  <pre><tt><b>
-	server localvision fred:7001
-
-</b></tt></pre>
+and contains a line that reads:
+<pre>
+  server localvision fred:7001
+</pre>
 Now only the name <i>localvision</i> is locked into the documents created to
 access Vision.  Changing the server simply involves changing the
 configuration file.  The configuration file can also be used to
@@ -591,10 +614,11 @@ Each server statement associates a symbolic name with a server
 address.  In the previous example, the symbolic name is
 <i>localvision</i>; a server for <i>localvision</i> is <i>fred:7001</i>.  
 The same symbolic name can be
-used in a more than one server statement.  The configuration file:<pre><tt><b>
-	server localvision fred:7001
-	server localvision fester:7001
-</b></tt></pre>
+used in a more than one server statement.  The configuration file:
+<pre>
+  server localvision fred:7001
+  server localvision fester:7001
+</pre>
 defines two servers for <i>localvision</i>.  When <i>vquery</i> encounters a
 URL naming <i>localvision</i> as its session target, it picks one of these
 servers at random.  If that server does not respond, <i>vquery</i>
@@ -604,11 +628,12 @@ multiple hosts.
 <p>
 The configuration file can also be used to provide symbolic name
 resolution for multiple data bases.  The following configuration file
-defines three servers servicing two destinations:  </b></tt></pre>
-	server localvision fred:7001
-	server localvision fester:7001
-	server testdata    fester:7002
-</b></tt></pre>
+defines three servers servicing two destinations:
+<pre>
+  server localvision fred:7001
+  server localvision fester:7001
+  server testdata    fester:7002
+</pre>
 <p>
 Presumably, the servers for <i>localvision</i> are accessing one database
 while the server for <i>testdata</i> is accessing another although that is
@@ -619,12 +644,13 @@ specific servers.  The following configuration file directs requests
 based on the host from which they came.  In this example, requests
 originating from <i>pc995</i> are sent to either <i>server1</i> or 
 <i>server2</i> at random; 
-all other requests are sent to either <i>fred</i> or <i>fester</i>:<pre><tt><b>
-	server localvision server1:7001 pc995
-	server localvision server2:7001 pc995
-	server localvision fred:7001
-	server localvision fester:7001
-</b></tt></pre>
+all other requests are sent to either <i>fred</i> or <i>fester</i>:
+<pre>
+  server localvision server1:7001 pc995
+  server localvision server2:7001 pc995
+  server localvision fred:7001
+  server localvision fester:7001
+</pre>
 <p>
 In this example, requests from <i>pc995</i> are the only requests
 that can go to <i>server1</i> or <i>server2</i>.  Furthermore, if
@@ -638,12 +664,13 @@ Finally, <i>vquery</i> can be used to prioritize access to servers
 based on subnet addresses.  The following configuration file creates
 a prioritized server for each of three 24 bit subnets of a class B
 network along with a server that backs up the subnet servers and acts
-as a server for all other users:  <pre><tt><b>
-	server localvision subserver1:7001 129.1.1 24
-	server localvision subserver2:7001 129.1.2 24
-	server localvision subserver3:7001 129.1.3 24
-	server localvision baseserver:7001 129.1   16
-</b></tt></pre>
+as a server for all other users:
+<pre>
+  server localvision subserver1:7001 129.1.1 24
+  server localvision subserver2:7001 129.1.2 24
+  server localvision subserver3:7001 129.1.3 24
+  server localvision baseserver:7001 129.1   16
+</pre>
 <p>
 Note that only users running on hosts with a network address that
 begins with <i>129.1</i> can access a server using the symbolic name
@@ -673,27 +700,28 @@ file.  The recipient Vision class can be overridden for all
 destinations in a configuration file using the <i>default class</i> 
 directive.  The recipient Vision class can be overridden for a 
 specific destination using the <i>class &ltdest&gt</i> directive.  The 
-following example illustrates both:<pre><tt><b>
-           default class   UserInterface HyperWS
+following example illustrates both:
+<pre>
+  default class   UserInterface HyperWS
 
-           server default  pugsley:7001
-           server test     pugsley:8010
+  server default  pugsley:7001
+  server test     pugsley:8010
 
-           server demo     pugsley:7200
-           class  demo     Interface HtmlAccess
-
-</b></tt></pre>
+  server demo     pugsley:7200
+  class  demo     Interface HtmlAccess
+</pre>
 As expected, when both a <i>class &ltdest&gt</i> directive and a 
 <i>default class</i>
 directive are present in the same file, the <i>class &ltdest&gt</i> directive
 overrides the <i>default class</i> directive for the destination to which it
 applies. When multiple servers are created to handle a destination, the
 same class specification applies to all of the them.  For example, the
-<i>class analyzer</i> statement in the following example:<pre><tt><b>
-           server analyzer pugsley:7010
-           server analyzer lurch:7010
-           class  analyzer UserInterface HyperWS
-</b></tt></pre>
+<i>class analyzer</i> statement in the following example:
+<pre>
+  server analyzer pugsley:7010
+  server analyzer lurch:7010
+  class  analyzer UserInterface HyperWS
+</pre>
 applies to both <i>analyzer</i> servers.
 <p>
 The default expression sent to Vision can now be specified as an
@@ -702,27 +730,28 @@ expression includes the ability to substitute the values of any or
 all environment variables as well as certain other information.  
 <p>
 Two new commands have been added to the set of commands recognized in a
-<i>vquery.cfg</i> file.  The command:<pre><tt><b>
-           default expression aVisionExpressionSpecification
-</b></tt></pre>
+<i>vquery.cfg</i> file.  The command:
+<pre>
+  default expression aVisionExpressionSpecification
+</pre>
 establishes a Vision expression to use by default for any service
 destination that does not supply its own specification.  Any service
 that requires a different expression can override the default expression
-using the directive:<pre><tt><b>
-           expression aServiceName aVisionExpressionSpecification
-
-</b></tt></pre>
+using the directive:
+<pre>
+  expression aServiceName aVisionExpressionSpecification
+</pre>
 Both the <i>default expression</i> and <i>expression</i> directives must be
 included on a single input line.  <b>Note that there
  is no provision for escaping a long expression across multiple lines</b>.
 <p>
 If a <i>default expression</i> directive does not appear in a <i>vquery.cfg</i>
 file, vquery behaves as if the following default expression were
-supplied:<pre><tt><b>
-          default expression $$class get: $$path usingQuery: $$query for:
-              $REMOTE_HOST at: $REMOTE_ADDR
-
-</b></tt></pre>
+supplied:
+<pre>
+  default expression $$class get: $$path usingQuery: $$query for:
+      $REMOTE_HOST at: $REMOTE_ADDR
+</pre>
 This default <i>default expression</i> specifies the expression that vquery
 has historically generated.  In particular, it specifies that the
 message <i>get:usingQuery:for:at:</i> be sent to the class specified by the

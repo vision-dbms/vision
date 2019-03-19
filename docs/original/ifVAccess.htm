@@ -407,15 +407,17 @@ dimension represents the items.&nbsp; The element counts reflect this --
 = 5</i>, the number of entities you specified, and <i>myFirstDatumArray.ElementCount(1)
 = 4</i>, the number of items you requested.&nbsp; If you are programming
 in C or C++, you could traverse the array using a loop of the form:
-<blockquote><i><tt>unsigned int rows = myFirstDatumArray.ElementCount(0);</tt></i>
-<br><i><tt>unsigned int cols = myFirstDatumArray.ElementCount(1);</tt></i>
-<br><i><tt>unsigned int row, col;</tt></i>
-<br><i><tt>for (row = 0; row &lt; myFirstDatumArray.ElementCount(0); row++)</tt></i>
-<br><i><tt>&nbsp;&nbsp;&nbsp; for (col = 0; col &lt; myFirstDatumArray.ElementCount(1);
-col++)</tt></i>
-<br><i><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DoSomethingWith (myFirstDatumArray[<b>row,col</b>]);</tt></i></blockquote>
+<blockquote><i>
+<pre>
+   unsigned int rows = myFirstDatumArray.ElementCount(0);
+   unsigned int cols = myFirstDatumArray.ElementCount(1);
+   unsigned int row, col;
+   for (row = 0; row &lt; myFirstDatumArray.ElementCount(0); row++)
+      for (col = 0; col &lt; myFirstDatumArray.ElementCount(1); col++)
+         DoSomethingWith (myFirstDatumArray[<b>row,col</b>]);
+</pre></i></blockquote>
 Visual Basic transposes this, reversing the interpretation of rows and
-columns.&nbsp; Consequently, using this array from Visual Basic requires
+columns. Consequently, using this array from Visual Basic requires
 that you reverse the order of the subscripts:
 <blockquote><i>Dim myArrayValues()</i>
 <br><i>myArrayValues = myDatumArray.AsVariantArray</i>

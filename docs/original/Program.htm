@@ -27,7 +27,8 @@ statement is executed in sequence.  Programs always return the value
 of the last statement executed.  This value is automatically printed
 by Vision.  For example, the following program can be used to
 calculate a value and print out a descriptive message as well as the
-result:  <pre>
+result:
+<pre>
   !sum <- 2 + 2 ;
   "The Answer Is: " print ;
   sum printNL ;
@@ -40,11 +41,13 @@ statement prints the sum followed by a carriage return.
 <p>
 Some expressions that can be written as a single expression, can be
 subdivided into more manageable pieces by creating multiple
-expressions.  For example:  <pre>
+expressions.  For example:
+<pre>
   !count <- mylist union: yourlist . exclude: autolist .
       select: [ score > 20] . count ;
 </pre>
-could be rewritten as:<pre>
+could be rewritten as:
+<pre>
   !ourlist <- mylist union: yourlist ;
   !universe <- ourlist exclude: autolist ;
   !optimalList <- universe select: [score > 20 ] ;
@@ -56,18 +59,21 @@ could be rewritten as:<pre>
 <p>
 A <b>Block</b> is a program that represents a deferred sequence of
 actions.  Syntactically, a block is a program surrounded by square
-brackets.  The general form for a block is illustrated below:<pre>
+brackets.  The general form for a block is illustrated below:
+<pre>
   [ statement 1 ;
     statement 2 ;
       . . .
   ]
 </pre>
 The block will be executed when it receives the unary message <i>value</i>.
-For example, the following two programs have the same effect:  <pre>
+For example, the following two programs have the same effect:
+<pre>
   !index <- 17 ;
   :index <- index + 1 ;
   index print ;
-</pre>and<pre>
+</pre>and
+<pre>
   !index <- 17 ;
   [:index <- index + 1 ] value ;
   index print ;
@@ -90,14 +96,16 @@ lists:<pre id="runBlock.samp">
                 ] ;
 </pre>
 Each month, after Joe and Mary have updated their lists, you can
-execute this program by typing the expression:  <pre>
+execute this program by typing the expression:
+<pre>
   myProgram value
 </pre>
 You can now access the updated values of the variables
 <i>currentList</i> and <i>changeList</i>.  
 <p>
 You have actually already seen another use for blocks.  In the
-expression:<pre>
+expression:
+<pre>
   universe select: [ score > 20 ]
 </pre>
 the argument to the <i>select:</i> message is actually a block.  When
@@ -134,7 +142,8 @@ objects respond to several messages that support conditional execution:
 <li><i>ifFalse: falseBlock else: elseBlock</i>
 </ul>
 <p>
-For example:<pre>
+For example:
+<pre>
   myList count > 100
      ifTrue: [ "This is a big list."  ]
      ifFalse: [ "This is a small list." ]
@@ -144,7 +153,8 @@ text "This is a big list" will be displayed; otherwise, the text
 "This is a small list" will be displayed.  
 <p>
 The value returned by these messages is the value of
-the block that was executed.  In the example:<pre>
+the block that was executed.  In the example:
+<pre>
   !result <- myList count > 100
                ifTrue: [ 100 ]
               ifFalse: [ -100 ]
@@ -155,18 +165,21 @@ the variable <i>result</i> will be assigned to the value
 depending on the number of elements in <i>myList</i>.  
 <p>
 The <i>ifTrue:</i> or <i>ifFalse:</i> message can be used if there
-is only one conditional consequence of interest.  For example:<pre>
+is only one conditional consequence of interest.  For example:
+<pre>
   count <= cutoff
     ifTrue: [ :total <- total + 100 ]
 </pre>
-This expression is identical to:<pre>
+This expression is identical to:
+<pre>
   count <= cutoff
     ifTrue: [ :total <- total + 100 ]
    ifFalse: [ NA ]
 </pre>
 Since the arguments in these messages are blocks, they can contain
 complex expressions as well, including nested control structures as
-shown below:<pre>
+shown below:
+<pre>
   myList count > 100
      ifTrue: [ myList count > 1000
                   ifTrue: [ "This is a very big list." ]
@@ -183,7 +196,8 @@ It is often useful to repeat an operation until a particular event is
 reached.  This conditional repetition of an activity is provided by
 sending the <i>whileTrue:</i> message to a block with a second block
 as its argument.  For example, this message could be used to print
-out the squares of the first ten numbers as shown below:  <pre>
+out the squares of the first ten numbers as shown below:
+<pre>
   !maxCount <- 10 ;
   !count <- 1 ;
   [ count <= maxCount ]
@@ -242,10 +256,12 @@ them at a later date.
 Programs can be created using spaces, tabs, and carriage returns
 wherever needed to enhance readability.  For example, multiple
 keyword messages are often written with each keyword-argument pair on
-different lines, as shown below:<pre>
+different lines, as shown below:
+<pre>
   value within: 10
      percentOf: oldvalue
-</pre>or<pre>
+</pre>or
+<pre>
   condition
      ifTrue: [ ]
      ifFalse: [ ]
@@ -261,7 +277,8 @@ by Vision.
 <span id="comment">The <i>#</i> character </span>
 is used to begin a comment.  All characters
 appearing on a line that follow this character are ignored.  For
-example:  <pre>
+example:
+<pre>
   ####################
   #   Sample Program Using Comments
   ####################
@@ -275,7 +292,8 @@ example:  <pre>
 <h2 id="named">Blocks and Parameters</h2>
 <p>
 Blocks can be named by providing a valid selector enclosed within
-vertical bars (i.e., the '<i>|</i>' character) as shown below:  <pre>
+vertical bars (i.e., the '<i>|</i>' character) as shown below:
+<pre>
   [ | sample |
     statement1 ;
     statement2 ;
@@ -297,14 +315,16 @@ to defining a block with no parameters.  This is the format used to
 The second example defines a block which requires 2 parameters to
 execute.  You use the <i>valueWith:</i> message to evaluate a block
 with one parameter, the <i>valueWith:and:</i> to evaluate a block
-with two parameters, and so on.  For example:<pre>
+with two parameters, and so on.  For example:
+<pre>
   !block <-
         [ | sampleP1: a  P2: b |
           "Parameter 1: " print ; a printNL ;
           "Parameter 2: " print ; b printNL ;
         ] ;
   block valueWith: 10 and: 5
-</pre>produces:<pre>
+</pre>produces:
+<pre>
   Parameter 1:       10
   Parameter 2:        5
 </pre>
@@ -316,17 +336,20 @@ messages.
 <p>
 If a block is defined to require parameters and you do not supply
 the correct number, you will get an error message.  For example,
-if you supplied the above block with a single value:<pre>
+if you supplied the above block with a single value:
+<pre>
   block valueWith: 10
 </pre>
-You would see the error message:<pre>
+You would see the error message:
+<pre>
   >>> Parameter 'a' Unavailable <<<
 </pre>
 Note that stand-alone blocks such as the one defined here do not utilize the
 full block name, in this case <i>sampleP1:P2:</i>.  This name is
 important when the block is used to <a href="#method">define
 methods.</a>.  If you are using the block as a stand-alone, you can
-use the following short-hand to define the block:<pre>
+use the following short-hand to define the block:
+<pre>
   !block <-
         [ | :a :b |
           "Parameter 1: " print ; a printNL ;
@@ -335,7 +358,8 @@ use the following short-hand to define the block:<pre>
 </pre>
 This block works exactly the same way as the previously named block
 in that it defines two parameters named <i>a</i> and <i>b</i>.
-Execution is identical to before:<pre>
+Execution is identical to before:
+<pre>
   block valueWith: 10 and: 5
 </pre>
 and produces the same results.
@@ -344,7 +368,8 @@ and produces the same results.
 <h2 id="method">Writing Methods</h2>
 <p>
 The method <i>defineMethod:</i> requires a named block as its parameter.
-To define a method that requires no parameters, use the form:<pre>
+To define a method that requires no parameters, use the form:
+<pre>
   object
   defineMethod:
   [ | messageName |
@@ -353,7 +378,8 @@ To define a method that requires no parameters, use the form:<pre>
   ] ;
 </pre>
 For example, to define a method that prints the count of the number
-of elements in a list use:<pre>
+of elements in a list use:
+<pre>
   List
   defineMethod:
   #-- name the method <i>printCount</i> with 0 parameters
@@ -362,12 +388,14 @@ of elements in a list use:<pre>
   ] ;
 </pre>
 This defines the method <i>printCount</i> as a message for the
-class <i>List</i> that requires 0 parameters.  To run it use:<pre>
+class <i>List</i> that requires 0 parameters.  To run it use:
+<pre>
   !myList <- 1, 2, 3 ;
   myList printCount ;          #- prints 3
 </pre>
 To define a method that adds a supplied value to the list count and
-prints the result, use:<pre>
+prints the result, use:
+<pre>
   List
   defineMethod:
   #-- name the method <i>printCountPlus:</i> with 1 parameters
@@ -376,13 +404,15 @@ prints the result, use:<pre>
   ] ;
 </pre>
 This defines the method <i>printCount:</i> as a message for the
-class <i>List</i> that requires 1 parameter.  To run it use:<pre>
+class <i>List</i> that requires 1 parameter.  To run it use:
+<pre>
   !myList <- 1, 2, 3 ;
   myList printCountPlus: 5 ;     #- prints 8
 </pre>
 To define a method that adds a supplied value to the list count,
 multiplies the result by a second supplied value, and
-prints the result, use:<pre>
+prints the result, use:
+<pre>
   List
   defineMethod:
   #-- name the method <i>printCountPlus:times:</i> with 2 parameters
@@ -391,7 +421,8 @@ prints the result, use:<pre>
   ] ;
 </pre>
 This defines the method <i>printCount:times:</i> as a message for the
-class <i>List</i> that requires 2 parameters.  To run it use:<pre>
+class <i>List</i> that requires 2 parameters.  To run it use:
+<pre>
   !myList <- 1, 2, 3 ;
   myList printCountPlus: 5 times: 2 ;        #- prints 16
 </pre>

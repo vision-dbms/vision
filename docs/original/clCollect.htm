@@ -45,23 +45,22 @@ The elements in a collection do not need to be from the same class.
 
 <p>
 The <i>Collection</i> class is an indirect subclass of Object:
-<font size=+1><pre>
-          <a href="clObject.htm">Object</a>
+<pre>
+    <a href="clObject.htm">Object</a>
+       |
+       Function
+          |
+          EnumeratedFunction
              |
-             Function
+             <b>Collection</b>
                 |
-                EnumeratedFunction
-                   |
-                   <b>Collection</b>
-                      |
-                      IndexedCollection
-                      |   |-- <a href="clIList.htm">IndexedList</a>
-                      |   |-- <a href="clTS.htm">TimeSeries</a>
-                      |
-                      SequencedCollection
-                          |-- <a href="clList.htm">List</a>
-
-</pre></font>
+                IndexedCollection
+                |   |-- <a href="clIList.htm">IndexedList</a>
+                |   |-- <a href="clTS.htm">TimeSeries</a>
+                |
+                SequencedCollection
+                    |-- <a href="clList.htm">List</a>
+</pre>
 The <i>Collecton</i> classes have been optimized to organize and
 query large sets of data.  A large number of the messages defined
 for these classes have been written in Vision and can therefore be
@@ -81,9 +80,10 @@ instances of one of these subclasses to a <i>TimeSeries</i> or an
 <i>IndexedList</i> object.
 <p>
 All <i>Collection</i> objects respond to the message 
-<a href="mList.htm#count"><i>count</i></a>.  For example:<pre><tt><b>
-     Currency instanceList count print ;
-</b></tt></pre>
+<a href="mList.htm#count"><i>count</i></a>.  For example:
+<pre>
+  Currency instanceList count print ;
+</pre>
 prints the number of instances in the Currency class.
 <p id="do">
 The <a href="mList.htm#do:"><i>do:</i></a> message
@@ -93,10 +93,11 @@ It performs the same function as the
 instead of applying to a single object, the version defined
 for the <i>Collection</i> class applies the block supplied as the
 parameter to each
-element in the recipient object.  For example:<pre><tt><b>
-     Currency instanceList
-     do: [ code print: 10 ; name printNL ] ;
-</b></tt></pre>
+element in the recipient object.  For example:
+<pre>
+  Currency instanceList
+  do: [ code print: 10 ; name printNL ] ;
+</pre>
 displays the value of <i>code</i> and <i>name</i> for each instance
 in the Currency class.  The supplied block is evaluated for each
 element in the collection.  Messages within the block are sent
@@ -111,11 +112,12 @@ the result of evaluating the block is returned, not the original
 object.  <a href="clBlock.htm#return">Blocks</a> return
 the value of the last statement exectued.  The <i>send:</i>
 message is defined to return this object for each object
-in the recipient collection.  For example:<pre><tt><b>
-     !names <- Currency instanceList
-         send: [ name ] ;
-     names count printNL ;
-</b></tt></pre>
+in the recipient collection.  For example:
+<pre>
+  !names <- Currency instanceList
+      send: [ name ] ;
+  names count printNL ;
+</pre>
 In this example,
 the currency name is returned for each instance in the Currency
 class.  The variable <i>names</i> represents a collection
@@ -141,21 +143,23 @@ for the <i>Collection</i> class applies the block supplied as the
 parameter to each
 element in the recipient object, returning a collection where each
 element of the collection is extended by the variables defined within
-the block.  For example:<pre><tt><b>
-     !xlist <- Currency instanceList
-        extendBy: [ !nameLength <- name count ;
-                    !name10 <- name take: 10 ;
-                  ] ;
-</b></tt></pre>
+the block.  For example:
+<pre>
+  !xlist <- Currency instanceList
+     extendBy: [ !nameLength <- name count ;
+                 !name10 <- name take: 10 ;
+               ] ;
+</pre>
 defines <i>xlist</i> to represent a list of all currency instances
 that respond to the new variables
 <i>nameLength</i> and <i>name10</i> 
-in addition to the currency messages.  For example:<pre><tt><b>
-     xlist 
-     do: [ name print: 30 ;   
-           nameLength printNL ;
-         ] ;
-</b></tt></pre>
+in addition to the currency messages.  For example:
+<pre>
+  xlist 
+  do: [ name print: 30 ;   
+        nameLength printNL ;
+      ] ;
+</pre>
 All objects in <i>xlist</i> respond to the <i>nameLength</i> message
 just like any other message.  All objects in the list continue to
 respond to the messages already defined such as <i>name</i>.  
@@ -179,42 +183,44 @@ have been redefined for the <i>Collection</i> classes to operate
 on the elements of the collection.  The messages <i>basicDo:</i>,
 <i>basicSend:</i>, and <i>basicExtend:</i> are available if
 you want to run any of these operations on the collection as
-a whole.  For example:<pre><tt><b>
-     Currency instanceList
-     basicDo: [ whatAmI print: 30 ; count printNL ] ;
-</b></tt></pre>
+a whole.  For example:
+<pre>
+  Currency instanceList
+  basicDo: [ whatAmI print: 30 ; count printNL ] ;
+</pre>
 sends the messages inside the block to the collection object itself,
 not to the individual elements.  
 <p>
 The message <a href="mList.htm#numberElements"><i>numberElements</i></a>
 can be used to extend each element in a collection by the variable
 <i>position</i> which corresponds to its position number in the collection.
-For example:<pre><tt><b>
-     Currency instanceList 
-       numberElements            #- extend by !position
-     do: [ code print: 10 ;  
-           position printNL ;
-         ] ;
-</b></tt></pre>
+For example:
+<pre>
+  Currency instanceList 
+    numberElements            #- extend by !position
+  do: [ code print: 10 ;  
+        position printNL ;
+      ] ;
+</pre>
 <p>
 The message
 <a href="mList.htm#linkElements"><i>linkElements</i></a>
 can be used to extend each element in a collection by the 
 two variables: <i>prior</i> and <i>next</i>.  These variables
 will return the elements in the recipient that are before or
-after each element in the recipient.  For example:<pre><tt><b>
-     3 sequence linkElements
-     do: [ print ; 
-           prior print ; 
-           next printNL 
-         ] ;
-
-</b>displays:<b>
-
-             1      NA         2
-             2        1        3
-             3        2        NA
-</b></tt></pre>
+after each element in the recipient.  For example:
+<pre>
+  3 sequence linkElements
+  do: [ print ; 
+        prior print ; 
+        next printNL 
+      ] ;
+</pre>displays:
+<pre>
+          1      NA         2
+          2        1        3
+          3        2        NA
+</pre>
 <p>
 <hr>
 <h2 id="select">Creating Subsets</h2>
@@ -222,13 +228,14 @@ after each element in the recipient.  For example:<pre><tt><b>
 It is often useful to restrict a collection to objects that meet
 certain criteria.  For example, you may wish to find the currencies
 with a US exchange rate greater than 2 and produce a report for those
-currencies:<pre><tt><b>
-     Currency instanceList            #- start with all currencies
-        select: [ usExchange > 2 ].   #- return subset meeting criteria
-     do: [ name print: 30 ;           #- display name and exchange
-           usExchange printNL ;       #-   for members of subset
-         ] ;
-</b></tt></pre>
+currencies:
+<pre>
+  Currency instanceList            #- start with all currencies
+     select: [ usExchange > 2 ].   #- return subset meeting criteria
+  do: [ name print: 30 ;           #- display name and exchange
+        usExchange printNL ;       #-   for members of subset
+      ] ;
+</pre>
 <p>
 The <a href="mList.htm#select:"><i>select:</i></a>
 message returns a collection of those elements in the original
@@ -248,27 +255,27 @@ a <i>TimeSeries</i> containing a subset of the dates in the original
 The block supplied as the parameter to the <i>select:</i> message
 can contain any valid Vision program.  You can create local variables
 in this block and use the <i>&&</i> and <i>||</i> messages to produce
-multi-part criteria.  For example:<pre><tt><b>
-     Currency instanceList
-     select: [ !firstLetter <- name take: 1 ;
-               (usExchange > 2 ) &&
-               (firstLetter < "B" || firstLetter > "U")
-             ] .
-
-</b></tt></pre>
+multi-part criteria.  For example:
+<pre>
+  Currency instanceList
+  select: [ !firstLetter <- name take: 1 ;
+            (usExchange > 2 ) &&
+            (firstLetter < "B" || firstLetter > "U")
+          ] .
+</pre>
 The value returned by the selection block is the value
 used to perform the selection.  The subset will include all
 elements that return the value <i>TRUE</i> when this block is
 evaluated.  Since the object returned by the <i>select:</i> message
 is another <i>Collection</i>, you can send another <i>select:</i>
-message to it.  The previous example could have been written using:<pre><tt><b>
-     Currency instanceList
-     select: [ usExchange > 2 ] .
-     select: [ !firstLetter <- name take: 1 ;
-               firstLetter < "B" || firstLetter > "U"
-             ] .
-
-</b></tt></pre>
+message to it.  The previous example could have been written using:
+<pre>
+  Currency instanceList
+  select: [ usExchange > 2 ] .
+  select: [ !firstLetter <- name take: 1 ;
+            firstLetter < "B" || firstLetter > "U"
+          ] .
+</pre>
 <p>
 The message <a href="mList.htm#first:"><i>first:</i></a> is used to
 select the specified number of elements in the recipient that are not the
@@ -277,24 +284,26 @@ beginning of the collection.
 The message <a href="mList.htm#last:"><i>last:</i></a> is used to
 select the specified number of elements in the recipient that are not the
 <a href="Classes.htm#default">default value</a>, starting from the
-end of the collection.  For example:<pre><tt><b>
-     Currency instanceList last: 10 .
-         select: [ usExchange > 2 ] .
-</b></tt></pre>
+end of the collection.  For example:
+<pre>
+  Currency instanceList last: 10 .
+      select: [ usExchange > 2 ] .
+</pre>
 This expression selects the last 10 currencies in the <i>Currency</i>
 class and then selects those with an exchange rate greater than 2
 from this subset.  
 <p>
 The message <i>nonDefaults</i> can be used to eliminate any
-default values from a <i>Collection</i>.  For example:<pre><tt><b>
-     Currency instanceList nonDefaults
-</b></tt></pre>
+default values from a <i>Collection</i>.  For example:
+<pre>
+  Currency instanceList nonDefaults
+</pre>
 returns a list of all currencies excluding the default instance.
-It is equivalent to:<pre><tt><b>
-     Currency instanceList 
-        select: [ isntDefault ] .
-
-</b></tt></pre>
+It is equivalent to:
+<pre>
+  Currency instanceList 
+     select: [ isntDefault ] .
+</pre>
 
 <p>
 <hr>
@@ -304,11 +313,12 @@ The messages <i>sortUp:</i> and <i>sortDown:</i> return the
 recipient collection as a <i>List</i> object in ascending
 or descending order.  The collection
 is sorted by the value returned by the block supplied as a parameter.
-For example:<pre><tt><b>
-     Currency instanceList 
-        sortUp: [ name ] .
-     do: [ name printNL ] ;
-</b></tt></pre>
+For example:
+<pre>
+  Currency instanceList 
+     sortUp: [ name ] .
+  do: [ name printNL ] ;
+</pre>
 This program sorts the currency objects by name and prints them
 in alphabetical order.  
 <p>
@@ -316,11 +326,12 @@ You can perform multiple sorts
 using the <a href="mList.htm#sortUpBy:then:"><i>sortUpBy:then:</i></a>
 and <a href="mList.htm#sortDownBy:then:"><i>sortDownBy:then:</i></a>
 messages and supplying two criteria. For example, to sort by exchange
-rate, then name, use:<pre><tt><b>
-     Currency instanceList 
-        sortUpBy: [ usExchange ] then: [ name ] .
-     do: [ name print: 30 ; usExchange printNL ] ;
-</b></tt></pre>
+rate, then name, use:
+<pre>
+  Currency instanceList 
+     sortUpBy: [ usExchange ] then: [ name ] .
+  do: [ name print: 30 ; usExchange printNL ] ;
+</pre>
 The messages <i>sortUpBy:then:then:</i>, <i>sortUpBy:then:then:then:</i>, 
 <i>sortDownBy:then:then:</i>, and <i>sortDownBy:then:then:then:</i>
 have also been defined to perform sorts with additional criteria.
@@ -334,20 +345,22 @@ sort message is applied to a collection, the original order of the
 collection is preserved if the sort produces a tied value.  If you
 apply several sort criteria in reverse order (i.e., the most
 detailed level of sort first), you can produce the desired results.
-For example:<pre><tt><b>
-     Currency instanceList 
-        sortUp: [ name ] .
-        sortUp: [ usExchange ] .
-     do: [ name print: 30 ; usExchange printNL ] ;
-</b></tt></pre>
+For example:
+<pre>
+  Currency instanceList 
+     sortUp: [ name ] .
+     sortUp: [ usExchange ] .
+  do: [ name print: 30 ; usExchange printNL ] ;
+</pre>
 is identical to the previous example, producing an ascending sort
 by exchange rate, sorting alphabetically when the exchange rates are
-the same.  The expression:<pre><tt><b>
-     Currency instanceList 
-        sortUp: [ name ] .
-        sortDown: [ usExchange ] .
-     do: [ name print: 30 ; usExchange printNL ] ;
-</b></tt></pre>
+the same.  The expression:
+<pre>
+  Currency instanceList 
+     sortUp: [ name ] .
+     sortDown: [ usExchange ] .
+  do: [ name print: 30 ; usExchange printNL ] ;
+</pre>
 produces a descending sort by exchange rate, sorting alphabetically 
 when the exchange rates are the same.
 <p id="ranks">
@@ -360,11 +373,12 @@ extended by the variable <i>rank</i> which represents the element's
 rank in the collection.  The value of <i>rank</i> will be an integer
 between 1 and the number of elements in the recipient object.  The
 returned object will have the same number of elements 
-and will be in the same order as the recipient.  For example:<pre><tt><b>
-     Currency instanceList
-          rankUp: [ usExchange ] .
-     do: [ code print: 5 ; usExchange print ; rank printNL ] ;
-</b></tt></pre>
+and will be in the same order as the recipient.  For example:
+<pre>
+  Currency instanceList
+       rankUp: [ usExchange ] .
+  do: [ code print: 5 ; usExchange print ; rank printNL ] ;
+</pre>
 The displayed rank indicates the currency's position in the
 collection by ascending exchanging rate.
 <p>
@@ -377,11 +391,12 @@ provide a way to define a different variable name to the hold
 the value of the rank.  The second parameter is a named block
 that defines the variable name to use as a parameter and returns
 the value of <i>^current</i>.  For example, to name the variable
-<i>alt</i> instead of <i>rank</i> use:<pre><tt><b>
-     Currency instanceList
-        rankUp: [ usExchange ] usingCollector: [ | :alt | ^current ] .
-     do: [ code print: 5 ; usExchange print ; alt printNL ] ;
-</b></tt></pre>
+<i>alt</i> instead of <i>rank</i> use:
+<pre>
+  Currency instanceList
+     rankUp: [ usExchange ] usingCollector: [ | :alt | ^current ] .
+  do: [ code print: 5 ; usExchange print ; alt printNL ] ;
+</pre>
 
 <p>
 <hr>
@@ -409,11 +424,12 @@ that are associated with the specific group.
 For example, if the variable <i>companyList</i> contains a list
 of companies that respond to the message <i>sector</i>, and each
 sector responds to the message <i>name</i>, then
-the expression:<pre><tt><b>
-     companyList groupedBy: [ sector ] .
-     do: [ name printNL ;
-         ] ;
-</b></tt></pre>
+the expression:
+<pre>
+  companyList groupedBy: [ sector ] .
+  do: [ name printNL ;
+      ] ;
+</pre>
 can be used to group the companies into sectors and display the name
 of each sector present.  
 <p>
@@ -424,25 +440,27 @@ The original set of companies is not lost. Each element in the <i>List</i>
 formed by the <i>groupedBy:</i> message responds to the message
 <i>groupList</i>.
 This message returns the <i>List</i> of companies from the original 
-collection associated with the specific group.  For example:<pre><tt><b>
-     companyList groupedBy: [ sector ] . 
-     do: [ name print ;
-           groupList count printNL ;
-         ] ;
-</b></tt></pre>
+collection associated with the specific group.  For example:
+<pre>
+  companyList groupedBy: [ sector ] . 
+  do: [ name print ;
+        groupList count printNL ;
+      ] ;
+</pre>
 displays the number of elements in the group after each sector's name.
 Since <i>groupList</i> returns a <i>List</i> object, you can send
 any of the <i>List</i> messages to it.  For example, you could
-display the companies in each sector using:<pre><tt><b>
-     companyList groupedBy: [ sector ] . 
-     do: [ name print ;
-           groupList count printNL ;
-           groupList 
-           do: [                        # for each company in sector 
-               displayInfo ;            # print standard company info
-               ] ;                      # end of groupList do: []
-         ];                             # end of sector do: []
-</b></tt></pre>
+display the companies in each sector using:
+<pre>
+  companyList groupedBy: [ sector ] . 
+  do: [ name print ;
+        groupList count printNL ;
+        groupList 
+        do: [                        # for each company in sector 
+            displayInfo ;            # print standard company info
+            ] ;                      # end of groupList do: []
+      ];                             # end of sector do: []
+</pre>
 In this example, the summary information is displayed about the
 sector followed by an entry for each element in the sector.
 <p>
@@ -457,23 +475,24 @@ list represents a list of sectors. Each element in this outer list in turn
 responds to the message <i>groupList</i> which returns the set of elements
 from the original list that are in the current group. Since this subset
 is itself a list, you can perform any list operations on it,
-including grouping it further.  For example:<pre><tt><b>
-     companyList groupedBy: [ sector ] .      # group by sector 
-     do: [ 
-         "SECTOR: " print; 
-         name printNL;                        # print sector's name 
-         groupList groupedBy: [ industry ] .  # group companies in sector 
-         do: [                                #    by industry 
-             "INDUSTRY: " print; 
-             name printNL;                    # print industry's name 
-             groupList                        # for each company 
-             do: [                            #   in industry 
-                 "Company: " print ; 
-                 name printNL ;               # print company's name
-                 ] ;                          # end of companies in ind. 
-             ] ;                              # end of industries in sector 
-     ] ;                                      # end of sectors
-</b></tt></pre>
+including grouping it further.  For example:
+<pre>
+  companyList groupedBy: [ sector ] .      # group by sector 
+  do: [ 
+      "SECTOR: " print; 
+      name printNL;                        # print sector's name 
+      groupList groupedBy: [ industry ] .  # group companies in sector 
+      do: [                                #    by industry 
+          "INDUSTRY: " print; 
+          name printNL;                    # print industry's name 
+          groupList                        # for each company 
+          do: [                            #   in industry 
+              "Company: " print ; 
+              name printNL ;               # print company's name
+              ] ;                          # end of companies in ind. 
+          ] ;                              # end of industries in sector 
+  ] ;                                      # end of sectors
+</pre>
 <p>
 This report groups <i>companyList</i> into sectors.  The companies
 within a sector are then grouped into industries.  The companies are listed
@@ -552,9 +571,10 @@ included in one or more <i>groupLists</i>.
 <h2 id="compute">Collection Computation Messages</h2>
 <p>
 A number of messages have been defined to compute summary statistics
-for a <i>Collection</i>.  For example:<pre><tt><b>
-     companyList average: [ sales ] 
-</b></tt></pre>
+for a <i>Collection</i>.  For example:
+<pre>
+  companyList average: [ sales ] 
+</pre>
 computes the average sales value for the companies in <i>companyList</i>.
 <p>
 The following table summarizes the various statistical messages
@@ -706,13 +726,14 @@ the value 1 to the first 10% of the elements with the highest values
 and the value 10 to the elements in the bottom 10%. When you send
 one of these messages to a <i>Collection</i>,
 Vision returns the recipient extended by the variable
-named <i>decile</i>. For example:<pre><tt><b>
-     companyList decileDown: [ sales ] . 
-     do: [ name print: 30 ; 
-           sales print: 10 ;
-           decile printNL ; 
-         ] ;
-</b></tt></pre>
+named <i>decile</i>. For example:
+<pre>
+  companyList decileDown: [ sales ] . 
+  do: [ name print: 30 ; 
+        sales print: 10 ;
+        decile printNL ; 
+      ] ;
+re>
 displays the decile value from 1 to 10 for each company in
 <i>companyList</i>.
 <p>
@@ -733,14 +754,15 @@ The messages
 can be used to provide an arbitrary number of tiles.
 The extended variable is named <i>tile</i>.
 For example, to group a company list into fractiles (20 groups),
-you could use:<pre><tt><b>
-     companyList 
-          tileUp: [ sales ] tiles: 20 .
-     do: [ name print: 30 ; 
-           sales print: 10 ;
-           tile printNL ;      #- number from 1-20
-         ] ;
-</b></tt></pre>
+you could use:
+<pre>
+  companyList 
+       tileUp: [ sales ] tiles: 20 .
+  do: [ name print: 30 ; 
+        sales print: 10 ;
+        tile printNL ;      #- number from 1-20
+      ] ;
+</pre>
 <p>
 If you want to define a different name for the extended variable
 representing the tile, you can use the messages
@@ -752,15 +774,16 @@ representing the tile, you can use the messages
 <a href="mList.htm#percentileDown:using:"><i>percentileDown:using:</i></a>,
 <a href="mList.htm#tileUp:using:tiles:"><i>tileUp:using:tiles:</i></a>, and
 <a href="mList.htm#tileDown:using:tiles:"><i>tileDown:using:tiles:</i></a>.
-For example:<pre><tt><b>
-     companyList 
-         decileUp: [ sales ] using: "d1" .
-         decileUp: [ profit ] using: "d2" .
-     do: [ name print: 30 ; 
-           d1 print ;          # sales decile
-           d2 printNL ;        # profit decile
-         ] ;
-</b></tt></pre>
+For example:
+<pre>
+  companyList 
+      decileUp: [ sales ] using: "d1" .
+      decileUp: [ profit ] using: "d2" .
+  do: [ name print: 30 ; 
+        d1 print ;          # sales decile
+        d2 printNL ;        # profit decile
+      ] ;
+</pre>
 <p>
 These various "tiling" messages have all been defined in Vision using
 the messages <i>tileUp:usingCollector:tiles:</i> and
@@ -768,28 +791,29 @@ the messages <i>tileUp:usingCollector:tiles:</i> and
 the block to be evaluated.  The second parameter defines the
 name of the extended variable.  The third parameter indicates
 the number of "tiles" to create.  For example, to define
-the message <i>fractileUp:</i>, use:<pre><tt><b>
-     Collection
-     defineMethod: 
-     [ | fractileUp: block |
-       ^self tileUp: block 
-             usingCollector: [ |:fractile| ^current ] 
-             tiles: 20
-     ] ;
-
-</b></tt></pre>
+the message <i>fractileUp:</i>, use:
+<pre>
+  Collection
+  defineMethod: 
+  [ | fractileUp: block |
+    ^self tileUp: block 
+          usingCollector: [ |:fractile| ^current ] 
+          tiles: 20
+  ] ;
+</pre>
 <p id="runningTotal">
 The message
 <a href="mList.htm#runningTotal:"><i>runningTotal:</i></a>
 returns the recipient <i>Collection</i> extended by the
 variable <i>runningTotal</i> which represents the running
-sum of the elements in the collection to that point.  For example:<pre><tt><b>
-     20 sequence
-        runningTotal: [ ^self ] .    
-     do: [ print ; 
-           runningTotal printNL ;
-         ];
-</b></tt></pre>
+sum of the elements in the collection to that point.  For example:
+<pre>
+  20 sequence
+     runningTotal: [ ^self ] .    
+  do: [ print ; 
+        runningTotal printNL ;
+      ];
+</pre>
 The message
 <a href="mList.htm#runningAverage:"><i>runningAverage:</i></a>
 returns the recipient <i>Collection</i> extended by the
@@ -911,11 +935,12 @@ There is normally no reason to create new instances of the
 <i>Collection</i> class directly.
 You can explicitly create a new instance of any of the
 <i>Collection</i> subclasses by sending the <i>new</i> message 
-to the specific class.  For example:<pre><tt><b>
-     !list <- List new ; 
-     !ilist <- IndexedList new ;
-     !ts <- TimeSeries new ;
-</b></tt></pre>
+to the specific class.  For example:
+<pre>
+  !list <- List new ; 
+  !ilist <- IndexedList new ;
+  !ts <- TimeSeries new ;
+</pre>
 The variables <i>list</i>, <i>ilist</i>, and <i>ts</i> can be
 accessed and updated using the rules defined for the
 <a href="clList.htm"><i>List</i></a>,
@@ -942,11 +967,12 @@ of <i>Lists</i>.  The supplied parameter should be a <i>Block</i>.
 This message evaluates the block for each element and creates
 a "running list" of the objects returned by the block.  If the
 returned object is a <i>Collection</i>, the individual elements
-in the collection are appending the "running list".  For example:<pre><tt><b>
-     5 sequence
-        collectListElementsFrom: [ ^self sequence ] .
-     do: [ printNL ] ;
-</b></tt></pre>
+in the collection are appending the "running list".  For example:
+<pre>
+  5 sequence
+     collectListElementsFrom: [ ^self sequence ] .
+  do: [ printNL ] ;
+</pre>
 returns a single <i>List</i> containing the elements
 <i>1</i>, 
 <i>1</i>, <i>2</i>, 
@@ -963,31 +989,33 @@ is to apply a series of operations in succession.  Starting with a
 list, you may wish to perform a series of extensions,
 selections, and groupings, then sort and print the result.  There
 are a number of different techniques that can be used to produce
-the same result.  For example:<pre><tt><b>
-     !myList <- Currency instanceList ;
-     !xList <- myList 
-       extendBy: [ !rate <- 1 / usExchange ] ;
-     !subset1 <- xList select: [ rate < 1.5 ] ;
-     !subset2 <- subset1 first: 5 ;
-     !final <- subset2 sortUp: [ name ] ;
-     final do: [ code print: 5 ;
-                 name print: 15 ;
-                 rate printNL ;
-               ] ;
-</b></tt></pre>
+the same result.  For example:
+<pre>
+  !myList <- Currency instanceList ;
+  !xList <- myList 
+    extendBy: [ !rate <- 1 / usExchange ] ;
+  !subset1 <- xList select: [ rate < 1.5 ] ;
+  !subset2 <- subset1 first: 5 ;
+  !final <- subset2 sortUp: [ name ] ;
+  final do: [ code print: 5 ;
+              name print: 15 ;
+              rate printNL ;
+            ] ;
+</pre>
 This example uses a large number of temporary variables.  Although
 there is nothing wrong with this approach, you need not save each of
-the intermediate steps.  For example:<pre><tt><b>
-     Currency instanceList 
-       extendBy: [ !rate <- 1 / usExchange ] .
-       select: [ rate < 1.5 ] .
-       first: 5 .
-       sortUp: [ name ] .
-     do: [ code print: 5 ;
-           name print: 15 ;
-           rate printNL ;
-         ] ;
-</b></tt></pre>
+the intermediate steps.  For example:
+<pre>
+  Currency instanceList 
+    extendBy: [ !rate <- 1 / usExchange ] .
+    select: [ rate < 1.5 ] .
+    first: 5 .
+    sortUp: [ name ] .
+  do: [ code print: 5 ;
+        name print: 15 ;
+        rate printNL ;
+      ] ;
+</pre>
 This example produces the same result without any intermediate
 variables. 
 <p>
@@ -1000,33 +1028,35 @@ this particular example may look as though that is the case, the
 purpose of the operator is to terminate the parameters and evaluate
 the expression up until that point.  For example, if you were using
 the unary message <i>numberElements</i> in the previous expression
-it would not be followed by the <font size=+1><b>.</b></font>:<pre><tt><b>
-     Currency instanceList 
-       numberElements           #- . not needed since no parameters
-       extendBy: [ !rate <- 1 / usExchange ] .    #- . terminates block 
-       select: [ rate < 1.5 ] .                   #- . terminates block 
-       first: 5 .                                 #- . terminates count 
-       sortUp: [ name ] .                         #- . terminates block
-     do: [ code print: 5 ;
-           name print: 15 ;
-           rate printNL ;
-         ] ;
-</b></tt></pre>
+it would not be followed by the <font size=+1><b>.</b></font>:
+<pre>
+  Currency instanceList 
+    numberElements           #- . not needed since no parameters
+    extendBy: [ !rate <- 1 / usExchange ] .    #- . terminates block 
+    select: [ rate < 1.5 ] .                   #- . terminates block 
+    first: 5 .                                 #- . terminates count 
+    sortUp: [ name ] .                         #- . terminates block
+  do: [ code print: 5 ;
+        name print: 15 ;
+        rate printNL ;
+      ] ;
+</pre>
 The <font size=+1><b>.</b></font> operator</a> provides an
 alternative to using parentheses in expressions containing numerous
 keywords applied in succession such as this one.  The same expression
-using parentheses could be written as:<pre><tt><b>
-     ((((Currency instanceList 
-            numberElements 
-            extendBy: [ !rate <- 1 / usExchange ]
-        ) select: [ rate < 1.5 ]
-       ) first: 5 
-      ) sortUp: [ name ] 
-     ) do: [ code print: 5 ;
-             name print: 15 ;
-             rate printNL ;
-           ] ;
-</b></tt></pre>
+using parentheses could be written as:
+<pre>
+  ((((Currency instanceList 
+         numberElements 
+         extendBy: [ !rate <- 1 / usExchange ]
+     ) select: [ rate < 1.5 ]
+    ) first: 5 
+   ) sortUp: [ name ] 
+  ) do: [ code print: 5 ;
+          name print: 15 ;
+          rate printNL ;
+        ] ;
+</pre>
 
 <p>
 <hr>
@@ -1045,10 +1075,12 @@ Because collections are not evaluated sequentially,
 you do not have control over the order in which the collection is
 processed nor can you assume that the number of evaluations is
 equal to the number of elements in the list.  
-For example:<pre><tt><b>     !count <- 0 ;
+For example:
+<pre>
+    !count <- 0 ;
      list do: [ ^global :count <- ^global count + 1 ] ;
      count printNL ;
-</b></tt></pre>
+</pre>
 will not produce the results you expect.  Although you might
 expect <i>count</i> to equal the number of elements in <i>list</i>,
 it would actually equal the number of internal passes needed to
@@ -1060,11 +1092,12 @@ be used instead of <i>do:</i> when you want to evaluate the
 list in order, an element at a time.  Although there are situations
 when you may need to do this, this message is much slower than
 the <i>do:</i> message since it does not benefit from the
-optimizations available.  For example:<pre><tt><b>
-     !count <- 0 ;
-     list iterate: [ ^global :count <- ^global count + 1 ] ;
-     count printNL ;
-</b></tt></pre>
+optimizations available.  For example:
+<pre>
+  !count <- 0 ;
+  list iterate: [ ^global :count <- ^global count + 1 ] ;
+  count printNL ;
+</pre>
 
 <hr>
 <h2 id="more">Related Topics</h2>

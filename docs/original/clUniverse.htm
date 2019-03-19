@@ -26,14 +26,13 @@ For example, a <b>Universe</b> instance named
 instances comprising the <i>Standard & Poors 500</i> each month.
 <p>
 The Universe class is a direct subclass of Entity:
-<font size=+1><pre>
-          <a href="clObject.htm">Object</a>
-             |
-          <a href="clEntity.htm">Entity</a>
-             |
-             <b>Universe</b>
-
-</pre></font>
+<pre>
+    <a href="clObject.htm">Object</a>
+       |
+    <a href="clEntity.htm">Entity</a>
+       |
+       <b>Universe</b>
+</pre>
 
 <p>
 <hr>
@@ -44,11 +43,11 @@ The Universe class is a direct subclass of Entity:
 over time.  A universe can be restricted to a certain type of entity by
 setting its <i>entityType</i> property using the <i>setEntityTypeTo:</i>
 message.  For example, to create the <i>Dow Jones 30</i> universe of
-securities:<pre><tt><b>
-     Universe createInstance: "DJ30" .
-         setEntityTypeTo: Security ;
-
-</b></tt></pre>
+securities:
+<pre>
+  Universe createInstance: "DJ30" .
+      setEntityTypeTo: Security ;
+</pre>
 The time series property <i>list</i> is defined at the class <b>Universe</b>
 to store lists of entities over time.  This property can be updated
 using the <i>setListTo:</i> message 
@@ -60,12 +59,13 @@ list are only added if they represent instances of that class.  List
 elements can be supplied as explicit objects or as string.  Strings
 will be converted to instances of the <i>entityType's</i> class using
 the <i>locateId:</i> message for that class.  
-For example:<pre><tt><b>
-     95 evaluate:
-       [ Named Universe DJ30 
-            setListTo: Named Security IBM, "XON", "GM" ;
-       ] ;
-</b></tt></pre>
+For example:
+<pre>
+  95 evaluate:
+    [ Named Universe DJ30 
+         setListTo: Named Security IBM, "XON", "GM" ;
+    ] ;
+</pre>
 stores a list of three securities in the <i>list</i> property for
 the <i>DJ30</i> universe as of year-end 1995.  The strings <i>XON</i>
 and <i>GM</i> are converted into security instances.  The <i>addMember:</i>
@@ -73,55 +73,57 @@ and <i>deleteMember:</i> messages can be use used to modify an
 existing list.  Instances are added or deleted from the list stored
 as of the evaluation date.
 <p>
-To view the universe members as of a specific date use:<pre><tt><b>
-     #-- latest
-     Named Universe DJ30 list do: [ displayInfo ] ;
+To view the universe members as of a specific date use:
+<pre>
+  #-- latest
+  Named Universe DJ30 list do: [ displayInfo ] ;
 
-     #-- as of last month
-     ^today - 1 monthEnds evaluate:
-       [ Named Universe DJ30 list do: [ displayInfo ] ;
-       ] ;
+  #-- as of last month
+  ^today - 1 monthEnds evaluate:
+    [ Named Universe DJ30 list do: [ displayInfo ] ;
+    ] ;
 
-     #-- alternative
-     Named Universe DJ30 :list lag: 1 monthEnds . do: [ displayInfo ] ;
+  #-- alternative
+  Named Universe DJ30 :list lag: 1 monthEnds . do: [ displayInfo ] ;
 
-     #-- all periods
-     Named Universe DJ30 :list
-     do: [ ^date print ; count print ; " members" printNL ; 
-           ^self do: [ displayInfo ] ;
-         ] ;
-</b></tt></pre>
+  #-- all periods
+  Named Universe DJ30 :list
+  do: [ ^date print ; count print ; " members" printNL ; 
+        ^self do: [ displayInfo ] ;
+      ] ;
+</pre>
 <p>
 The <i>displayMemberHistory</i> report shows changes in the universe
-membership over time.  For example:<pre><tt><b>
-     96 evaluate:
-       [ Named Universe DJ30 
-            setListTo: "IBM", "XON", "GIS", "DD" ;
-       ] ;
+membership over time.  For example:
+<pre>
+  96 evaluate:
+    [ Named Universe DJ30 
+         setListTo: "IBM", "XON", "GIS", "DD" ;
+    ] ;
 
-     Named Universe DJ30 displayMemberHistory ;
-
-</b>displays: <b>
+  Named Universe DJ30 displayMemberHistory ;
+</pre>displays:
+<pre>
                       ---  Membership History Report  ---                     
-                             for Universe DJ30 DJ30                           
+                          for Universe DJ30 DJ30                           
 
-     01/01/1                0 current         0 prior
-     12/31/1995             3 current         0 prior
-         added ... 30229010     XON          EXXON CORP COM
-         added ... 37044210     GM           GENERAL MTRS CORP COM
-         added ... 45920010     IBM          INTERNATIONAL BUSINESS MACH COM
-     12/31/1996             4 current         3 prior
-         added ... 26353410     DD           DU PONT E I DE NEMOURS & CO COM
-         added ... 37033410     GIS          GENERAL MLS INC COM
-       dropped ... 37044210     GM           GENERAL MTRS CORP COM
-
-</b></tt></pre>
+  01/01/1                0 current         0 prior
+  12/31/1995             3 current         0 prior
+      added ... 30229010     XON          EXXON CORP COM
+      added ... 37044210     GM           GENERAL MTRS CORP COM
+      added ... 45920010     IBM          INTERNATIONAL BUSINESS MACH COM
+  12/31/1996             4 current         3 prior
+      added ... 26353410     DD           DU PONT E I DE NEMOURS & CO COM
+      added ... 37033410     GIS          GENERAL MLS INC COM
+    dropped ... 37044210     GM           GENERAL MTRS CORP COM
+</pre>
 The message <i>universe</i> has been defined for the class
 <b>Entity</b> and returns the list of <b>Universe</b> instances
-that contain the recipient object.  For example:<pre><tt><b>
-     Named Security IBM universes
-     do: [ displayInfo ] 
-</b></tt></pre>
+that contain the recipient object.  For example:
+<pre>
+  Named Security IBM universes
+  do: [ displayInfo ] 
+</pre>
 will display the <i>DJ30</i> and any other universe in which the security
 <i>IBM</i> is a member.
 
@@ -155,7 +157,8 @@ Several <b>DataFeed</b> classes have been defined to work with
 </table></center>
 <p>
 For example, the following tab-delimited string could be used to create
-and refresh <b>Universe</b> instances:<pre>
+and refresh <b>Universe</b> instances:
+<pre>
      Interface ExternalFeedManager upload: "UniverseMaster" using:
      "Id	Name                      MemberType	
       SP500     Standard & Poors 500	  Security	
@@ -165,7 +168,8 @@ and refresh <b>Universe</b> instances:<pre>
 
 </pre>
 The following tab-delimited string could be used to define <b>Universe/<b>
-memberships over time:<pre>
+memberships over time:
+<pre>
      Interface ExternalFeedManager upload: "UniverseMembers" using:
      "groupId     date       memberId
       SP500       19971031   45920010	

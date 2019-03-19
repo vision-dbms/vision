@@ -5,7 +5,8 @@ title: Vision Syntax
 <p>
 <h2 id="order">Order of Operations</h2>
 <p>
-In the expression:<pre>
+In the expression:
+<pre>
   gm sales + ford sales
 </pre>
 the following interpretations could be possible:
@@ -21,7 +22,8 @@ and then add one to the other.
 </ul>
 <p>
 In this example, the last interpretation is clearly the only
-meaningful one.  However, in the example:  <pre>
+meaningful one.  However, in the example:
+<pre>
   gm sales + ford sales log
 </pre>
 the following interpretations could be possible:
@@ -44,19 +46,23 @@ arithmetic.  Arithmetic rules state that multiplication and division
 have a higher precedence than addition and subtraction, so they are
 performed first.  If an expression contains two operations of the
 same precedence, they are executed in the order in which they occur.
-For example:  <pre>
+For example:
+<pre>
   3 * 2 + 4
 </pre>
-computes to 10 and:<pre>
+computes to 10 and:
+<pre>
   10 + 3 * 2
 </pre>
 computes to 16.
 <p>
 Parentheses can be used to change the order of evaluation.  In the
-above examples:  <pre>
+above examples:
+<pre>
   3 * (2 + 4)
 </pre>
-computes to 18 and:<pre>
+computes to 18 and:
+<pre>
   (10 + 3) * 2
 </pre>
 computes to 26.
@@ -120,7 +126,8 @@ As the preceding example illustrates, expressions are actually
 decomposed into a series of expressions that get executed based on
 precedence order.  An expression within parentheses is evaluated
 before any expression outside the parentheses.  If the previous
-example were written as:  <pre>
+example were written as:
+<pre>
   (gm sales + ford sales) log
 </pre>
 the expected result is achieved.  The order of operations is:
@@ -147,26 +154,31 @@ produce an object representing the log of the combined sales figure.
 <h2 id="sample">Sample Usage</h2>
 <p>
 The following examples further illustrate precedence rules.  To add 3
-to the value of the May estimate, the expression:  <pre>
+to the value of the May estimate, the expression:
+<pre>
   :estimate asOf: 9305 + 3       <i>(incorrect)</i>
 </pre>
 produces incorrect results.  Because the binary message <i>+</i> is
 evaluated before keyword messages, Vision will first add <i>3</i> to 
 <i>9305</i> to
 produce the parameter for the <i>asOf:</i> message.  The correct expression
-is:<pre>
+is:
+<pre>
   (:estimate asOf: 9305) + 3
 </pre>
-To print the sum of <i>2</i> and <i>7</i>, the expression:<pre>
+To print the sum of <i>2</i> and <i>7</i>, the expression:
+<pre>
      2 + 7 print ;                        <i>(incorrect)</i>
 </pre>
 produces incorrect results.  Because unary messages are evaluated
 before binary messages, Vision will print the value <i>7</i> prior to
-performing the addition operation.  The correct expression is:<pre>
+performing the addition operation.  The correct expression is:
+<pre>
   ( 2 + 7 ) print ;
 </pre>
 Alternatively, you could have used one of the keyword versions of the
-print message.  For example, the expression:<pre>
+print message.  For example, the expression:
+<pre>
   2 + 7 print: 12 ;
 </pre>
 also produces the correct result.  Because the keyword message <i>print:</i>
@@ -177,13 +189,15 @@ result.  In this case the value <i>9</i> is printed, right justified in 12
 columns.  
 <p>
 To count the number of elements in the union of two lists, the 
-expression:<pre>
+expression:
+<pre>
   mylist union: yourlist count   <i>(incorrect)</i>
 </pre>
 produces incorrect results.  Because unary messages are evaluated
 before keyword messages, Vision will compute the number of elements
 in <i>yourlist</i> first and will use this result as the argument for the
-<i>union:</i> message.  The correct expression is:<pre>
+<i>union:</i> message.  The correct expression is:
+<pre>
   (mylist union: yourlist) count
 </pre>
 <p>
@@ -202,10 +216,12 @@ role of a closing parenthesis, where the opening parenthesis is
 assumed to be at the start of the current expression.
 <p>
 Using the dot operator, the previous 
-expressions could have been written as:<pre>
+expressions could have been written as:
+<pre>
   :estimate asOf: 9305 . + 3
 </pre>
-and<pre>
+and
+<pre>
   mylist union: yourlist . count
 </pre>
 Note that the '.' can only be used as a terminator for a keyword
@@ -215,7 +231,8 @@ produce a <a href="Error.htm#syn">syntax error</a> in these cases.
 One final piece of information is needed to complete this discussion
 on order of operations.  Whenever multiple keywords appear in an
 unparenthesized expression, Vision assumes they form a single
-message.  Therefore the expression:  <pre>
+message.  Therefore the expression:
+<pre>
   mylist union: yourlist exclude: autolist   <i>(incorrect)</i>
 </pre>
 would be viewed as sending the keyword message <i>union:exclude:</i>
@@ -224,18 +241,23 @@ object <i>mylist</i> and providing two parameters,
 <i>yourlist</i> and <i>autolist</i>.  To
 tell Vision to view this expression as two successive keyword
 messages (i.e., <i>union:</i> and <i>exclude:</i> ) either of the following
-formats is valid:  <pre>
+formats is valid:
+<pre>
   (mylist union: yourlist) exclude: autolist
-</pre>or<pre>
+</pre>or
+<pre>
   mylist union: yourlist . exclude: autolist
 </pre>
 <p>
 Any of the following formats can be used to find the number of
-elements in the final list produced:<pre>
+elements in the final list produced:
+<pre>
   ( (mylist union: yourlist) exclude: autolist) count
-</pre>or<pre>
+</pre>or
+<pre>
   (mylist union: yourlist . exclude: autolist) count
-</pre>or<pre>
+</pre>or
+<pre>
   mylist union: yourlist . exclude: autolist . count
 </pre>
 <hr>
@@ -244,7 +266,7 @@ elements in the final list produced:<pre>
 For you grammar buffs, here is the Vision language syntax presented in
 a BNF format:
 <p>
-<pre><font size=-1>
+<pre>
 VisionProgram           : ExpressionList
 
 ExpressionList          : ExpressionListTerm
@@ -375,6 +397,6 @@ StringBody              :
 
 StringBodyCharacter     : .
                         | '\'.          ... any character preceded by a \
-</font></pre>
+</pre>
 
 {% include doc-footer.htm copydates="1997" %}

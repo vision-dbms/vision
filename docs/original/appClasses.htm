@@ -57,12 +57,13 @@ designer.
 Some of the classes referenced in this document were added to the Vision
 bootstrap database as part of release 5.9.4.  If your installation
 was bootstrapped prior to this, you may need to define the
-following:<pre><tt><b>
-     Entity createSubclass: "Support" ;
-     Entity createSubclass: "Table" ;
-     Object createSubclass: "Bridge" ;
-     IncorporatorPrototype createSubclass: "DataFeed" ;
-</b></tt></pre>
+following:
+<pre>
+  Entity createSubclass: "Support" ;
+  Entity createSubclass: "Table" ;
+  Object createSubclass: "Bridge" ;
+  IncorporatorPrototype createSubclass: "DataFeed" ;
+</pre>
 <hr></blockquote><p>
 
 <p>
@@ -127,9 +128,10 @@ entities in the application.  Note that these classes may need to
 be <a href="#missingDefs">added to your database</a> if you want
 to use them.  There is no special protocol that needs to be defined
 for these classes.  They simply provide a way of organizing the
-entity subclasses so that the expression:<pre><tt><b>
-     Entity showInheritance
-</b></tt></pre>
+entity subclasses so that the expression:
+<pre>
+  Entity showInheritance
+</pre>
 neatly separates the core entity classes from miscellaneous support
 classes.  For example, you could create a subclass of <b>Table</b>
 when you need a place to store descriptions for coded information.
@@ -181,32 +183,33 @@ a property defined at the entity instance with which it is associated.
 The <i>createInstance:</i> message for this class assumes you are supplying
 four values: the entity, a date, a value, and a base currency if applicable.
 <p>
-For example:<pre><tt><b>
-     #-- Create price time series for Security class
-     Entity createSubclass: "Security"
-     Security define: 'price' ;
+For example:
+<pre>
+  #-- Create price time series for Security class
+  Entity createSubclass: "Security"
+  Security define: 'price' ;
 
-     #-- Create PriceRecord which tracks high, low, and close for a security
-     DataRecord createSubclass: "PriceRecord" ;
-     PriceRecord defineFixedProperty: 'high' ;
-     PriceRecord defineFixedProperty: 'low' ;
-     PriceRecord defineFixedProperty: 'close' ;
+  #-- Create PriceRecord which tracks high, low, and close for a security
+  DataRecord createSubclass: "PriceRecord" ;
+  PriceRecord defineFixedProperty: 'high' ;
+  PriceRecord defineFixedProperty: 'low' ;
+  PriceRecord defineFixedProperty: 'close' ;
 
-     #--  Update IBM's prices for several dates
-     Security createInstance: "IBM" ;
-     Named Security IBM 
-     do: [ !newPrice <- ^global PriceRecord createInstance: ^self, 9601 .
-               do: [ :high <- 101.25 ; :low <- 100.75 ; :close <- 101.00 ] ;
-           :prices asOf: 9601 put: newPrice;
-           !newPrice <- ^global PriceRecord createInstance: ^self, 9602 .
-               do: [ :high <- 102.25 ; :low <- 100.75 ; :close <- 101.75 ] ;
-           :prices asOf: 9602 put: newPrice;
-         ] ;
+  #--  Update IBM's prices for several dates
+  Security createInstance: "IBM" ;
+  Named Security IBM 
+  do: [ !newPrice <- ^global PriceRecord createInstance: ^self, 9601 .
+            do: [ :high <- 101.25 ; :low <- 100.75 ; :close <- 101.00 ] ;
+        :prices asOf: 9601 put: newPrice;
+        !newPrice <- ^global PriceRecord createInstance: ^self, 9602 .
+            do: [ :high <- 102.25 ; :low <- 100.75 ; :close <- 101.75 ] ;
+        :prices asOf: 9602 put: newPrice;
+      ] ;
 
-    #-- Display the data
-    Named Security IBM :prices
-       do: [ ^date print: 15 ; high print ; close print ; low printNL ] ;
-</b></tt></pre>
+ #-- Display the data
+ Named Security IBM :prices
+    do: [ ^date print: 15 ; high print ; close print ; low printNL ] ;
+</pre>
 
 <p>
 <hr>
