@@ -1,25 +1,7 @@
 ---
 title: "Vision Interfaces: Sample Html Access"
 ---
-<h2>Vision Interfaces: Sample Html Access</h2>
 
-<p>
-     | <a href="vconcep.htm">Home</a> 
-     | <a href="vifaces.htm">Interfaces</a>
-     | <a href="tkInterface.htm">Interface ToolKit</a>
-     | <a href="ifDownload.htm#ifVQuery">Download Scripts</a> 
-     |
-<hr>
-<h2>Topics Covered:</h2>
-<ul type=square>
-<li><a href="ifHtml.htm#overview">Overview</a>
-<li><a href="ifHtml.htm#io">Basic Handshaking</a>
-<li><a href="ifHtml.htm#access">The <b>Interface HtmlAccess</b> Class</a>
-<li><a href="ifHtml.htm#format">The <b>FormatTools Html</b> Class</a>
-<li><a href="ifHtml.htm#execution">Putting the Pieces Together</a>
-<li><a href="ifHtml.htm#vquery">The <i>vquery</i> Program</a>
-</ul>
-<hr>
 <h2 id="overview">Overview</h2>
 <p>
 Web browsers such as Netscape and Internet Explorer offer an
@@ -51,72 +33,12 @@ It can also be used as the value of the <i>ACTION</i> attribute of a form.
 In the latter case, the values of the controls in the form are also
 shipped.
 <p>
-The server indicated in either of these cases can reference a program
-sitting between your Web server and Vision which passes the inputs
-to Vision and returns the result to the browser.
-The <a href="#vquery"><i>vquery</i> program</a> is designed to
-perform this function.  It is included as part of the
-<i>/vision/tools</i> directory with standard Vision releases.
-The actual mechanisms for creating and using this program 
-<a href="#vquery">are described below</a>.  You can use this program
-to perform the bridging operation or create your own program or script,
-customized to the requirements of your environment.  
-Whether you use
-<i>vquery</i> or your own bridging program, you can take advantage of
-the functionality offered by the Vision toolkits
-<a href="tkInterface.htm"><b>Interface</b> and <b>FormatTools</b></a>.
-<p>
-<hr>
-<h2 id="io">Basic Handshaking</h2>
-<p>
-When Web servers call CGI programs, they supply information
-including the full path referenced.
-The <a href="#vquery"><i>vquery</i> program</a>
-removes the first part of the path to identify a Vision
-session.  The remainder of the path is passed as an input to this
-session.  For example, if your server's name is <i>www.myserver.com</i>
-and you are using the <i>vquery</i> program to talk to the default
-Vision session, the URL in your <i>HREF</i> statement could 
-contain:
-<pre>
-  http://www.myserver.com/cgi-bin/vquery/default/report1@param1@param2
-</pre>
-The <i>vquery</i> program strips the path through <i>default</i>
-to determine which Vision session to use,
-then passes the remaining string to the Vision session for parsing and
-execution.
-<p>
-If your Web document contains an <i>ACTION</i> statement that
-references a CGI program, the inputs from the form are passed
-to this program as a string of name/value pairs in the form:
-<pre>
-  control1=value1&control2=value2&control3=value3
-</pre>
-All explicit and hidden control values are shipped.  The CGI
-program must arrange to pass these inputs to Vision.  The
-<i>vquery</i> program supplies this string directly to Vision,
-allowing Vision to handle all aspects of parameter validation and
-document preparation.
-<p>
-Path and query strings may exist.  The <i>vquery</i> program will
-ship both strings to a Vision session which will interpret these
-inputs, execute the request, and prepare a document that can be 
-read by an Html browser.  The document is returned to <i>vquery</i>
-which then returns it to the browser.
-<p>
 <hr>
 <h2 id="access">The <b>Interface HtmlAccess</b> Class</h2>
 <p>
 The class <b>Interface HtmlAccess</b> supplies the protocol needed
 to parse inputs from Html forms and links and produce a document
-that can be interpretted by an Html browser.  
-<p>
-After stripping the session information from the supplied path,
-the <a href="#vquery"><i>vquery</i> program</a> passes the
-remainder of the path, the query string associated
-with a form, the remote host, and remote address of the
-client to the appropriate Vision session using the 
-expression:
+that can be interpretted by an Html browser:
 <pre>
   Interface HtmlAccess
      get: "PATH_INFO"
@@ -142,7 +64,7 @@ display the results.
 <li>Display Html page footer information.
 </ol>
 <p>
-<h4 id="parsing">Parsing the Strings</h4>
+<h3 id="parsing">Parsing the Strings</h3>
 <p>
 The <i>get:usingQuery:for:at:</i> 
 method assumes that the PATH_INFO string is supplied in the
@@ -154,7 +76,7 @@ where any number of parameters can be supplied, separated by the @
 character.  For example, if the URL in your <i>HREF</i> statement 
 contains:
 <pre>
-  http://www.myserver.com/cgi-bin/vquery/default/Profile@Company@IBM
+  http://www.myserver.com/.../Profile@Company@IBM
 </pre>
 the PATH_INFO would contain: <i>/Profile@Company@IBM</i>.  The
 method strips off the leading "/",
@@ -212,7 +134,7 @@ for the <b>Interface</b> class.
 If both the PATH_INFO and QUERY_STRING are present, the application
 associated with the PATH_INFO string is the one that is executed.
 <p>
-<h4 id="output">Preparing the Output</h4>
+<h3 id="output">Preparing the Output</h3>
 <p>
 When the application is run, a document in the following format is 
 generated:
@@ -236,19 +158,14 @@ within a
 <a href="#format"><i>FormatTools Html evaluate:</i> block</a>
 so that any display tags are generated for Html.
 <p>
-<h4 id="conventions">Passing Information to Vision: Summary</h4>
+<h3 id="conventions">Passing Information to Vision: Summary</h3>
 <p>
 <p>
 <ol type="1">
 <li>
 <i>HREFs</i> used with anchors should be formed using:
 <pre>
-  http://servername/cgi-bin/vquery/default/appName@p1@p2@p3...
-</pre>
-<li>To ship inputs from a form, the <i>ACTION</i> statement should
-be formed using:
-<pre>
-  http://servername/cgi-bin/vquery/
+  http://servername/.../appName@p1@p2@p3...
 </pre>
 The form should contain a control (hidden or visible) named
 <i>appName</i> that specifies the name of the application to run.
@@ -288,34 +205,29 @@ default and Html behavior is presented in the document
 <a href="tkInterface.htm#format"><i>Vision ToolKit Class: Interface</i></a>.
 
 <p>
-<h4 id="links">Embedding Links in Vision Documents</h4>
+<h3 id="links">Embedding Links in Vision Documents</h3>
 <p>
 The general format for an Html link is:
 <pre>
   &lta HREF=URL&gt label &lt/a&gt
 </pre>
 where URL is the name of the server that connects to Vision plus any
-additional information you wish to send.  This is the format 
-<a href="#io">described earlier</a> that is used to run <i>vquery</i>
-and pass a string containing the application name and parameters to
-a running Vision session.  For example:
+additional information you wish to send.  For example:
 <pre>
-  http://www.myserver.com/cgi-bin/vquery/default/Profile@Company@IBM
+  http://www.myserver.com/.../Profile@Company@IBM
 </pre>
-In this case the server runs the CGI program <i>vquery</i> which
-submits the string <i>/Profile@Company@IBM</i> to the default
-session.  If you want to define a link within the <i>Profile</i>
+If you want to define a link within the <i>Profile</i>
 method that runs <i>Profile2</i>, you could include the following
 print statements in your Vision code:
 <pre>
-  "&lta HREF='http://myserver/cgi-bin/vquery/default/" print ;
+  "&lta HREF='http://myserver/.../" print ;
   "Profile2@IBM'&gt" print ;
   "IBM Profile 2 Link" print ;
   "&lt/a&gt" printNL ;
 </pre>
 When this report is displayed in your Web Browser, the text 
 <b><i>IBM Profile 2 Link</i></b> will be represented as an anchor.  If you
-click on this link, <i>vquery</i> will ship the string
+click on this link, your server should ship the string
 <i>Profile2@IBM</i> to Vision .  When Vision receives this
 information, it sets the current application to <i>Profile2</i> with
 the parameter <i>IBM</i> and returns the document created.  The
@@ -331,7 +243,7 @@ class.  For example:
   ] ;
 </pre>
 <p>
-<h4 id="linkMessages">FormatTools: Link Creation Messages</h4>
+<h3 id="linkMessages">FormatTools: Link Creation Messages</h3>
 <p>
 A number of messages have been defined for the
 <b>FormatTools</b> class that aid in producing the links:
@@ -345,7 +257,7 @@ name and any parameters, separated by the @ character.
 This message formats an Html anchor statement in the form:
 <pre>
   &lta href=
-     "http://server/cgi-bin/vquery/SESSION/app@p1@p2@p3/?globalDate=yyyymmdd"
+     "http://server/.../app@p1@p2@p3/?globalDate=yyyymmdd"
   &gtlabel&lt/a&gt
 </pre>
 <p>
@@ -358,7 +270,7 @@ name.
 This message formats an Html anchor statement in the form:
 <pre>
   &lta href=
-     "http://server/cgi-bin/vquery/SESSION/app/?globalDate=yyyymmdd"
+     "http://server/.../app/?globalDate=yyyymmdd"
   &gtlabel&lt/a&gt
 </pre>
 <p>
@@ -390,425 +302,5 @@ This message creates an Html image statement in the form:
 where the string <i>imageFile</i> is generated using the <i>file</i>
 and <i>path</i> parameters.
 </pre>
-
-<p>
-<hr>
-<h2 id="execution">Putting the Pieces Together</h2>
-<p>
-If you use <a href="#vquery"><i>vquery</i></a> as your bridging program,
-the assumption is that you have one or more Vision sessions running
-listening for inputs on known sockets.  This information is recorded
-in <i>vquery</i>'s <a href="#config">configuration file</a>.  Any
-Vision session can open a unique listener socket for this purpose.
-In addition, there are a number of session parameters you can set that 
-control the URL links created and other aspects of the document generated.
-<p>
-A typical Vision script used to start one of these sessions is
-displayed below:
-<pre>
-  ####################
-  #   Vision Script for a Session referenced by vquery
-  ####################
-
-  #--------------------
-  #  Establish a known channel - edit for each session started
-  #--------------------
-  !listener <- "inet/stream,p:7001" asOpenVisionChannel;
-  listener enableHandler;
-  listener displayInfo;
-
-  #--------------------
-  #  set various session attributes that control flow
-  #--------------------
-  Interface HtmlAccess
-    setServerTo: "http://www.myserver.com" .
-    setPathTo: "default/" .
-    setHomePathTo: "http://www.myserver.com/VFReport.htm" .
-    setResourcePathTo: "http://www.myserver.com/Misc" .
-    setTitleTo: "Vision Demo" .
-  ;
-</pre>
-The first part of this script establishes socket 7001 on this machine
-as the handle for this session.  The second part of this script
-sets various parameters which control some of the output preparation.
-These attribute setting messages are described below.  There should
-be an entry in the <i>vquery.cfg</i> file that 
-contains:
-<pre>
-  server default fred:7001
-</pre>
-assuming that this session is running on host <i>fred</i>.
-<p>
-<hr size=1>
-<i>setServerTo:</i>
-<p>
-This message sets the name of the server used in forming the URL
-generated by the <i>buildLinkForApp:</i> message variations.
-<p>
-<hr size=1>
-<i>setCgiExeTo:</i>
-<p>
-This message sets the name of the cgi-bin program to run.  By default,
-this value is "/cgi-bin/vquery/" in the server's directory.
-<p>
-<hr size=1>
-<i>setPathTo:</i>
-<p>
-This message sets the name of the session to display following the
-server name when forming the URL generated by the
-<i>buildLinkForApp:</i> message variations,
-and represents the symbolic name used by <i>vquery</i> 
-to determine which session to connect to for the link.
-By default, the path is "default/".
-<p>
-<hr size=1>
-<i>setVisionPathTo:</i>
-<p>
-This message is used to create the full URL of the bridging program
-to run and can be set explicitly for the session.  It is
-automatically run whenever the server or path is reset.
-<p>
-<hr size=1>
-<i>setHomePathTo:</i>
-<p>
-This message is used to set the URL that represents the home page
-link displayed at the end of every document generate via this
-interface.
-<p>
-<hr size=1>
-<i>setResourcePathTo:</i>
-<p>
-This message sets the name of the directory from which to load
-image and other files, referenced within you documents.
-<p>
-<hr size=1>
-<i>setTitleTo:</i>
-<p>
-This message is used to set the title displayed at the start of each
-document.
-<p>
-<hr size=1>
-<i>setApplicationWSTo:</i>
-<p>
-This message is used to redefine the <a href="tkInterface.htm#apps">
-<b>ApplicationWS</b></a> used for locating application methods
-and caching parameter values.  By
-default, <b>Interface ApplicationWS</b> is used.  You can use this 
-message to reset the workspace to any 
-<a href="tkInterface.htm#appMulti">named subclass or instance</a> of
-<b>ApplicationWS</b>.
-<p>
-<hr size=1>
-<i>setTopLogoTo:</i>
-<p>
-This message is used to define the name of an image file that will
-appear at the top of every document.  By default, no logo is displayed.
-<p>
-<hr size=1>
-<i>setTopBarTo:</i>
-<p>
-This message is used to define the name of an image file that will
-separate the document title from the rest of the document body.
-By default, a standard horizontal line is drawn.
-<p>
-<hr size=1>
-<i>setBottomBarTo:</i>
-<p>
-This message is used to define the name of an image file that will
-separate the document footer from the rest of the document body.
-By default, a standard horizontal line is drawn.
-<p>
-<hr>
-<h2 id="vquery">The <i>vquery</i> Program</h2>
-<p>
-<i>vquery</i> is a CGI (Common Gateway Interface) program used to access
-Vision databases from any Web Server that can call a CGI compatible
-program.  As a CGI program, <i>vquery</i> sits between the Web server and
-Vision.  When invoked by the server, <i>vquery</i> is passed a URL (Uniform
-Resource Locator) for the document it is to return.  It uses that URL
-to locate a Vision session capable of producing the Html
-document addressed by that URL.  <i>vquery</i> passes the
-part of the URL it does not use to the Vision session along with the
-name and address of the client making the request.  It returns the
-output from Vision as the document.  
-<p>
-<h4>How <i>vquery</i> Calls Vision</h4>
-<p>
-
-When Web servers call CGI programs, they pass a URL along with a
-number of additional parameters that supply information about the
-server and the client.  Five of the many parameters passed from the
-server are examined by <i>vquery</i> -- PATH_INFO, QUERY_STRING,
-REQUEST_METHOD, REMOTE_HOST, and REMOTE_ADDR.  The first component of
-the path contained in PATH_INFO is removed by <i>vquery</i> and is used
-to identify a Vision session.  <i>vquery</i>'s logic for doing that
-is described later in this section.  The part of the path not used
-by <i>vquery</i>, the parameters passed as part of the URL, and the
-symbolic name (REMOTE_HOST) and address (REMOTE_ADDR) of the client
-making the request are passed to the Vision session using the
-request:
-<pre>
-  Interface HtmlAccess
-     get: "PATH_INFO"
-     usingQuery: "QUERY_STRING"
-     for: "REMOTE_HOST"
-     at: "REMOTE_ADDR" ;
-</pre>
-<p>
-The default implementation of the <i>get:usingQuery:for:at:</i> method
-parses the PATH_INFO and QUERY_STRING strings and generates an HTTP
-response containing an HTML document
-as its content.  The current implementation of this method does not
-use either the REMOTE_HOST or REMOTE_ADDR strings.  These strings
-identify the name and IP address of the host originating the request
-and could be used for simple response customization, query logging,
-or data filtering.  
-<p>
-<h4>How <i>vquery</i> finds a Vision session to call</h4>
-<p>
-To service a request, <i>vquery</i> does not start a Vision session.
-It expects one or more Vision sessions to be running already.  Each
-of those sessions must be listening for requests at an address that
-<i>vquery</i> can discover.  <i>vquery</i> discovers that address by
-examining the first component of the URL's path and an optional
-configuration file.  
-<p>
-In its simplest and least flexible form, the path component examined
-by <i>vquery</i> can simply be the name of a host combined with the
-number or name of a port on that host:
-<pre>
-  /fred:7001/VReport/xyz
-</pre>or<pre>
-  /fred:vqueryport/VReport/xyz
-</pre>
-<p>
-The first example above attempts to find a Vision session listening
-at port 7001 on host <i>fred</i>; the second example assumes that a TCP port
-named <i>vqueryport</i> has been added to the <i>/etc/services</i> file and
-that a Vision session is listening at that port on host <i>fred</i>.  
-<p>
-<a name="config"> </a>
-The absolute address form is the simplest to start using and the most
-difficult to administer.  As more documents are created with these
-absolute addresses 'wired-in', the task of changing the address of
-the server goes from formidable to impossible.  To avoid this
-problem, <i>vquery</i> supports the use of symbolic names resolved
-with the help of a configuration file.  The first example above can
-be restated using a symbolic name:
-<pre>
-  /localvision/VReport/xyz
-</pre>
-assuming that the configuration file <i>/vision/lib/vquery.cfg</i> exists
-and contains a line that reads:
-<pre>
-  server localvision fred:7001
-</pre>
-Now only the name <i>localvision</i> is locked into the documents created to
-access Vision.  Changing the server simply involves changing the
-configuration file.  The configuration file can also be used to
-declare multiple servers accessing multiple data bases and to direct
-specific users to specific servers.  
-<p>
-Every configuration file can contain multiple server statements.
-Each server statement associates a symbolic name with a server
-address.  In the previous example, the symbolic name is
-<i>localvision</i>; a server for <i>localvision</i> is <i>fred:7001</i>.  
-The same symbolic name can be
-used in a more than one server statement.  The configuration file:
-<pre>
-  server localvision fred:7001
-  server localvision fester:7001
-</pre>
-defines two servers for <i>localvision</i>.  When <i>vquery</i> encounters a
-URL naming <i>localvision</i> as its session target, it picks one of these
-servers at random.  If that server does not respond, <i>vquery</i>
-will try the other.  Using this strategy, <i>vquery</i> can
-distribute requests across multiple servers, potentially running on
-multiple hosts.  
-<p>
-The configuration file can also be used to provide symbolic name
-resolution for multiple data bases.  The following configuration file
-defines three servers servicing two destinations:
-<pre>
-  server localvision fred:7001
-  server localvision fester:7001
-  server testdata    fester:7002
-</pre>
-<p>
-Presumably, the servers for <i>localvision</i> are accessing one database
-while the server for <i>testdata</i> is accessing another although that is
-not strictly necessary.  
-<p>
-The configuration file can be used to direct specific users to
-specific servers.  The following configuration file directs requests
-based on the host from which they came.  In this example, requests
-originating from <i>pc995</i> are sent to either <i>server1</i> or 
-<i>server2</i> at random; 
-all other requests are sent to either <i>fred</i> or <i>fester</i>:
-<pre>
-  server localvision server1:7001 pc995
-  server localvision server2:7001 pc995
-  server localvision fred:7001
-  server localvision fester:7001
-</pre>
-<p>
-In this example, requests from <i>pc995</i> are the only requests
-that can go to <i>server1</i> or <i>server2</i>.  Furthermore, if
-either <i>server1</i> or <i>server2</i> is available to service a
-request from <i>pc995</i>, it will get the request.  If neither
-<i>server1</i> nor <i>server2</i> is available, however, a request
-from <i>pc995</i> will be sent to either <i>fred</i> or
-<i>fester</i>.  
-<p>
-Finally, <i>vquery</i> can be used to prioritize access to servers
-based on subnet addresses.  The following configuration file creates
-a prioritized server for each of three 24 bit subnets of a class B
-network along with a server that backs up the subnet servers and acts
-as a server for all other users:
-<pre>
-  server localvision subserver1:7001 129.1.1 24
-  server localvision subserver2:7001 129.1.2 24
-  server localvision subserver3:7001 129.1.3 24
-  server localvision baseserver:7001 129.1   16
-</pre>
-<p>
-Note that only users running on hosts with a network address that
-begins with <i>129.1</i> can access a server using the symbolic name
-localvision.  Users with other network addresses who specify the
-localvision session target will not be connected to any of these
-servers.  Note, however, that this is not a security mechanism since
-<i>vquery</i> will continue to forward requests that use host:port
-formatted URLs to the server designated by the URL.  
-<p>
-<h4>Where <i>vquery</i> and its configuration file belong</h4>
-<p>
-By default, <i>vquery</i> is shipped in the /vision/tools directory.
-It should be installed in whatever directory the Web server expects
-to find its CGI programs.  By default, the configuration file for
-<i>vquery</i> is <i>/vision/lib/vquery.cfg</i>.  That file can be relocated
-to a different directory provided that the environment variable
-<i>VQueryConfig</i> is set to the path name of the configuration file.  If
-<i>VQueryConfig</i> is used to relocate the configuration file, it must be
-set either as a configuration option of a Web server that can set
-additional environment variables for its CGI programs or before the
-Web server is started.  
-<p>
-<h4>Customizing the configuration file</h4>
-<p>
-You have the ability to override the default class in the <i>vquery.cfg</i>
-file.  The recipient Vision class can be overridden for all 
-destinations in a configuration file using the <i>default class</i> 
-directive.  The recipient Vision class can be overridden for a 
-specific destination using the <i>class &ltdest&gt</i> directive.  The 
-following example illustrates both:
-<pre>
-  default class   UserInterface HyperWS
-
-  server default  pugsley:7001
-  server test     pugsley:8010
-
-  server demo     pugsley:7200
-  class  demo     Interface HtmlAccess
-</pre>
-As expected, when both a <i>class &ltdest&gt</i> directive and a 
-<i>default class</i>
-directive are present in the same file, the <i>class &ltdest&gt</i> directive
-overrides the <i>default class</i> directive for the destination to which it
-applies. When multiple servers are created to handle a destination, the
-same class specification applies to all of the them.  For example, the
-<i>class analyzer</i> statement in the following example:
-<pre>
-  server analyzer pugsley:7010
-  server analyzer lurch:7010
-  class  analyzer UserInterface HyperWS
-</pre>
-applies to both <i>analyzer</i> servers.
-<p>
-The default expression sent to Vision can now be specified as an
-option in the <i>vquery.cfg</i> file.  The syntax used to specify that
-expression includes the ability to substitute the values of any or
-all environment variables as well as certain other information.  
-<p>
-Two new commands have been added to the set of commands recognized in a
-<i>vquery.cfg</i> file.  The command:
-<pre>
-  default expression aVisionExpressionSpecification
-</pre>
-establishes a Vision expression to use by default for any service
-destination that does not supply its own specification.  Any service
-that requires a different expression can override the default expression
-using the directive:
-<pre>
-  expression aServiceName aVisionExpressionSpecification
-</pre>
-Both the <i>default expression</i> and <i>expression</i> directives must be
-included on a single input line.  <b>Note that there
- is no provision for escaping a long expression across multiple lines</b>.
-<p>
-If a <i>default expression</i> directive does not appear in a <i>vquery.cfg</i>
-file, vquery behaves as if the following default expression were
-supplied:
-<pre>
-  default expression $$class get: $$path usingQuery: $$query for:
-      $REMOTE_HOST at: $REMOTE_ADDR
-</pre>
-This default <i>default expression</i> specifies the expression that vquery
-has historically generated.  In particular, it specifies that the
-message <i>get:usingQuery:for:at:</i> be sent to the class specified by the
-<i>class</i> directive for the service.  The parameters to that message are
-obtained by substituting data available from vquery's environment.
-<p>
-The substitution rules are straightforward.  Except for the <i>$$class</i>
-substitution, all substitutions are formatted as Vision strings with
-embedded &quot; and \ characters suitably quoted to keep Vision happy.  All
-substitutions begin with a '$' followed by a symbol that names an
-environment variable or special substitution.   A substitution that
-begins with a single '$' is assumed to name an environment variable.  
-If the environment variable exists, its value is substituted as a string
-into the expression generated and sent to Vision.  The <i>$REMOTE_HOST</i>
-and <i>$REMOTE_ADDR</i> substitutions above are examples of environment
-variable substitutions.  If the environment variable does not exist, an
-empty string is substituted.  As vquery is currently implemented, there
-is no way to distinguish between a non-existent environment variable and
-one that is defined to have an empty value.
-<p>
-In addition to environment variable substitution, vquery recognizes four
-special substitutions:
-<p><Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
-<tr>
-<td><b>Variable</b>
-<td><b>Definition</b>
-</tr>
-
-<tr>
-<td><i>$$class</i>
-<td>substitute the class specified by the <i>default class</i> or
-<i>class</i> directive applicable to the service.  In the absence
-of either, <i>Interface HtmlAccess</i> is assumed.  The <i>$$class</i>
-substitution is the only substitution that is NOT formatted 
-as a string in the expression generated and sent to Vision.
-<tr>
-<td><i>$$path</i>
-<td>substitute the part of the URL path left after vquery has
-stripped it of its service name and/or address component.
-<tr>
-<td><i>$$query</i>
-<td>substitute the form input data supplied as part of the
-request.  Because different form request methods use different 
-mechanisms for passing form data, this substitution should be 
-used instead of the $QUERY_STRING environment variable substitution
-to obtain form input data.
-<tr>
-<td><i>$$environment</i>
-<td>substitute the entire set of environment variable
-bindings available to vquery.  Each environment variable is 
-supplied one per line in the form <i>name=value</i>.
-</tr></table></Center>
-<p>
-The <i>vquery</i> source code is provided as part of the 
-<a href="ifDownload.htm#ifVQuery"> vquery download module</a> 
-for users who wish to modify it for their own purposes.
-Instructions for compiling it on different systems are supplied at
-the top of <i>vquery.cpp</i>.
 
 {% include doc-footer.htm copydates="1997" %}

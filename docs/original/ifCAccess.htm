@@ -1,64 +1,12 @@
 ---
 title: Sample C++ Access to Vision
 ---
-<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
 
-<h2>
-Sample C++ Access to Vision</h2>
-| <a href="vconcep.htm">Home</a> | <a href="vifaces.htm">Interfaces</a> |
-<a href="ifDownload.htm#ifCAccess">Download
-Scripts</a> |
-<hr>
-<h2>Topics Covered:</h2>
-
-<ul type=square>
-<li>
-<a href="#Introduction">Introduction</a></li>
-
-<li>
-<a href="#Operation">Operation</a></li>
-
-<li>
-<a href="#Compilation">Compilation</a></li>
-
-<li>
-<a href="#Reference">Reference</a></li>
-
-<li>
-<a href="#VArrayBase">class VArrayBase</a></li>
-
-<li>
-<a href="#VArray">class VArray</a></li>
-
-<li>
-<a href="#VConnection">class VConnection</a></li>
-
-<li>
-<a href="#VConnectionUse">class VConnectionUse</a></li>
-
-<li>
-<a href="#VDatum">class VDatum</a></li>
-
-<li>
-<a href="#VExtractWS">class VExtractWS</a></li>
-
-<li>
-<a href="#VSockets">class VSockets</a></li>
-
-<li>
-<a href="#VStringBase">class VStringBase</a></li>
-
-<li>
-<a href="#VString">class VString</a></li>
-</ul>
-
-<hr><a NAME="Introduction"></a>
-<h2>
-Introduction</h2>
+<h2 id="Introduction">Introduction</h2>
 The Vision C++ interface kit consists of a set of C++ classes that you
 use to provide structured access to Vision data. The classes in this kit
 provide you with array and character based access to Vision.
-<p>The Vision C++ interface kit is supplied in <a href="ifDownload.htm#ifCAccess">source
+<p>The Vision C++ interface kit is supplied in source
 code form.</a> You are encouraged to modify that source code to suit your
 needs. The kit has been tested using default compilation options under
 the following combinations of operating systems and compilers:
@@ -97,9 +45,7 @@ the following combinations of operating systems and compilers:
 
 <p>The functionality of the Vision C++ interface kit is also available in COM form
 using the <a href="ifVAccess.htm">VAccess COM objects</a>.
-<br><a NAME="Operation"></a>
-<h2>
-Operation</h2>
+<h2 id="Operation">Operation</h2>
 The Vision C++ interface kit provides array and character oriented, socket
 based access to Vision. When you use the kit, you primarily work with instances
 of the six classes summarized in the following table:
@@ -576,11 +522,7 @@ ability to generate the list dynamically as the following example illustrates:
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf ("\n");</pre>
 
-<pre>
-<hr WIDTH="100%"><a NAME="Compilation"></a></pre>
-
-<h2>
-Compilation</h2>
+<h2 id="Compilation">Compilation</h2>
 The Vision C++ interface kit is supplied in source code form. In general,
 you should add these files to the project or makefile you are using to
 develop your application, compile the '.c' versions of these files with
@@ -645,25 +587,18 @@ the socket calls made by the classes included in the interface kit.
 </table></center>
 
 <p>
-<hr WIDTH="100%">
-<br><a NAME="Reference"></a>
-<h2>
-Reference</h2>
+<h2 id="Reference">Reference</h2>
 
-<a NAME="VArrayBase"></a>
-<h4>
-class VArrayBase</h4>
+<h3 id="VArrayBase">class VArrayBase</h4>
 
-<h4>
-Synopsis</h4>
+<h4>Synopsis</h4>
 <b>Superclasses:</b>
 <br>&lt;none>
 <p><b>Subclasses:</b>
 <br>VArray&lt;T&gt;
 <p><b>Definition:</b>
 <br>#include "VArray.h"
-<h4>
-Overview</h4>
+<h4>Overview</h4>
 The <i>VArrayBase</i> class provides an abstract class foundation for multi-dimensional
 arrays of arbitrary size and shape.
 <p>This class is a pure abstract class that cannot be instantiated directly.
@@ -674,8 +609,7 @@ deal with setting and querying the size and shape of an array.
 or as a vector which linearizes the array in "row-major" order. The member
 functions defined in this class help you to construct and decode a linearized
 view of an array.
-<h4>
-Operations</h4>
+<h4>Operations</h4>
 
 <b><h5>Category:</h5>
 <pre>

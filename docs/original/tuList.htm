@@ -1,7 +1,19 @@
 ---
 title: "Vision Tutorial 4: Using Lists"
+
+related_topics:
+  - url: "tuBasic.htm"
+    title: "Vision Basics"
+  - url: "tuLoad.htm"
+    title: "Creating A Demo Database"
+  - url: "tuSingle.htm"
+    title: "Single Object Access"
+  - url: "tuTS.htm"
+    title: "Using Dates and TimeSeries"
+
 ---
 
+<p>
 <blockquote><hr>
 <center><b><font size+1>Reminder!</font></b></center>
 To run these examples, you should first start a new session then load the sample database using:
@@ -14,7 +26,7 @@ directory.
 <b>Note:</b> The <i>sample.load</i> file runs by default on a <i>Unix</i> environment.  If you are using a <i>Windows NT</i> platform, this location may be prefixed by a drive  and optional path (e.g. <i>d:/visiondb/localvision/samples/general/sample.load</i>).  Check with your Vision Administrator for further details.<hr></blockquote>
 
 <hr>
-<h2 id="List Creation and Basic Access">List Creation and Basic Access</h2>
+<h2 id="ListCreationAndBasicAccess">List Creation and Basic Access</h2>
 
 <p>Vision allows you to store one or more objects in a list. To create
 a list, just separate the objects you wish to include in the list with
@@ -100,7 +112,7 @@ returns the value <i>TRUE</i>.
 
 <hr width="100%" ></p>
 
-<h2 id="The do: Message">The "<a href="clCollect.htm#do">do:</a>" Message</h2>
+<h2 id="TheDoMessage">The "<a href="clCollect.htm#do">do:</a>" Message</h2>
 
 <p>Now that you know how many companies are in <i>testList</i>, you may
 wish to analyze and display information for each company in the list. The
@@ -249,7 +261,7 @@ the companies.
 
 <hr>
 
-<h2 id="The select: Message">The "<a href="clCollect.htm#select">select:</a>" Message<</h2>
+<h2 id="TheSelectMessage">The "<a href="clCollect.htm#select">select:</a>" Message<</h2>
 
 <p>It is often useful to restrict a list to objects that meet certain criteria.
 For example, you may wish to find the companies in <i>fullList</i> whose
@@ -372,7 +384,7 @@ your criteria.
 
 <hr></p>
 
-<h2 id="Sort Messages"><a href="clCollect.htm#sorts">Sort</a> Messages</h2>
+<h2 id="SortMessages"><a href="clCollect.htm#sorts">Sort</a> Messages</h2>
 
 <p>It is often useful to display your information in sorted order. The
 <i><a href="mList.htm#sortDown:">sortDown:</a></i> and <i><a href="mList.htm#sortUp:">sortUp:</a>
@@ -460,7 +472,7 @@ sort.
 are available.
 <hr>
 
-<h2 id="The extendBy: Message">The <a href="clCollect.htm#extend">"extendBy:"</a>Message</h2>
+<h2 id="TheExtendByMessage">The <a href="clCollect.htm#extend">"extendBy:"</a>Message</h2>
 
 <p>The last example used the calculation price / earningsPerShare three
 times (selecting, sorting, and doing) thus creating two inefficiencies.
@@ -575,7 +587,7 @@ IBM Corp           0.10   54217.02     9.26 </pre>
 <p>
 <hr>
 
-<h2 id="List Rank, Decile, and Quintile Messages">List <a href="clCollect.htm#ranks">Rank</a>, 
+<h2 id="ListRankDecileAndQuintileMessages">List <a href="clCollect.htm#ranks">Rank</a>, 
 <a href="clCollect.htm#tiles">Decile</a>, and 
 <a href="clCollect.htm#tiles">Quintile</a> Messages</h2>
 
@@ -792,7 +804,7 @@ Boeing Co               15355.00    3   1.38     2
 <p>
 <hr>
 
-<h2 id="The groupedBy: Message">The <a href="clCollect.htm#groups">"groupedBy:"</a> Message</h2>
+<h2 id="TheGroupedByMessage">The <a href="clCollect.htm#groups">"groupedBy:"</a> Message</h2>
 
 <p>The <i>groupedBy:</i> message provides you with a powerful tool for
 aggregation, enabling you to simultaneously analyze information at a detailed
@@ -1025,7 +1037,7 @@ this report for all companies.
 <hr>
 
 <a href="clCollect.htm#compute">
-<h2 id="Statistical Messages">Statistical Messages</h2></a>
+<h2 id="StatisticalMessages">Statistical Messages</h2></a>
 
 <p>Vision offers various messages for calculating summary statistics about
 a list. For example, if you wish to calculate the average sales for the
@@ -1199,7 +1211,7 @@ Sector Totals:                 199700.89              6.66
 </ul>
 <hr>
 
-<h2 id="Other List Messages">Other List Messages</h2>
+<h2 id="OtherListMessages">Other List Messages</h2>
 
 <p>Many applications require merging several lists together. Vision offers
 several messages to support these operations. Start by creating two lists:
@@ -1405,17 +1417,5 @@ General Motors Corp     6
 IBM Corp                7
 Travelers Corp          8</pre>
 </ul>
-
-<hr>
-
-<h2 id="SeeAlso">See Also</h2>
-
-<p>
-
-| <a href="tuBasic.htm">Vision Basics</a> 
-| <a href="tuLoad.htm">Creating A Demo Database</a>
-| <a href="tuSingle.htm">Single Object Access</a> 
-| <a href="tuTS.htm">Using Dates and TimeSeries</a> |
-
 
 {% include doc-footer.htm copydates="1999" %}

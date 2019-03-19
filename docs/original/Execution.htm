@@ -245,7 +245,9 @@ the object that results. The <i>super</i> message does not modify its recipient
 -- it simply returns its next deepest layer. For example,</p>
 
 <ul>
-<pre>instance1a super</pre>
+<pre>
+instance1a super
+</pre>
 </ul>
 
 <p>returns the same object as <i>instance1</i> -- the object which it specialized.</p>
@@ -286,7 +288,7 @@ Definitions</a></p>
 Definitions</a></p>
 </ul>
 
-<h4 id="current">The <i>^current</i> Object</h4>
+<h3 id="current">The <i>^current</i> Object</h3>
 
 <p>One of the first questions this document asked was how Vision knows
 where to find <i>gm</i> in the expression:</p>
@@ -367,13 +369,15 @@ It makes sense to have it inherit from someplace convenient. Consider the
 following Vision code fragment:</p>
 
 <ul>
-<pre>!x &lt;- 10;
+<pre>
+!x &lt;- 10;
 !y &lt;- 5;
 [ !x &lt;- 20;
   x print;
   y print;
 ] value;
-x print;</pre>
+x print;
+</pre>
 </ul>
 
 <p>When executed, this code displays the following result:</p>
@@ -489,8 +493,7 @@ should see the same collection of names as seen by their non-conditional
 brethren. Constructing a <i>^current</i> object that inherits from the
 environment of the block's definition produces that behavior. </p>
 
-<h4 id="operate">Using Blocks To Operate
-On Objects</h4>
+<h3 id="operate">Using Blocks To Operate On Objects</h3>
 
 <p>It is often useful to send a number of messages to the same object.
 For example, you could write code like:</p>
@@ -742,7 +745,7 @@ from the object with which it is working, the block gains direct access
 to the information it needs. That principle also applies to the definition
 of methods.</p>
 
-<h4 id="methods">Using Blocks To Define Methods</h4>
+<h3 id="methods">Using Blocks To Define Methods</h3>
 
 <p>When you define a method, you are defining code that runs in response
 to a message. Because that code is a block, it will have a <i>^current</i>
@@ -893,8 +896,7 @@ return the definition environment of the block. You will probably never
 need to use <i>^my</i> to access the environment that actually defined
 the method, but you can and it behaves consistently.</p>
 
-<h4 id="super">Using <i>^super</i> to Access Superclass
-Definitions</h4>
+<h3 id="super">Using <i>^super</i> to Access Superclass Definitions</h3>
 
 <p>In an object-oriented system, subclasses are used to implement more
 specialized behavior than their superclasses. One way that is done is by
@@ -1038,7 +1040,7 @@ operations like <i>extendBy:</i> and <i>groupedBy:</i> and implementing
 operations like <i>showMessagesX</i> that must examine each layer of
 an object. </p>
 
-<h4 id="here">Using <i>^here</i> to Ignore Subclass Definitions</h4>
+<h3 id="here">Using <i>^here</i> to Ignore Subclass Definitions</h3>
 
 <p>While the ability to override the implementation of a message in a subclass
 is a powerful capability, sometimes it is too powerful. When you write

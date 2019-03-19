@@ -354,7 +354,7 @@ date (i.e., the <i>asDate</i> message returns an NA).
 <hr>
 <h2 id="adv">Memory Resources and Advanced Data Loading Techniques</h2>
 
-<h4 id="adv_mem">Private Memory and String Structures</h4>
+<h3 id="adv_mem">Private Memory and String Structures</h3>
 <p>
 The amount of private memory allocated at any point in your Vision session for temporary
 and permanent structures can be displayed using the following query:
@@ -532,7 +532,7 @@ To optimize private memory usage when loading data, methods should be defined to
 process the data load so that following execution any unreferenced temporary variables
 or string clusters are no longer resident in memory.
 <p>
-<h4 id="adv_batch">Batch Loads</h4>
+<h3 id="adv_batch">Batch Loads</h3>
 <p>
 The message <i>asFileContents</i> is suitable for loading data from files that
 are relatively small, on the order of 5-30 MB, consisting of a single file or
@@ -638,7 +638,7 @@ by the amount of characters left to process since the last batch is not guarante
 the full number of records as specified by the value of <i>batchCount</i>. A final check of
 string size greater than 0 is added in the event that an empty string is returned.
 <p>
-<h4 id="adv_multi">Multiple File Loads</h4>
+<h3 id="adv_multi">Multiple File Loads</h3>
 <p>
 If data to be loaded is provided in separate files rather than in a single file, the
 <a href="#adv_batch">batch load</a> technique may not be appropriate. In this
