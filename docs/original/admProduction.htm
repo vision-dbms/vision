@@ -1,32 +1,8 @@
 ---
 title: "Vision Administration: Production Processing"
+
 ---
-<h2>Vision Administration: Production Processing</h2>
 
-<p>
-| <a href="vadmin.htm">General Vision Administration</a> 
-| <a href="admSysAdmin.htm">System Administration Issues</a>
-| <a href="vconcep.htm">Home</a>
-|
-<hr>
-<h2>Topics Covered:</h2>
-<ul type=square>
-<li><a href="#overview">Overview</a>
-<li><a href="#process">The Production Process</a>
-<li><a href="#install">Installation</a>
-<li><a href="#directories">The Production Directory Structure</a>
-<li><a href="#daily">Daily Production Cycle</a>
-<li><a href="#updates">Update Jobs</a>
-<li><a href="#reports">Report Jobs</a>
-<li><a href="#pma">Sample Production Environment</a>
-<li><a href="#submits">Submitting Ad-Hoc Updates</a>
-<li><a href="#faqs">Frequently Asked Questions</a>
-<li><a href="#variables">Production Environment Variable Summary</a>
-<li><a href="#vadmin">The <i>VAdmin</i> Module and Production Processing</a>
-<li><a href="#custom">Designing Your Own Production Processing</a>
-</ul>
-
-<p><hr>
 <h2 id="overview">Overview</h2>
 <p>
 Many Vision installations expect to receive various data feeds on a 
@@ -233,7 +209,7 @@ will run until terminated or until the next night's cycle begins.
 
 
 <p>
-<h4 id="dailyMaint">Daily Setup and Maintenance Activities</h4>
+<h3 id="dailyMaint">Daily Setup and Maintenance Activities</h3>
 <p>
 When it starts, the <i>daily.daemon</i> loads a command file defined
 for the current day of the week.  The files <i>setup.Mon</i>,
@@ -272,7 +248,7 @@ extension to the file name.
 For more information about the maintenance procedures, see the document
 <a href="admTools.htm"><i>Vision Network Administration Tools</i></a>.
 <p>
-<h4 id="dailyStatus">The Status Directory</h4>
+<h3 id="dailyStatus">The Status Directory</h3>
 <p>
 The <i>/localvision/production/status</i> directory provides 
 a snapshot of the current production cycle's activities.  
@@ -361,7 +337,7 @@ For each job that has run there should be a corresponding log file in
 the <i>logs</i> directory named <i>logs/jobName.log</i>
 containing details for that specific job for the current date's processing.  
 <p>
-<h4 id="dailyScheduling">Scheduling Update and Report Jobs</h4>
+<h3 id="dailyScheduling">Scheduling Update and Report Jobs</h3>
 <p>
 Update jobs are scheduled by placing the job name in the
 <i>status/pending</i> directory.  For example, to schedule a job
@@ -402,7 +378,7 @@ be saved in the directory <i>/localvision/production/Reports/output</i>.
 The specific steps needed to create report <b>job</b> and <b>okay</b>
 scripts are <a href="#reports">described later in this document</a>.
 <p>
-<h4 id="dailyTerminate">Production Cycle Termination and Restart</h4>
+<h3 id="dailyTerminate">Production Cycle Termination and Restart</h3>
 <p>
 If the new production cycle is ready to start while a cycle is
 in progress, the new process creates the token
@@ -456,7 +432,7 @@ example, if you saved your environment variables in the file
 <pre>cd /localvision/production/admin
 daily.daemon helpers/sample.env >& logs/nocron.yyyymmdd & </pre></ul>
 <p>
-<h4 id="dailyHoliday">Holiday Processing and Job Cancellation</h4>
+<h3 id="dailyHoliday">Holiday Processing and Job Cancellation</h3>
 <p>
 To cancel the normal daily processing for holidays that occur during
 the business week, you can store holiday dates in the directory
@@ -495,7 +471,7 @@ other update jobs.
 </ul>
 <p>
 
-<h4 id="updatesCreate">Creating Update Jobs </h4>
+<h3 id="updatesCreate">Creating Update Jobs </h3>
 <p>
 Update jobs are defined in the directory
 <i>/localvision/production/Updates/jobs</i>.
@@ -580,7 +556,7 @@ if (-f /localvision/upload/feeds/prices.dat ) exit 0
 exit 1</pre></ul>
 
 <p>
-<h4 id="updatesSched">Scheduling Update Jobs</h4>
+<h3 id="updatesSched">Scheduling Update Jobs</h3>
 <p>
 To schedule an update job, you create a token containing the job name in
 the <i>status/pending</i> directory.  For example, to manually schedule the
@@ -636,7 +612,7 @@ token.  The <i>Cancel.Prices</i> token will remain in the
 <i>status/tokens</i> directory for the remainder of the cycle.
 
 <p>
-<h4 id="updatesPredefined">Pre-defined Update Jobs</h4>
+<h3 id="updatesPredefined">Pre-defined Update Jobs</h3>
 <p>
 Your installation includes several pre-defined update jobs in the
 <i>/localvision/production/Updates/jobs</i> directory:
@@ -707,7 +683,7 @@ executed:
 </ul>
 
 <p>
-<h4 id="reportsCreate">Creating Report Jobs </h4>
+<h3 id="reportsCreate">Creating Report Jobs </h3>
 <p>
 You will need to create a report job for each production report you wish
 to run.  Report jobs are defined in the directory
@@ -779,7 +755,7 @@ The Price Changes Report is Done
 @@@EOF
 </pre></ul>
 <p>
-<h4 id="reportsSched">Scheduling Report Jobs</h4>
+<h3 id="reportsSched">Scheduling Report Jobs</h3>
 <p>
 To schedule a report job, you create a token containing the job name 
 prefixed by <i>report.</i> in the directory
@@ -809,7 +785,7 @@ To cancel a report, remove its token from the <i>status/pending</i>
 directory.
 
 <p>
-<h4 id="reportsPredefined">Pre-defined Report Jobs</h4>
+<h3 id="reportsPredefined">Pre-defined Report Jobs</h3>
 <p>
 Your installation includes several pre-defined report jobs in the
 <i>/localvision/production/Reports/jobs</i> directory:
@@ -873,7 +849,7 @@ an alias for the script
 <i>/localvision/production/admin/scripts/submitUpdate</i>.
 
 <p>
-<h4 id="submitsCode">Submitting Ad-Hoc Vision Code Updates</h4>
+<h3 id="submitsCode">Submitting Ad-Hoc Vision Code Updates</h3>
 <p>
 You may need to load and save new Vision scripts into 
 your database for several reasons such as report modifications,
@@ -915,7 +891,7 @@ or
 visionSubmit -C -n myfile</b>
 
 </pre></ul>
-<h4 id="submitsFeed">Submitting Ad-Hoc DataFeed Updates</h4>
+<h3 id="submitsFeed">Submitting Ad-Hoc DataFeed Updates</h3>
 <p>
 
 It is sometimes useful to load data using a <b>DataFeed</b> format
@@ -945,14 +921,13 @@ This indicates that this is the 33rd submit for user code
 You can avoid the prompts by supplying the inputs on one line.
 For example: 
 <ul type=disc>
-<pre>visionSubmit -F currency.dat CurrencyMaster currency.cfg
-</b> 
+<pre>
+visionSubmit -F currency.dat CurrencyMaster currency.cfg
+</pre>
 or
-<b>
-visionSubmit -F -n currency.dat CurrencyMaster</pre></ul>
-
-
-
+<pre>
+visionSubmit -F -n currency.dat CurrencyMaster
+</pre></ul>
 
 <p><hr>
 <h2 id="faqs">Frequently Asked Questions</h2>
@@ -1023,12 +998,14 @@ run the <i>sleep 300</i> and <i>sleep 360</i> commands each time they
 are done processing the current jobs in the pending queue.  You can
 "kill the sleeps" to force either of these tasks to re-examine the
 pending queue.  For example:<ul type=disc>
-<pre>ps -fu dbadmin | grep sleep           #- show the sleep tasks
-</b>
+<pre>
+ps -fu dbadmin | grep sleep           #- show the sleep tasks
+</pre>
 displays:
-<b>
+<pre>
 dbadmin 22183 10262  0 13:39:37 ?         0:00 sleep 300
-dbadmin 22160 10266  0 13:36:54 ?         0:00 sleep 360</pre></ul>
+dbadmin 22160 10266  0 13:36:54 ?         0:00 sleep 360
+</pre></ul>
 To force the update daemon to re-examine the pending queue, use
 the Unix <i>kill</i> command to remove the <i>sleep 300</i> task:<ul type=disc>
 <pre>kill 22183
@@ -1091,12 +1068,5 @@ changes
 <tr><td><i>submitLog</i>   <td>/localvision/production/status/logs/submit.log
 <tr><td><i>listenerLog</i> <td>/localvision/production/status/logs/listener.log
 </table></center>
-
-<hr>
-<h2 id="vadmin">The <i>VAdmin</i> Module and Production Processing</h2>
-<p>
-
-<p><hr>
-<h2 id="custom">Designing Your Own Production Processing</h2>
 
 {% include doc-footer.htm copydates="1998-1999" %}

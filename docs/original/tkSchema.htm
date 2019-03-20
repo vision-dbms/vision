@@ -1,6 +1,8 @@
 ---
 title: "Vision ToolKit Class: Schema"
 
+toc_sticky: false
+
 related_topics:
   - url: Classes.htm
     title: Classes
@@ -12,6 +14,7 @@ related_topics:
     title: Message Cross Reference
 
 ---
+
 <p>
 The Vision <b>Schema</b> ToolKit has been created to provide a set of
 classes and messages that aid in tracking information about your
@@ -162,7 +165,7 @@ and descriptions.  The expression:
 </pre>
 returns an instance of this class.
 <p>
-<h4>Descriptive Information</h4>
+<h3 id="CD_DescriptiveInformation">Descriptive Information</h3>
 <p>
 A number of messages defined for the <i>Schema ClassDescriptor</i>
 class are used to store and access descriptive information about 
@@ -227,7 +230,7 @@ returned otherwise.
 </tr></table></Center>
 
 <p>
-<h4>New ClassDescriptor Instances</h4>
+<h3 id="CD_New_ClassDescriptor_Instances">New ClassDescriptor Instances</h3>
 <p>
 A new <i>Schema ClassDescriptor</i> instance is automatically created
 whenever a new subclass is created using a variation of the
@@ -279,7 +282,7 @@ the class <i>Entity</i> (i.e., <i>Entity classDescriptor</i>).
 and instantiations for the underlying class are initialized.  
 </ol>
 <p>
-<h4 id="classType">Assigning the ClassType</h4>
+<h3 id="CD_classType">Assigning the ClassType</h3>
 <p>
 A Vision database contains a large number of classes organized into a
 hierarchy that all eventually inherit from the class <i>Object</i>.
@@ -347,7 +350,7 @@ message.  To look at the current assignments use:
         ] ;
 </pre>
 <p>
-<h4>Tracking Inheritance</h4>
+<h3 id="CD_TrackingInheritance">Tracking Inheritance</h3>
 <p>
 The property <i>inheritancePath</i> is defined at <i>Schema ClassDescriptor</i>
 and contains an indexed list of the
@@ -409,7 +412,7 @@ is called directory by the version at <i>Object<i>.
 
 </tr></table></Center>
 <p>
-<h4>Naming Dictionaries</h4>
+<h3 id="CD_NamingDictionaries">Naming Dictionaries</h3>
 <p>
 <a href="clDict.htm#named">Naming Dictionaries</a> are subclasses of
 <i>Dictionary</i> that are used to organize instance names for a class.
@@ -452,7 +455,7 @@ flag.  You can turn this flag off using
 the message <i>setAutoCreateNamingDictionaryOff</i> .
 
 <p>
-<h4>New Instances of the Underlying Class</h4>
+<h3 id="CD_NewInstancesUnderlyingClass">New Instances of the Underlying Class</h3>
 <p>
 Information recorded in a class' class descriptor is used to
 create new instances of the class.  The <i>createInstance:</i>
@@ -472,7 +475,7 @@ The <i>initializeNames</i> message updates the naming dictionary associated
 with the class descriptor with the code and any aliases defined
 for the new instance.
 <p>
-<h4>Additional Information</h4>
+<h3 id="CD_AdditionalInformation">Additional Information</h3>
 <p>
 The <i>Schema ClassDescriptor</i> messages are described further in
 the document <a href="mSchema.htm"><i>Schema Message Dictionary</i></a>.
@@ -495,7 +498,7 @@ or <i>describe</i> message to the result to display a short or long
 description of the message.
 
 <p>
-<h4>Descriptive Information</h4>
+<h3 id="MID_DescriptiveInformation">Descriptive Information</h3>
 <p>
 A number of messages defined for the <i>Schema 
 MessageImplementationDescriptor</i>
@@ -575,9 +578,7 @@ parameters names filled in for binary and keyword messages.
 <p>
 
 <p>
-<h4>
-<a name="schemaTables">MessageType, FunctionType, UsageLevel, and KeyType</a>
-</h4>
+<h3 id="MID_schemaTables">MessageType, FunctionType, UsageLevel, and KeyType</h3>
 <p>
 The class <b>MessageType</b> defines instances that correspond to
 the different types of message that can be defined in Vision.  The
@@ -618,7 +619,7 @@ Although, Vision does not require or use keys directly, this is sometimes
 useful for classes that are presented as part of a data model.
 
 <p>
-<h4 id="settingDefaults">Default Values</h4>
+<h3 id="MID_settingDefaults">Default Values</h3>
 <p>
 The property <i>defaultValue</i> is used to store a default value for
 a <i>MessageImplementationDescriptor</i>.  It is only meaningful to
@@ -646,7 +647,7 @@ of the execution of the
 method.  
 
 <p>
-<h4>Method History</h4>
+<h3 id="MID_MethodHistory">Method History</h3>
 <p>
 The time series property <i>implementationSource</i> provides a history
 of method changes.  To display the implementation history for a particular
@@ -662,7 +663,7 @@ method use:
 <p>
 
 <p>
-<h4>New Instances</h4>
+<h3 id="MID_NewInstances">New Instances</h3>
 <p>
 New instances of the <i>Schema MessageImplementationDescriptor</i>
 class are NOT
@@ -686,7 +687,7 @@ The <i>refreshedInLastPosting</i> property is set to TRUE if
 the instance implementation or type changed during the last update.
 
 <p>
-<h4>Additional Information</h4>
+<h3 id="MID_AdditionalInformation">Additional Information</h3>
 <p>
 The <i>Schema MessageImplementationDescriptor</i>
 messages are described further in
@@ -1024,7 +1025,7 @@ The <b>Schema</b>
 ToolKit has been a standard component of all databases bootstrapped
 since March 1994.  
 <p>
-<h4>Adding Classes Created With <i>specialized</i> </h4>
+<h3 id="AddingClassesCreatedWithSpecialized">Adding Classes Created With <i>specialized</i> </h3>
 <p>
 Variations of the <i>specialized</i> message create subclasses
 without generating a corresponding <i>ClassDescriptor</i> instance.

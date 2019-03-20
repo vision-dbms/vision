@@ -1,33 +1,14 @@
 ---
 title: "Vision Administration: Batch Processing"
+
+related_topics:
+  - url: "clDataFeed.htm"
+    title: "Data Feeds"
+  - url: "pmaFeeds.htm"
+    title: "PMA Feeds"
+
 ---
-<h2>Vision Administration: Batch Processing</h2>
-<p>
-| <a href="vconcep.htm">Home</a> 
-| <a href="clDataFeed.htm">Data Feeds</a>
-| <a href="pmaFeeds.htm">PMA Feeds</a>
-|
-<hr>
 
-
-
-<h2>Topics Covered:</h2>
-<ul type=square>
-<li><a href="#overview">Overview</a>
-<li><a href="#Batch">Creating Batch Scripts</a>
-<li><a href="#Updating">Using BatchScripts to Run DataFeeds</a>
-<li><a href="#New">Defining New Classes and Properties</a>
-<li><a href="#ModelData">ModelData Sample</a>
-<li><a href="#Maintenance">Database Maintenance Functions</a>
-<li><a href="#ObjectSpaces">Creating New Object Spaces</a>
-<li><a href="#ObjectSpaceAssign">Assigning New Classes to an Object Space</a>
-<li><a href="#ClassStores">Creating New DataRecord Stores</a>
-<li><a href="#Bridges">Creating Bridge Classes and Feeds</a>
-<li><a href="#LocalEntity">LocalEntity Bridges and Private Object Spaces</a>
-<li><a href="#EstimateBridge">Creating Estimate Bridges and Feeds</a>
-
-</ul>
-<p><hr>
 <h2 id="overview">Overview</h2>
 <p>
 The <a href="pmaDBA.htm">Vision Administrator Module</a> performs various Database Administration functions
@@ -86,8 +67,8 @@ saved in the Vision database and you want to run this program.  You
 could create the file <i>testfile</i> which contains the following
 lines:
 <pre>
-    displayWeeklyReports ;
-     ?g
+  displayWeeklyReports ;
+  ?g
 </pre>
 Note that the characters <b>?g</b> must be the only characters on the line
 followed by a carriage return.
@@ -108,16 +89,16 @@ a new display method for the class Object and saves the method to the
 database:
 
 <pre>
-     #---  Vision Script to define and save a new method at Object
-     Object defineMethod: [ | display |
-        ^self whatAmI print ; ^self creationDate print ;
-        ^self code printNL ;
-     ] ;
-     ?g
+  #---  Vision Script to define and save a new method at Object
+  Object defineMethod: [ | display |
+     ^self whatAmI print ; ^self creationDate print ;
+     ^self code printNL ;
+  ] ;
+  ?g
 
-     #---  Now save the results - don't forget the ?g on its own line
-     Utility updateNetworkWithAnnotation: "define a new display method" ;
-     ?g
+  #---  Now save the results - don't forget the ?g on its own line
+  Utility updateNetworkWithAnnotation: "define a new display method" ;
+  ?g
 </pre>
 
 Assume this script is saved as the file <i>testupdate</i>.  You
@@ -164,10 +145,10 @@ load data using the <b>SecurityMaster</b> feed from the file
 <i>/localvision/upload/feeds/secmaster.dat</i>, use the expression:
 
 <pre>
-         Interface BatchFeedManager
-         upload: "SecurityMaster"
-         usingFile: "/localvision/upload/feeds/secmaster.dat"
-         withConfig: NA ;
+  Interface BatchFeedManager
+  upload: "SecurityMaster"
+  usingFile: "/localvision/upload/feeds/secmaster.dat"
+  withConfig: NA ;
 </pre>
 
 If you have an explicit configuration file to use, replace the
@@ -178,16 +159,16 @@ Master via a batch process, do the following:
 <li>Create a Vision script that loads and saves the data
 
 <pre>
-         #--  Load the data
-         Interface BatchFeedManager
-             upload: "SecurityMaster"
-             usingFile: "/localvision/upload/feeds/secmaster.dat"
-             withConfig: NA ;
-         ?g
+  #--  Load the data
+  Interface BatchFeedManager
+      upload: "SecurityMaster"
+      usingFile: "/localvision/upload/feeds/secmaster.dat"
+      withConfig: NA ;
+  ?g
 
-         #--  and Update the database - don't forget the ?g on its own line
-         Utility updateNetworkWithAnnotation: "load single secmaster file" ;
-         ?g
+  #--  and Update the database - don't forget the ?g on its own line
+  Utility updateNetworkWithAnnotation: "load single secmaster file" ;
+  ?g
 </pre>
 <p>
 Note:  On NT systems, if your data files are on a different drive than your script, you need to use the absolute path name.<p>
@@ -208,36 +189,36 @@ name them the same way each day, you can use a single Vision script
 to update the set:
 
 <pre>
-         #--  Load the data
-         Interface BatchFeedManager
-             upload: "CompanyMaster"
-             usingFile: "/localvision/upload/feeds/compmaster.dat"
-             withConfig: NA ;
-         ?g
-         Interface BatchFeedManager
-             upload: "SecurityMaster"
-             usingFile: "/localvision/upload/feeds/secmaster.dat"
-             withConfig: NA ;
-         ?g
-         Interface BatchFeedManager
-             upload: "PortfolioMaster"
-             usingFile: "/localvision/upload/feeds/portmaster.dat"
-             withConfig: NA ;
-         ?g
-         Interface BatchFeedManager
-             upload: "PriceFeed"
-             usingFile: "/localvision/upload/feeds/prices.dat"
-             withConfig: NA ;
-         ?g
-         Interface BatchFeedManager
-             upload: "HoldingsFeed"
-             usingFile: "/localvision/upload/feeds/holdings.dat"
-             withConfig: NA ;
-         ?g
+  #--  Load the data
+  Interface BatchFeedManager
+      upload: "CompanyMaster"
+      usingFile: "/localvision/upload/feeds/compmaster.dat"
+      withConfig: NA ;
+  ?g
+  Interface BatchFeedManager
+      upload: "SecurityMaster"
+      usingFile: "/localvision/upload/feeds/secmaster.dat"
+      withConfig: NA ;
+  ?g
+  Interface BatchFeedManager
+      upload: "PortfolioMaster"
+      usingFile: "/localvision/upload/feeds/portmaster.dat"
+      withConfig: NA ;
+  ?g
+  Interface BatchFeedManager
+      upload: "PriceFeed"
+      usingFile: "/localvision/upload/feeds/prices.dat"
+      withConfig: NA ;
+  ?g
+  Interface BatchFeedManager
+      upload: "HoldingsFeed"
+      usingFile: "/localvision/upload/feeds/holdings.dat"
+      withConfig: NA ;
+  ?g
 
-         #--  and Update the database - don't forget the ?g on its own line
-         Utility updateNetworkWithAnnotation: "load daily file" ;
-         ?g
+  #--  and Update the database - don't forget the ?g on its own line
+  Utility updateNetworkWithAnnotation: "load daily file" ;
+  ?g
 </pre>
 
 <hr>
@@ -249,63 +230,61 @@ The actual Vision code invoked by VAdmin to perform these functions
 is supplied below:
 
 <pre>
-     #--------------------
-     #  VAdmin Schema Choice: Create Entity Class
-     #      Creates Entity subclass and associated MasterFeed
-     #  Inputs -
-     #        createEntityClass:      name of subclass to create
-     #                     from:      Entity class to subclass
-     #--------------------
-     Interface BatchFeedManager
-        createEntityClass: "SPIndustry" from: "Industry" ;
+  #--------------------
+  #  VAdmin Schema Choice: Create Entity Class
+  #      Creates Entity subclass and associated MasterFeed
+  #  Inputs -
+  #        createEntityClass:      name of subclass to create
+  #                     from:      Entity class to subclass
+  #--------------------
+  Interface BatchFeedManager
+     createEntityClass: "SPIndustry" from: "Industry" ;
+  #--------------------
+  #  VAdmin Schema Choice: Create DataRecord Class
+  #      Creates DataRecord subclass and EntityExtenderFeed
+  #  Inputs -
+  #        createDataRecordClass:     name of subclass to create
+  #                         from:     DataRecord class to subclass
+  #                     linkedTo:     Entity class to link to
+  #                          via:     property to define at linkedTo class
+  #                         asTS:     should property be a t/s?
+  #--------------------
+  Interface BatchFeedManager
+    createDataRecordClass: "ModelData" from: "DataRecord"
+       linkedTo: "Company" via: "modelData" asTS: "YES" ;
 
-     #--------------------
-     #  VAdmin Schema Choice: Create DataRecord Class
-     #      Creates DataRecord subclass and EntityExtenderFeed
-     #  Inputs -
-     #        createDataRecordClass:     name of subclass to create
-     #                         from:     DataRecord class to subclass
-     #                     linkedTo:     Entity class to link to
-     #                          via:     property to define at linkedTo class
-     #                         asTS:     should property be a t/s?
-     #--------------------
-     Interface BatchFeedManager
-       createDataRecordClass: "ModelData" from: "DataRecord"
-          linkedTo: "Company" via: "modelData" asTS: "YES" ;
+  #------------------------------------------
+  #  VAdmin DataFeeds Choice: PropertySetup
+  #      Define properties for new DataRecord Class
+  #  Inputs -
+  #               classId:   name of class/subclass properties are assigned to
+  #              property:   name of property
+  #                tsflag:   is property a t/s? Y or N
+  #              datatype:   class of object returned by this property
+  PropertySetup updateFromString:
+      #--  these are tab-delimited
+      "classId  property  tsflag  datatype
+      ModelData	model1	N	Number
+      ModelData	model2	N	Number
+      ModelData	model3	N	Number
+      ";
 
-     #------------------------------------------
-     #  VAdmin DataFeeds Choice: PropertySetup
-     #      Define properties for new DataRecord Class
-     #  Inputs -
-     #               classId:   name of class/subclass properties are assigned to
-     #              property:   name of property
-     #                tsflag:   is property a t/s? Y or N
-     #              datatype:   class of object returned by this property
-     PropertySetup updateFromString:
-         #--  these are tab-delimited
-         "classId  property  tsflag  datatype
-         ModelData	model1	N	Number
-         ModelData	model2	N	Number
-         ModelData	model3	N	Number
-         ";
-
-
-     #--------------------
-     #  VAdmin Schema Choice: Create Relationship
-     #      Creates MembershipFeed and property tracking relationship
-     #              at the group and member entity classes supplied
-     #  Inputs -
-     #        createRelationship:     name of MembershipFeed class to create
-     #             withGroupType:     Entity class of Groups
-     #                       via:     list property defined at group class
-     #             andMemberType:     Entity class of Members
-     #                       via:     property defined at member class
-     #                      asTS:     should properties be t/s?
-     #--------------------
-     Interface BatchFeedManager
-       createRelationship: "CompanyToSPIndustry"
-          withGroupType: "SPIndustry" via: "memberList"
-          andMemberType: "Company" via: "spIndustry" asTS: "YES" ;
+  #--------------------
+  #  VAdmin Schema Choice: Create Relationship
+  #      Creates MembershipFeed and property tracking relationship
+  #              at the group and member entity classes supplied
+  #  Inputs -
+  #        createRelationship:     name of MembershipFeed class to create
+  #             withGroupType:     Entity class of Groups
+  #                       via:     list property defined at group class
+  #             andMemberType:     Entity class of Members
+  #                       via:     property defined at member class
+  #                      asTS:     should properties be t/s?
+  #--------------------
+  Interface BatchFeedManager
+    createRelationship: "CompanyToSPIndustry"
+       withGroupType: "SPIndustry" via: "memberList"
+       andMemberType: "Company" via: "spIndustry" asTS: "YES" ;
 </pre>
 
 
@@ -327,21 +306,21 @@ time.  You need to:
 The following Vision script can be used to define the new class:
 
 <pre>
-     Interface BatchFeedManager
-       createDataRecordClass: "ModelData" from: "DataRecord" 
-          linkedTo: "Company" via: "modelData" asTS: "YES" ;
-     ?g
+  Interface BatchFeedManager
+    createDataRecordClass: "ModelData" from: "DataRecord" 
+       linkedTo: "Company" via: "modelData" asTS: "YES" ;
+  ?g
 
-     PropertySetup updateFromString:
-        "classId     property     tsflag     datatype
-         ModelData   model1       N          Number
-         ModelData   model2       N          Number
-         ModelData   model3       N          Number
-        " ;
-     ?g
+  PropertySetup updateFromString:
+     "classId     property     tsflag     datatype
+      ModelData   model1       N          Number
+      ModelData   model2       N          Number
+      ModelData   model3       N          Number
+     " ;
+  ?g
 
-     Utility updateNetworkWithAnnotation: "Define ModelData class" ;
-     ?g
+  Utility updateNetworkWithAnnotation: "Define ModelData class" ;
+  ?g
 </pre>
 
 
@@ -351,31 +330,31 @@ the <b>ModelDataFeed</b>.  For example, if you create a file
 named <i>models.dat</i>, that contains:
 
 <pre>
-     id     date     model1     model2     model3
-     ibm    9801     1          2          3
-     ibm    9802     2          2          3
-     dell   9801     10         12         14
+  id     date     model1     model2     model3
+  ibm    9801     1          2          3
+  ibm    9802     2          2          3
+  dell   9801     10         12         14
 </pre>
 
 you can update it using:
 
 <pre>
-     Interface BatchFeedManager 
-         upload: "ModelDataFeed"
-         usingFile: "models.dat
-         withConfig: NA ;
-     ?g
+  Interface BatchFeedManager 
+      upload: "ModelDataFeed"
+      usingFile: "models.dat
+      withConfig: NA ;
+  ?g
 </pre>
 
 Access to the data is provided via the Vision expression:
 
 <pre>
-     Named Company IBM modelData
-     do: [ date print: 15 ; 
-           model1 print ;
-           model2 print ;
-           model3 printNL ;
-         ] ;
+  Named Company IBM modelData
+  do: [ date print: 15 ; 
+        model1 print ;
+        model2 print ;
+        model3 printNL ;
+      ] ;
 </pre>
 <p><hr><p>
 <h2 id="Maintenance">Database Maintenance Functions</h2>
@@ -533,11 +512,11 @@ run the following command:
 <ul type=disc>
    On Unix:
 <pre>
-     /localvision/adminScripts/installSpace.cmd Models DB</pre>
+  /localvision/adminScripts/installSpace.cmd Models DB</pre>
 </pre>
 On NT:
 <pre>
-     %LocalVisionRoot%adminScripts\installSpace.cmd Models DB
+  %LocalVisionRoot%adminScripts\installSpace.cmd Models DB
 </pre></ul>
 
 After this runs, you should see an 'object space created' message as
@@ -546,7 +525,7 @@ well as the normal update message.
 Once you have created your new Models object space you can access it
 via:
 <pre>
-      Environment DB Models
+   Environment DB Models
 </pre>
 
 <p>
@@ -576,9 +555,9 @@ You need to specify
 the object space location of a new class prior to its creation using the
 following expression:
 <pre>
-     #---  Set the object space of the next class created to 
-     #--     the space define to hold the Models
-     Interface BatchFeedManager setObjectSpaceTo: Environment DB Models;
+  #---  Set the object space of the next class created to 
+  #--     the space define to hold the Models
+  Interface BatchFeedManager setObjectSpaceTo: Environment DB Models;
 </pre>
 You can use the object space name or the object space number as the
 parameter to <i>setObjectSpaceTo:</i>.
@@ -586,16 +565,16 @@ You must precede each <b>Entity</b> and <b>DataRecord</b> subclass
 creation request with the <i>setObjectSpaceTo:</i> expression if you want
 the new class set up in a specific object space.  For example:
 <pre>
-     Interface BatchFeedManager
-        setObjectSpaceTo: Environment DB Models;
-     Interface BatchFeedManager 
-        createEntityClass: "ModelType" from: "Classification" ;
+  Interface BatchFeedManager
+     setObjectSpaceTo: Environment DB Models;
+  Interface BatchFeedManager 
+     createEntityClass: "ModelType" from: "Classification" ;
 
-     Interface BatchFeedManager
-        setObjectSpaceTo: Environment DB Models;
-     Interface BatchFeedManager
-       createDataRecordClass: "ModelData" from: "DataRecord"
-          linkedTo: "Company" via: "modelData" asTS: "YES" ;
+  Interface BatchFeedManager
+     setObjectSpaceTo: Environment DB Models;
+  Interface BatchFeedManager
+    createDataRecordClass: "ModelData" from: "DataRecord"
+       linkedTo: "Company" via: "modelData" asTS: "YES" ;
 </pre>
 This request will create the new entity class <b>ModelType</b> and
 the new data record class <b>ModelData</b> in the object space named
@@ -624,9 +603,9 @@ in the <b>Models</b> object space, create a Vision script that
 contains the following:
 
 <pre>
-       #--  Create a new store for ModelData in Models object space
-       ModelData createNewStoreAt: Environment DB Models ;
-       ?g
+  #--  Create a new store for ModelData in Models object space
+  ModelData createNewStoreAt: Environment DB Models ;
+  ?g
 </pre>
 
 Once you have saved this script, any new instances created via
@@ -643,7 +622,7 @@ automatically get placed in the last "store" created.  If you are
 writing your own Vision methods to load data directly, you will need
 to modify any code that creates new instances so it is in the form:
 <pre>
-     ^global ModelData currentStore createInstance: "xxx" ;
+  ^global ModelData currentStore createInstance: "xxx" ;
 </pre>
 
 
@@ -672,31 +651,30 @@ To create the <b>FundamentalBridge</b> class and associate
 it with the <b>Company</b> entity via the fixed property
 <i>fundamentalData</i>, do the following:
 <pre>
-     #--------------------
-     #  Create Bridge Class
-     #      Creates Bridge subclass and establishes relationship
-     #          with existing Entity subclass
-     #  Inputs -
-     #        createBridgeClass:     name of subclass to create
-     #                     from:     Bridge class to subclass
-     #                 linkedTo:     Entity class to link to
-     #                      via:     property to define at linkedTo class
-     #                     asTS:     should property be a t/s?
-     #--------------------
-     Interface BatchFeedManager
-       createBridgeClass: "FundamentalBridge" from: "Bridge"
-          linkedTo: "Company" via: "fundamentalData" asTS: "NO" ;
+   #--------------------
+   #  Create Bridge Class
+   #      Creates Bridge subclass and establishes relationship
+   #          with existing Entity subclass
+   #  Inputs -
+   #        createBridgeClass:     name of subclass to create
+   #                     from:     Bridge class to subclass
+   #                 linkedTo:     Entity class to link to
+   #                      via:     property to define at linkedTo class
+   #                     asTS:     should property be a t/s?
+   #--------------------
+   Interface BatchFeedManager
+     createBridgeClass: "FundamentalBridge" from: "Bridge"
+        linkedTo: "Company" via: "fundamentalData" asTS: "NO" ;
 </pre>
 You can create and attach the different data records to this class
 using:
 <pre>
-     Interface BatchFeedManager
-       createDataRecordClass: "AnnualData" from: "DataRecord"
-          linkedTo: "FundamentalBridge" via: "annual" asTS: "YES" ;
-     Interface BatchFeedManager
-       createDataRecordClass: "QuarterlyData" from: "DataRecord"
-          linkedTo: "FundamentalBridge" via: "quarterly" asTS: "YES" ;
-
+  Interface BatchFeedManager
+    createDataRecordClass: "AnnualData" from: "DataRecord"
+       linkedTo: "FundamentalBridge" via: "annual" asTS: "YES" ;
+  Interface BatchFeedManager
+    createDataRecordClass: "QuarterlyData" from: "DataRecord"
+       linkedTo: "FundamentalBridge" via: "quarterly" asTS: "YES" ;
 </pre>
 The <b>PropertySetup</b> feed can be used to define updateable properties
 for the <b>AnnualData</b> and <b>QuarterData</b> classes and the
@@ -706,11 +684,11 @@ to update these properties for specific companies on specific dates.
 Once these classes have been established, you can access the specific
 fundamental data record using:
 <pre>
-     Named Company IBM fundamentalData annual  #insert property name
+  Named Company IBM fundamentalData annual  #insert property name
 </pre>
 or
 <pre>
-     Named Company IBM fundamentalData quarterly   #insert property name
+  Named Company IBM fundamentalData quarterly   #insert property name
 </pre>
 
 <p><hr><p>
@@ -736,7 +714,7 @@ can be updated using data feeds:
 <li>Use the <a href="#ObjectSpaces"><i>installSpace.cmd</i></a> script
 to create a new object space:
 <pre>
-       /localvision/adminScripts/installSpace.cmd MySpace
+  /localvision/adminScripts/installSpace.cmd MySpace
 </pre>
 <p><li>Set the permissions on this space so that the private user and
 the Vision Administrator can update it.
@@ -744,36 +722,35 @@ the Vision Administrator can update it.
 in this space for any entity class you wish to extend with private
 data:
 <pre>
-       Interface BatchFeedManager 
-          setObjectSpaceTo: Environment DB MySpace ;
-       Interface BatchFeedManager
-            createBridgeClass: "MyCompany" from: "LocalEntity" 
-            linkedTo: "Company" via: "myCompany" asTS: "Method" ;
+  Interface BatchFeedManager 
+     setObjectSpaceTo: Environment DB MySpace ;
+  Interface BatchFeedManager
+       createBridgeClass: "MyCompany" from: "LocalEntity" 
+       linkedTo: "Company" via: "myCompany" asTS: "Method" ;
 </pre>
 <p><li>As the Vision Administrator, define and save one or more
 <b>DataRecord</b> classes attached to this bridge in this space:
 <pre>
-       Interface BatchFeedManager
-           setObjectSpaceTo: Environment DB MySpace ;
-       Interface BatchFeedManager
-            createDataRecordClass: "AnalystRating" from: "DataRecord"
-            linkedTo: "MyCompany" via: "rating" asTS: "Y" ;
+  Interface BatchFeedManager
+      setObjectSpaceTo: Environment DB MySpace ;
+  Interface BatchFeedManager
+      createDataRecordClass: "AnalystRating" from: "DataRecord"
+        linkedTo: "MyCompany" via: "rating" asTS: "Y" ;
 
-       Interface BatchFeedManager
-           setObjectSpaceTo: Environment DB MySpace ;
-       Interface BatchFeedManager
-            createDataRecordClass: "CompanyAnnualOverride" from: "DataRecord"
-            linkedTo: "MyCompany" via: "companyAnnualOverride" asTS: "Y" ;
+  Interface BatchFeedManager
+      setObjectSpaceTo: Environment DB MySpace ;
+  Interface BatchFeedManager
+      createDataRecordClass: "CompanyAnnualOverride" from: "DataRecord"
+        linkedTo: "MyCompany" via: "companyAnnualOverride" asTS: "Y" ;
 </pre>
 <p><li>If you want to create private <b>Entity</b> classes in your
 private space, you must save the following Vision code in the private
 space:
 <pre>
-     Environment DB MySpace 
-          define: 'Entity' toBe: CoreWorkspace Entity newPrototype ;
-     Environment DB MySpace 
-          define: 'Named' toBe: CoreWorkspace Named newPrototype ;
-
+  Environment DB MySpace 
+       define: 'Entity' toBe: CoreWorkspace Entity newPrototype ;
+  Environment DB MySpace 
+       define: 'Named' toBe: CoreWorkspace Named newPrototype ;
 </pre>
 This code must be saved by the Vision Administrator.
 <p><li>As the Vision Administrator, define and save one or more
@@ -781,11 +758,10 @@ This code must be saved by the Vision Administrator.
 with the -U# option, where # indicates the private object space 
 number:
 <pre>
-       Interface BatchFeedManager
-           setObjectSpaceTo: Environment DB MySpace ;
-       Interface BatchFeedManager 
-          createEntityClass: "MyIndustry" from: "Entity" ;
-
+    Interface BatchFeedManager
+        setObjectSpaceTo: Environment DB MySpace ;
+    Interface BatchFeedManager 
+       createEntityClass: "MyIndustry" from: "Entity" ;
 </pre>
 </ol>
 Once the Vision Administrator has saved the appropriate classes,
@@ -822,29 +798,28 @@ For example, you may want to create an estimate bridge for
 tracking  annual company eps estimates made by an analyst as well
 as consensus estimate provided by a source such as I/B/E/S:
 <pre>
-     #--------------------
-     #  Create EstimateBridge Class
-     #  Inputs -
-     #    createEstimateBridgeClass: name of subclass to create
-     #                         from: EstimateBridge class to subclass
-     #                     linkedTo: Entity or Bridge class to link to
-     #                          via: t/s property to define at linkedTo class
-     #      withEstimateRecordClass: subclass of EstimateRecord
-     #                      andFreq: periodicity of estimates
-     #--------------------
+  #--------------------
+  #  Create EstimateBridge Class
+  #  Inputs -
+  #    createEstimateBridgeClass: name of subclass to create
+  #                         from: EstimateBridge class to subclass
+  #                     linkedTo: Entity or Bridge class to link to
+  #                          via: t/s property to define at linkedTo class
+  #      withEstimateRecordClass: subclass of EstimateRecord
+  #                      andFreq: periodicity of estimates
+  #--------------------
 
-     Interface BatchFeedManager
-         createEstimateBridgeClass: "EpsABridge" from: "EstimateBridge" 
-         linkedTo: "Company" via: "analystEpsEst" 
-         withEstimateRecordClass: "AnalystEstimateRecord" 
-         andFreq: 12 monthEnds ;
+  Interface BatchFeedManager
+      createEstimateBridgeClass: "EpsABridge" from: "EstimateBridge" 
+      linkedTo: "Company" via: "analystEpsEst" 
+      withEstimateRecordClass: "AnalystEstimateRecord" 
+      andFreq: 12 monthEnds ;
 
-     Interface BatchFeedManager
-         createEstimateBridgeClass: "IbesEpsABridge" from: "EstimateBridge" 
-         linkedTo: "Company" via: "ibesEpsEst" 
-         withEstimateRecordClass: "ConsensusEstimateRecord" 
-         andFreq: 12 monthEnds ;
-
+  Interface BatchFeedManager
+      createEstimateBridgeClass: "IbesEpsABridge" from: "EstimateBridge" 
+      linkedTo: "Company" via: "ibesEpsEst" 
+      withEstimateRecordClass: "ConsensusEstimateRecord" 
+      andFreq: 12 monthEnds ;
 </pre>
 <p>
 Once the estimate bridges have been created you can use the appropriate feed to update the database using the <i> upload:usingFile:withConfig:</i>  message.

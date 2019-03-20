@@ -1,26 +1,15 @@
 ---
 title: The Vision Network
+
+related_topics:
+  - url: "Running.htm"
+    title: "Running Vision"
+  - url: "admDBA.htm"
+    title: "General Administration"
+
 ---
 
-<h2>The Vision Network</h2>
-
-| <a href="vconcep.htm">Home</a> 
-| <a href="Running.htm">Running Vision</a> 
-| <a href="admDBA.htm">General Administration</a> |
-<hr>
-
-<p>
-<h2>Topics Covered:</h2>
-<ul type="square">
-<li><a href="#overview">Overview</a>
-<li><a href="#The Network Structure">The Network Structure</a>
-<li><a href="#Creating New Object Spaces">Creating New Object Spaces</a>
-<li><a href="#Distributing Object Spaces">Distributing Object Spaces</a>
-<li><a href="#Creating Multiple Vision Networks">Creating Multiple Vision Networks</a>
-</ul>
-<hr>
-
-<a name = "overview"><h2>Overview</h2></a>
+<h2 id="overview">Overview</h2>
 
 Most database management systems only store the raw data 
 associated with manual inputs and various data feeds.  
@@ -105,7 +94,7 @@ stamps of specific files, it is not necessary to back up the entire network
 a "full" backup once a week and daily incremental backup during the week.
 <hr>
 
-<a name = "The Network Structure"><h2>The Network Structure</h2></a>
+<h2 id="TheNetworkStructure">The Network Structure</h2></a>
 
 The Vision Network is initially configured to contain three object spaces 
 in the directory  <i>/localvision/network: 1, 2 and 3</i>.   
@@ -572,7 +561,7 @@ Two starting points are available for creating a new network:
 <li><a href="#bootstrap">Bootstrap a new Vision network containing only the core classes and messages.</a>
 </ul>
 
-<h4 id="copy">Copying an Existing Network</h4>
+<h3 id="copy">Copying an Existing Network</h3>
            
 To copy an existing network you can create a new directory and copy the <i>/localvision/network</i> tree to it.  
 For example:
@@ -627,7 +616,7 @@ By default, the user code that created the <i>NDF</i> for the new network will h
 If you want to change this, edit the file <i>NDF.GURL</i> in the directory <i>/localvision/newnetwork</i>.
 <p>
 
-<h4 id="bootstrap">Bootstrapping a New Network</h4>
+<h3 id="bootstrap">Bootstrapping a New Network</h3>
 
 You may want to create a new database network that just contains the core Vision classes and messages.  
 The Vision scripts needed to create the bootstrap database are supplied in the directory <i>/localvision/bootstrap</i>.  
@@ -661,7 +650,7 @@ change this, edit the file <i>NDF.GURL</i> in the directory
 <i>/localvision/bootnetwork</i>. 
  <p> 
 
-<h4>Rebuilding the NDF</h4> <p>
+<h3 id="Rebuilding">Rebuilding the NDF</h3> <p>
 The NDF contains version information about every update that has ever
 been performed since the database network was created.  As a result,
 this file can get large over time.  Since the segments associated
