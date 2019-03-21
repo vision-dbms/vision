@@ -1,21 +1,13 @@
 ---
 title: External Database Access and Investment Databases
+
+related_topics:
+  - url: "invRef.htm"
+    title: "Investment Reference"
+
 ---
-<h2>External Database Access and Investment Databases</h2>
-| <a href="vconcep.htm">Home</a> | <a href="invRef.htm">Investment Reference</a> |
-<hr>
 
-<h2>Topics Covered:</h2>
-<ul type=disc>
-<li><a href="#Overview">Overview</a>
-<li><a href="#The General Model">The General Model</a>
-<li><a href="#Database Availability and Access">Database Availability and Access</a>
-<li><a href="#Database Coverage">Database Coverage</a>
-<li><a href="#Loading External Data From Files">Loading External Data From Files</a>
-</ul>
-<hr>
-
-<a name="Overview"><h2>Overview</h2></a>
+<h2 id="Overview">Overview</h2>
 
 The Vision database provides access to a variety of  database  sources
 that  are  updated  by  an  external vendor on a regular basis.  These
@@ -49,7 +41,7 @@ of data values for a specific entity as of a specific point in time.
 
 <hr>
 
-<a name="The General Model"><h2>The General Model</h2></a>
+<h2 id="TheGeneralModel">The General Model</h2>
            
 Each table of information supplied  by  an  external  data  source  is
 mapped  to  its  own  Vision class, which is a subclass of the DataSet
@@ -100,21 +92,24 @@ property <i>XYZData</i> is defined at the class Company.  The value of this
 property  is  the  actual  instance  in the XYZ LocalEntity class that
 represents the data for the specific company.  The expression:
 
-<pre>    Named Company IBM XYZData </pre>
+<pre>
+  Named Company IBM XYZData
+</pre>
 
 will therefore return the instance in the XYZ LocalEntity  class  that
 represents IBM's data.  This is illustrated pictorially below:
 
-<pre>    Company                                 XYZ LocalEntity
-    ================================        ==============================
-    | ticker | name | ... | XYZData|        |  id       | ...            |
-    |________|______|_____|________|        |____________________________|
-    |  GM    |      |     |        |        |   id1     |                |
-    |  IBM   |      |     |  ======|===|    |   id2     |                |
-    |  XON   |      |     |        |   |    |   id3     |                |
-    |  . . .                       |   |====|=> idIBM   |                |
-    |______________________________|        | . . .                      |
-                                            |____________________________|
+<pre>
+  Company                                 XYZ LocalEntity
+  ================================        ==============================
+  | ticker | name | ... | XYZData|        |  id       | ...            |
+  |________|______|_____|________|        |____________________________|
+  |  GM    |      |     |        |        |   id1     |                |
+  |  IBM   |      |     |  ======|===|    |   id2     |                |
+  |  XON   |      |     |        |   |    |   id3     |                |
+  |  . . .                       |   |====|=> idIBM   |                |
+  |______________________________|        | . . .                      |
+                                          |____________________________|
 </pre>
 
 The <i>XYZData</i> property establishes a  permanent  relationship  between
@@ -126,15 +121,21 @@ Because the value of this property  is  the  actual  instance  in  the
 LocalEntity class, it responds to the messages defined for that class.
 In this example, the expression:
 
-<pre>    Named Company IBM XYZData id </pre>
+<pre>
+  Named Company IBM XYZData id
+</pre>
 
 returns the string value <i>idIBM</i>.  Since the message <i>showMessages</i>
 lists  all  the messages defined for the recipient object's class, the
 expression:
 
-<pre>    Named Company IBM XYZData showMessages </pre>
+<pre>
+  Named Company IBM XYZData showMessages
+</pre>
 or
-<pre>    Named Company IBM XYZData showMessagesX </pre>
+<pre>
+  Named Company IBM XYZData showMessagesX
+</pre>
 
 displays all the messages defined for the XYZ LocalEntity class.
 <p>
@@ -149,15 +150,21 @@ in  response  to  the message <i>XYZData</i>.  The messages <i>isDefault</i> and
 the  default  instance of the class.  For example, assume that the XYZ
 database does not supply information for GM.  The expression:
 
-<pre>    Named Company GM XYZData isDefault </pre>
+<pre>
+  Named Company GM XYZData isDefault
+</pre>
 
 returns the value TRUE, the expression:
 
-<pre>    Named Company IBM XYZData isDefault </pre>
+<pre>
+  Named Company IBM XYZData isDefault
+</pre>
 
 returns the value FALSE, and the expression:
 
-<pre>    Company masterList select: [ XYZData isntDefault ] </pre>
+<pre>
+  Company masterList select: [ XYZData isntDefault ]
+</pre>
 
 returns the list of Company instances that have <i>real</i> XYZ data.
 <p>
@@ -177,35 +184,40 @@ this  property  are  the  actual  records  in  the snapshot class that
 correspond to the data for the instance as  of  a  specific  point  in
 time.  The expression:
 
-<pre>    Named Company IBM XYZData history </pre>
+<pre>
+  Named Company IBM XYZData history
+</pre>
 
 returns the instance in the snapshot class that represents IBM's  most
 recent data in the XYZ database and the expression:
 
-<pre>    Named Company IBM XYZData :history asOf: 9211 . </pre>
+<pre>
+  Named Company IBM XYZData :history asOf: 9211 .
+</pre>
 or
-<pre>    9211 evaluate:
-      [ Named Company IBM XYZData history ] </pre>
+<pre>
+  9211 evaluate:
+    [ Named Company IBM XYZData history ]
+</pre>
 
 returns the instance in  the  snapshot  class  that  represents  IBM's
 November   1992  data  in  the  XYZ  database.   This  is  illustrated
 pictorially below:
 
 <pre>
-    LocalEntity                           snapshot
-    ==============================       ================================
-    | id      | ... | history    |       | localId   | date | item1 | ...
-    |---------|-----|------------|       |-----------|------|-------|-----
-    | id1     |     | 9211-------|-------|--> id1    | 9211 |
-    |         |     | 9212-------|-----  |    id2    | 9211 |
-    |         |     | 9301-------|--  |  |    id3    | 9211 |
-    | . . .   |     |            | |  |--|--> id1    | 9212 |
-    |               |            | |     |    id2    | 9212 |
-    |               |            | |     |    id3    | 9212 |
-    |               |            | |-----|--> id1    | 9301 |
-    |               |            |       |           |      |
-    |_______________|____________|       |___________|______|_____________
-
+  LocalEntity                           snapshot
+  ==============================       ================================
+  | id      | ... | history    |       | localId   | date | item1 | ...
+  |---------|-----|------------|       |-----------|------|-------|-----
+  | id1     |     | 9211-------|-------|--> id1    | 9211 |
+  |         |     | 9212-------|-----  |    id2    | 9211 |
+  |         |     | 9301-------|--  |  |    id3    | 9211 |
+  | . . .   |     |            | |  |--|--> id1    | 9212 |
+  |               |            | |     |    id2    | 9212 |
+  |               |            | |     |    id3    | 9212 |
+  |               |            | |-----|--> id1    | 9301 |
+  |               |            |       |           |      |
+  |_______________|____________|       |___________|______|_____________
 </pre>
 
 The <i>history</i> property establishes a  permanent  relationship  between
@@ -217,27 +229,39 @@ Because the values in the <i>history</i> property are actual  instances  in
 the  snapshot  class,  they  respond  to the messages defined for that
 class.  The expression:
 
-<pre>    Named Company IBM XYZData history item1 </pre>
+<pre>
+  Named Company IBM XYZData history item1
+</pre>
 
 returns the value of <i>item1</i>.   Since  the  message  <i>displayMessages</i>
 lists  all  the messages defined for the recipient object's class, the
 expression:
 
-<pre>    Named Company IBM XYZData history displayMessages </pre>
+<pre>
+  Named Company IBM XYZData history displayMessages
+</pre>
 or
-<pre>    Named Company IBM XYZData history displayMessagesX </pre>
+<pre>
+  Named Company IBM XYZData history displayMessagesX
+</pre>
 
 displays  all  the  messages  defined  for  the  snapshot  class.   To
 determine the date of the record retrieved, use the <i>date</i> message:
 
-<pre>    Named Company IBM XYZData history date </pre>
+<pre>
+  Named Company IBM XYZData history date
+</pre>
 
 Continuing with the example introduced above, the expressions:
 
-<pre>    Named Company IBM XYZData :history asOf: 9211 . item1 </pre>
+<pre>
+  Named Company IBM XYZData :history asOf: 9211 . item1
+</pre>
 or
-<pre>    9211 evaluate:
-      [ Named Company IBM XYZData history item1 ] </pre>
+<pre>
+  9211 evaluate:
+    [ Named Company IBM XYZData history item1 ]
+</pre>
 
 can be used to access the value of XYZ <i>item</i> as  of  November  1992.
 <p>
@@ -248,10 +272,14 @@ defined  to simplify this access.  For example, the method <i>xyz</i> could
 be defined at the class Company to  execute  the  expression  <i>XYZData
 history</i>.  The previous expression would then be rewritten as:
 
-<pre>    Named Company IBM :xyz asOf: 9211 . item1 </pre>
+<pre>
+  Named Company IBM :xyz asOf: 9211 . item1
+</pre>
 or
-<pre>    9211 evaluate:
-      [ Named Company IBM xyz item1 ] </pre>
+<pre>
+  9211 evaluate:
+    [ Named Company IBM xyz item1 ]
+</pre>
 
 
 The default instance for the snapshot class is stored in the <i>history</i>
@@ -261,22 +289,26 @@ Not  Found</i>  errors  if you access data from a date prior to the first
 <i>real</i> date.  If this value were not stored and the first <i>real</i>  date
 were November 1992, the expression:
 
-<pre>    9206 evaluate:
-      [
-        Named Company IBM XYZData history
+<pre>
+  9206 evaluate:
+    [
+      Named Company IBM XYZData history
 
-        do: [ date print ;
-              item1 print ;
-              item2 print ;
-              item3 printNL ;
-            ] ;
-      ] ; </pre>
+      do: [ date print ;
+            item1 print ;
+            item2 print ;
+            item3 printNL ;
+          ] ;
+    ] ;
+</pre>
 
 would display the errors:
 
-<pre>    >>> Selector 'item1' Not Found <<<
-    >>> Selector 'item2' Not Found <<<
-    >>> Selector 'item3' Not Found <<<  </pre>
+<pre>
+  >>> Selector 'item1' Not Found <<<
+  >>> Selector 'item2' Not Found <<<
+  >>> Selector 'item3' Not Found <<< 
+</pre>
 
 because the <i>history</i> message would return the value NA.
 
@@ -289,7 +321,9 @@ errors.
 
 The expression:
 
-<pre>    Company masterList select: [ XYZData history isntDefault ] . </pre>
+<pre>
+  Company masterList select: [ XYZData history isntDefault ] .
+</pre>
 
 selects the companies that have <i>real</i> snapshot records.
 <p>
@@ -297,26 +331,34 @@ selects the companies that have <i>real</i> snapshot records.
 Since  the  message  <i>xyz</i>  translates  into  <i>XYZData  history</i>,  the
 expression:
 
-<pre>    Company masterList select: [ xyz isntDefault ] . </pre>
+<pre>
+  Company masterList select: [ xyz isntDefault ] .
+</pre>
 
 is identical to
 
-<pre>    Company masterList select: [ XYZData history isntDefault ] . </pre>
+<pre>
+  Company masterList select: [ XYZData history isntDefault ] .
+</pre>
 
 To select those companies that have some XYZ data but do not have  any
 data on or before December 1992, use:
 
-<pre>    92 evaluate:
-       [ Company masterList
-           select: [ XYZData isntDefault && XYZData history isDefault ]
-       ] </pre>
+<pre>
+  92 evaluate:
+     [ Company masterList
+         select: [ XYZData isntDefault && XYZData history isDefault ]
+     ]
+</pre>
 or
-<pre>    Company masterList
-        select: [ XYZData isntDefault && :xyz asOf: 92 . isDefault ] </pre>
+<pre>
+  Company masterList
+      select: [ XYZData isntDefault && :xyz asOf: 92 . isDefault ]
+</pre>
 
 <hr>
 
-<a name="Database Availability and Access"><h2>Database Availability and Access</h2></a>
+<h2 id="DatabaseAvailabilityAndAccess">Database Availability and Access</h2>
 
 The class DataSource has been defined to track information  about  the
 external  databases  maintained  in Vision and the data sets that they
@@ -328,16 +370,18 @@ latest  and  earliest data dates can be displayed using the expression
 For example, when executed on December 21, 1993, the following  output
 may have been generated:
 
-<pre>    Vision Database Update Status
-           As Of:  12/21/1993
+<pre>
+  Vision Database Update Status
+         As Of:  12/21/1993
 
 
-    Source                 Latest        Earliest
+  Source                 Latest        Earliest
 
-    EE                  12/ 2/1993     10/14/1993
-    IbesIntl            12/16/1993      9/30/1993
-    MSCI                10/31/1993      7/31/1993
-    WS                  11/30/1993      9/30/1993 </pre>
+  EE                  12/ 2/1993     10/14/1993
+  IbesIntl            12/16/1993      9/30/1993
+  MSCI                10/31/1993      7/31/1993
+  WS                  11/30/1993      9/30/1993
+</pre>
 
 
 The message <i>profile</i> produces a detailed report showing  data  source
@@ -345,43 +389,47 @@ characteristics  such  as  its  update frequency, the entity class for
 which data is provided, and its data sets and  their  characteristics.
 For example:
 
-<pre>    Named DataSource IbesIntl profile </pre>
+<pre>
+  Named DataSource IbesIntl profile
+</pre>
 
 produces a report of the form:
 
-<pre>    Data Source: IbesIntl
-    Object Space:  25   Environment DB IbesIntl
-    Entity Type:        Company
-    Access Via:         Company IbesData
-    Frequency:          7 Days
-    Last Processed:     12/7/1993
-    Last Update As Of:  12/2/1993
-    Previous Update:    11/24/1993
-    Available For:      9/30/1993 - 12/2/1993
+<pre>
+  Data Source: IbesIntl
+  Object Space:  25   Environment DB IbesIntl
+  Entity Type:        Company
+  Access Via:         Company IbesData
+  Frequency:          7 Days
+  Last Processed:     12/7/1993
+  Last Update As Of:  12/2/1993
+  Previous Update:    11/24/1993
+  Available For:      9/30/1993 - 12/2/1993
 
-    Data Source Includes the Following Data Sets:
-    Data Set:           annEst
-    Update Mode:        Append
-    Access Via:         Company IbesData annEstHistory
-    Duration:           12 MonthEnds
-    First Available:    11/30/1993
+  Data Source Includes the Following Data Sets:
+  Data Set:           annEst
+  Update Mode:        Append
+  Access Via:         Company IbesData annEstHistory
+  Duration:           12 MonthEnds
+  First Available:    11/30/1993
 
-    Data Set:           qtrEst
-    Update Mode:        Append
-    Access Via:         Company IbesData qtrEstHistory
-    Duration:            3 MonthEnds
-    First Available:    11/30/1993
+  Data Set:           qtrEst
+  Update Mode:        Append
+  Access Via:         Company IbesData qtrEstHistory
+  Duration:            3 MonthEnds
+  First Available:    11/30/1993
 
-    Data Set:           snapshot
-    Update Mode:        Append
-    Access Via:         Company IbesData history
-    Duration:            7 Days
-    First Available:    11/30/1993
+  Data Set:           snapshot
+  Update Mode:        Append
+  Access Via:         Company IbesData history
+  Duration:            7 Days
+  First Available:    11/30/1993
 
-    Data Set:           static
-    Update Mode:        Replace
-    Duration:          NA
-    First Available:    11/30/1993 </pre>
+  Data Set:           static
+  Update Mode:        Replace
+  Duration:          NA
+  First Available:    11/30/1993
+</pre>
 
 This profile displays general information about the data source at the
 top.  The  remainder  of  the  report  then  profiles  each  data  set
@@ -411,7 +459,9 @@ to look homogeneous from the company class. For example, to access the
 Ibes  local entity associated with the company Nestles', you would use
 the expression:
 
-<pre>    Named Company \461669 IbesData </pre>
+<pre>
+  Named Company \461669 IbesData
+</pre>
 
 A partial list of messages defined at the class  DataSource  is  shown
 below:
@@ -441,15 +491,19 @@ the  other  hand,  may  have  history  prior  to   this   date.  The
 <i>lastProcessDate</i> represents the actual date that the last update was
 installed and available in Vision.  For example, the expression:
 
-<pre>     Named DataSource IbesIntl
-        do: [ earliestUpdateDate print: 15 ;
-              mostRecentUpdateDate print: 15 ;
-              lastProcessDate printNL ;
-            ] </pre>
+<pre>
+   Named DataSource IbesIntl
+      do: [ earliestUpdateDate print: 15 ;
+            mostRecentUpdateDate print: 15 ;
+            lastProcessDate printNL ;
+          ]
+</pre>
 
 might display:
 
-<pre>    9/30/1993     12/ 2/1993     12/7/1993</pre>
+<pre>
+  9/30/1993     12/ 2/1993     12/7/1993
+</pre>
 
 which indicates that the database was last updated on Dec 7 with  data
 as of Dec 2.  The first data available was as of Sept 30.
@@ -458,7 +512,9 @@ as of Dec 2.  The first data available was as of Sept 30.
 The message <i>updateFrequency</i> returns the expected frequency at  which
 the data source updates.  For example, the expression:
 
-<pre>    Named DataSource IbesIntl updateFrequency </pre>
+<pre>
+  Named DataSource IbesIntl updateFrequency
+</pre>
 
 returns the value <i>7 days</i> indicating that the data should be  updated
 once  a  week.   Note that the frequency for the data source indicates
@@ -471,17 +527,23 @@ determine the current update schedule.
 The message <i>entityType</i> returns the default  instance  of  the  class
 associated with this DataSource.  For example, the expression:
 
-<pre>    Named DataSource MSCI entityType </pre>
+<pre>
+  Named DataSource MSCI entityType
+</pre>
 
 returns the default Security and the expression:
 
-<pre>    Named DataSource WS entityType </pre>
+<pre>
+  Named DataSource WS entityType
+</pre>
 
 returns the default Company.  The message  <i>localEntity</i>  returns  the
 default  instance  of the local entity class associated with this data
 source.  The expression:
 
-<pre>    Named DataSource WS localEntity instanceList</pre>
+<pre>
+  Named DataSource WS localEntity instanceList
+</pre>
 
 returns the list of all local entities that have been  installed  with
 the WorldScope database.
@@ -491,11 +553,13 @@ The profile report for a data source includes a profile of  each  data
 set  associated  with  the  data  source.  For example, the DataSource
 profile displayed above for IbesIntl included the section:
 
-<pre>    Data Set:           snapshot
-    Update Mode:        Append
-    Access Via:         Company IbesData history
-    Duration:            7 Days
-    First Available:    11/30/1993 </pre>
+<pre>
+  Data Set:           snapshot
+  Update Mode:        Append
+  Access Via:         Company IbesData history
+  Duration:            7 Days
+  First Available:    11/30/1993
+</pre>
 
 
 If the <i>Update Mode</i> is <i>Append</i> this data set is used to  append  new
@@ -513,26 +577,32 @@ local entity class to link a data set's instances to the local entity.
 Any data set profile that includes  the  line  <i>Access  Via:</i>  can  be
 accessed via the local entity instance.  For example, the expression:
 
-<pre>    Named Company \461669 IbesData history </pre>
+<pre>
+  Named Company \461669 IbesData history
+</pre>
 
 is used to access ibes snapshot records.  To access all snapshots over
 time, use the expression:
 
-<pre>    Named Company \461669 IbesData :history
-    do: [ #---
-        ] ; </pre>
+<pre>
+  Named Company \461669 IbesData :history
+  do: [ #---
+      ] ;
+</pre>
 
 Although <i>history</i> is typically the name of the time series that links
 snapshot  records,  many  data sources provide several data sets, each
 linked by its own time series property.  For example, in the  IbesIntl
 profile there are three data sets that include the <i>Access Via</i> line:
 
-<pre>    Data Set:           annEst
-    Access Via:         Company IbesData annEstHistory
-    Data Set:           qtrEst
-    Access Via:         Company IbesData qtrEstHistory
-    Data Set:           snapshot
-    Access Via:         Company IbesData history </pre>
+<pre>
+  Data Set:           annEst
+  Access Via:         Company IbesData annEstHistory
+  Data Set:           qtrEst
+  Access Via:         Company IbesData qtrEstHistory
+  Data Set:           snapshot
+  Access Via:         Company IbesData history
+</pre>
 
 This indicates that access to the IbesIntl data sets  from  the  local
 entity    is   via   the   time   series   messages   <i>annEstHistory</i>,
@@ -566,9 +636,11 @@ class:
 
 The expression:
 
-<pre>    Named DataSource MSCI dataSetList
-     select: [ updateModeIsAppend ] .
-         do: [ className print: 15; accessName printNL ]; </pre>
+<pre>
+  Named DataSource MSCI dataSetList
+   select: [ updateModeIsAppend ] .
+       do: [ className print: 15; accessName printNL ];
+</pre>
 
 lists the name of each data set in the MSCI database and the  property
 that links the records in that data set to MSCI LocalEntity instances.
@@ -576,7 +648,7 @@ that links the records in that data set to MSCI LocalEntity instances.
 
 <hr>
               
-<a name="Database Coverage"><h2>Database Coverage</h2></a>
+<h2 id="DatabaseCoverage">Database Coverage</h2>
 
 
 LocalEntity instances for  each  data  source  are  linked  to  Entity
@@ -585,19 +657,27 @@ defined at the LocalEntity classes returns the actual Entity instance.
 Cover  methods  such  as  <i>company</i>  or <i>security</i> are also defined to
 access the Entity instance.  The expression:
 
-<pre>    Named Security \461669 MSCIData globalEntry </pre>
+<pre>
+  Named Security \461669 MSCIData globalEntry
+</pre>
 
 returns:
 
-<pre>    Named Security \461669 </pre>
+<pre>
+  Named Security \461669
+</pre>
 
 and the expression:
 
-<pre>    Named Security 461669 MSCIData globalEntry MSCIData </pre>
+<pre>
+  Named Security 461669 MSCIData globalEntry MSCIData
+</pre>
 
 returns:
 
-<pre>    Named Security \461669 MSCIData </pre>
+<pre>
+  Named Security \461669 MSCIData
+</pre>
 
 
 The following are frequently used messages defined for the LocalEntity
@@ -629,10 +709,12 @@ update.
 For example, to find the securities which have actual  Ibes  data  but
 have not been updated by the latest update, use the following:
 
-<pre>    Security masterList
-       select: [ IbesData isntDefault &&
-                 IbesData hasntBeenUpdated
-               ] . </pre>
+<pre>
+  Security masterList
+     select: [ IbesData isntDefault &&
+               IbesData hasntBeenUpdated
+             ] .
+</pre>
 
 Substituting  MSCIData  in  the  above  expression  will  return   the
 securities which do not have <i>current</i> MSCI data.
@@ -641,14 +723,16 @@ securities which do not have <i>current</i> MSCI data.
 To display the last update date for Ibes data in securities which have
 not been updated by the latest Ibes update, use:
 
-<pre>    Security masterList
-      select: [ IbesData isntDefault &&
-                IbesData hasntBeenUpdated
-              ] .
-      sortUp: [ id ] .
-          do: [ IbesData lastUpdateDate print: 12;
-                displayInfo;
-              ]; </pre>
+<pre>
+  Security masterList
+    select: [ IbesData isntDefault &&
+              IbesData hasntBeenUpdated
+            ] .
+    sortUp: [ id ] .
+        do: [ IbesData lastUpdateDate print: 12;
+              displayInfo;
+            ];
+</pre>
 
 Each data source may also provide  data  for  entities  that  are  not
 currently  in  the  Company  or Security universe.  This data is still
@@ -661,13 +745,17 @@ Security   instance).    The   messages   <i>isReconciledGlobally</i>   and
 For example, to find the local entities in the IbesIntl database  that
 are not globally reconciled, use:
 
-<pre>    Named DataSource IbesIntl localEntity masterList
-      select: [ isntReconciledGlobally ] . </pre>
+<pre>
+  Named DataSource IbesIntl localEntity masterList
+    select: [ isntReconciledGlobally ] .
+</pre>
 
 or
 
-<pre>    Security IbesData masterList
-      select: [ isntReconciledGlobally ] . </pre>
+<pre>
+  Security IbesData masterList
+    select: [ isntReconciledGlobally ] .
+</pre>
 
 
 The  method  <i>displayGlobalExceptionReport</i>  defined  for   DataSource
@@ -675,25 +763,33 @@ instances  lists  the  local  entities in the data source that are not
 globally reconciled.  To produce this report  for  IbesIntl,  use  the
 expression:
 
-<pre>    Named DataSource IbesIntl displayGlobalExceptionReport </pre>
+<pre>
+  Named DataSource IbesIntl displayGlobalExceptionReport
+</pre>
 
 The local IbesIntl  entities  that  are  globally  reconciled  can  be
 accessed by the expression:
 
-<pre>    Named DataSource IbesIntl localEntity masterList
-      select: [ isReconciledGlobally ] . </pre>
+<pre>
+  Named DataSource IbesIntl localEntity masterList
+    select: [ isReconciledGlobally ] .
+</pre>
 
 Since globally reconciled local entities are linked to actual  Company
 instances,  the  following  expression  returns  the Company instances
 which have actual Ibes data:
 
-<pre>    Named DataSource IbesIntl localEntity masterList
-      select: [ isReconciledGlobally ] .
-      send: [ company ] . </pre>
+<pre>
+  Named DataSource IbesIntl localEntity masterList
+    select: [ isReconciledGlobally ] .
+    send: [ company ] .
+</pre>
 
 which is equivalent to:
 
-<pre>    Company masterList select: [ IbesData isntDefault ] .</pre>
+<pre>
+  Company masterList select: [ IbesData isntDefault ] .
+</pre>
 
 Besides tracking general update information at the data source  level,
 such  as  frequency and update dates, individual update information is
