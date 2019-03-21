@@ -1,29 +1,22 @@
 ---
 title: "Vision Application Classes: Company and Security"
----
-<h2>Vision Application Classes: Company and Security</h2>
 
-<p>
-| <a href="vpma.htm">Application Overview</a> 
-| <a href="pmaIssues.htm">Data Issues</a>
-| <a href="pmaClasses.htm">Application Classes</a>
-| <a href="mpmaCompany.htm">Company Messages</a> 
-| <a href="mpmaSecurity.htm">Security Messages</a> 
-| <a href="pmaXRef.htm">Application Cross Reference</a>
-|
-<hr>
-<h2>Topics Covered:</h2>
-<ul type=square>
-<li><a href="#overview">Overview</a>
-<li><a href="#basic">Basic Access</a>
-<li><a href="#company-security">The Company-Security Connection</a>
-<li><a href="#messages">Company and Security Message Summary </a>
-<li><a href="#datarec">Prices and Dividends </a>
-<li><a href="#splits">Split Adjustments </a>
-<li><a href="#updates">Updating Company and Security Data</a>
-<li><a href="#related">Related Classes</a>
-</ul>
-<hr>
+related_topics:
+  - url: "vpma.htm"
+    title: "Application Overview"
+  - url: "pmaIssues.htm"
+    title: "Data Issues"
+  - url: "pmaClasses.htm"
+    title: "Application Classes"
+  - url: "mpmaCompany.htm"
+    title: "Company Messages"
+  - url: "mpmaSecurity.htm"
+    title: "Security Messages"
+  - url: "pmaXRef.htm"
+    title: "Application Cross Reference"
+
+---
+
 <h2 id="overview">Overview</h2>
 <p>
 The instances of the class <b>Company</b> 
@@ -41,31 +34,31 @@ amounts of one or more securities.
 The following subset of the class hierarchy displays the classes
 directly related to <b>Company</b> and <b>Security</b>:
 <pre>
-          Object
-             |
-             Entity
-             |  |
-             |  |-- Company
-             |  |
-             |  |-- Security
-             |  |
-             |  |-- Classification
-             |         |
-             |         |-- <a href="#related">Country</a>
-             |         |
-             |         |-- <a href="#related">Industry</a>
-             |         |
-             |         |-- <a href="#related">Sector</a>
-             |         |
-             |         |-- <a href="#related">SecurityType</a>
-             |         |
-             |         |-- <a href="#related">AssetCategory</a>
-             |    
-             DataRecord
-                |
-                |-- <a href="#datarec">DivRecord</a>
-                |
-                |-- <a href="#datarec">PriceRecord</a>
+  Object
+     |
+     Entity
+     |  |
+     |  |-- Company
+     |  |
+     |  |-- Security
+     |  |
+     |  |-- Classification
+     |         |
+     |         |-- <a href="#related">Country</a>
+     |         |
+     |         |-- <a href="#related">Industry</a>
+     |         |
+     |         |-- <a href="#related">Sector</a>
+     |         |
+     |         |-- <a href="#related">SecurityType</a>
+     |         |
+     |         |-- <a href="#related">AssetCategory</a>
+     |    
+     DataRecord
+        |
+        |-- <a href="#datarec">DivRecord</a>
+        |
+        |-- <a href="#datarec">PriceRecord</a>
 
 </pre>
 
@@ -682,7 +675,7 @@ prices:
 <h2 id="related">Related Classes</h2>
 
 <p>
-<h4 id= "country">The Country Class</h4>
+<h3 id="country">The Country Class</h3>
 <p>
 Instances of the <b>Country</b> class correspond to individual countries
 such as <i>United States</i>, <i>Canada</i>, and <i>Great Britain</i>.
@@ -815,7 +808,7 @@ manually or using the <b>CompanyMaster</b> feed, these companies
 will not be reflected in the country's <i>memberList</i>.
 
 <p>
-<h4 id= "industry">The Industry and Sector Classes</h4>
+<h3 id="industry">The Industry and Sector Classes</h3>
 <p>
 Instances of the <b>Industry</b> class correspond to user-defined industry
 classifications such as <i>Beverages</i>, <i>Automotive</i>, and 
@@ -1096,7 +1089,7 @@ updated.
 <p>
 
 <p>
-<h4 id= "type">The SecurityType and AssetCategory Classes</h4>
+<h3 id="type">The SecurityType and AssetCategory Classes</h3>
 <p>
 
 <p>

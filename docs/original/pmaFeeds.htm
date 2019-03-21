@@ -2,7 +2,7 @@
 title: "Vision Portfolio Management Application Feeds"
 ---
 
-<h2><A name=overview>Overview</A></H2>
+<h2 id="overview">Overview</h2>
 <P>A standardized interface for loading security, portfolio, and related 
 investment data into Vision is provided as part of the <B>Portfolio Management 
 Application Layer</B>. <B>DataFeed</B> classes have been defined to translate 
@@ -13,7 +13,7 @@ relational database.
 <P>
 <HR>
 
-<h2><A name=formats>DataFeed Formats</A></H2>
+<h2 id="formats">DataFeed Formats</h2>
 <P>A separate <B>DataFeed</B> is defined for each format of external data you 
 wish to load into your Vision database. A data feed consists of one or more 
 records that are separated by carriage-return/line-feed. Each record contains 
@@ -85,7 +85,7 @@ different ways to map external data into Vision. These include:
 <P>
 <HR>
 
-<h2><A name=predefined>Pre-defined Feed Summary</A></H2>
+<h2 id="predefined">Pre-defined Feed Summary</h2>
 <P>A number of data feeds have been pre-defined to support the Portfolio 
 Management Application. These feeds are summarized below and are described in 
 detail in individual fact sheets. 
@@ -274,7 +274,7 @@ properties.
 <P>
 <HR>
 
-<h2><A name=starter>Starter Feeds</A></H2>
+<h2 id="starter">Starter Feeds</h2>
 <P>To successfully use the supplied <A 
 href="pmaApps.htm"><I>Headstart 
 Applications</I></A>, your initial feeds should include security, portfolio, and 
@@ -287,7 +287,7 @@ to use most of the starter portfolio reports without modification.
 <HR>
 
 
-<h2><A name=rejects>Reject Files</A> </H2>
+<h2 id="rejects">Reject Files</h2>
 <p>
 A reject file is generated when a data feed record is not processed for any reason. The reject file is created in the working directory with the same file name as the data feed appended by <i>.rejects</i>.     
 The first line of this file is the field order list used to process the feed followed by the records that were not processed by the feed.  Comments at the end of the record indicate a rejection reason where possible.
@@ -295,7 +295,7 @@ Once the reject reason has been resolved the reject file can be used as the data
 The <a href="#config">configuration file</a> option <i>rejectFileName</i> can be used to customize the location and name of the reject file.
 <p>
 <hr>
-<h2><A name=excel>Temporary Changes via Excel</A></H2>
+<h2 id="excel">Temporary Changes via Excel</h2>
 <P>Vision data feeds provide a potent means for an analyst that wants to use the 
 Vision browser applications on dynamically generated information. For example, 
 an analyst may want to create a composite account on the fly that can be used as 
@@ -330,7 +330,7 @@ Tools</I></A>.
 <P>
 <HR>
 
-<h2><A name=vadmin>Permanent Changes via VAdmin</A></H2>
+<h2 id="vadmin">Permanent Changes via VAdmin</h2>
 <P>Your Vision database is designed to store portfolio, security, holding, and 
 related information over time. Although you can load this data temporarily on an 
 as needed basis using <A 
@@ -345,8 +345,9 @@ administration functions.
 Administration</I></A>. 
 <P>
 <HR>
-<A name=config>
-<h2>Configuration Files</H2></A>A <I>configuration</I> file is a standard text 
+<h2 id="config">Configuration Files</h2>
+<p>
+A <I>configuration</I> file is a standard text 
 file which contains directions that override the default settings for loading a 
 data feed file. The configuration file must have the same name, through the 
 first '.', as the file it accompanies. For example, 

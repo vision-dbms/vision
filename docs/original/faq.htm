@@ -14,21 +14,21 @@ title: "Vision FAQ: Frequently Asked Questions"
 <ul type="disk">
 <li><a href="faq.htm#sorting">Multiple Sorts</a><br>
 <li><a href="faq.htm#list">Displaying messages for a Collection Element</a><br>
-<li><a href="faq.htm#current sector">Grouping List into a range of values</a><br>
+<li><a href="faq.htm#current_sector">Grouping List into a range of values</a><br>
 <li><a href="faq.htm#rating">Grouping elements by string values</a><br>
 <li><a href="faq.htm#showMessages">Sending <i>showMessages</i> message to a list</a><br>
 </ul>
 
 <h2 id="Techniques">Techniques</h2>
 <ul type="disk">
-<li><a href="faq.htm#^my">Using <i>^my</i> to copy variables</a>
+<li><a href="faq.htm#using_my">Using <i>^my</i> to copy variables</a>
 </ul>
 
 <hr>
 <p>
 
-<a name="print"><i><b>I defined a method to compute the price-earnings ratio and it does 
-not print anything.  What did I do wrong?</i></b></a>
+<span id="print"><i><b>I defined a method to compute the price-earnings ratio and it does 
+not print anything.  What did I do wrong?</i></b></span>
 <p>
 
 The most likely problem is that you terminated your method with the ; character 
@@ -48,9 +48,9 @@ See: <a href="clNA.htm#novalue">The noValue Value</a>
 <hr>
 <p>
 
-<a name="calculation"><i><b>I am printing the result of a ratio calculation 
+<span id="calculation"><i><b>I am printing the result of a ratio calculation 
 and the value printed is the value of the last item in the calculation.  
-What happened to the calculation?</i></b></a>
+What happened to the calculation?</i></b></span>
 
 <p>
 This is probably a precedence order problem.  For example, the program:
@@ -90,8 +90,8 @@ See: <a href="Syntax.htm#order">Precedence Order</a>
 <hr>
 <p>
 
-<a name="snf"><i><b>I am getting the <b>Selector Not Found</b> message for 
-<b>select: do:</b>.  What does this mean?</i></b></a>
+<span id="snf"><i><b>I am getting the <b>Selector Not Found</b> message for 
+<b>select: do:</b>.  What does this mean?</i></b></span>
 <p>
 
 You are most likely missing a <i>.</i> character after the <i>select:</i> block.  
@@ -139,8 +139,8 @@ See: <a href="Syntax.htm#dot">The dot operator</a>,
 <hr>
 <p>
 
-<a name="sorting"><i><b>I want to sort my list from highest to lowest score and then 
-alphabetically for ties.  How do I do this?</i></b></a>
+<span id="sorting"><i><b>I want to sort my list from highest to lowest score and then 
+alphabetically for ties.  How do I do this?</i></b></span>
 <p>
 
 The <a href="mList.htm#sortUpBy:then:"><i>sortUpBy:then:</i></a> and 
@@ -172,7 +172,7 @@ See: <a href="clCollect.htm#sorts">Sorting Collections</a>
 
 
 
-<a name="list"><i><b>How do I group my list into ranges of values?</i></b></a>
+<span id="list"><i><b>How do I group my list into ranges of values?</i></b></span>
 <p>
 
 The message <a href="mList.htm#groupedBy:usingCutoffs:"><i>groupedBy: usingCutoffs:</i></a>
@@ -226,9 +226,9 @@ do: [ lowerBoundary isntNA
 <hr>
 <p>
 
-<a name="current sector"><i><b>I am trying to find all the elements in a 
+<span id="current_sector"><i><b>I am trying to find all the elements in a 
 <b>groupList</b> that are in the current sector and the list is always 
-empty even though I know there are matches.  Why?</i></b></a>
+empty even though I know there are matches.  Why?</i></b></span>
 <p>
 
 Your program probably looks something like this:
@@ -291,9 +291,9 @@ See: <a href="Classes.htm#hierarchy">Instance Hierarchy</a>,
 <hr>
 <p>
 
-<a name="rating"><i><b>I created a property 'rating' for company and assigned the values 
+<span id="rating"><i><b>I created a property 'rating' for company and assigned the values 
 A, B, or C to some instances.  When I group my company list by rating, 
-there are several groups with the same rating.  Why?</i></b></a>
+there are several groups with the same rating.  Why?</i></b></span>
 <p>
 
 The grouping operation groups objects into unique buckets.  If you 
@@ -414,9 +414,9 @@ See: <a href="clCollect.htm#groups">Grouping Collections</a>
 <hr>
 <p>
 
-<a name="showMessages"><i><b>When I send the <b>&quotshowMessages&quot</b> message to a list 
+<span id="showMessages"><i><b>When I send the <b>&quotshowMessages&quot</b> message to a list 
 I get the set of messages that all lists respond to.  
-How do I know what the elements of the list respond to?</i></b></a>
+How do I know what the elements of the list respond to?</i></b></span>
 <p>
 
 You really want the list of messages associated with the elements of the list.  
@@ -456,7 +456,7 @@ myList groupedBy: [ whatAmI ] .
 <hr>
 <p>
 
-<a name="^my"><i><b>When and why do you have to copy variables using ^my?</i></b></a>
+<span id="using_my"><i><b>When and why do you have to copy variables using ^my?</i></b></span>
 <p>
 
 Because the magic word <i>^my</i> can only "reach back" one level of 
