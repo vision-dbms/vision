@@ -1,20 +1,16 @@
 ---
 title: "Vision Class: Dictionary "
----
-<h2>Vision Class: Dictionary</h2>
 
-<p>
-     | <a href="vconcep.htm">Home</a> | <a href="mDict.htm">Messages</a> | <a href="Classes.htm">Classes</a> | <a href="clXRef.htm">Class XRef</a> |
-<hr> <h2>Topics Covered:</h2> 
-<ul type=square>
-<li><a href="#overview">Dictionary Overview</a>
-<li><a href="#access">Basic Access</a>
-<li><a href="#shortcut">Access Shortcut</a> 
-<li><a href="#named">Naming Dictionaries (Named)</a>
-<li><a href="#xref">Cross Reference Dictionaries (XRef)</a> 
-<li><a href="#sys">System Dictionaries</a>
-</ul> 
-<hr> 
+related_topics:
+  - url: "mDict.htm"
+    title: "Messages"
+  - url: "Classes.htm"
+    title: "Classes"
+  - url: "clXRef.htm"
+    title: "Class XRef"
+
+---
+
 <h2 id="overview">Dictionary Overview</h2> 
 <p> 
 The subclasses of the class <b>Dictionary</b> are used to manage a
@@ -81,63 +77,63 @@ Dictionary.  The following example creates a new class and several
 instances and uses a Dictionary to keep track of the instances by
 name:
 <pre>
-     #- Create a new Class
-     !Industry <- Object createSubclass ;
+  #- Create a new Class
+  !Industry <- Object createSubclass ;
 
-     #- Define a Property at the Class
-     Industry define: 'name' ;
+  #- Define a Property at the Class
+  Industry define: 'name' ;
 
-     #- Create new Instances
-     !autos <- Industry createInstance ;
-     autos :name <- "Automotive" ;
-     !tech <- Industry createInstance ;
-     tech :name <- "Technology" ;
+  #- Create new Instances
+  !autos <- Industry createInstance ;
+  autos :name <- "Automotive" ;
+  !tech <- Industry createInstance ;
+  tech :name <- "Technology" ;
 
-     #- Create a Dictionary to Reference Instances
-     !LookupIndustry <- Dictionary new ;
-     LookupIndustry at: "autos" put: autos ;
-     LookupIndustry at: "tech" put: tech ;
+  #- Create a Dictionary to Reference Instances
+  !LookupIndustry <- Dictionary new ;
+  LookupIndustry at: "autos" put: autos ;
+  LookupIndustry at: "tech" put: tech ;
 </pre>
 The expression:
 <pre>
-    LookupIndustry at: "autos"
+  LookupIndustry at: "autos"
 </pre>
 returns the instance of the class Industry representing the
 automotive industry.  Since the object returned is the actual
 Industry object which responds to the <i>name</i> message, the
 expression:
 <pre>
-     LookupIndustry at: "autos" . name
+  LookupIndustry at: "autos" . name
 </pre>
 returns the name of this industry, in this case the String
 "Automotive".  You can add several identifiers to the Dictionary
 that all return the same object.  For example:
 <pre>
-     LookupIndustry at: "cars" put: (LookupIndustry at: "autos")
+  LookupIndustry at: "cars" put: (LookupIndustry at: "autos")
 </pre>
 adds the name <i>cars</i> to the Dictionary and defines it to return
 the industry object representing the automotive industry.  The
 expressions:
 <pre>
-     LookupIndustry at: "autos"
+  LookupIndustry at: "autos"
 </pre>
 and
 <pre>
-     LookupIndustry at: "cars"
+  LookupIndustry at: "cars"
 </pre>
 produce identical results.
 <p>
 The message <i>displayMessages</i> can be used to see all the names
 in a Dictionary.  For example:
 <pre>
-     LookupIndustry displayMessages
+  LookupIndustry displayMessages
 </pre>
 displays the names <i>autos, cars, </i>and <i>tech</i>.
 <p>
 If there is no object associated with the supplied identifier, the
 value <i>NA</i> is returned.  For example:
 <pre>
-     LookupIndustry at: "xyz"
+  LookupIndustry at: "xyz"
 </pre>
 returns the value <i>NA</i>.  The message
 <a href="mDict.htm#uniformAt:"><i>uniformAt: id </i></a>
@@ -147,11 +143,11 @@ found either, the value <i>NA</i> is returned.  For example, add the
 name <i>Default</i> to the Dictionary to return the default
 Industry instance:
 <pre>
-     LookupIndustry at: "Default" put: Industry ;
+  LookupIndustry at: "Default" put: Industry ;
 </pre>
 then:
 <pre>
-     LookupIndustry uniformAt: "xyz"
+  LookupIndustry uniformAt: "xyz"
 </pre>
 returns the object representing the default Industry since the id
 <i>xyz</i> is not found in the dictionary.
@@ -159,15 +155,15 @@ returns the object representing the default Industry since the id
 The <i>delete:</i> message can be used to delete an entry from a
 Dictionary.  For example:
 <pre>
-     LookupIndustry delete: "cars" ;
+  LookupIndustry delete: "cars" ;
 </pre>
 deletes this entry from the dictionary.  The expression:
 <pre>
-     LookupIndustry at: "cars"
+  LookupIndustry at: "cars"
 </pre>
 will now return the value <i>NA</i>.  Note that the expression:
 <pre>
-     LookupIndustry at: "autos"
+  LookupIndustry at: "autos"
 </pre>
 will continue to return the industry object because the
 <i>delete:</i> message at Dictionary just deletes the reference from
@@ -181,19 +177,19 @@ itself.
 Internally, the <i>at:</i> message defines the supplied name as a 
 <a href=Fund.htm#constant>class constant</a>.  The expression:
 <pre>
-     Dictionary  at: "test" put: "this is a test"
+  Dictionary  at: "test" put: "this is a test"
 </pre>
 is equivalent to:
 <pre>
-     Dictionary define: 'test' toBe: "this is a test"
+  Dictionary define: 'test' toBe: "this is a test"
 </pre>
 The expressions:
 <pre>
-    Dictionary at: "test"
+  Dictionary at: "test"
 </pre>
 is therefore equivalent to:
 <pre>
-    Dictionary test
+  Dictionary test
 </pre>
 Note that if the identifier does not start with a letter or the _
 character or if it contains any special characters, you need to use the \
@@ -202,15 +198,15 @@ the name).  In these cases, it is often easier to use the <i>at:</i>
 form of the lookup.  For example, if you added a multi-word identifier
 using:
 <pre>
-     Dictionary at: "this is a long identifier" put: "answer"
+  Dictionary at: "this is a long identifier" put: "answer"
 </pre>
 then the expressions:
 <pre>
-     Dictionary at: "this is a long identifier"
+  Dictionary at: "this is a long identifier"
 </pre>
 and
 <pre>
-     Dictionary this\ is\ a\ long\ identifier
+  Dictionary this\ is\ a\ long\ identifier
 </pre>
 both return the String "answer".  In this case, the version using <i>at:</i>
 is probably simpler to read.
@@ -233,20 +229,20 @@ Company and Security class.  The name <i>GM</i> would be added to
 the dictionaries <i>Named Company</i> and <i>Named Security</i>.
 The expression:
 <pre>
-     Named Company at: "GM" .
+  Named Company at: "GM" .
 </pre>
 or
 <pre>
-     Named Company GM
+  Named Company GM
 </pre>
 returns the Company instance representing General Motors and the
 expression:
 <pre>
-     Named Security at: "GM" .
+  Named Security at: "GM" .
 </pre>
 or
 <pre>
-     Named Security GM
+  Named Security GM
 </pre>
 returns the Security instance representing General Motors common
 stock.
@@ -254,7 +250,7 @@ stock.
 To display the set of naming dictionaries that have been
 defined, use the expression:
 <pre>
-     Named displayMessages
+  Named displayMessages
 </pre>
 <p>
 When a new entity subclass is created using the
@@ -262,23 +258,23 @@ When a new entity subclass is created using the
 automatically defined at the class <i>Named</i> using the same
 identifier.  For example, the expression:
 <pre>
-     Entity createSubclass: "Industry" ;
+  Entity createSubclass: "Industry" ;
 </pre>
 creates the new subclass <i>Industry</i> and the new naming dictionary
 <i>Named Industry</i>.  The <i>Default</i> identifier is automatically
 added to this naming dictionary to return the default instance in the
 new Entity class.  The expressions:
 <pre>
-     Named Industry at: "Default"
+  Named Industry at: "Default"
 </pre>
 and
 <pre>
-     Named Industry Default
+  Named Industry Default
 </pre>
 will therefore return the default Industry instance.  The 
 expression:
 <pre>
-     Named Industry uniformAt: "xyz"
+  Named Industry uniformAt: "xyz"
 </pre>
 will return the default Industry if the identifier <i>xyz</i> has not
 been defined.  When a new instance of an entity class is created
@@ -286,17 +282,17 @@ using the <i>createInstance: id</i> message, the id is automatically
 added to the class naming dictionary, returning the newly created instance. 
 For example, the expression:
 <pre>
-     Industry createInstance: "Auto" ;
+  Industry createInstance: "Auto" ;
 </pre>
 create a new instance of the Industry class and adds the name
 <i>Auto</i> to the <i>Named Industry</i> Dictionary.  The
 expressions:
 <pre>
-     Named Industry at: "Auto"
+  Named Industry at: "Auto"
 </pre>
 and
 <pre>
-     Named Industry Auto
+  Named Industry Auto
 </pre>
 will therefore return the Industry instance representing the
 automotive industry.
@@ -326,7 +322,7 @@ and the second is the name of a property at the entity class that
 will store the cross reference values.  For example, to create a
 currency cross reference to track Source1 currency codes use:
 <pre>
-     Currency createXRef: "Source1" withProperty: "source1Code" ;
+  Currency createXRef: "Source1" withProperty: "source1Code" ;
 </pre>
 This message performs the following steps:
 <ol type="1">
@@ -339,11 +335,11 @@ instance (i.e., <i>Currency XRef Source1 Default = Named Currency Default</i>).
 To obtain a list of the XRef instances defined for a
 class, use the expression:
 <pre>
-     entityClass XRef displayMessages
+  entityClass XRef displayMessages
 </pre>
 For example:
 <pre>
-     Currency XRef displayMessages
+  Currency XRef displayMessages
 </pre>
 returns the names of all the <i>Currency XRef</i> dictionaries that have been
 created for the Currency class.
@@ -352,7 +348,7 @@ The message <i>setXRefIn: xref to: id</i> is used to add or change XRef values
 for a specific entity.  For example,
 if Source1's code for the US currency is 1, use the expression:
 <pre>
-   Named Currency US setXRefIn: Currency XRef Source1 to: "1" ;
+  Named Currency US setXRefIn: Currency XRef Source1 to: "1" ;
 </pre>
 This expression adds the id <i>1</i> to the XRef and
 sets the value of the "source1Code" property
@@ -395,7 +391,7 @@ The message <i>profile</i> is defined at XRef to display the cross
 reference values defined in this XRef for all entities.  For
 example, the expression:
 <pre>
-     Currency XRef Source1 profile
+  Currency XRef Source1 profile
 </pre>
 displays:
 <pre>
@@ -409,33 +405,33 @@ Any number of aliases can be defined.  If Source1 also uses the code
 "USA1" for the US currency, then you can set and use either alias.
 For example:
 <pre>
-   Named Currency US setXRefIn: Currency XRef Source1 to: "USA1" ;
-   Currency XRef Source1 profile ;
+  Named Currency US setXRefIn: Currency XRef Source1 to: "USA1" ;
+  Currency XRef Source1 profile ;
 </pre>
 produces:
 <pre>
-     Currency XRef Source1  For Item: [:source1Code]
-     Code      Name                          XRef Value
-     . . .
-     US        U.S. Dollar                    : 1 / USA1 /
-     . . .
+  Currency XRef Source1  For Item: [:source1Code]
+  Code      Name                          XRef Value
+  . . .
+  US        U.S. Dollar                    : 1 / USA1 /
+  . . .
 </pre>
 The default <i>profile</i> message defined
 for the Entity class displays the value defined for each XRef property
 defined for the class.  For example, the expression:
 <pre>
-     Named Currency US profile
+  Named Currency US profile
 </pre>
 produces:
 <pre>
-     *** Currency Profile For: US Dollars
-     Code:                         US
-     Aliases:                      US / 
+  *** Currency Profile For: US Dollars
+  Code:                         US
+  Aliases:                      US / 
 
-     ---  Links   ---
+  ---  Links   ---
 
-     ---  XRefs  ---
-     source1Code:                     USA1
+  ---  XRefs  ---
+  source1Code:                     USA1
 </pre>
 <p>
 <hr>
@@ -448,12 +444,12 @@ The dictionary <i>SystemDictionary UpperCaseDictionary</i> is used
 to store the upper case equivalents of the letters 'a' through 'z'.
 This Dictionary was created using:
 <pre>
-     SystemDictionary newAs: "UpperCaseDictionary" ;
-     SystemDictionary UpperCaseDictionary 
-          at: "a" put: "A" .
-          at: "b" put: "B" .
-          at: "c" put: "C" .
-     ;
+  SystemDictionary newAs: "UpperCaseDictionary" ;
+  SystemDictionary UpperCaseDictionary 
+       at: "a" put: "A" .
+       at: "b" put: "B" .
+       at: "c" put: "C" .
+  ;
 </pre>
 The message <a href="mString.htm#capitalize"><i>capitalize</i></a>
 is defined at the class String to use this dictionary to translate
@@ -466,13 +462,13 @@ Note that the <i>newAs:</i> message has been defined at Dictionary to name the
 new dictionary in the dictionary's parent dictionary.  
 The expression:
 <pre>
-     SystemDictionary newAs: "Test"
+  SystemDictionary newAs: "Test"
 </pre>
 creates a new dictionary
 and automatically defines the message <i>Test</i> at the class SystemDictionary
 to return it.  The expression:
 <pre>
-     SystemDictionary Test
+  SystemDictionary Test
 </pre>
 returns this new dictionary instance.
 

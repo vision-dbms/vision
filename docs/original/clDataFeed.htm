@@ -2,7 +2,7 @@
 title: "Vision Class: DataFeed"
 ---
 
-<H2><A name=overview>DataFeed Overview</A></H2>
+<h2 id="overview">DataFeed Overview</h2>
 <P>The <B>DataFeed</B> class is an abstract class that is used to organize the 
 classes that translate data from sources external to Vision into Vision objects. 
 An external feed corresponds to a flat, tabular structure. It may be loaded into 
@@ -93,7 +93,7 @@ a security.
 <HR>
 
 <P>
-<H2><A name=basic>Basic Interactions</A></H2>
+<h2 id="basic">Basic Interactions</h2>
 <P>Each <B>DataFeed</B> subclass defines one or more data items that you can 
 update. Some feeds create new instances of <B>Entity</B>, <B>Bridge</B>, 
 <B>DataRecord</B>, and/or <B>LinkRecord</B> subclasses; other feeds only refresh 
@@ -177,7 +177,7 @@ scripts</A>.
 <HR>
 
 <P>
-<H2><A name=master>The MasterFeed Class</A></H2>
+<h2 id="master">The MasterFeed Class</h2>
 <P>Subclasses of <B>MasterFeed</B> are used to create new instances in an 
 <B>Entity</B> subclass and refresh key properties for instances of that class. 
 The properties updated by these feeds usually store basic descriptive 
@@ -317,7 +317,7 @@ class to create new <B>Entity</B> subclasses.
 <HR>
 
 <P>
-<H2><A name=eext>The EntityExtenderFeed Class</A></H2>
+<h2 id="eext">The EntityExtenderFeed Class</h2>
 <P>Subclasses of <B>EntityExtenderFeed</B> are used to update properties for an 
 <B>Entity</B> that are directly defined at the entity's class or linked to the 
 entity via a property returning a subclass of <B>DataRecord</B>. An 
@@ -537,7 +537,7 @@ last date priced.
 <HR>
 
 <P>
-<H2><A name=trans>The TransactionFeed Class</A></H2>
+<h2 id="trans">The TransactionFeed Class</h2>
 <P>Subclasses of <B>TransactionFeed</B> are used to create and cross reference 
 instances of a <B>LinkRecord</B> subclass, classes that associate two or more 
 entities. 
@@ -551,7 +551,7 @@ feeds</A>, to define protocol for these subclasses.
 <HR>
 
 <P>
-<H2><A name=members>The MembershipFeed Class</A></H2>
+<h2 id="members">The MembershipFeed Class</h2>
 <P>Subclasses of <B>MembershipFeed</B> are used to update and cross reference 
 one-to-many relationships between a group and its members over time. For 
 example, one or more companies can be members of the same industry. Over time, a 
@@ -680,7 +680,7 @@ entity.
 <HR>
 
 <P>
-<H2><A name=alias>The AliasFeed and XRefFeed Classes</A></H2>
+<h2 id="alias">The AliasFeed and XRefFeed Classes</h2>
 <P>Subclasses of <B>AliasFeed</B> are used to establish multiple aliases for 
 existing <B>Entity</B> instances. For example, <B>PortfolioAliases</B> may be 
 defined as a subclass of <B>AliasFeed</B> to establish multiple aliases for 
@@ -751,7 +751,7 @@ SecurityXRef |  Security
 <HR>
 
 <P>
-<H2><A name=rgroup>The RangeGroupFeed Class</A></H2>
+<h2 id="rgroup">The RangeGroupFeed Class</h2>
 <P>Subclasses of <B>RangeGroupFeed</B> are used to define and update numeric 
 ranges and categorize <B>Entity</B> instances into the appropriate range group. 
 <P>You can define new <B>RangeGroupFeed</B> subclasses using the 
@@ -760,8 +760,8 @@ ranges and categorize <B>Entity</B> instances into the appropriate range group.
 <HR>
 
 <P>
-<H2><A name=schema>The SchemaFeeds Class: Creating New Classes and 
-Properties</A></H2>
+<h2 id="schema">The SchemaFeeds Class: Creating New Classes and 
+Properties</h2>
 <P>Subclasses of <B>SchemaFeeds</B> are used to define new core classes, 
 properties, and data feed classes. The class hierarchy is illustrated below:
 <pre>
@@ -1051,7 +1051,7 @@ set the index type for a message that return an IndexedList.
 <HR>
 
 <P>
-<H2><A name=globals>The GlobalsFeed Class</A></H2>
+<h2 id="globals">The GlobalsFeed Class</h2>
 <P>The <B>GlobalsFeed</B> class is used to override the default settings for 
 loading a data feed file. The overrides only apply to the next feed run. The 
 <I>loadFromFile:</I> and <I>updateFromString:</I> messages can be used to load global values with this feed. The first line of the feed may contain the header line record however it is ignored as the fields are assumed to be in the following order:
@@ -1079,7 +1079,7 @@ such as <I>Date</I> or <I>DateOffset</I>. For example:
 <HR>
 
 <P>
-<H2><A name=purges>Purging Data Using DataFeeds</A></H2>
+<h2 id="purges">Purging Data Using DataFeeds</h2>
 <P><B>DataFeed</B> classes can be used to flag entities as inactive 
 (<B>MasterFeed</B> subclasses) and to purge actual <B>DataRecords</B> and points in time series properties (<B>EntityExtenderFeed</B> subclasses). To indicate 
 that you want to use a feed to purge data, you can set the <I>enablePurge</I> 

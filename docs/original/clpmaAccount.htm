@@ -1,35 +1,22 @@
 ---
 title: "Vision Application Classes: The Account Classes "
----
-<h2>Vision Application Classes: The Account Classes</h2>
 
-<p>
-| <a href="vpma.htm">Application Overview</a> 
-| <a href="pmaIssues.htm">Data Issues</a>
-| <a href="pmaClasses.htm">Application Classes</a>
-| <a href="mpmaAccount.htm">Account Messages</a> 
-| <a href="mpmaHolding.htm">Holding Messages</a> 
-| <a href="pmaXRef.htm">Application Cross Reference</a>
-|
-<hr>
-<h2>Topics Covered:</h2>
-<ul type=square>
-<li><a href="#overview">Overview</a>
-<li><a href="#basic">Basic Access</a>
-<li><a href="#account">The Account Class</a>
-<li><a href="#holdings">The Holding Class</a>
-<li><a href="#portfolio">The Portfolio Class</a>
-<li><a href="#portfolioUp">Updating Portfolio Data</a>
-<li><a href="#agg">The AggAccount Class</a>
-<li><a href="#aggUp">Updating AggAccount Data</a>
-<li><a href="#index">The IndexAccount Class</a>
-<li><a href="#indexUp">Updating IndexAccount Data</a>
-<li><a href="#composite">The CompositeAccount Class</a>
-<li><a href="#compositeUp">Updating CompositeAccount Data</a>
-<li><a href="#updates">Updating Account and Holding Data - Summary</a>
-<li><a href="#secXRef">Account and Holding Access By Security</a>
-</ul>
-<hr>
+related_topics:
+  - url: "vpma.htm"
+    title: "Application Overview"
+  - url: "pmaIssues.htm"
+    title: "Data Issues"
+  - url: "pmaClasses.htm"
+    title: "Application Classes"
+  - url: "mpmaAccount.htm"
+    title: "Account Messages"
+  - url: "mpmaHolding.htm"
+    title: "Holding Messages"
+  - url: "pmaXRef.htm"
+    title: "Application Cross Reference"
+
+---
+
 <h2 id="overview">Overview</h2>
 <p>
 
@@ -63,26 +50,25 @@ respond to the messages defined for the class <b>Account</b>.
 The following subset of the class hierarchy displays the classes
 directly related to <b>Account</b>:
 <pre>
-          Object
-             |
-             Entity
-             |  |
-             |  |-- Account
-             |        |
-             |        |-- AggAccount
-             |        |
-             |        |-- CompositeAccount
-             |        |
-             |        |-- IndexAccount
-             |        |
-             |        |-- Portfolio
-             |
-             LinkRecord
-                |
-                |-- CompositeAccount Component
-                |
-                |-- Holding
-
+  Object
+     |
+     Entity
+     |  |
+     |  |-- Account
+     |        |
+     |        |-- AggAccount
+     |        |
+     |        |-- CompositeAccount
+     |        |
+     |        |-- IndexAccount
+     |        |
+     |        |-- Portfolio
+     |
+     LinkRecord
+        |
+        |-- CompositeAccount Component
+        |
+        |-- Holding
 </pre>
 
 <p>
@@ -141,7 +127,7 @@ the following search rule:<p>
 <p>
 For example, the expression:
 <pre>
-     Account locateId: "XYZ" 
+  Account locateId: "XYZ" 
 </pre>
 returns <i>Named Account XYZ</i> if it is  defined,  otherwise  it  returns
 <i>Named  Portfolio  XYZ</i>,  otherwise it returns
@@ -247,51 +233,50 @@ time in the <i>baseCurrency</i> of the <b>Account</b>.  The message
 base currency by default or a currency override, if defined.
 For example:
 <pre>
+  Named Portfolio XYZ
+  do: [ baseCurrency code print: 5 ;               #- default currency
+        currency code print: 5 ;                   #- currency override
+        _totalMarketValue printWithCommas: 18.0 ;  #- latest raw value
+        totalMarketValue printWithCommas: 18.0 ;   #- currency adjusted
+      ] ;
+
+  ^today - 1 monthEnds evaluate:
+     [
      Named Portfolio XYZ
      do: [ baseCurrency code print: 5 ;               #- default currency
            currency code print: 5 ;                   #- currency override
-           _totalMarketValue printWithCommas: 18.0 ;  #- latest raw value
+           _totalMarketValue printWithCommas: 18.0 ;  #- eom raw value
            totalMarketValue printWithCommas: 18.0 ;   #- currency adjusted
          ] ;
-
-     ^today - 1 monthEnds evaluate:
-        [
-        Named Portfolio XYZ
-        do: [ baseCurrency code print: 5 ;               #- default currency
-              currency code print: 5 ;                   #- currency override
-              _totalMarketValue printWithCommas: 18.0 ;  #- eom raw value
-              totalMarketValue printWithCommas: 18.0 ;   #- currency adjusted
-            ] ;
-        ] ;
+     ] ;
 </pre>
 displays the latest and prior month-end
 market value in the portfolio's base currency
 and the currency override.  In this case the values are the same.  The
 expressions:
 <pre>
-     "DEM" asCurrency evaluate:
-        [
-        Named Portfolio XYZ
-        do: [ baseCurrency code print: 5 ;               #- default currency
-              currency code print: 5 ;                   #- DEM
-              _totalMarketValue printWithCommas: 18.0 ;  #- latest raw value
-              totalMarketValue printWithCommas: 18.0 ;   #- value in DEM
-            ] ;
-        ] ;
-
-     "DEM" asCurrency evaluate:
+  "DEM" asCurrency evaluate:
      [
-     ^today - 1 monthEnds evaluate:
-        [
-        Named Portfolio XYZ
-        do: [ baseCurrency code print: 5 ;               #- default currency
-              currency code print: 5 ;                   #- DEM
-              _totalMarketValue printWithCommas: 18.0 ;  #- eom raw value
-              totalMarketValue printWithCommas: 18.0 ;   #- value in DEM
-            ] ;
-        ] ;
-    ] ;
+     Named Portfolio XYZ
+     do: [ baseCurrency code print: 5 ;               #- default currency
+           currency code print: 5 ;                   #- DEM
+           _totalMarketValue printWithCommas: 18.0 ;  #- latest raw value
+           totalMarketValue printWithCommas: 18.0 ;   #- value in DEM
+         ] ;
+     ] ;
 
+  "DEM" asCurrency evaluate:
+  [
+  ^today - 1 monthEnds evaluate:
+     [
+     Named Portfolio XYZ
+     do: [ baseCurrency code print: 5 ;               #- default currency
+           currency code print: 5 ;                   #- DEM
+           _totalMarketValue printWithCommas: 18.0 ;  #- eom raw value
+           totalMarketValue printWithCommas: 18.0 ;   #- value in DEM
+         ] ;
+     ] ;
+ ] ;
 </pre>
 displays the latest and prior month-end
 market value in the portfolio's base currency
@@ -303,13 +288,13 @@ the different <a href="clpmaCompany.htm#type">asset categories</a>.
 For example, to show the total market value and percent cash for
 each <b>Portfolio</b> use:
 <pre>
-     Portfolio masterList
-     do: [ code print: 10 ;
-           name print: 25 ;
-           totalMarketValue printWithCommas: 15.0 ;      
-           totalMarketValueCash / totalMarketValue * 100 print: 10.2 ;
-           newLine print ;
-         ] ;
+  Portfolio masterList
+  do: [ code print: 10 ;
+        name print: 25 ;
+        totalMarketValue printWithCommas: 15.0 ;      
+        totalMarketValueCash / totalMarketValue * 100 print: 10.2 ;
+        newLine print ;
+      ] ;
 </pre>
 <p>
 For general descriptions of all the <b>Account</b> messages, see the
@@ -369,7 +354,7 @@ The message <i>id</i> has been defined at <b>Holding</b>
 to return a string in the form <i>securityCode---accountCode</i>.
 For example,  the expression:
 <pre>
-     Named Portfolio XYZ getHoldingIn: Named Security GM . id
+  Named Portfolio XYZ getHoldingIn: Named Security GM . id
 </pre>
 displays the string <i>37044210---XYZ</i>.
 <p>
@@ -382,43 +367,43 @@ current evaluation date. Since the message <i>holdings</i> returns a
 can be sent to it (e.g., <i>do:</i>, <i>select:</i> , 
 <i>groupedBy:</i>, <i>sortUp:</i> , etc.).  For example:
 <pre>
-     Named Portfolio XYZ holdings                #-- returns List of Holdings
-     do: [
-         security name print: 30 ;               #-- security level
-         security price print: 10 ;              #-- security level
-         totalMarketValue printNL: 15 ;          #-- holding level
-         ] ;
+  Named Portfolio XYZ holdings                #-- returns List of Holdings
+  do: [
+      security name print: 30 ;               #-- security level
+      security price print: 10 ;              #-- security level
+      totalMarketValue printNL: 15 ;          #-- holding level
+      ] ;
 
-     Named Portfolio XYZ holdings
-       groupedBy: [ security company country ] .
-     do: [
-         code print: 10 ; name printNL ;         #-- country level
-         groupList sortDown: [ percentOfPort ] .
-         do: [
-             security name print: 30 ;           #-- security level
-             security price print: 10 ;          #-- security level
-             totalMarketValue print: 15 ;        #-- holding level
-             percentOfPort printNL ;             #-- holding level
-             ] ;
-        newLine print ;
-        ] ;
+  Named Portfolio XYZ holdings
+    groupedBy: [ security company country ] .
+  do: [
+      code print: 10 ; name printNL ;         #-- country level
+      groupList sortDown: [ percentOfPort ] .
+      do: [
+          security name print: 30 ;           #-- security level
+          security price print: 10 ;          #-- security level
+          totalMarketValue print: 15 ;        #-- holding level
+          percentOfPort printNL ;             #-- holding level
+          ] ;
+     newLine print ;
+     ] ;
 </pre>
 
 The message <i>getHoldingIn:</i> is used to get an account's <b>Holding</b>
 in a specific security if it exists.  A default <b>Holding</b> is returned
 otherwise.  For example:
 <pre>
-     Named Portfolio XYZ
-        getHoldingIn: Named Security GM . percentOfPort 
+  Named Portfolio XYZ
+     getHoldingIn: Named Security GM . percentOfPort 
 </pre>
 returns the percentage of <i>Portfolio XYZ</i> represented by the holding
 in  <i>GM</i>.  The message <i>holds:</i> is used to indicate whether or not an
 account holds a specific security.  It returns a <b>Boolean</b> value.   For
 example:
 <pre>
-     Portfolio masterList
-        select: [ ^self holds: ^global Named Security GM ] .
-     do: [ code print: 10 ; name printNL ] ;
+  Portfolio masterList
+     select: [ ^self holds: ^global Named Security GM ] .
+  do: [ code print: 10 ; name printNL ] ;
 </pre>
 displays the <i>code</i> and <i>name</i> of every <b>Portfolio</b>
 that currently holds <i>GM</i>.
@@ -426,48 +411,48 @@ that currently holds <i>GM</i>.
 Since holdings are stored over time, you can access a <b>Portfolio's</b>
 holdings as of a different date using:
 <pre>
-    9612 evaluate:
-       [
-       Named Portfolio XYZ holdings
-       do: [
-           security name print: 30 ;
-           security price print: 10 ;
-           totalMarketValue printNL: 15 ;
-           ] ;
-       ]
+  9612 evaluate:
+    [
+    Named Portfolio XYZ holdings
+    do: [
+        security name print: 30 ;
+        security price print: 10 ;
+        totalMarketValue printNL: 15 ;
+        ] ;
+    ]
 </pre>
 This
 displays the holdings information as of Dec 31, 1996.   The  message
 <i>holdingsDate</i>  can  be  used  to  display  the  effective date of the
 holdings list being accessed.  For example:
 <pre>
-     9612 evaluate:
-       [
-       Named Portfolio XYZ
-       do: [ "Holdings As Of: " print; holdingsDate printNL ;
-              holdings
-              do: [
-                  security name print: 30 ;
-                  security price print: 10 ;
-                  totalMarketValue printNL: 15 ;
-                  ] ;
-           ]
-       ] ;
+  9612 evaluate:
+    [
+    Named Portfolio XYZ
+    do: [ "Holdings As Of: " print; holdingsDate printNL ;
+           holdings
+           do: [
+               security name print: 30 ;
+               security price print: 10 ;
+               totalMarketValue printNL: 15 ;
+               ] ;
+        ]
+    ] ;
 </pre>
 The message <i>hasHoldings</i> is defined for the <b>Account</b>
 class to indicate whether the account has holdings as of the current
 evaluation date.  For example, the expression:
 <pre>
-     Portfolio masterList select: [ hasHoldings ] .
-     do: [ displayInfo ] ;
+  Portfolio masterList select: [ hasHoldings ] .
+  do: [ displayInfo ] ;
  </pre>
 displays the list of portfolios that have current holdings and the
 expression:
 <pre>
-     9612 evaluate:
-       [ Portfolio masterList select: [ hasHoldings ] .
-         do: [ displayInfo ] ;
-       ] ;
+  9612 evaluate:
+    [ Portfolio masterList select: [ hasHoldings ] .
+      do: [ displayInfo ] ;
+    ] ;
 </pre>
 displays the list of portfolios that had holdings as of Dec 31, 1996.
 <p>
@@ -475,13 +460,13 @@ The message <i>holdings</i> can be used to access the <b>List</b>
 of <b>Holdings</b>
 associated with a <b>Security</b> as well.  For example:
 <pre>
-     Named Security GM holdings               #-- returns List of Holdings
-     do: [
-         account code print: 5 ;              #--  account level
-         account name print: 20 ;             #--  account level
-         security price print: 10 ;           #--  security level
-         totalMarketValue printNL: 15 ;       #--  holding level
-         ] ;
+  Named Security GM holdings               #-- returns List of Holdings
+  do: [
+      account code print: 5 ;              #--  account level
+      account name print: 20 ;             #--  account level
+      security price print: 10 ;           #--  security level
+      totalMarketValue printNL: 15 ;       #--  holding level
+      ] ;
 </pre>
 <p>
 Holdings access by <b>Security</b> is described in more detail
@@ -492,36 +477,36 @@ The <b>Holding</b> class structure is illustrated below:
 <center><b>Holding Class Structure</b></center>
 <p>
 <pre>
-    _____________
-    |  Holding  |--|
-    |___________|  |                     ______________
-                   |---- security   ---> |  Security  |
-                   |                     |____________|          ___________
-                   |                        |                    |   ...   |
-                   |                        |---- holdings  ---> | Holding |
-                   |                        |                    | Holding |
-                   |                        |                    |   ...   |
-                   |                        |                    |_________|
-                   |                        |
-                   |                        |---- code
-                   |                        |---- name
-                   |                        |---- price
-                   |                        |---- company --->
-                   |                     __________________
-                   |---- account    ---> |  Account       |
-                   |                     |________________|      ___________
-                   |                        |                    |   ...   |
-                   |                        |---- holdings  ---> | Holding |
-                   |                        |                    | Holding |
-                   |                        |                    |   ...   |
-                   |                        |                    |_________|
-                   |---- date               |---  code
-                   |---- baseCurrency       |---  name
-                   |---- percentOfPort      |---- baseCurrency
-                   |---- shares             |---- totalMarketValue
-                   |---- totalCost          |---- totalMarketValueEquity
-                   |---- totalMarketValue   |---  totalMarketValueCash
-                   |                        |
+  _____________
+  |  Holding  |--|
+  |___________|  |                     ______________
+                 |---- security   ---> |  Security  |
+                 |                     |____________|          ___________
+                 |                        |                    |   ...   |
+                 |                        |---- holdings  ---> | Holding |
+                 |                        |                    | Holding |
+                 |                        |                    |   ...   |
+                 |                        |                    |_________|
+                 |                        |
+                 |                        |---- code
+                 |                        |---- name
+                 |                        |---- price
+                 |                        |---- company --->
+                 |                     __________________
+                 |---- account    ---> |  Account       |
+                 |                     |________________|      ___________
+                 |                        |                    |   ...   |
+                 |                        |---- holdings  ---> | Holding |
+                 |                        |                    | Holding |
+                 |                        |                    |   ...   |
+                 |                        |                    |_________|
+                 |---- date               |---  code
+                 |---- baseCurrency       |---  name
+                 |---- percentOfPort      |---- baseCurrency
+                 |---- shares             |---- totalMarketValue
+                 |---- totalCost          |---- totalMarketValueEquity
+                 |---- totalMarketValue   |---  totalMarketValueCash
+                 |                        |
 </pre>
 <p>
 <h4 id="holdingCreation">Holdings Creation</h4>
@@ -595,16 +580,16 @@ over time.  The <i>aggregateList</i> message returns the list
 of <b>AggAccount</b> instances that include the <b>Portfolio</b>
 as of the evaluation date.  For example:
 <pre>
-     Named Portfolio XYZ aggregateList        #- current agg list
-     do: [ displayInfo ] ;
+  Named Portfolio XYZ aggregateList        #- current agg list
+  do: [ displayInfo ] ;
 </pre>
 displays the list of current <b>AggAccount</b> instances that include
 <i>Portfolio XYZ</i> and:
 <pre>
-     9612 evaluate: 
-       [ Named Portfolio XYZ aggregateList        #- 12/96 agg list
-         do: [ displayInfo ] ;
-       ] ;
+  9612 evaluate: 
+    [ Named Portfolio XYZ aggregateList        #- 12/96 agg list
+      do: [ displayInfo ] ;
+    ] ;
 </pre>
 displays the list of <b>AggAccount</b> instances as of Dec 31, 1996
 that include <i>Portfolio XYZ</i>.
@@ -671,12 +656,12 @@ assigned directly from this feed:
 <p>
 After running this upload, you can access the holdings using:
 <pre>
-     Named Portfolio PORT1 holdings              #-- returns List of Holdings
-     do: [
-         security name print: 30 ;               #-- security level
-         totalMarketValue print: 15 ;            #-- holding level
-         percentOfPort printNL ;                 #-- holding level        
-         ] ;
+  Named Portfolio PORT1 holdings              #-- returns List of Holdings
+  do: [
+      security name print: 30 ;               #-- security level
+      totalMarketValue print: 15 ;            #-- holding level
+      percentOfPort printNL ;                 #-- holding level        
+      ] ;
 </pre>
 
 <p>
@@ -699,8 +684,8 @@ instances.  Portfolios can be added to and deleted from aggregates
 over time.  The <i>memberList</i> message returns the list of <b>Portfolio</b>
 instances in the aggregate as of the evaluation date.  For example:
 <pre>
-     Named AggAccount AGG1 memberList            #-- current memberList
-     do: [ displayInfo ] ;
+  Named AggAccount AGG1 memberList            #-- current memberList
+  do: [ displayInfo ] ;
 </pre>
 displays the list of current <b>Portfolio</b> instances in
 <i>AggAccount AGG1</i> and:
@@ -1182,13 +1167,13 @@ The message <i>holdings</i> can be used to access the <b>List</b>
 of <b>Holdings</b>
 associated with a <b>Security</b>.  For example:
 <pre>
-     Named Security GM holdings               #-- returns List of Holdings
-     do: [
-         account code print: 5 ;              #--  account level
-         account name print: 20 ;             #--  account level
-         security price print: 10 ;           #--  security level
-         totalMarketValue printNL: 15 ;       #--  holding level
-         ] ;
+  Named Security GM holdings               #-- returns List of Holdings
+  do: [
+      account code print: 5 ;              #--  account level
+      account name print: 20 ;             #--  account level
+      security price print: 10 ;           #--  security level
+      totalMarketValue printNL: 15 ;       #--  holding level
+      ] ;
 </pre>
 <p>
 Note that this <b>List</b> of <b>Holding</b> instances only includes
@@ -1197,16 +1182,16 @@ Note that this <b>List</b> of <b>Holding</b> instances only includes
 Since holdings are stored over time, you can access the holdings in
 a <b>Security</b> as of a different date using:
 <pre>
-    9612 evaluate:
-       [
-       Named Security GM holdings               #-- returns List of Holdings
-       do: [
-           account code print: 5 ;              #--  account level
-           account name print: 20 ;             #--  account level
-           security price print: 10 ;           #--  security level
-           totalMarketValue printNL: 15 ;       #--  holding level
-           ] ;
-       ] ;
+  9612 evaluate:
+    [
+    Named Security GM holdings               #-- returns List of Holdings
+    do: [
+        account code print: 5 ;              #--  account level
+        account name print: 20 ;             #--  account level
+        security price print: 10 ;           #--  security level
+        totalMarketValue printNL: 15 ;       #--  holding level
+        ] ;
+    ] ;
 </pre>
 
 {% include doc-footer.htm copydates="1998" %}

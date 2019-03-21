@@ -1,23 +1,16 @@
 ---
 title: "Vision Class: Currency"
+
+related_topics:
+  - url: "mCurrency.htm"
+    title: "Messages"
+  - url: "Classes.htm"
+    title: "Classes"
+  - url: "clXRef.htm"
+    title: "Class XRef"
+
 ---
-<h2>Vision Class: Currency</h2>
 
-<p>
-     | <a href="vconcep.htm">Home</a> | <a href="mCurrency.htm">Messages</a> | <a href="Classes.htm">Classes</a> | <a href="clXRef.htm">Class XRef</a> |
-<hr>
-<h2>Topics Covered:</h2>
-<ul type=square>
-<li><a href="#overview">Currency Overview</a>
-<li><a href="#access">Basic Access</a>
-<li><a href="#related">Creating Related Currencies</a>
-<li><a href="#dynamic">Dynamic Currency Support</a>
-<li><a href="#methods">Writing Currency-Adjusted Methods</a>
-<li><a href="#euroDef">The Euro Currency</a>
-<p>
-
-</ul>
-<hr>
 <h2 id="overview">Currency Overview</h2>
 <p>
 The <b>Currency</b> class is used to track exchange rate information between
@@ -28,11 +21,11 @@ in which monetary transactions are performed such as "US Dollars" or
 <p>
 The Currency class is a direct subclass of Entity:
 <pre>
-    <a href="clObject.htm">Object</a>
-       |
-    <a href="clEntity.htm">Entity</a>
-       |
-    <b>Currency</b>
+  <a href="clObject.htm">Object</a>
+     |
+  <a href="clEntity.htm">Entity</a>
+     |
+  <b>Currency</b>
 </pre>
 <hr>
 <p>
@@ -362,7 +355,7 @@ this value will be stored in
 the time series <i>usExchange</i> for the <i>EUR</i> currency instance.
 
 <p>
-<h2>Historical Analysis</h2>
+<h2 id="HistoricalAnalysis">Historical Analysis</h2>
 <p>
 Most of the issues involved with using the <i>euro</i> relate to
 viewing data that existed prior to its introduction.  Since there will be no
@@ -408,7 +401,7 @@ by creating an additional <b>Currency</b> instance and populating
 its <i>usExchange</i> time series with a daily synthetic rate, both
 historically and into the future.
 <p>
-<h2>Using the Legacy Currency</h2>
+<h2 id="UsingTheLegacyCurrency">Using the Legacy Currency</h2>
 <p>
 Many Vision installations
 want to change the default currency for securities and companies
@@ -428,7 +421,8 @@ displayed in <i>euros</i>.  For example, assume the following:
 <p>
 The Vision expression:
 <pre>
-     981231 evaluate: [ Named Security GermanSec price] </pre>
+     981231 evaluate: [ Named Security GermanSec price]
+</pre>
 will return the value of 50 <i>euros</i>, since price data is
 automatically converted from reported currency to the security's
 base currency.  
@@ -452,7 +446,7 @@ the Vision expression:
 This usage instructs Vision to display the data for each security
 in the list using its legacy currency.  
 <p>
-<h2>Monetary Data Stored at Entity</h2>
+<h2 id="MonetaryDataStoredAtEntity">Monetary Data Stored at Entity</h2>
 <p>
 
 <b>Note: </b>
@@ -462,13 +456,12 @@ the Legacy to US exchange rate.  If your currency source does not
 provide these values, they can be computed and stored daily using
 the calculation:
 <ul type=disc>
-<pre>legacy fixed rate to EUR * daily EUR to US rate</pre></ul>
+<pre>legacy fixed rate to EUR * daily EUR to US rate
+</pre>
+</ul>
 
 The <i>ExchangeRateFeed</i> data feed computes these legacy rates automatically.
 <p>
 Vision Installations that predate release 6.1.2 may wish to review the <a href="euro.htm">Euro</a> document for more information.
-
-
-</pre>
 
 {% include doc-footer.htm copydates="1999" %}

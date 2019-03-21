@@ -1,27 +1,40 @@
 ---
 title: "Vision Class: TimeSeries"
----
-<h2>Vision Class: TimeSeries</h2>
 
-<p>
-     | <a href="vconcep.htm">Home</a> | <a href="mTS.htm">Messages</a> | <a href="clXRef.htm">Class XRef</a> | <a href="clCollect.htm">The Collection Classes</a> | <a href="clDate.htm">The Date Class</a> | <a href="tuTS.htm">Using TimeSeries</a> |
-<hr> 
-<h2>Topics Covered:</h2> 
-<ul type=square> 
-<li><a href="#overview">Overview</a>
-<li><a href="#basic">TimeSeries Basics</a>
-<li><a href="#date">The Default Date and DateRanges</a>
-<li><a href="#lags">Lags and Leads</a>
-<li><a href="#extract">Extracting Subsets</a>
-<li><a href="#collect">Collection Message Summary</a>
-<li><a href="#messages">Additional TimeSeries Messages</a>
-<li><a href="#methods">TimeSeries and Methods</a>
-<li><a href="#props">TimeSeries and Properties</a>
-<li><a href="#hfts">High Frequency Time Series</a>
-<li><a href="#other">Related Topics</a>
-</ul>
-<p>
-<hr>
+related_topics:
+  - url: "mTS.htm"
+    title: "Messages"
+  - url: "clXRef.htm"
+    title: "Class XRef"
+  - url: "clCollect.htm"
+    title: "The Collection Classes"
+  - url: "clDate.htm"
+    title: "The Date Class"
+  - url: "tuTS.htm"
+    title: "Using TimeSeries"
+  - url: "clCollect.htm"
+    title: "The Collection Classes"
+  - url: "clDate.htm#creation"
+    title: "Creating Dates and DateOffsets"
+  - url: "clDate.htm#ts"
+    title: "Dates and TimeSeries Data"
+  - url: "clDate.htm#internal"
+    title: "Date Arithmetic"
+  - url: "clDate.htm#dr"
+    title: "The DateRange Class"
+  - url: "clCollect.htm#iterate"
+    title: "When to Iterate"
+  - url: "Classes.htm#cluster"
+    title: "Clustering Issues"
+  - url: "tuList.htm"
+    title: "Vision Tutorial: Using TimeSeries"
+  - url: "tinats.htm#"
+    title: "Technical Paper: Time is not a Time Series"
+  - url: "sdmts.htm#"
+    title: "Technical Paper: Sets Do More Than Select"
+
+---
+
 <h2 id="overview">Overview</h2> 
 <p> 
 <b>TimeSeries</b> objects are used to track information for a particular 
@@ -1243,7 +1256,7 @@ the femto-second (i.e., 1e-15, 0.000000000000001 seconds).
 Creating a high frequency time series requires that you supply an
 extra parameter indicating the resolution you wish when you create
 the property.  For example, to define a property for tracking real-time
-prices at security, you could use the expression:<b>
+prices at security, you could use the expression:
 <pre>
    Security define: 'rtPrice' withTimeIndex: LowResolutionTime ;
 
@@ -1254,7 +1267,7 @@ time series.  The first parameter can be supplied in the form:
       yyyymmdd.hhmmssss
 </pre>
 to include both the date and time components.  For example, to update
-IBM's price as of 3:03 pm on April 14, 2000, use: <b>
+IBM's price as of 3:03 pm on April 14, 2000, use:
 <pre>
      Named Security IBM :rtPrice asOf: 20000414.1503 put: 102.25 ;
 </pre>
@@ -1300,23 +1313,5 @@ object to format the date and time components in a standard way.
 The messages <i>countSecondsTo:</i>, <i>countMinutesTo:</i>, and
 <i>countHoursTo:</i> can be used to compute the nubmer of seconds,
 minutes, or hours between two time points.
-<p>
-<hr>
-<h2 id="other">Related Topics</h2>
-<p>
-For additional information see:
-<p>
-<ul type=square>
-<li><a href="clCollect.htm">The Collection Classes</a>
-<li><a href="clDate.htm#creation">Creating Dates and DateOffsets</a>
-<li><a href="clDate.htm#ts">Dates and TimeSeries Data</a>
-<li><a href="clDate.htm#internal">Date Arithmetic</a>
-<li><a href="clDate.htm#dr">The DateRange Class</a>
-<li><a href="clCollect.htm#iterate">When to Iterate</a>
-<li><a href="Classes.htm#cluster">Clustering Issues</a>
-<li><a href="tuList.htm">Vision Tutorial: Using TimeSeries</a>
-<li><a href="tinats.htm#">Technical Paper: Time is not a Time Series</a>
-<li><a href="sdmts.htm#">Technical Paper: Sets Do More Than Select</a>
-</ul>
 
 {% include doc-footer.htm copydates="1997" %}

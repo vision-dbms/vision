@@ -1,30 +1,24 @@
 ---
 title: "Vision Class: Collection"
----
-<h2>Vision Class: Collection</h2>
 
-<p>
-     | <a href="vconcep.htm">Home</a> | <a href="clXRef.htm">Class XRef</a> | <a href="clList.htm">The List Class</a> | <a href="clIList.htm">The IndexedList Class</a> | <a href="clTS.htm">The TimeSeries Class</a> |
-<hr> 
-<h2>Topics Covered:</h2> 
-<ul type=square> 
-<li><a href="#overview">Overview</a>
-<li><a href="#basic">Collection Basics</a>
-<li><a href="#select">Creating Subsets</a>
-<li><a href="#sorts">Sorting and Ranking Collections</a>
-<li><a href="#groups">Grouping Collections</a>
-<li><a href="#compute">Collection Computation Messages</a>
-<li><a href="#tiles">
-Tiles, Running Totals, and Other Intra-List Messages</a>
-<li><a href="#inter">Inter-Collection Messages</a> 
-<li><a href="#creation">Creating and Updating Collections</a>
-<li><a href="#dot">Collection Messages and the
-   <font size=+2>.</font> Operator </a>
-<li><a href="#iterate">When to Iterate</a>
-<li><a href="#more">Related Topics</a>
-</ul>
-<p>
-<hr>
+related_topics:
+  - url: "clXRef.htm"
+    title: "Class XRef"
+  - url: "clList.htm"
+    title: "The List Class"
+  - url: "clIList.htm"
+    title: "The IndexedList Class"
+  - url: "clTS.htm"
+    title: "The TimeSeries Class"
+  - url: "tuList.htm"
+    title: "Vision Tutorial: Using Lists"
+  - url: "tuTS.htm"
+    title: "Vision Tutorial: Using TimeSeries"
+  - url: "sdmts.htm#"
+    title: "Technical Paper: Sets Do More Than Select"
+
+---
+
 <h2 id="overview">Overview</h2> 
 <p> 
 The <b>Collection</b> class is an abstract class that is used to
@@ -46,20 +40,20 @@ The elements in a collection do not need to be from the same class.
 <p>
 The <i>Collection</i> class is an indirect subclass of Object:
 <pre>
-    <a href="clObject.htm">Object</a>
-       |
-       Function
-          |
-          EnumeratedFunction
-             |
-             <b>Collection</b>
-                |
-                IndexedCollection
-                |   |-- <a href="clIList.htm">IndexedList</a>
-                |   |-- <a href="clTS.htm">TimeSeries</a>
-                |
-                SequencedCollection
-                    |-- <a href="clList.htm">List</a>
+  <a href="clObject.htm">Object</a>
+     |
+     Function
+        |
+        EnumeratedFunction
+           |
+           <b>Collection</b>
+              |
+              IndexedCollection
+              |   |-- <a href="clIList.htm">IndexedList</a>
+              |   |-- <a href="clTS.htm">TimeSeries</a>
+              |
+              SequencedCollection
+                  |-- <a href="clList.htm">List</a>
 </pre>
 The <i>Collecton</i> classes have been optimized to organize and
 query large sets of data.  A large number of the messages defined
@@ -733,7 +727,7 @@ named <i>decile</i>. For example:
         sales print: 10 ;
         decile printNL ; 
       ] ;
-re>
+</pre>
 displays the decile value from 1 to 10 for each company in
 <i>companyList</i>.
 <p>
@@ -1098,19 +1092,5 @@ optimizations available.  For example:
   list iterate: [ ^global :count <- ^global count + 1 ] ;
   count printNL ;
 </pre>
-
-<hr>
-<h2 id="more">Related Topics</h2>
-<p>
-For additional information see:
-<p>
-<ul type=square>
-<li><a href="clList.htm">The List Class</a>
-<li><a href="clIList.htm">The IndexedList Class</a>
-<li><a href="clTS.htm">The TimeSeries Class</a>
-<li><a href="tuList.htm">Vision Tutorial: Using Lists</a>
-<li><a href="tuTS.htm">Vision Tutorial: Using TimeSeries</a>
-<li><a href="sdmts.htm#">Technical Paper: Sets Do More Than Select</a>
-</ul>
 
 {% include doc-footer.htm copydates="1997" %}

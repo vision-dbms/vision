@@ -1,23 +1,22 @@
 ---
 title: "Vision Class: Undefined (NA) "
----
-<h2>Vision Class: Undefined (NA)</h2>
 
-<p>
-     | <a href="vconcep.htm">Home</a> | <a href="clXRef.htm">Class XRef</a> | <a href="clBoolean.htm">The Boolean Class</a> |
-<hr> 
-<h2>Topics Covered:</h2> 
-<ul type=square> 
-<li><a href="#overview">Overview</a>
-<li><a href="#creation">Generating NA Values</a>
-<li><a href="#message">NA Messages</a>
-<li><a href="#conditional">NAs and Conditional Tests</a>
-<li><a href="#subclass">Creating NA Subclasses</a>
-<li><a href="#novalue">The <i>NoValue</i> Value</a>
-<li><a href="#other">Related Topics</a>
-</ul>
-<p>
-<hr>
+related_topics:
+  - url: "Fund.htm#default"
+    title: "Assigning Property Values"
+  - url: "Classes.htm#sampleNAvsDefault"
+    title: "NAs and Default Values"
+  - url: "Messages.htm#default"
+    title: "Assigning Default Values"
+  - url: "Navigate.htm#message"
+    title: "General Message Information"
+  - url: "clBoolean.htm"
+    title: "The Boolean Class"
+  - url: "clXRef.htm"
+    title: "Class XRef"
+
+---
+
 <h2 id="overview">Overview</h2> 
 <p> 
 The <b>Undefined</b> class has a single instance
@@ -43,11 +42,11 @@ which  have any number of instances.
 <p>
 The Undefined class is a direct subclass of Object:
 <pre>
-    <a href="clObject.htm">Object</a>
-       |
-       <b>Undefined</b>
-          |
-          |-- <a href="#novalue">NoValue</a>
+  <a href="clObject.htm">Object</a>
+     |
+     <b>Undefined</b>
+        |
+        |-- <a href="#novalue">NoValue</a>
 </pre>
 
 <p>
@@ -73,8 +72,7 @@ its initial value is <i>NA</i>.  For example:
 <pre>
   !variable ;
   variable print ;
-</pre>and
-<pre>
+</pre>and<pre>
   Currency defineFixedProperty: 'fixed' ;
   Named Currency USD fixed print ;
 </pre>and
@@ -91,14 +89,12 @@ a property.  For example:
   variable print ;                      #- print it
   :variable <- NA ;                     #- assign NA
   variable print ;                      #- print it
-</pre>and
-<pre>
+</pre>and<pre>
   Named Currency USD :fixed <- 10 ;     #- assign value
   Named Currency USD fixed print ;      #- print it
   Named Currency USD :fixed <- NA ;     #- assign NA
   Named Currency USD fixed print ;      #- print it
-</pre>and
-<pre>
+</pre>and<pre>
   Named Currency USD :ts 
              asOf: 93 put: 10 ;         #- assign value
   Named Currency USD ts print ;         #- print it
@@ -325,19 +321,5 @@ see the class hierarchy:
 Because the <i>NoValue</i> object is a subclass of <i>Undefined</i>,
 it responds to the <i>isNA</i> and <i>isntNA</i> messages with the
 values <i>TRUE</i> and <i>FALSE</i>.
-<p>
-<hr>
-<h2 id="other">Related Topics</h2>
-<p>
-<p>
-For additional information see:
-<p>
-<ul type=square>
-<li><a href="Output.htm#printNA">Printing NAs</a>
-<li><a href="Fund.htm#default">Assigning Property Values</a>
-<li><a href="Classes.htm#sampleNAvsDefault">NAs and Default Values</a>
-<li><a href="Messages.htm#default">Assigning Default Values</a>
-<li><a href="Navigate.htm#message">General Message Information</a>
-</ul>
 
 {% include doc-footer.htm copydates="1996" %}

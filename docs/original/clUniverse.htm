@@ -1,22 +1,16 @@
 ---
 title: "Vision Class: Universe "
----
-<h2>Vision Class: Universe</h2>
 
-<p>
-| <a href="vconcep.htm">Home</a> 
-| <a href="mUniverse.htm">Messages</a> 
-| <a href="Classes.htm">Classes</a>
-| <a href="clXRef.htm">Class XRef</a>
-|
-<hr>
-<h2>Topics Covered:</h2>
-<ul type=square>
-<li><a href="#overview">Universe Overview</a>
-<li><a href="#basic">Basic Usage</a>
-<li><a href="#feeds">Using The ExternalFeedManager</a>
-</ul>
-<hr>
+related_topics:
+  - url: "mUniverse.htm"
+    title: "Messages"
+  - url: "Classes.htm"
+    title: "Classes"
+  - url: "clXRef.htm"
+    title: "Class XRef"
+
+---
+
 <h2 id="overview">Universe Overview</h2>
 <p>
 The <b>Universe</b> class is a subclass of <b>Entity</b> used to
@@ -27,11 +21,11 @@ instances comprising the <i>Standard & Poors 500</i> each month.
 <p>
 The Universe class is a direct subclass of Entity:
 <pre>
-    <a href="clObject.htm">Object</a>
-       |
-    <a href="clEntity.htm">Entity</a>
-       |
-       <b>Universe</b>
+  <a href="clObject.htm">Object</a>
+     |
+  <a href="clEntity.htm">Entity</a>
+     |
+     <b>Universe</b>
 </pre>
 
 <p>
@@ -159,33 +153,31 @@ Several <b>DataFeed</b> classes have been defined to work with
 For example, the following tab-delimited string could be used to create
 and refresh <b>Universe</b> instances:
 <pre>
-     Interface ExternalFeedManager upload: "UniverseMaster" using:
-     "Id	Name                      MemberType	
-      SP500     Standard & Poors 500	  Security	
-      DJ30      Dow Jones 30 Industrials  Security
-      DJT       Dow Jones Transportation  Security
-     " ;
-
+  Interface ExternalFeedManager upload: "UniverseMaster" using:
+  "Id	Name                      MemberType	
+   SP500     Standard & Poors 500	  Security	
+   DJ30      Dow Jones 30 Industrials  Security
+   DJT       Dow Jones Transportation  Security
+  " ;
 </pre>
 The following tab-delimited string could be used to define <b>Universe/<b>
 memberships over time:
 <pre>
-     Interface ExternalFeedManager upload: "UniverseMembers" using:
-     "groupId     date       memberId
-      SP500       19971031   45920010	
-      SP500       19971031   37044210	
-      SP500       19971031   88553510	
-      #---  ...
-      SP500       19971130   45920010	
-      SP500       19971130   37044210	
-      SP500       19971130   88553510	
-      #---  ...
-      DJT         Default    01165910
-      DJT         Default    00176510
-      DJT         Default    00202M10
-      #---  ...
-     " ;
-
+  Interface ExternalFeedManager upload: "UniverseMembers" using:
+  "groupId     date       memberId
+   SP500       19971031   45920010	
+   SP500       19971031   37044210	
+   SP500       19971031   88553510	
+   #---  ...
+   SP500       19971130   45920010	
+   SP500       19971130   37044210	
+   SP500       19971130   88553510	
+   #---  ...
+   DJT         Default    01165910
+   DJT         Default    00176510
+   DJT         Default    00202M10
+   #---  ...
+  " ;
 </pre>
 
 {% include doc-footer.htm copydates="1998" %}
