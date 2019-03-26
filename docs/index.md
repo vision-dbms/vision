@@ -1,6 +1,7 @@
 ---
 title: Vision
-layout: home
+
+layout: single
 ---
 
 * [The Technology](original/visiontech.htm)
@@ -27,7 +28,7 @@ Please pardon our appearance as we work to update and modernize the material in 
 * [Vision Help](original/vhelp.htm)
 * [Vision FAQ](original/faq.htm)
 
-* [For Portfolio Managers](original/vpma.htm)
+* [For Investment Managers](original/vpma.htm)
 
 ## Legacy Documentation
 
