@@ -1,38 +1,123 @@
-docs:
-  - title: "Vision Technology"
+################################################################
+####  Landing Pages
+
+lp_TheVisionStory: &lp_TheVisionStory
+  title: "The Vision Story"
+  url: "/original/visiontech.htm"
+
+lp_GettingVision: &lp_GettingVision
+  title: "Getting Vision"
+  url: "nix-build.html"
+
+lp_UserGuide: &lp_UserGuide
+  title: "User Guide"
+  url: "/original/Fund.htm"
+
+################################################################
+####  Sidebar Groups
+
+################
+grp_GettingVision: &grp_GettingVision
+  <<: *lp_GettingVision
+  children:
+  - title: "For Linux and Unix"
+    url: "nix-build.html"
+
+################
+grp_TheVisionStory: &grp_TheVisionStory
+  <<: *lp_TheVisionStory
+  children:
+  - title: "The Technology"
     url: "/original/visiontech.htm"
+  - title: "Time Is Not A Time-Series"
+    url: "/original/tinats.htm"
+  - title: "Sets Do More Than <i>Select</i>"
+    url: "/original/sdmts.htm"
+  - title: "The Simple Hard Problem of Time"
+    url: "/original/tshpot.htm"
 
-  - title: "Vision Concepts"
-    children:
-      - title: "Vision Fundamentals"
-        url: "/original/Fund.htm"
-      - title: "Vision Classes"
-        url: "/original/Classes.htm"
-      - title: "Vision Messages"
-        url: "/original/Messages.htm"
+################
+grp_VisionConcepts: &grp_VisionConcepts
+  title: "Vision Concepts"
+  children:
+  - title: "Vision Fundamentals"
+    url: "/original/Fund.htm"
+  - title: "Vision Classes"
+    url: "/original/Classes.htm"
+  - title: "Vision Messages"
+    url: "/original/Messages.htm"
 
-  - title: "Writing Programs"
-    children:
-      - title: "The Vision Language"
-        url: "/original/Lang.htm"
-      - title: "Vision Syntax"
-        url: "/original/Syntax.htm"
-      - title: "Vision Programs"
-        url: "/original/Program.htm"
-      - title: "Vision Program Execution"
-        url: "/original/Execution.htm"
-      - title: "Vision Program Errors"
-        url: "/original/Error.htm"
+################
+grp_WritingPrograms: &grp_WritingPrograms
+  title: "Writing Programs"
+  children:
+  - title: "The Vision Language"
+    url: "/original/Lang.htm"
+  - title: "Vision Syntax"
+    url: "/original/Syntax.htm"
+  - title: "Vision Programs"
+    url: "/original/Program.htm"
+  - title: "Vision Program Execution"
+    url: "/original/Execution.htm"
+  - title: "Vision Program Errors"
+    url: "/original/Error.htm"
 
-  - title: "Using Vision"
-    children:
-      - title: "Running Vision"
-        url: "/original/Running.htm"
-      - title: "Loading Information into Vision"
-        url: "/original/Input.htm"
-      - title: "Formatting Vision Output"
-        url: "/original/Output.htm"
+################
+grp_UsingVision: &grp_UsingVision
+  title: "Using Vision"
+  children:
+  - title: "Running Vision"
+    url: "/original/Running.htm"
+  - title: "Loading Information into Vision"
+    url: "/original/Input.htm"
+  - title: "Formatting Vision Output"
+    url: "/original/Output.htm"
 
+################
+grp_UserGuide: &grp_UserGuide
+  title: "User Guide"
+  children:
+  - *grp_VisionConcepts
+  - *grp_WritingPrograms
+  - *grp_UsingVision
+
+
+## [For Investment Managers](original/vpma.htm)
+## Troubleshooting
+## [Debug an Update Malloc Error](update-malloc-debugging.html)
+## [Vision Database Scan](VdbScan)
+
+################
+grp_Home: &grp_Home
+  title: "Under where?"
+  children:
+  - *lp_TheVisionStory
+  - *lp_GettingVision
+  - *lp_UserGuide
+
+################################################################
+####  Sidebars
+
+################
+sb_Home:
+  - *grp_Home
+
+################
+sb_TheVisionStory:
+  - *grp_TheVisionStory
+
+################
+sb_GettingVision:
+  - *grp_GettingVision
+
+################
+sb_UserGuide:
+  - *grp_VisionConcepts
+  - *grp_WritingPrograms
+  - *grp_UsingVision
+
+################################################################
+docs:
   - title: "Vision Help"
     children:
       - title: "Navigating a Vision Database"
