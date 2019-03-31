@@ -1,7 +1,9 @@
 ---
----
+title: "VdbScan Error Message Lookup"
 
-# VdbScan Error Message Lookup
+sidebar:
+  nav: "sb_Troubleshooting"
+---
 
 Scan for your error messages here.  Try not to clutter this up with things other than the error message.
 

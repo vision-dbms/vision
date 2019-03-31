@@ -13,20 +13,33 @@ lp_UserGuide: &lp_UserGuide
   title: "User Guide"
   url: "/original/Fund.htm"
 
+lp_ClassXRef: &lp_ClassXRef
+  title: "Class Cross Reference"
+  url: "/original/clObject.htm"
+
+lp_InvestmentManagers: &lp_InvestmentManagers
+  title: "Investment Managers"
+  url: "/original/investmanag.htm"
+
+lp_Troubleshooting: &lp_Troubleshooting
+  title: "Troubleshooting"
+  url: "update-malloc-debugging.html"
+
+
 ################################################################
 ####  Sidebar Groups
 
 ################
 grp_GettingVision: &grp_GettingVision
   <<: *lp_GettingVision
-  children:
+  children: &children_GettingVision
   - title: "For Linux and Unix"
     url: "nix-build.html"
 
 ################
 grp_TheVisionStory: &grp_TheVisionStory
   <<: *lp_TheVisionStory
-  children:
+  children: &children_TheVisionStory
   - title: "The Technology"
     url: "/original/visiontech.htm"
   - title: "Time Is Not A Time-Series"
@@ -39,7 +52,7 @@ grp_TheVisionStory: &grp_TheVisionStory
 ################
 grp_VisionConcepts: &grp_VisionConcepts
   title: "Vision Concepts"
-  children:
+  children: &children_VisionConcepts
   - title: "Vision Fundamentals"
     url: "/original/Fund.htm"
   - title: "Vision Classes"
@@ -50,7 +63,7 @@ grp_VisionConcepts: &grp_VisionConcepts
 ################
 grp_WritingPrograms: &grp_WritingPrograms
   title: "Writing Programs"
-  children:
+  children: &children_WritingPrograms
   - title: "The Vision Language"
     url: "/original/Lang.htm"
   - title: "Vision Syntax"
@@ -65,7 +78,7 @@ grp_WritingPrograms: &grp_WritingPrograms
 ################
 grp_UsingVision: &grp_UsingVision
   title: "Using Vision"
-  children:
+  children: &children_UsingVision
   - title: "Running Vision"
     url: "/original/Running.htm"
   - title: "Loading Information into Vision"
@@ -74,26 +87,182 @@ grp_UsingVision: &grp_UsingVision
     url: "/original/Output.htm"
 
 ################
+grp_VisionInterfaces: &grp_VisionInterfaces
+  title: "Vision Interfaces"
+  children: &children_VisionInterfaces
+  - title:  "The Vision Interface ToolKit Class"
+    url: "/original/tkInterface.htm"
+  - title: "The Vision OpenVision ToolKit Class"
+    url: "/original/tkOpenVision.htm"
+  - title: "The VAccess COM Objects"
+    url: "/original/ifVAccess.htm"
+  - title: "Sample HTML Access to Vision"
+    url: "/original/ifHtml.htm"
+
+################
+grp_VisionAdministration: &grp_VisionAdministration
+  title: "Vision Administration"
+  children: &children_VisionAdministration
+  - title: "Batch Processing"
+    url: "/original/admBatch.htm"
+  - title: "Vision Production Management"
+    url: "/original/admProduction.htm"
+  - title: "The Vision Network"
+    url: "/original/admNet.htm"
+  - title: "Updating The Vision Network"
+    url: "/original/admUpdat.htm"
+  - title: "Vision Network Administration Tools"
+    url: "/original/admTools.htm"
+  - title: "Miscellaneous Database Administration"
+    url: "/original/admDBA.htm"
+
+################
+grp_VisionTutorials: &grp_VisionTutorials
+  title: "Vision Tutorials"
+  children: &children_VisionTutorials
+  - title: "Vision Basics"
+    url: "/original/tuBasic.htm"
+  - title: "Loading Data into Vision"
+    url: "/original/tuLoad.htm"
+  - title: "Single Object Access in Vision"
+    url: "/original/tuSingle.htm"
+  - title: "List Access in Vision"
+    url: "/original/tuList.htm"
+  - title: "TimeSeries Access in Vision"
+    url: "/original/tuTS.htm"
+  - title: "Case Study 1: Single Company Reporting"
+    url: "/original/tuCase1.htm"
+  - title: "Case Study 2: Basic Tabular Reporting"
+    url: "/original/tuCase2.htm"
+  - title: "Case Study 3: Cross Tabular Reporting"
+    url: "/original/tuCase3.htm"
+  - title: "Case Study 4: Simple Report Writer"
+    url: "/original/tuCase4.htm"
+  - title: "Case Study 5: Advanced Classification Techniques"
+    url: "/original/tuCase5.htm"
+
+################
+grp_VisionHelp: &grp_VisionHelp
+  title: "Vision Help"
+  children: &children_VisionHelp
+  - title: "Navigating a Vision Database"
+    url: "/original/Navigate.htm"
+  - title: "Vision Terminology"
+    url: "/original/Terms.htm"
+  - title: "Vision Editor"
+    url: "/original/Editor.htm"
+  - title: "Vision FAQ"
+    url: "/original/faq.htm"
+
+################
 grp_UserGuide: &grp_UserGuide
   title: "User Guide"
-  children:
+  children: &children_UserGuide
   - *grp_VisionConcepts
   - *grp_WritingPrograms
   - *grp_UsingVision
+  - *grp_VisionInterfaces
+  - *grp_VisionAdministration
+  - *grp_VisionTutorials
+  - *grp_VisionHelp
 
+################
+grp_ClassXRef: &grp_ClassXRef
+  <<: *lp_ClassXRef
+  children:
+  - title: "The Object Class"
+    url: "/original/clObject.htm"
+  - title: "The Number Class"
+    url: "/original/clNumber.htm"
+  - title: "The String Class"
+    url: "/original/clString.htm"
+  - title: "The Undefined (NA) Class"
+    url: "/original/clNA.htm"
+  - title: "The Boolean Class"
+    url: "/original/clBoolean.htm"
+  - title: "The Date, DateRange, and DateOffset Classes"
+    url: "/original/clDate.htm"
+  - title: "The Collection Class"
+    url: "/original/clCollect.htm"
+  - title: "The List Class"
+    url: "/original/clList.htm"
+  - title: "The TimeSeries Class"
+    url: "/original/clTS.htm"
+  - title: "The IndexedList Class"
+    url: "/original/clIList.htm"
+  - title: "The Dictionary Class"
+    url: "/original/clDict.htm"
+  - title: "The Entity Class"
+    url: "/original/clEntity.htm"
+  - title: "The Currency Class"
+    url: "/original/clCurrency.htm"
+  - title: "The Classication Class"
+    url: "/original/clClassify.htm"
+  - title: "The Interface ToolKit"
+    url: "/original/tkInterface.htm"
+  - title: "The DataFeed Class"
+    url: "/original/clDataFeed.htm"
+  - title: "The DataFeed Class - Advanced Topics"
+    url: "/original/clDataFeedAdv.htm"
+  - title: "The Schema Toolkit"
+    url: "/original/tkSchema.htm"
+  - title: "Application Classes"
+    url: "/original/appClasses.htm"
 
-## [For Investment Managers](original/vpma.htm)
-## Troubleshooting
-## [Debug an Update Malloc Error](update-malloc-debugging.html)
-## [Vision Database Scan](VdbScan)
+################
+grp_InvestmentManagers: &grp_InvestmentManagers
+  <<: *lp_InvestmentManagers
+  children: &children_InvestmentManagers
+  - title: "Overview"
+    url: "/original/investmanag.htm"
+  - title: "Installation"
+    url: "/original/pmaInstall.htm"
+  - title: "Headstart Applications"
+    url: "/original/pmaApps.htm"
+  - title: "Analyst Tools"
+    url: "/original/pmaAnalyst.htm"
+  - title: "Uploading Data"
+    url: "/original/pmaFeeds.htm"
+  - title: "Database Updates and Administration"
+    url: "/original/pmaDBA.htm"
+  - title: "Getting Started"
+    url: "/original/pmaStarting.htm"
+  - title: "Next Steps"
+    url: "/original/pmaNextSteps.htm"
+  - title: "Core Classes"
+    url: "/original/pmaClasses.htm"
+  - title: "Supplemental Core Classes"
+    url: "/original/pmaSupp.htm"
+  - title: "Special Issues"
+    url: "/original/pmaIssues.htm"
+  - title: "Language Tutorial"
+    url: "/original/pmaTutor.htm"
+  - title: "Document Cross Reference"
+    url: "/original/pmaXRef.htm"
+  - title: "FAQ"
+    url: "/original/pmaFAQ.htm"
+  - title: "Euro"
+    url: "/original/euro.htm"
+
+################
+grp_Troubleshooting: &grp_Troubleshooting
+  <<: *lp_Troubleshooting
+  children: &children_Troubleshooting
+  - title: "Debug an Update Malloc Error"
+    url: "update-malloc-debugging.html"
+  - title: "Vision Database Scan"
+    url: "VdbScan"
 
 ################
 grp_Home: &grp_Home
   title: "Under where?"
-  children:
+  children: &children_Home
   - *lp_TheVisionStory
   - *lp_GettingVision
   - *lp_UserGuide
+  - *lp_ClassXRef
+  - *lp_InvestmentManagers
+  - *lp_Troubleshooting
 
 ################################################################
 ####  Sidebars
@@ -112,142 +281,21 @@ sb_GettingVision:
 
 ################
 sb_UserGuide:
-  - *grp_VisionConcepts
-  - *grp_WritingPrograms
-  - *grp_UsingVision
+  *children_UserGuide
+
+################
+sb_ClassXRef:
+  - *grp_ClassXRef
+
+################
+sb_InvestmentManagers:
+  - *grp_InvestmentManagers
+
+################
+sb_Troubleshooting:
+  - *grp_Troubleshooting
 
 ################################################################
 docs:
-  - title: "Vision Help"
-    children:
-      - title: "Navigating a Vision Database"
-        url: "/original/Navigate.htm"
-      - title: "Vision Terminology"
-        url: "/original/Terms.htm"
-      - title: "Vision Editor"
-        url: "/original/Editor.htm"
-      - title: "Vision FAQ"
-        url: "/original/faq.htm"
-
-  - title: "Vision Tutorials"
-    children:
-      - title: "Vision Basics"
-        url: "/original/tuBasic.htm"
-      - title: "Loading Data into Vision"
-        url: "/original/tuLoad.htm"
-      - title: "Single Object Access in Vision"
-        url: "/original/tuSingle.htm"
-      - title: "List Access in Vision"
-        url: "/original/tuList.htm"
-      - title: "TimeSeries Access in Vision"
-        url: "/original/tuTS.htm"
-      - title: "Case Study 1: Single Company Reporting"
-        url: "/original/tuCase1.htm"
-      - title: "Case Study 2: Basic Tabular Reporting"
-        url: "/original/tuCase2.htm"
-      - title: "Case Study 3: Cross Tabular Reporting"
-        url: "/original/tuCase3.htm"
-      - title: "Case Study 4: Simple Report Writer"
-        url: "/original/tuCase4.htm"
-      - title: "Case Study 5: Advanced Classification Techniques"
-        url: "/original/tuCase5.htm"
-
-  - title: "Vision Interfaces"
-    children:
-      - title:  "The Vision Interface ToolKit Class"
-        url: "/original/tkInterface.htm"
-      - title: "The Vision OpenVision ToolKit Class"
-        url: "/original/tkOpenVision.htm"
-      - title: "The VAccess COM Objects"
-        url: "/original/ifVAccess.htm"
-      - title: "Sample HTML Access to Vision"
-        url: "/original/ifHtml.htm"
-
-  - title: "Vision Administration"
-    children:
-      - title: "Batch Processing"
-        url: "/original/admBatch.htm"
-      - title: "Vision Production Management"
-        url: "/original/admProduction.htm"
-      - title: "The Vision Network"
-        url: "/original/admNet.htm"
-      - title: "Updating The Vision Network"
-        url: "/original/admUpdat.htm"
-      - title: "Vision Network Administration Tools"
-        url: "/original/admTools.htm"
-      - title: "Miscellaneous Database Administration"
-        url: "/original/admDBA.htm"
-
-  - title: "Class Cross Reference"
-    children:
-      - title: "The Object Class"
-        url: "/original/clObject.htm"
-      - title: "The Number Class"
-        url: "/original/clNumber.htm"
-      - title: "The String Class"
-        url: "/original/clString.htm"
-      - title: "The Undefined (NA) Class"
-        url: "/original/clNA.htm"
-      - title: "The Boolean Class"
-        url: "/original/clBoolean.htm"
-      - title: "The Date, DateRange, and DateOffset Classes"
-        url: "/original/clDate.htm"
-      - title: "The Collection Class"
-        url: "/original/clCollect.htm"
-      - title: "The List Class"
-        url: "/original/clList.htm"
-      - title: "The TimeSeries Class"
-        url: "/original/clTS.htm"
-      - title: "The IndexedList Class"
-        url: "/original/clIList.htm"
-      - title: "The Dictionary Class"
-        url: "/original/clDict.htm"
-      - title: "The Entity Class"
-        url: "/original/clEntity.htm"
-      - title: "The Currency Class"
-        url: "/original/clCurrency.htm"
-      - title: "The Classication Class"
-        url: "/original/clClassify.htm"
-      - title: "The Interface ToolKit"
-        url: "/original/tkInterface.htm"
-      - title: "The DataFeed Class"
-        url: "/original/clDataFeed.htm"
-      - title: "The DataFeed Class - Advanced Topics"
-        url: "/original/clDataFeedAdv.htm"
-      - title: "The Schema Toolkit"
-        url: "/original/tkSchema.htm"
-      - title: "Application Classes"
-        url: "/original/appClasses.htm"
-
-  - title: "Investment Managers"
-    children:
-      - title: "Overview"
-        url: "/original/investmanag.htm"
-      - title: "Installation"
-        url: "/original/pmaInstall.htm"
-      - title: "Headstart Applications"
-        url: "/original/pmaApps.htm"
-      - title: "Analyst Tools"
-        url: "/original/pmaAnalyst.htm"
-      - title: "Uploading Data"
-        url: "/original/pmaFeeds.htm"
-      - title: "Database Updates and Administration"
-        url: "/original/pmaDBA.htm"
-      - title: "Getting Started"
-        url: "/original/pmaStarting.htm"
-      - title: "Next Steps"
-        url: "/original/pmaNextSteps.htm"
-      - title: "Core Classes"
-        url: "/original/pmaClasses.htm"
-      - title: "Supplemental Core Classes"
-        url: "/original/pmaSupp.htm"
-      - title: "Special Issues"
-        url: "/original/pmaIssues.htm"
-      - title: "Language Tutorial"
-        url: "/original/pmaTutor.htm"
-      - title: "Document Cross Reference"
-        url: "/original/pmaXRef.htm"
-      - title: "FAQ Reference"
-        url: "/original/pmaFAQ.htm"
-      - title: "Euro"
-        url: "/original/euro.htm"
+  - title: "*** Missing Sidebar ***"
+    children: []

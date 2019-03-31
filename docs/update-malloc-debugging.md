@@ -1,5 +1,8 @@
 ---
 title: Debugging Update Malloc Errors
+
+sidebar:
+  nav: "sb_Troubleshooting"
 ---
 
 ## Build a reproducer
