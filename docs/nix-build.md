@@ -28,8 +28,7 @@ In this example we'll be building `release-8.1` on Linux from a fresh clone of t
 1. Add those binaries to your path
    * `cd ../../../../software/builds/$VERSION/Linux_x86_64/bin`
    * ``setenv PATH `pwd`:$PATH``
-   
-   
+
 # Tests
 
 ## IVR
