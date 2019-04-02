@@ -13,7 +13,7 @@ In the beginning, way back in the late 1970s, two budding young entrepreneurs, M
 
 Before the day was through, it was easy to imagine ways to drive the next generation of information analysis.  They knew then that they were destined to act on their vision.  
 
-![First Vision Doodles](/original/doodles.jpg)
+![First Vision Doodles](doodles.jpg)
 
 Before long, they were joined by a third partner, Rich Newman. They formed Innovative Systems Techniques (InSyTe).  The Vision journey was underway.
 
