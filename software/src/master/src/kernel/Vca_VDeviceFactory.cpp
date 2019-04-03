@@ -7214,8 +7214,10 @@ namespace Vca {
 	    SocketDevice (
 		VReferenceable *pContainer, Manager *pManager, Handle &rhSocket
 	    ) : BaseClass (pContainer, pManager, rhSocket) {
+		makeNonblocking();
 	    }
 	    SocketDevice (VReferenceable *pContainer, ThisClass &rOther) : BaseClass (pContainer, rOther) {
+		makeNonblocking();
 	    }
 
 	//  Destruction
