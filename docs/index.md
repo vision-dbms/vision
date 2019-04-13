@@ -13,7 +13,7 @@ Vision is an object-oriented, analytical database management technology that has
 
 At Vision's core is a scaleable, distributed database management engine.  An object-oriented programming language is built into the database engine, providing a single, integrated environment for defining, storing, and analyzing data. Vision is fully extensible by its users.  By integrating data and programs into one environment, Vision offers users unparalleled analytical power and real-world modeling capabilities, complementing the data collection and transactions processing capabilities of relational databases and greatly surpassing the analytical capabilities of OLAPs and other add-ons.
 
-[Learn more about the Vision technology](/original/TheVisionStory.html)
+[Learn more about the Vision technology](/original/The-Vision-Story.html)
 
 [Learn how to install and run a Vision environment](nix-build.html)
 
