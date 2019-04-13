@@ -13,15 +13,27 @@ Vision is an object-oriented, analytical database management technology that has
 
 At Vision's core is a scaleable, distributed database management engine.  An object-oriented programming language is built into the database engine, providing a single, integrated environment for defining, storing, and analyzing data. Vision is fully extensible by its users.  By integrating data and programs into one environment, Vision offers users unparalleled analytical power and real-world modeling capabilities, complementing the data collection and transactions processing capabilities of relational databases and greatly surpassing the analytical capabilities of OLAPs and other add-ons.
 
-[Learn more about the Vision technology](/original/The-Vision-Story.html)
+[Learn more about the Vision technology](
+  {{ site.data.navigation.lp_TheVisionStory.url }}
+)
 
-[Learn how to install and run a Vision environment](nix-build.html)
+[Learn how to install and run a Vision environment](
+  {{ site.data.navigation.lp_GettingVision.url }}
+)
 
-[Learn how to use Vision to organize your data and applications](/original/Fund.htm)
+[Learn how to use Vision to organize your data and applications](
+  {{ site.data.navigation.lp_UsingVision.url }}
+)
 
-[Explore the built-in Vision Classes](/original/clXRef.htm)
+[Explore the built-in Vision Classes](
+  {{ site.data.navigation.lp_ClassXRef.url }}
+)
 
-[Take a deep dive into an Investment Management Case Study](/original/investmanag.htm)
+[Take a deep dive into an Investment Management Case Study](
+  {{ site.data.navigation.lp_InvestmentManagers.url }}
+)
 
-[Review tips for troubleshooting in a production Vision environment](update-malloc-debugging.html)
+[Review tips for troubleshooting in a production Vision environment](
+  {{ site.data.navigation.lp_Troubleshooting.url }}
+)
 

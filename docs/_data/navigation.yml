@@ -9,8 +9,8 @@ lp_GettingVision: &lp_GettingVision
   title: "Getting Vision"
   url: "nix-build.html"
 
-lp_UserGuide: &lp_UserGuide
-  title: "User Guide"
+lp_UsingVision: &lp_UsingVision
+  title: "Using Vision"
   url: "/original/Fund.htm"
 
 lp_ClassXRef: &lp_ClassXRef
@@ -25,7 +25,6 @@ lp_Troubleshooting: &lp_Troubleshooting
   title: "Troubleshooting"
   url: "update-malloc-debugging.html"
 
-
 ################################################################
 ####  Sidebar Groups
 
@@ -33,7 +32,7 @@ lp_Troubleshooting: &lp_Troubleshooting
 grp_GettingVision: &grp_GettingVision
   <<: *lp_GettingVision
   children: &children_GettingVision
-  - title: "For Linux and Unix"
+  - title: "For Linux, MacOS, and Unix"
     url: "nix-build.html"
 
 ################
@@ -78,8 +77,8 @@ grp_WritingPrograms: &grp_WritingPrograms
     url: "/original/Error.htm"
 
 ################
-grp_UsingVision: &grp_UsingVision
-  title: "Using Vision"
+grp_RunningVision: &grp_RunningVision
+  title: "Running Vision"
   children: &children_UsingVision
   - title: "Running Vision"
     url: "/original/Running.htm"
@@ -157,12 +156,12 @@ grp_VisionHelp: &grp_VisionHelp
     url: "/original/faq.htm"
 
 ################
-grp_UserGuide: &grp_UserGuide
-  title: "User Guide"
-  children: &children_UserGuide
+grp_UsingVision: &grp_UsingVision
+  title: "Using Vision"
+  children: &children_UsingVision
   - *grp_VisionConcepts
   - *grp_WritingPrograms
-  - *grp_UsingVision
+  - *grp_RunningVision
   - *grp_VisionInterfaces
   - *grp_VisionAdministration
   - *grp_VisionTutorials
@@ -261,7 +260,7 @@ grp_Home: &grp_Home
   children: &children_Home
   - *lp_TheVisionStory
   - *lp_GettingVision
-  - *lp_UserGuide
+  - *lp_UsingVision
   - *lp_ClassXRef
   - *lp_InvestmentManagers
   - *lp_Troubleshooting
@@ -283,7 +282,7 @@ sb_GettingVision:
 
 ################
 sb_UserGuide:
-  *children_UserGuide
+  *children_UsingVision
 
 ################
 sb_ClassXRef:
