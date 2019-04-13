@@ -21,7 +21,7 @@ At Vision's core is a scaleable, distributed database management engine.  An obj
 
 [Explore the built-in Vision Classes](/original/clXRef.htm)
 
-[Take a deep dive into a Investment Management Case Study](/original/investmanag.htm)
+[Take a deep dive into an Investment Management Case Study](/original/investmanag.htm)
 
 [Review tips for troubleshooting in a production Vision environment](update-malloc-debugging.html)
 
