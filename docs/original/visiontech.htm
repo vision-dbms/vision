@@ -33,15 +33,17 @@ at all appropriate places in new applications. It is unreasonable
 and undesirable to encumber the productivity of those users or the reuse
 of their explorations simply because of technological limitations.
 
-<P>At this point, the world has caught up, at least partially, by recognizing
-that these issues are worth solving.
+<P>When we first wrote this in the early 1990's, the world was beginning
+  to recognize the importance of addressing these issues.  Today, these
+  issues are front and center as people work to model and analyze large
+  and growing collections of complex data.
 
 <h2>Not An Incremental Technology</h2>
-The analytic decision support, data acquisition, and data distribution
-applications we build for firms in the financial and other information
-intensive industries are mission critical in their organizations. We built
-Vision, a temporal, object-oriented, database management system, as a
-vehicle for delivering those systems. Vision has been doing that
+
+<P>The analytic decision support, data acquisition, and data distribution
+applications supported by Vision in the financial and other information
+intensive industries are mission critical in their organizations.  Vision,
+a temporal, object-oriented, database management system, has been doing that
 job successfully, reliably, and with no fundamental change to its architecture
 or information model since its initial release in 1986.
 
@@ -69,27 +71,26 @@ are implemented as algebraic transformations of underlying object structures
 and execution state, they are implicitly parallel. This includes
 all collection operations -- not just selection operations.
 
-<P>Vision's temporal data model is a grouped temporal model, influenced
-by Clifford and Warren's 1983 'Formal Semantics for Time In Databases'
-TODS article (remember, Vision has been doing this stuff since 1986).
-In Vision, temporal dependencies are modeled at the level of object properties.
-Temporal properties can be used explicitly as the time series that they
-are; however, they exhibit their modeling power when used to select, on
-the basis of the temporal context of an expression, the property values
-applicable in that temporal context. Temporal context can be freely
-bound, rebound, nested, and multiply bound within an expression.
-The algebra of the Vision execution engine easily parallelizes concurrent
-temporal contexts so that it is common for one expression to be evaluated
-for multiple individuals and temporal contexts simultaneously and without
-restriction. Underlying this model are time series structures with
-no intrinsic limits on their granularity or regularity and an extensive,
-extensible collection of date and time classes and operations.
+<P>
+  Vision's temporal data model is based on early temporal database research
+  such Clifford and Warren's 1983 <i>Formal Semantics for Time In Databases</i>
+  (Vision has been doing this stuff since 1986). In Vision, temporal dependencies
+  are modeled at the level of object properties. Temporal properties can be used
+  explicitly as the time series that they are; however, they exhibit their modeling
+  power when used to select, on the basis of the temporal context of an expression,
+  the property values applicable in that temporal context. Temporal context can be
+  freely bound, rebound, nested, and multiply bound within an expression.  The
+  algebra of the Vision execution engine easily parallelizes concurrent temporal
+  contexts so that it is common for one expression to be evaluated for multiple
+  individuals and temporal contexts simultaneously and without restriction. Underlying
+  this model are time series structures with no intrinsic limits on their granularity
+  or regularity and an extensive, extensible collection of date and time classes and
+  operations.
 
-<P>In planting its flag at a new point in the technological spectrum, Vision
-has questioned a number of assumptions and implemented some traditional
+<P>Vision has questioned a number of assumptions and implemented some traditional
 ideas in non-traditional ways. Physically, Vision objects are not
 records, and Vision computation does not proceed an individual object at
-a time. In the examples that follow, if you think you see concrete
+a time.  In the examples that follow, if you think you see concrete
 structures like records and element at a time execution orders, it's all
 in your mind.
 
@@ -102,7 +103,7 @@ in your mind.
          select: [security type isEquity].
          collectListElementsFrom: [security holdings].
          groupedBy: [account].
-         select: [pctEq >= ^my lowerPct &amp;&amp; pctEq <= ^my upperPct].
+         select: [pctEq between: ^my lowerPct and: ^my upperPct].
          extendBy: [ !correlation <- groupList correlate: [...] ... ].
          sortDown: [correlation]
     ];
@@ -119,9 +120,11 @@ need to do at 9 AM for an 11 AM presentation.
 of key features worth noting:
 <OL>
 <LI>
-query and collection operations are embedded throughout the logic of this
+Query and collection operations are embedded throughout the logic of this
 method. Some of those operations are traditional database operations
-like selection and grouping, others are non-traditional and user defined.</LI>
+like selection and grouping, others are non-traditional and user defined,
+such as <i>collectListElementsFrom:</i> and <i>correlate:</i>.
+</LI>
 
 <LI>
 New collections of information, complete with new properties, need to be
@@ -147,7 +150,7 @@ Account defineMethod: [ | displayCorrelatedAccounts |
 MyFunds do: [displayCorrelatedAccounts]</I>
 </i></pre>
 <LI>
-collection level detail is just as important as summary information.
+Collection level detail is just as important as summary information.
 This is true  for both stored database state and dynamically derived
 information. Here, for example, the <I>Account</I> class has a collection
 valued <I>holdings</I> property and non-collection valued <I>pctEq</I>
@@ -157,7 +160,7 @@ and a multi-valued <I>groupList</I> property referencing the elements of
 the group.</LI>
 
 <LI>
-much complexity is encapsulated beneath this method. For example,
+Much complexity is encapsulated beneath this method. For example,
 at the level of abstraction of this method, the time variability of both
 the <I>holdings</I> and <I>pctEq</I> properties has already been properly
 handled.</LI>
