@@ -13,6 +13,34 @@ lp_UsingVision: &lp_UsingVision
   title: "Using Vision"
   url: "/original/Fund.htm"
 
+lp_VisionConcepts: &lp_VisionConcepts
+  title: "Vision Concepts"
+  url: "/original/Fund.htm"
+
+lp_WritingPrograms: &lp_WritingPrograms
+  title: "Writing Programs"
+  url: "/original/Lang.htm"
+
+lp_RunningVision: &lp_RunningVision
+  title: "Running Vision"
+  url: "/original/Running.htm"
+
+lp_VisionInterfaces: &lp_VisionInterfaces
+  title: "Vision Interfaces"
+  url: "/original/tkInterface.htm"
+
+lp_VisionAdministration: &lp_VisionAdministration
+  title: "Vision Administration"
+  url: "/original/admBatch.htm"
+
+lp_VisionTutorials: &lp_VisionTutorials
+  title: "Vision Tutorials"
+  url: "/original/tuBasic.htm"
+
+lp_VisionHelp: &lp_VisionHelp
+  title: "Vision Help"
+  url: "/original/Navigate.htm"
+
 lp_ClassXRef: &lp_ClassXRef
   title: "Class Cross Reference"
   url: "/original/clObject.htm"
@@ -52,7 +80,7 @@ grp_GettingVision: &grp_GettingVision
 
 ################
 grp_VisionConcepts: &grp_VisionConcepts
-  title: "Vision Concepts"
+  <<: *lp_VisionConcepts
   children: &children_VisionConcepts
   - title: "Vision Fundamentals"
     url: "/original/Fund.htm"
@@ -63,7 +91,7 @@ grp_VisionConcepts: &grp_VisionConcepts
 
 ################
 grp_WritingPrograms: &grp_WritingPrograms
-  title: "Writing Programs"
+  <<: *lp_WritingPrograms
   children: &children_WritingPrograms
   - title: "The Vision Language"
     url: "/original/Lang.htm"
@@ -78,7 +106,7 @@ grp_WritingPrograms: &grp_WritingPrograms
 
 ################
 grp_RunningVision: &grp_RunningVision
-  title: "Running Vision"
+  <<: *lp_RunningVision
   children: &children_RunningVision
   - title: "Running Vision"
     url: "/original/Running.htm"
@@ -89,7 +117,7 @@ grp_RunningVision: &grp_RunningVision
 
 ################
 grp_VisionInterfaces: &grp_VisionInterfaces
-  title: "Vision Interfaces"
+  <<: *lp_VisionInterfaces
   children: &children_VisionInterfaces
   - title:  "The Vision Interface ToolKit Class"
     url: "/original/tkInterface.htm"
@@ -102,7 +130,7 @@ grp_VisionInterfaces: &grp_VisionInterfaces
 
 ################
 grp_VisionAdministration: &grp_VisionAdministration
-  title: "Vision Administration"
+  <<: *lp_VisionAdministration
   children: &children_VisionAdministration
   - title: "Batch Processing"
     url: "/original/admBatch.htm"
@@ -119,7 +147,7 @@ grp_VisionAdministration: &grp_VisionAdministration
 
 ################
 grp_VisionTutorials: &grp_VisionTutorials
-  title: "Vision Tutorials"
+  <<: *lp_VisionTutorials
   children: &children_VisionTutorials
   - title: "Vision Basics"
     url: "/original/tuBasic.htm"
@@ -144,7 +172,7 @@ grp_VisionTutorials: &grp_VisionTutorials
 
 ################
 grp_VisionHelp: &grp_VisionHelp
-  title: "Vision Help"
+  <<: *lp_VisionHelp
   children: &children_VisionHelp
   - title: "Navigating a Vision Database"
     url: "/original/Navigate.htm"
@@ -159,6 +187,7 @@ grp_VisionHelp: &grp_VisionHelp
 grp_UsingVision: &grp_UsingVision
   <<: *lp_UsingVision
   children: &children_UsingVision
+  - *lp_UsingVision
   - *grp_VisionConcepts
   - *grp_WritingPrograms
   - *grp_RunningVision
