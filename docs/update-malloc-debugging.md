@@ -1,5 +1,5 @@
 ---
-title: Debugging Update Malloc Errors
+title: Debugging Malloc Errors
 
 sidebar:
   nav: "sb_Troubleshooting"

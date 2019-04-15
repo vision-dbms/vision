@@ -23,17 +23,10 @@ lp_InvestmentManagers: &lp_InvestmentManagers
 
 lp_Troubleshooting: &lp_Troubleshooting
   title: "Troubleshooting"
-  url: "update-malloc-debugging.html"
+  url: "/original/visiondebugger.html"
 
 ################################################################
 ####  Sidebar Groups
-
-################
-grp_GettingVision: &grp_GettingVision
-  <<: *lp_GettingVision
-  children: &children_GettingVision
-  - title: "For Linux, MacOS, and Unix"
-    url: "nix-build.html"
 
 ################
 grp_TheVisionStory: &grp_TheVisionStory
@@ -49,6 +42,13 @@ grp_TheVisionStory: &grp_TheVisionStory
     url: "/original/tshpot.htm"
   - title: "A Categorical Approach to Data"
     url: "/original/catdb.htm"
+
+################
+grp_GettingVision: &grp_GettingVision
+  <<: *lp_GettingVision
+  children: &children_GettingVision
+  - title: "For Linux, MacOS, and Unix"
+    url: "nix-build.html"
 
 ################
 grp_VisionConcepts: &grp_VisionConcepts
@@ -79,7 +79,7 @@ grp_WritingPrograms: &grp_WritingPrograms
 ################
 grp_RunningVision: &grp_RunningVision
   title: "Running Vision"
-  children: &children_UsingVision
+  children: &children_RunningVision
   - title: "Running Vision"
     url: "/original/Running.htm"
   - title: "Loading Information into Vision"
@@ -157,7 +157,7 @@ grp_VisionHelp: &grp_VisionHelp
 
 ################
 grp_UsingVision: &grp_UsingVision
-  title: "Using Vision"
+  <<: *lp_UsingVision
   children: &children_UsingVision
   - *grp_VisionConcepts
   - *grp_WritingPrograms
@@ -249,10 +249,12 @@ grp_InvestmentManagers: &grp_InvestmentManagers
 grp_Troubleshooting: &grp_Troubleshooting
   <<: *lp_Troubleshooting
   children: &children_Troubleshooting
-  - title: "Debug an Update Malloc Error"
-    url: "update-malloc-debugging.html"
+  - title: "The Vision Debugger"
+    url: "/original/visiondebugger.html"
   - title: "Vision Database Scan"
-    url: "VdbScan"
+    url: "/VdbScan"
+  - title: "Debugging Malloc Errors"
+    url: "/update-malloc-debugging.html"
 
 ################
 grp_Home: &grp_Home
