@@ -18,7 +18,7 @@ At Vision's core is a scaleable, distributed database management engine.  An obj
 )
 
 [Learn how to install and run a Vision environment](
-  /vision{{ site.data.navigation.lp_GettingVision.url }}
+  {{ site.data.navigation.lp_GettingVision.url }}
 )
 
 [Learn how to use Vision to organize your data and applications](
