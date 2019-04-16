@@ -1,31 +1,16 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Class: Object </title>
-</head>
-<body bgcolor = white>
+---
+title: "Vision Class: Object "
 
-<h2>Vision Class: Object</h2>
-<p>
-     | <a href="FHome.htm">Home</a> | <a href="clXRef.htm">Class XRef</a> |
-<hr> 
-<h3>Topics Covered:</h3> 
-<ul type=square> 
-<li><a href="#overview">Overview</a>
-<li><a href="#popular">Frequently Used Messages</a>
-<li><a href="#basic">Object Characteristics</a>
-<li><a href="#display">Display Messages</a>
-<li><a href="#evaluation">Evaluation Messages</a>
-<li><a href="#classes">Class and Instance Messages</a>
-<li><a href="#messages">Message Management Messages</a>
-<li><a href="#identity">Object Identity Messages</a>
-<li><a href="#constant">Object Constants</a>
-<li><a href="#currency">Currency Messages</a>
-<li><a href="#general">General Access and Update Messages</a>
-</ul>
-<p>
-<hr>
-<h3><a name="overview">Overview</a></h3> 
+related_topics:
+  - url: "clXRef.htm"
+    title: "Class XRef"
+
+
+sidebar:
+  nav: "sb_ClassXRef"
+---
+
+<h2 id="overview">Overview</h2> 
 <p> 
 The <b>Object</b> class is a direct or indirect super class of all
 other classes in the database.  Any message defined at <i>Object</i>
@@ -36,32 +21,31 @@ create instances in another class, a new instance is created in
 each of that class' super classes including <i>Object</i>.
 <p>
 The major subclasses of <i>Object</i> are:
-<font size=+1><pre>
-          <b>Object</b>
-              <a href="clBoolean.htm">Boolean</a>
-              <a href="clDate.htm#dr">DateRange</a>
-              <a href="clDict.htm">Dictionary</a>
-              <a href="clEntity.htm">Entity</a>
-              Function
-                  <a href="clBlock.htm">Block</a>
-                  <a href="clIList.htm">IndexedList</a>
-                  <a href="clList.htm">List</a>
-                  <a href="clTS.htm">TimeSeries</a>
-              Ordinal
-                  <a href="clDate.htm">Date</a>
-                  <a href="clNumber.htm">Number</a>
-                  <a href="clString.htm">String</a>
-              ToolKit
-                  <a href="tkOpenVision.htm">OpenVision</a>
-                  <a href="tkSchema.htm">Schema</a>
-                  <a href="tkInterface.htm">UserInterface</a>
-             <a href="clNA.htm">Undefined</a>
-
-</pre></font>
+<pre>
+  <b>Object</b>
+      <a href="clBoolean.htm">Boolean</a>
+      <a href="clDate.htm#dr">DateRange</a>
+      <a href="clDict.htm">Dictionary</a>
+      <a href="clEntity.htm">Entity</a>
+      Function
+          <a href="clBlock.htm">Block</a>
+          <a href="clIList.htm">IndexedList</a>
+          <a href="clList.htm">List</a>
+          <a href="clTS.htm">TimeSeries</a>
+      Ordinal
+          <a href="clDate.htm">Date</a>
+          <a href="clNumber.htm">Number</a>
+          <a href="clString.htm">String</a>
+      ToolKit
+          <a href="tkOpenVision.htm">OpenVision</a>
+          <a href="tkSchema.htm">Schema</a>
+          <a href="tkInterface.htm">UserInterface</a>
+     <a href="clNA.htm">Undefined</a>
+</pre>
 
 <p>
 <hr>
-<h3><a name="popular">Frequently Used Messages</a></h3>
+<h2 id="popular">Frequently Used Messages</h2>
 <p>
 Messages defined at <i>Object</i> are available to all objects
 in the database.  The following tables summarize the most
@@ -224,7 +208,7 @@ its superclasses
 
 <p>
 <hr>
-<h3><a name="basic">Object Characteristics</a></h3>
+<h2 id="basic">Object Characteristics</h2>
 <p>
 The properties <i>code</i> and <i>creationDate</i> are defined for 
 all objects.  The <i>code</i> normally contains a string that identifies
@@ -260,12 +244,14 @@ when you create new classes using the
 <a href="Classes.htm#subclass"><i>createSubclass:</i></a>
 message.  As a result, you can send messages such as
 <i>isNumber</i>, <i>isString</i>, <i>isDictionary</i>, and 
-<i>isList</i> to any object.  For example, the expression:<pre><tt><b>
-     3 isString
-</b></tt></pre>
-returns <i>FALSE</i> and the expressions:<pre><tt><b>
-     3 isNumber
-</b></tt></pre>
+<i>isList</i> to any object.  For example, the expression:
+<pre>
+  3 isString
+</pre>
+returns <i>FALSE</i> and the expressions:
+<pre>
+  3 isNumber
+</pre>
 returns <i>TRUE</i>.
 <p>
 Every Vision class has an instance which represents its
@@ -289,7 +275,7 @@ its parent class.
 
 <p>
 <hr>
-<h3><a name="display">Display Messages</a></h3>
+<h2 id="display">Display Messages</h2>
 <p>
 
 <a name="print"> </a>
@@ -307,9 +293,10 @@ The message
 is defined to display an object's class name and value followed by
 a carriage return.  Some classes, such as 
 <a href="clEntity.htm#message">Entity</a> redefine this message to display
-additional information.  For example, the expression:<pre><tt><b>
-     Named Currency US displayInfo ; 
-</b></tt></pre>
+additional information.  For example, the expression:
+<pre>
+  Named Currency US displayInfo ; 
+</pre>
 displays the <i>code</i> and <i>name</i> of the object representing the
 US currency.
 <p>
@@ -317,44 +304,48 @@ The message <a href="mObject.htm#profile"><i>profile</i></a>
 is defined to display a descriptive report for an object.
 Some classes, such as 
 <a href="clEntity.htm#message">Entity</a> redefine this message to display
-additional information.  For example, the expression:<pre><tt><b>
-     Named Currency US profile ; 
-</b></tt></pre>
+additional information.  For example, the expression:
+<pre>
+  Named Currency US profile ; 
+</pre>
 displays a descriptive report about the object representing the
 US currency.
 
 <p>
 <hr>
-<h3><a name="evaluation">Evaluation Messages</a></h3>
+<h2 id="evaluation">Evaluation Messages</h2>
 <p>
 <a name="do:"> </a>
 It is often useful to send a number of messages to the same object.
 For example, you could request a number of values for the Canadian
-currency object using:<pre><tt><b>
-     Named Currency CAD code print ;
-     Named Currency CAD name print ;
-     Named Currency CAD usExchange printNL ;
-</b></tt></pre>
+currency object using:
+<pre>
+  Named Currency CAD code print ;
+  Named Currency CAD name print ;
+  Named Currency CAD usExchange printNL ;
+</pre>
 The <a href="#do:"><i>do:</i></a>
 message can be used to "factor out" 
 the repeated expression in the body of your program, in this
 case the <i>Named Currency CAD</i>.  The previous example could be
-rewritten using:<pre><tt><b>
-     Named Currency CAD
-     do: [ code print; 
-           name print ; 
-           usExchange printNL ;
-         ] ;
-</b></tt></pre>
+rewritten using:
+<pre>
+  Named Currency CAD
+  do: [ code print; 
+        name print ; 
+        usExchange printNL ;
+      ] ;
+</pre>
 <p>
-The general form for the <i>do:</i> message is:<pre><tt>
-     object 
-     do: [ expression1 ;
-           expression2 ;
-           #- ...
-           expressionN ;
-         ] ;
-</tt></pre>
+The general form for the <i>do:</i> message is:
+<pre>
+  object 
+  do: [ expression1 ;
+        expression2 ;
+        #- ...
+        expressionN ;
+      ] ;
+</pre>
 <p>
 The <i>do:</i> message requires one parameter, a block containing the
 program to evaluate.  All expressions inside the block are evaluated
@@ -369,33 +360,35 @@ execution.  The <a href="mObject.htm#send:"><i>send:</i></a>
 message is identical to the <i>do:</i> message except that it returns
 the result of executing the block instead of the original object.
 <p>
-The general form for the <i>send:</i> message is:<pre><tt>
-     object 
-     send: [ expression1 ;
-             expression2 ;
-             #- ...
-             expressionN ;
-             returnObject
-           ] ;
-</tt></pre>
+The general form for the <i>send:</i> message is:
+<pre>
+  object 
+  send: [ expression1 ;
+          expression2 ;
+          #- ...
+          expressionN ;
+          returnObject
+        ] ;
+</pre>
 <p>
-For example:<pre><tt><b>
-     #--  Case 1: 'do:' returns the original object
-     !result <- "xyz" do:
-        [ printNL ;           #- print recipient
-          count printNL ;     #- print count
-          count               #- result of block
-        ] ;
-     result printNL ;          #- prints string "xyz"
+For example:
+<pre>
+  #--  Case 1: 'do:' returns the original object
+  !result <- "xyz" do:
+     [ printNL ;           #- print recipient
+       count printNL ;     #- print count
+       count               #- result of block
+     ] ;
+  result printNL ;          #- prints string "xyz"
 
-     #--  Case 2: 'send:' returns the result of the block
-     !result <- "xyz" send: 
-        [ printNL ;           #- print recipient
-          count printNL ;     #- print count
-          count               #- result of block
-        ] ;
-     result printNL ;         #- prints 3 (the count returned)
-</b></tt></pre>
+  #--  Case 2: 'send:' returns the result of the block
+  !result <- "xyz" send: 
+     [ printNL ;           #- print recipient
+       count printNL ;     #- print count
+       count               #- result of block
+     ] ;
+  result printNL ;         #- prints 3 (the count returned)
+</pre>
 In the first case, the variable <i>result</i> is assigned to the
 object returned by the <i>do:</i> message.  Since <i>do:</i> returns
 the recipient object, the value of <i>result</i> is the string
@@ -411,32 +404,34 @@ The <a href="mObject.htm#extendBy:"><i>extendBy:</i></a>
 message is similar to <i>do:</i> except that it returns the
 original object extended by the extra layer of messages defined
 within the block.  
-The general form for the <i>extendBy:</i> message is:<pre><tt>
-     !newObject <- object extendBy:
-         [ !variable1 <- expression1 ;
-           !variable2 <- expression2 ;
-           #- ...
-           !variableN <- expressionN ;
-           ^current define: 'ts1' ;
-           ^current defineMethod: [ | m1 | whatAmI print ; ] ;
-         ] ;
-</tt></pre>
+The general form for the <i>extendBy:</i> message is:
+<pre>
+  !newObject <- object extendBy:
+      [ !variable1 <- expression1 ;
+        !variable2 <- expression2 ;
+        #- ...
+        !variableN <- expressionN ;
+        ^current define: 'ts1' ;
+        ^current defineMethod: [ | m1 | whatAmI print ; ] ;
+      ] ;
+</pre>
 <p>
 The variable <i>newObject</i> is an 
 <a href="Execution.htm#specialization">instance-level specialization</a>
 of the recipient
 object.  This object responds to all the variables defined by the
-block and inherits from the original object.  For example:<pre><tt><b>
-     !result <- "xyz" extendBy:
-        [ !countPlus1 <- count + 1 ; #- create a variable
-          !countPlus2 <- count + 3 ; #- create another one
-        ] ;
-     result
-     do: [ printNL ;                 #- print string xyz
-           count printNL ;           #- inherited message prints 3
-           countPlus1 printNL ;      #- extension message prints 4.00
-         ] ;
-</b></tt></pre>
+block and inherits from the original object.  For example:
+<pre>
+  !result <- "xyz" extendBy:
+     [ !countPlus1 <- count + 1 ; #- create a variable
+       !countPlus2 <- count + 3 ; #- create another one
+     ] ;
+  result
+  do: [ printNL ;                 #- print string xyz
+        count printNL ;           #- inherited message prints 3
+        countPlus1 printNL ;      #- extension message prints 4.00
+      ] ;
+</pre>
 The variable <i>result</i> responds to the message <i>countPlus1</i>
 and any additional messages to which the original <i>String</i>
 object responds such as <i>count</i>.
@@ -448,17 +443,18 @@ succession.  Each <i>extendBy:</i> creates a new layer for
 resolving messages.  
 <a href="Execution.htm#resolve">Messages are resolved</a>
 by searching from the last extension layer added
-backwards.  For example:<pre><tt><b>
-     "xyz" 
-        extendBy: [ !layer1 <- "this is layer 1" ] .
-        extendBy: [ !layer2 <- "this is layer 2" ] .
-        extendBy: [ !layer3 <- "this is layer 3" ] .
-     do: [ count printNL ;
-           layer1 printNL ;
-           layer2 printNL ;
-           layer3 printNL ;
-        ] ;
-</b></tt></pre>
+backwards.  For example:
+<pre>
+  "xyz" 
+     extendBy: [ !layer1 <- "this is layer 1" ] .
+     extendBy: [ !layer2 <- "this is layer 2" ] .
+     extendBy: [ !layer3 <- "this is layer 3" ] .
+  do: [ count printNL ;
+        layer1 printNL ;
+        layer2 printNL ;
+        layer3 printNL ;
+     ] ;
+</pre>
 Each application of the <i>extendBy:</i> message returns the prior
 recipient plus the new message.  The final <i>do:</i> message
 accesses data from each of these extensions (<i>layer1, layer2,
@@ -474,7 +470,7 @@ the <a href="Execution.htm#local">magic word <i>^local</i></a>.
 
 <p>
 <hr>
-<h3><a name="classes">Class and Instance Messages</a></h3>
+<h2 id="classes">Class and Instance Messages</h2>
 <p>
 A number of messages are defined for the class <i>Object</i>
 are used to create and manage classes and instances.  These
@@ -607,7 +603,7 @@ to support a variety of database administration fucntions.
 
 <p>
 <hr>
-<h3><a name="messages">Message Management Messages</a></h3>
+<h2 id="messages">Message Management Messages</h2>
 <p>
 A number of messages are defined for the class <i>Object</i>
 are used to create and manage messages.  These
@@ -733,7 +729,7 @@ defined for <i>recipient</i>
 
 <p>
 <hr>
-<h3><a name="identity">Object Identity Messages</a></h3>
+<h2 id="identity">Object Identity Messages</h2>
 
 <p>
 <a name="compare"> </a>
@@ -747,12 +743,14 @@ these messages return different results.
 For example, the <i>integer 3</i> is equal to the <i>double 3.0</i> because
 they have the same value.  The 
 <i>integer 3</i> is not identical to the
-<i>double 3.0</i> because they are not the same object.  Therefore:<pre><tt><b>
-     3 = 3.0
-</b></tt></pre>
-returns <i>TRUE</i> and:<pre><tt><b>
-     3 == 3.0
-</b></tt></pre>
+<i>double 3.0</i> because they are not the same object.  Therefore:
+<pre>
+  3 = 3.0
+</pre>
+returns <i>TRUE</i> and:
+<pre>
+  3 == 3.0
+</pre>
 returns <i>FALSE</i>.  The <i>=</i> and <i>!=</i>
 messages can be redefined for other
 classes as appropriate.  Although you could redefine the <i>==</i> and
@@ -777,12 +775,14 @@ The message
 <a href="Classes.htm#hierarchy"><i>asSelf</i></a> can be used to strip any
 extensions from an object.  It is often useful to send this message
 to the recipient and parameter objects prior to performing any
-equality tests.  For example:<pre><tt><b>
-    Named Currency US = (Named Currency US extendBy: [ !x ] )
-</b></tt></pre>
-returns <i>FALSE</i>, whereas:<pre><tt><b>
-    Named Currency US = (Named Currency US extendBy: [ !x ] ) asSelf
-</b></tt></pre>
+equality tests.  For example:
+<pre>
+  Named Currency US = (Named Currency US extendBy: [ !x ] )
+</pre>
+returns <i>FALSE</i>, whereas:
+<pre>
+  Named Currency US = (Named Currency US extendBy: [ !x ] ) asSelf
+</pre>
 returns <i>TRUE</i>.
 <p>
 The 
@@ -795,7 +795,7 @@ the original child object.
 
 <p>
 <hr>
-<h3><a name="constant">Object Constants</a></h3>
+<h2 id="constant">Object Constants</h2>
 <p>
 Several frequently used values have been defined as constants at the class
 <i>Object</i>.  You can send these messages to any object to access
@@ -828,10 +828,10 @@ the defined constant value.
 
 <p>
 <hr>
-<h3><a name="currency">Currency Messages</a></h3>
+<h2 id="currency">Currency Messages</h2>
 <p>
 The 
-<href="clCurrency.htm"><i>Currency</i> 
+<a href="clCurrency.htm"><i>Currency</i></a>
 class is used to track exchange rate information between
 currencies.  Several messages have been defined at the <i>Object</i>
 class to support the <b>basic currency protocol</b> for all objects:
@@ -861,7 +861,7 @@ specified by the <i>parameter</i>
 
 <p>
 <hr>
-<h3><a name="general">General Access and Update Messages</a></h3>
+<h2 id="general">General Access and Update Messages</h2>
 <p>
 
 Several messages have been defined at the <i>Object</i>
@@ -898,16 +898,4 @@ date in <i>parameter2</i>, returning the result as a <i>TimeSeries</i>
 
 </tr></table></Center>
 
-<p>
-<hr>
-
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated June 19, 1997</font>
-</table>
-
-</body>
-</html>
-
-
+{% include doc-footer.htm copydates="1997" %}

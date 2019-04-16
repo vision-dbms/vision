@@ -1,28 +1,17 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Portfolio Management Application Issues</title>
-</head>
-<body bgcolor=white>
-<h2>Vision Portfolio Management Application Issues</h2>
+---
+title: Vision Portfolio Management Application Issues
 
-<p>
-| <a href="vpma.htm">Application Overview</a> 
-| <a href="pmaXRef.htm">Application Cross Reference</a>
-|
-<hr>
-<h3>Topics Covered:</h3>
-<ul type=square>
-<li><a href="#overview">Overview</a>
-<li><a href="#splits">Split Adjustments</a>
-<li><a href="#prices">Prices</a>
-<li><a href="#divs">Dividends</a>
-<li><a href="#ids">Security and Company Identification</a>
-<li><a href="#holdings">Holdings</a>
-</ul>
-<p>
-<hr>
-<h3><a name="overview">Overview</a></h3>
+related_topics:
+  - url: "vpma.htm"
+    title: "Application Overview"
+  - url: "pmaXRef.htm"
+    title: "Application Cross Reference"
+
+sidebar:
+  nav: "sb_InvestmentManagers"
+---
+
+<h2 id="overview">Overview</h2>
 <p>
 Special structures have been designed to manage dividend,
 price, and adjustment data in the Vision database.
@@ -45,7 +34,7 @@ occurred since that date.
 
 <p>
 <hr>
-<h3><a name="splits">Split Adjustments</a></h3>
+<h2 id="splits">Split Adjustments</h2>
 <p>
 
 All per share and shares outstanding data in Vision is implicitly
@@ -85,28 +74,30 @@ represents the running product of these raw factors.  This variable has
 an initial value of 1.  Each time a split occurs, a new point
 representing the product of the new raw factor and the last
 adjustment factor is stored in the adjustment factor as of the
-ex-date.  The data from the previous example is illustrated below:<pre><tt><b>
-                          0       1/15/97     3/15/97
+ex-date.  The data from the previous example is illustrated below:
+<pre>
+                       0       1/15/97     3/15/97
 <hr width="40%" align=center>
-     rawSplitFactor                  2          3
-     adjustmentFactor     1          2          6
-</b></tt></pre>
+  rawSplitFactor                  2          3
+  adjustmentFactor     1          2          6
+</pre>
 <p>
 To properly use the adjustment factor data, you actually need to
 access values as of the two dates involved, the adjustment
 date and the current date.  The ratio of these factors gives you
 the correct adjustment.  Therefore the correct way to adjust per share
 data that has been adjusted through December 31 for analysis on May
-31 is:<pre><tt><b>
-     adjustment factor ratio =   adjustment factor on May 31     =  6
-                              --------------------------------     ---
-                              adjustment factor on December 31      1
+31 is:
+<pre>
+  adjustment factor ratio =   adjustment factor on May 31     =  6
+                           --------------------------------     ---
+                           adjustment factor on December 31      1
 
-      per share
-    adjusted value =         unadjusted value / adjustment factor ratio
+   per share
+ adjusted value =         unadjusted value / adjustment factor ratio
 
-    XYZ's adjusted eps =        10  / 6   =  1.67
-</b></tt></pre>
+ XYZ's adjusted eps =        10  / 6   =  1.67
+</pre>
 <p>
 The correct way to adjust share outstanding values is to multiply
 the unadjusted value by the adjustment factor ratio.
@@ -115,24 +106,27 @@ The message <i>adjustmentRelativeTo: </i> is used to access the
 current adjustment
 factor relative to the date that your data item is known to be
 adjusted through.  If you know that XYZ's <i>eps</i> is adjusted through
-January 31, then the expression:<pre><tt><b>
-     Named Security XYZ adjustmentRelativeTo: 9701
-</b></tt></pre>
+January 31, then the expression:
+<pre>
+  Named Security XYZ adjustmentRelativeTo: 9701
+</pre>
 accesses the value needed to adjust the <i>eps</i> value relative to the
 current analysis date.  To adjust the <i>eps</i>, divide the unadjusted
-value by this adjustment value:<pre><tt><b>
-     Named Security XYZ send: [ _eps  / # unadjusted
-                                (^self adjustmentRelativeTo: 9701)
-                             ] 
-</b></tt></pre>
+value by this adjustment value:
+<pre>
+  Named Security XYZ send: [ _eps  / # unadjusted
+                             (^self adjustmentRelativeTo: 9701)
+                           ] 
+</pre>
 The previous example assumes that you know the exact date the data
 has been adjusted through.  You may not always know this explicitly;
 however, many data items are adjusted as of the date they become
 effective (i.e., the "as of" date).
 In this case, the following methodology can be used to access
-the adjusted value:<pre><tt><b>
-     Named Security XYZ getAdjustedDataFor: Named Security XYZ :_eps
-</b></tt></pre>
+the adjusted value:
+<pre>
+  Named Security XYZ getAdjustedDataFor: Named Security XYZ :_eps
+</pre>
 <p>
 In general, methods have been created that automatically return
 adjusted values by default.  For example, the 
@@ -157,9 +151,10 @@ stores the value of the factor into <i>rawSplitFactor</i> as of the ex-date
 provided.  The new value of <i>adjustmentFactor</i> is then computed and
 stored on this date as well.
 For example, if XYZ has a 2-for-1 split on April 15, 1997 the
-procedure to add this factor is:<pre><tt><b>
-     Named Security XYZ addSplitFactorOf: 2 onExDate: 970415 asDate
-</b></tt></pre>
+procedure to add this factor is:
+<pre>
+  Named Security XYZ addSplitFactorOf: 2 onExDate: 970415 asDate
+</pre>
 Raw split information is normally updated during the nightly
 production cycle.  It should never be necessary to use this message
 directly; however, it can be used to update splits that have not
@@ -170,32 +165,36 @@ the adjustment factors for the security.
 
 <p>
 <hr>
-<h3><a name="prices">Prices</a></h3>
+<h2 id="prices">Prices</h2>
 <p>
 
 The message <i>price</i> returns the split-adjusted, currency-adjusted
 price for a specific security.  The price is
 accessed as of the current date by default.  The value is split adjusted
 through the current date and is in the base currency of the security by
-default.  For example:  <pre><tt><b>
+default.  For example:
+<pre>
      Named Security XYZ price
-</b></tt></pre>
-returns XYZ's latest price value in XYZ's base currency,<pre><tt><b>
-     Named Security XYZ :price asOf: 9702 .
-</b>or<b>
-     9702 evaluate: [ Named Security XYZ price ] 
-</b></tt></pre>
-returns the latest price as of Feb 1997 in the base currency , and<pre><tt><b>
-    "CAN" asCurrency evaluate: [ Named Security XYZ  price ]
-</b></tt></pre>
+</pre>
+returns XYZ's latest price value in XYZ's base currency,
+<pre>
+  Named Security XYZ :price asOf: 9702 .
+</pre>or<pre>
+  9702 evaluate: [ Named Security XYZ price ] 
+</pre>
+returns the latest price as of Feb 1997 in the base currency , and
+<pre>
+ "CAN" asCurrency evaluate: [ Named Security XYZ  price ]
+</pre>
 returns the latest price in Canadian dollars.  All values
 are split-adjusted through the current date.  The message <i>_price</i>
 returns the unadjusted price as of the current evaluation date.
 <p>
 The message <i>priceChangeFrom:to:</i> returns the price percentage change
-value between two dates.  For example:<pre><tt><b>
-     Named Security XYZ priceChangeFrom: 970201 to: 970331
-</b></tt></pre>
+value between two dates.  For example:
+<pre>
+  Named Security XYZ priceChangeFrom: 970201 to: 970331
+</pre>
 returns the percentage change in price between these two dates.
 <p>
 The actual time series of prices and volumes is stored in the time
@@ -207,9 +206,10 @@ addition to the price and volume values, instances of this class maintain the
 currency and date of the price so that proper split and currency
 adjustments can happen.  
 To access a full price record for a security, use the message
-<i>getPriceRecord</i>.  For example, the expression:<pre><tt><b>
-     Named Security XYZ getPriceRecord high
-</b></tt></pre>
+<i>getPriceRecord</i>.  For example, the expression:
+<pre>
+  Named Security XYZ getPriceRecord high
+</pre>
 returns the latest high price for security XYZ.
 <p>
 The following messages are defined for the class <b>PriceRecord</b>:
@@ -237,29 +237,32 @@ The following messages are defined for the class <b>PriceRecord</b>:
 </table></Center>
 <p>
 For example, to display the latest adjusted and unadjusted prices
-and volumes XYZ, use:<pre><tt><b>
-     Named Security XYZ getPriceRecord
-     do: [ recordDate print: 12 ;  
-           price print ;           #-- adjusted value
-           _price print ;          #-- unadjusted value
-           volume print ;          #-- adjusted value
-           _volume print ;         #-- unadjusted value
-           adjustmentFactor print ;
-           currencyFactor print ;
-           newLine print ;
-         ] ;
-</b></tt></pre>
+and volumes XYZ, use:
+<pre>
+  Named Security XYZ getPriceRecord
+  do: [ recordDate print: 12 ;  
+        price print ;           #-- adjusted value
+        _price print ;          #-- unadjusted value
+        volume print ;          #-- adjusted value
+        _volume print ;         #-- unadjusted value
+        adjustmentFactor print ;
+        currencyFactor print ;
+        newLine print ;
+      ] ;
+</pre>
 To access a full price record as of a specific date, use 
-the expression:<pre><tt><b>
-     Named Security XYZ :getPriceRecord asOf: 9711 .
-       do: [ price print ; _price print ] ;
-</b></tt></pre>
-or<pre><tt><b>
-     9711 evaluate: 
-       [ Named Security XYZ getPriceRecord
-             do: [ price print ; _price print ] ;
-       ] ;
-</b></tt></pre>
+the expression:
+<pre>
+  Named Security XYZ :getPriceRecord asOf: 9711 .
+    do: [ price print ; _price print ] ;
+</pre>
+or
+<pre>
+  9711 evaluate: 
+    [ Named Security XYZ getPriceRecord
+          do: [ price print ; _price print ] ;
+    ] ;
+</pre>
 Both return the full price record as of Nov 30, 1997 from which you
 can access the adjusted and unadjusted prices.
 <p>
@@ -267,19 +270,20 @@ The method <i>prices</i>
 has been defined to return the full time series of prices.  
 For example, to display the adjusted and unadjusted prices
 and volumes for all points in XYZ's time series
-in 1997, you could use:<pre><tt><b>
-     Named Security XYZ prices from: 970101 to: 9712 .
-     do: [ ^date print: 12 ;       #-- date in time series
-           recordDate print: 12 ;  #-- date in record - should match
-           price print ;           #-- adjusted value
-           _price print ;          #-- unadjusted value
-           volume print ;          #-- adjusted value
-           _volume print ;         #-- unadjusted value
-           adjustmentFactor print ;
-           currencyFactor print ;
-           newLine print ;
-         ] ;
-</b></tt></pre>
+in 1997, you could use:
+<pre>
+  Named Security XYZ prices from: 970101 to: 9712 .
+  do: [ ^date print: 12 ;       #-- date in time series
+        recordDate print: 12 ;  #-- date in record - should match
+        price print ;           #-- adjusted value
+        _price print ;          #-- unadjusted value
+        volume print ;          #-- adjusted value
+        _volume print ;         #-- unadjusted value
+        adjustmentFactor print ;
+        currencyFactor print ;
+        newLine print ;
+      ] ;
+</pre>
 Note that the <i>prices</i> message returns an actual time series
 object so you need not prepend the ":"  to the message name.  
 <p>
@@ -290,7 +294,7 @@ a value for your working session, you can use the
 <a href="pma_PriceFeed.htm"><b>PriceFeed</b></a> class.
 
 <p>
-<h4><a name="upprices">Updating Prices</a></h4>
+<h3 id="upprices">Updating Prices</h3>
 <p>
 Normally you will use the 
 <a href="pma_PriceFeed.htm"><b>PriceFeed</b></a> class
@@ -315,11 +319,11 @@ The script
 directory, was used to set up these spaces.
 <p>
 To create a space for a new year, execute and save the following
-code without specifying an object space:<pre><tt><b>
-   PriceTools setupYear: YYYYMMDD ;
-   Utility updateNetworkWithAnnotation: "Price Space Setup" ;
-
-</b></tt></pre>
+code without specifying an object space:
+<pre>
+  PriceTools setupYear: YYYYMMDD ;
+  Utility updateNetworkWithAnnotation: "Price Space Setup" ;
+</pre>
 This will create a new object space to hold pricing data associated
 with the year implied by the full date supplied as a parameter.  You
 need to run this for each year separately.
@@ -331,15 +335,15 @@ The individual <b>PriceRecord</b> stores can be accessed via the time
 series property <i>dailyStoreXRef</i> defined at <b>PriceTools</b>.  The dates
 in this time series correspond to the first date of the quarter
 associated with the store.  To determine the number of instances
-in each store use:<pre><tt><b>
-     PriceTools :dailyStoreXRef
-     do: [ "The store beginning on " print ; ^date print ;
-           " contains " print ; ^self instanceList count print ;
-           " PriceRecord instances and is stored in object space" print ;
-           ^self objectSpace printNL ;
-          ] ;
-
-</b></tt></pre>
+in each store use:
+<pre>
+  PriceTools :dailyStoreXRef
+  do: [ "The store beginning on " print ; ^date print ;
+        " contains " print ; ^self instanceList count print ;
+        " PriceRecord instances and is stored in object space" print ;
+        ^self objectSpace printNL ;
+       ] ;
+</pre>
 A separate space and price store have been created to hold all
 EOM price records.  Since the number of month-end records is
 significantly smaller than the number of daily records, it is
@@ -347,48 +351,49 @@ often sufficient to create a single price store for all eom price
 records.  This store is created as part of the initial database.
 <p>
 You can create additional EOM stores if desired by executing and
-saving the following code without specifying an object space:<pre><tt><b>
-   PriceTools setupEOMFrom: YYYYMMDD ;
-   Utility updateNetworkWithAnnotation: "EOM Price Space Setup" ;
-
-</b></tt></pre>
+saving the following code without specifying an object space:
+<pre>
+  PriceTools setupEOMFrom: YYYYMMDD ;
+  Utility updateNetworkWithAnnotation: "EOM Price Space Setup" ;
+</pre>
 The individual eom <b>PriceRecord</b> stores can be accessed via the time
 series property <i>eomStoreXRef</i> defined at <b>PriceTools</b>.  The dates in
 this time series correspond to the first date for which eom records
 are collected in this store.  To determine the number of instances in
-each eom store use:  <pre><tt><b>
-     PriceTools :eomStoreXRef
-     do: [ "The store beginning on " print ; ^date print ;
-           " contains " print ; ^self instanceList count print ;
-           " PriceRecord instances and is stored in object space" print ;
-           ^self objectSpace printNL ;
-          ] ;
-
-</b></tt></pre>
+each eom store use:
+<pre>
+  PriceTools :eomStoreXRef
+  do: [ "The store beginning on " print ; ^date print ;
+        " contains " print ; ^self instanceList count print ;
+        " PriceRecord instances and is stored in object space" print ;
+        ^self objectSpace printNL ;
+       ] ;
+</pre>
 Prices are connected to securities using a two-level time series
 structure.  The time series property <i>pricingSeries</i> is defined
 at <b>Security</b> to track the pricing data associated with a security
 by year.  The time points in <i>pricingSeries</i> represent the
 start of each year for which the security has pricing data.  The
 value as each point is a time series of the daily price records
-for the security for the year.  In other words, the expression:<pre><tt><b>
-     Named Security IBM :pricingSeries asOf: 96 .
-</b></tt></pre>
+for the security for the year.  In other words, the expression:
+<pre>
+  Named Security IBM :pricingSeries asOf: 96 .
+</pre>
 returns a time series whose dates represent days in 1996 and whose
 values represents IBM's <b>PriceRecord</b> instance for the associated date.
 To retrieve and display all price records for IBM in 1996, you can
-use the expression:<pre><tt><b>
-     Named Security IBM :pricingSeries asOf: 96 .
-     do: [ ^date print: 15 ; price printNL ] ;
-
-</b></tt></pre>
+use the expression:
+<pre>
+  Named Security IBM :pricingSeries asOf: 96 .
+  do: [ ^date print: 15 ; price printNL ] ;
+</pre>
 The method <i>prices</i> has been defined to collapse this
 mutli-level time series into a single flat time series containing all
-pricing records for the security.  For example:<pre><tt><b>
-     Named Security IBM prices from: 960101 to: 961231 .
-     do: [ ^date print: 15 ; price printNL ] ;
-
-</b></tt></pre>
+pricing records for the security.  For example:
+<pre>
+  Named Security IBM prices from: 960101 to: 961231 .
+  do: [ ^date print: 15 ; price printNL ] ;
+</pre>
 In general, you do not need to have knowledge of this two-level time
 series structure.  Unless you are explicitly writing methods that
 need to make use of the two-level time series structure, you should
@@ -401,19 +406,20 @@ defined at the class PriceTools to create and modify PriceRecord
 information.  The method will create a new PriceRecord for the 
 supplied security/date combination if it does not exist and returns
 the existing or newly created PriceRecord which can be updated using
-one or more of the following messages in succession:<pre><tt><b>
-    PriceTools getOrCreateRecordIn: Named Security IBM asOf: 971015 .
-       setPriceTo: number .
-       setVolumeTo: number .
-       setHighTo: number .
-       setLowTo: number .
-       setOpenTo: number .
-       setBidTo: number .
-       setAskTo: number .
-       setAdjustmentDateTo: date .
-       setBaseCurrencyTo: currency .
-       ;
-</b></tt></pre>
+one or more of the following messages in succession:
+<pre>
+ PriceTools getOrCreateRecordIn: Named Security IBM asOf: 971015 .
+    setPriceTo: number .
+    setVolumeTo: number .
+    setHighTo: number .
+    setLowTo: number .
+    setOpenTo: number .
+    setBidTo: number .
+    setAskTo: number .
+    setAdjustmentDateTo: date .
+    setBaseCurrencyTo: currency .
+    ;
+</pre>
 If you are creating the <b>PriceRecord</b>, you will minimally want to set
 the price (i.e., the closing price) and the base currency.  By
 default, the adjustment date is the same as the record date.  If
@@ -424,108 +430,113 @@ modified as appropriate.  The base currency applies to all data
 values except for volume.  The adjustment date is used to access
 all data values.
 <p>
-A basic methodology for updating prices is outlined below:<pre><tt><b>
-   Security defineMethod: [ | loadPricesFromFile: file | 
-     !recs <- file asFileContents asLines
-       extendBy:
-       [ !fields <- ^self breakOn: ",	" ;
-       ] .
-     select: [ fields count >= 2 ] .
-       extendBy:
-       [ !sec <- fields at: 1 . stripBoundingBlanks ;
-         !security <- ^global Named Security uniformAt: sec ;
-         !price <- fields at: 2 . asNumber ; 
-         !date <- fields at: 3 . asNumber asInteger asDate else: ^date ;
-         !curr <- fields at: 4 . stripBoundingBlanks ;
-         !currency <- ^global Named Currency at: curr . 
-              else: ^global Named Currency USD ;
-       ] ;
+A basic methodology for updating prices is outlined below:
+<pre>
+  Security defineMethod: [ | loadPricesFromFile: file | 
+    !recs <- file asFileContents asLines
+      extendBy:
+      [ !fields <- ^self breakOn: ",	" ;
+      ] .
+    select: [ fields count >= 2 ] .
+      extendBy:
+      [ !sec <- fields at: 1 . stripBoundingBlanks ;
+        !security <- ^global Named Security uniformAt: sec ;
+        !price <- fields at: 2 . asNumber ; 
+        !date <- fields at: 3 . asNumber asInteger asDate else: ^date ;
+        !curr <- fields at: 4 . stripBoundingBlanks ;
+        !currency <- ^global Named Currency at: curr . 
+             else: ^global Named Currency USD ;
+      ] ;
 
-     recs select: [ security isntNA && price > 0 ] .
-     do: [ ^global PriceTools getOrCreateRecordIn: security asOf: date .
-               setPriceTo: price .
-               setBaseCurrencyTo: currency ;
-         ] ;
-   ] ;
-
-</b></tt></pre>
+    recs select: [ security isntNA && price > 0 ] .
+    do: [ ^global PriceTools getOrCreateRecordIn: security asOf: date .
+              setPriceTo: price .
+              setBaseCurrencyTo: currency ;
+        ] ;
+  ] ;
+</pre>
 This approach is fine for small pricing universes and for updates
 that process a single day of prices at a time.  If you are planning
 to update multiple days of prices within a single feed and you are
 storing information for a large universe of daily securities, you
 will want to include an additional step that correctly allocates
 some underlying pricing components.  This modification is outlined
-below:<pre><tt><b>
-   Security defineMethod: [ | loadPricesFromFile: file | 
-     !recs <- file asFileContents asLines
-       extendBy:
-       [ !fields <- ^self breakOn: ",	" ;
-       ] .
-     select: [ fields count >= 2 ] .
-       extendBy:
-       [ !sec <- fields at: 1 . stripBoundingBlanks ;
-         !security <- ^global Named Security uniformAt: sec ;
-         !price <- fields at: 2 . asNumber ; 
-         !date <- fields at: 3 . asNumber asInteger asDate else: ^date ;
-         !curr <- fields at: 4 . stripBoundingBlanks ;
-         !currency <- ^global Named Currency at: curr . 
-              else: ^global Named Currency USD ;
-       ] ;
+below:
+<pre>
+  Security defineMethod: [ | loadPricesFromFile: file | 
+    !recs <- file asFileContents asLines
+      extendBy:
+      [ !fields <- ^self breakOn: ",	" ;
+      ] .
+    select: [ fields count >= 2 ] .
+      extendBy:
+      [ !sec <- fields at: 1 . stripBoundingBlanks ;
+        !security <- ^global Named Security uniformAt: sec ;
+        !price <- fields at: 2 . asNumber ; 
+        !date <- fields at: 3 . asNumber asInteger asDate else: ^date ;
+        !curr <- fields at: 4 . stripBoundingBlanks ;
+        !currency <- ^global Named Currency at: curr . 
+             else: ^global Named Currency USD ;
+      ] ;
 
-     !valid <- recs select: [ security isntNA && price > 0 ] ;
+    !valid <- recs select: [ security isntNA && price > 0 ] ;
 
-     #--  preallocate dates for all valid records
-     valid groupedBy: [ security ] .
-     do: [ !dateList <- groupList send: [ date ] ;
-           ^global PriceTools 
-              preallocateDatesIn: dateList forSecurity: ^self ;
-         ] ;
+    #--  preallocate dates for all valid records
+    valid groupedBy: [ security ] .
+    do: [ !dateList <- groupList send: [ date ] ;
+          ^global PriceTools 
+             preallocateDatesIn: dateList forSecurity: ^self ;
+        ] ;
 
-     #--  process valid records
-     valid
-     do: [ ^global PriceTools getOrCreateRecordIn: security asOf: date .
-               setPriceTo: price .
-               setBaseCurrencyTo: currency ;
-         ] ;
-   ] ;
-
-</b></tt></pre>
+    #--  process valid records
+    valid
+    do: [ ^global PriceTools getOrCreateRecordIn: security asOf: date .
+              setPriceTo: price .
+              setBaseCurrencyTo: currency ;
+        ] ;
+  ] ;
+</pre>
 
 
 
 <p>
 <hr>
-<h3><a name="divs">Dividends</a></h3>
+<h2 id="divs">Dividends</h2>
 <p>
 The message <i>dividend</i> returns the split-adjusted, currency-adjusted
 dividend value for a specific security.  The dividend value is
 accessed as of the current date by default.  The data is adjusted
 through the current date in the base currency of the security by
-default.  For example:  <pre><tt><b>
-     Named Security XYZ dividend
-</b></tt></pre>
-returns XYZ's latest dividend value in US dollars,<pre><tt><b>
-     Named Security XYZ :dividend asOf: 9702 .
-</b>or<b>
-     9702 evaluate: [ Named Security XYZ dividend ] 
-</b></tt></pre>
+default.  For example:
+<pre>
+  Named Security XYZ dividend
+</pre>
+returns XYZ's latest dividend value in US dollars,
+<pre>
+  Named Security XYZ :dividend asOf: 9702 .
+</pre>or<pre>
+  9702 evaluate: [ Named Security XYZ dividend ] 
+</pre>
 returns XYZ's latest dividend value as of Feb 1997 in US dollars, 
-and<pre><tt><b>
-     "CAN" asCurrency evaluate: [ Named Security XYZ dividend ] 
-</b></tt></pre>
+and
+<pre>
+  "CAN" asCurrency evaluate: [ Named Security XYZ dividend ] 
+</pre>
 returns XYZ's latest dividend value in Canadian dollars.  All values
 are split-adjusted through the current date.  
 The message <i>getDivsFrom:to:</i>
 returns the total dividends paid by the security between the two
-dates supplied.  For example:<pre><tt><b>
-     Named Security XYZ getDivsFrom: 970201 to: 970331
-</b></tt></pre>
+dates supplied.  For example:
+<pre>
+  Named Security XYZ getDivsFrom: 970201 to: 970331
+</pre>
 returns the total dividends paid between the two dates.
 The message <i>totalReturnFrom:to:</i> returns the total
 return between the two dates supplied.  For example, 
-to access the total return for the same period use:<pre><tt><b>
-     Named Security XYZ totalReturnFrom: 970201 to: 970331
-</b></tt></pre>
+to access the total return for the same period use:
+<pre>
+  Named Security XYZ totalReturnFrom: 970201 to: 970331
+</pre>
 The actual time series of dividend values is stored in the time
 series property <i>dividendSeries</i>.  The values in this time series
 are instances of the class <b>DivRecord</b>, which has been created to
@@ -559,17 +570,18 @@ code will be immune to any changes that may be made to the
 underlying data structure that manages the actual time series.
 <p>
 For example, to display the adjusted and unadjusted dividend values
-for each of XYZ's dividends, you could use:<pre><tt><b>
-     Named Security XYZ dividends
-     do: [ ^date print: 12 ;       #-- date in time series
-           date print: 12 ;        #-- date in record - should match
-           div print ;             #-- adjusted value
-           _div print ;            #-- unadjusted value
-           adjustmentFactor print ;
-           currencyFactor print ;
-           newLine print ;
-         ] ;
-</b></tt></pre>
+for each of XYZ's dividends, you could use:
+<pre>
+  Named Security XYZ dividends
+  do: [ ^date print: 12 ;       #-- date in time series
+        date print: 12 ;        #-- date in record - should match
+        div print ;             #-- adjusted value
+        _div print ;            #-- unadjusted value
+        adjustmentFactor print ;
+        currencyFactor print ;
+        newLine print ;
+      ] ;
+</pre>
 Note that the <i>dividends</i> message returns an actual time series
 object so you need not prepend the ":"  to the message name.  
 <p>
@@ -582,22 +594,11 @@ a value for your working session, you can use the
 <p>
 <hr>
 <p>
-<h3><a name="ids">Security and Company Identification</a></h3>
+<h2 id="ids">Security and Company Identification</h2>
 <p>
 
 <p>
 <hr>
-<h3><a name="holdings">Holdings</a></h3>
-<p>
+<h2 id="holdings">Holdings</h2>
 
-<p>
-<hr>
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated August 28, 1998</font>
-</table>
-
-</body>
-</html>
-
+{% include doc-footer.htm copydates="1998" %}

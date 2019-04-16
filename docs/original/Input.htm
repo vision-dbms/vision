@@ -1,39 +1,30 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Loading Information into Vision </title>
-</head>
-<body bgcolor = white>
+---
+title: Loading Information into Vision
 
-<h2>Loading Information into Vision</h2>
-<p>
-     | <a href="FHome.htm">Home</a> | <a href="Running.htm">Running Vision</a> | <a href="vifaces.htm">Interfaces</a> | <a href="Lang.htm">Vision Language</a> | 
-<hr>
-<h3>Topics Covered:</h3>
-<ul type="square">
-<li><a href="#file">Reading Files</a>
-<li><a href="#program">Loading Programs</a>
-<li><a href="#data">Loading Data Files</a>
-<li><a href="#more">Additional String Parsing Techniques</a>
-<li><a href="#adv">Memory Resources and Advanced Data Loading Techniques</a>
-</ul>
+related_topics:
+  - url: "vifaces.htm"
+    title: Interfaces
 
+sidebar:
+  nav: "sb_UsingVision"
+---
 <p>
-<hr>
-<h3><a name="file">Reading Files</a></h3>
+<h2 id="file">Reading Files</h2>
 <p>
 The <i>asFileContents</i> message can be sent to a <i>String</i>
 representing the name of a file and returns the contents of the
-file as a <i>String</i>.  For example:<pre><tt><b>
-     "myFile" asFileContents
-</b></tt></pre>
+file as a <i>String</i>.  For example:
+<pre>
+  "myFile" asFileContents
+</pre>
 opens the file <i>myFile</i> and returns its contents as a string.
 Since this program is not terminated with a ';' character, the
 contents of the file will print by default.  You could save the
-contents of the file into a variable.  For example:<pre><tt><b>
-     !fileContents <- "myFile" asFileContents ;
-     fileContents count printNL ;
-</b></tt></pre>
+contents of the file into a variable.  For example:
+<pre>
+  !fileContents <- "myFile" asFileContents ;
+  fileContents count printNL ;
+</pre>
 This program stores the contents of the file <i>myFile</i> into the
 variable <i>fileContents</i>.  The second statement in this program
 displays the number of characters in the file.
@@ -50,7 +41,7 @@ in properties of other Vision objects.</a>
 </ol>
 <p>
 <hr>
-<h3><a name="program">Loading Programs</a></h3>
+<h2 id="program">Loading Programs</h2>
 <p>
 It is often useful to save methods and other Vision programs in files
 outside the Vision database.  You can interactively load these files
@@ -58,14 +49,16 @@ by reading them into a Vision editor and executing the request;
 however, it is also useful to be able to read in files of code as part of a
 program.  You can use the <i>asFileContents evaluate</i> expression
 to do this.  For example, if the file <i>sampleCode</i> contains the
-Vision code:<pre><tt><b>
-     !x <- 3 ;
-     !y <- 10 ;
-</b></tt></pre>
-and you execute:<pre><tt><b>
-     "sampleCode" asFileContents evaluate; 
-     x print ; y print ;
-</b></tt></pre>
+Vision code:
+<pre>
+  !x <- 3 ;
+  !y <- 10 ;
+</pre>
+and you execute:
+<pre>
+  "sampleCode" asFileContents evaluate;
+  x print ; y print ;
+</pre>
 you will see the values of <i>x</i> and <i>y</i> displayed.  The
 first statement in this program will read in the file and evaluate
 its contents as though you had entered the code directly.  After the
@@ -76,19 +69,22 @@ By default, the code in your file will be evaluated as though
 you typed it into your top-level workspace.  You can also execute
 code in the context of a particular object.
 For example, if the file <i>sampleCode</i> contains the
-Vision code:<pre><tt><b>
-     "This object is an instance of class " print; 
-     whatAmI printNL ;
-</b></tt></pre>
-and you execute:<pre><tt><b>
-     "sampleCode" asFileContents evaluateIn: 3 ;
-</b></tt></pre>
-You should see:<pre><tt><b>
-     This object is an instance of class Integer
-</b></tt></pre>
+Vision code:
+<pre>
+  "This object is an instance of class " print;
+  whatAmI printNL ;
+</pre>
+and you execute:
+<pre>
+  "sampleCode" asFileContents evaluateIn: 3 ;
+</pre>
+You should see:
+<pre>
+  This object is an instance of class Integer
+</pre>
 <p>
 <hr>
-<h3><a name="data">Loading Data Files</a></h3>
+<h2 id="data">Loading Data Files</h2>
 <p>
 The string returned by the <i>asFileContents</i> message can be viewed
 as a data file. Each line of the data file can be thought of as a record.  
@@ -101,16 +97,18 @@ relative to its record will vary from record to record.
 <p>
 For example, in a fixed field format, you could have a security id
 in positions 1 - 6 , a name in positions 7 - 36, and a price in
-positions 37 - 46 as illustrated below:<pre><tt><b>
-     IBM   International Business Mach      123.500
-     GM    General Motors                    33.125
-     XON   Exxon Corp                       111.000
-</b></tt></pre>
-The same data in a comma delimited format would look like:<pre><tt><b>
-     IBM, International Business Mach, 123.500
-     GM, General Motors, 33.125
-     XON, Exxon Corp, 111.000
-</b></tt></pre>
+positions 37 - 46 as illustrated below:
+<pre>
+  IBM   International Business Mach      123.500
+  GM    General Motors                    33.125
+  XON   Exxon Corp                       111.000
+</pre>
+The same data in a comma delimited format would look like:
+<pre>
+  IBM, International Business Mach, 123.500
+  GM, General Motors, 33.125
+  XON, Exxon Corp, 111.000
+</pre>
 In the fixed field format, each field starts at a
 known character position in the record and has a fixed size.  Field
 values that require fewer characters are blank-padded to fit into
@@ -123,18 +121,19 @@ delimiter for this reason.
 The <i>asLines</i> message is used to divide the string returned
 by the <i>asFileContents</i> message into a 
 list of strings, using the carriage-return character
-as a delimiter.  For example:<pre><tt><b>
-   #-- create string containing the file name, including its path.
-   !fileName <- "/users/xyz/dir1/file.txt" ;
+as a delimiter.  For example:
+<pre>
+  #-- create string containing the file name, including its path.
+  !fileName <- "/users/xyz/dir1/file.txt" ;
 
-   #--  extract contents of file as a single, large string.
-   !theFile <- fileName asFileContents ;
+  #--  extract contents of file as a single, large string.
+  !theFile <- fileName asFileContents ;
 
-   #--  convert the file into a list of records 
-   #--  each element of record is a single string
-   !records <- theFile asLines ;
-   records count printNL ;
-</b></tt></pre>
+  #--  convert the file into a list of records
+  #--  each element of record is a single string
+  !records <- theFile asLines ;
+  records count printNL ;
+</pre>
 <p>
 The variable <i>records</i> returns a list of string objects where
 each element of the list corresponds to a record in the original file.
@@ -142,17 +141,17 @@ This record can then be divided into its fields
 based on position or delimiter character.  Each field is a
 string by default.  The field value can be converted to other data
 types such as number.
-<p>
-<a name="readFixed.samp"> </a>
+<p id="readFixed.samp">
 The following Vision code can be used to break fixed format records into 
-fields:<pre><tt><b>
-   #--  break each record into its fields - fixed format approach
-   !xrecords <- records
-     extendBy: [ !securityId <- ^self take: 6 . stripBoundingBlanks ;
-                 !name <- ^self from: 7 for: 30 . stripBoundingBlanks ; 
-                 !price <- ^self from: 37 to: 47 . asNumber ;
-               ] ;
-</b></tt></pre>
+fields:
+<pre>
+  #--  break each record into its fields - fixed format approach
+  !xrecords <- records
+    extendBy: [ !securityId <- ^self take: 6 . stripBoundingBlanks ;
+                !name <- ^self from: 7 for: 30 . stripBoundingBlanks ;
+                !price <- ^self from: 37 to: 47 . asNumber ;
+              ] ;
+</pre>
 The variable <i>xrecords</i> returns the list of records extended
 by three additional variables representing the fields in the record.
 The <i>securityId</i> variable is defined as the first 6 characters of
@@ -161,18 +160,18 @@ string starting at position 7 in the record.  Blanks at the start
 and end of these fields are removed.  The <i>price</i>
 variable is defined as the field from position 37 to 47 in the
 record and is converted to a number.
-<p>
-<a name="readDelimited.samp"> </a>
+<p id="readDelimited.samp">
 The following Vision code can be used to break comma-delimited records 
-into fields:<pre><tt><b>
-   #--  break each record into its fields - comma-delimited approach
-   !xrecords <- records
-      extendBy: [ !fields <- ^self breakOn: "," ;     # break on delimiter 
-                  !securityId <- fields at: 1 . stripBoundingBlanks ;
-                  !name <- fields at: 2 . stripBoundingBlanks ;
-                  !price <- fields at: 3 . asNumber ;
-                ] ;
-</b></tt></pre>
+into fields:
+<pre>
+  #--  break each record into its fields - comma-delimited approach
+  !xrecords <- records
+     extendBy: [ !fields <- ^self breakOn: "," ;     # break on delimiter
+                 !securityId <- fields at: 1 . stripBoundingBlanks ;
+                 !name <- fields at: 2 . stripBoundingBlanks ;
+                 !price <- fields at: 3 . asNumber ;
+               ] ;
+</pre>
 The <a href="mString.htm#breakOn:"><i>breakOn:</i></a> message is
 used to break the record into fields based on one or more delimiter
 characters and returns a list of strings.
@@ -186,61 +185,68 @@ example, the <i>securityId</i> can be used to reference a
 specific instance of a Security class.
 Assume the class Security had defined the
 properties <i>name</i> and <i>price</i>.
-<a name="update.samp"> </a>
+<span id="update.samp"> </span
 The following Vision code could be used to update these properties
-using the data read from the file:<pre><tt><b>
-   #--  use each record to update name and price properties of Security
-   xrecords
-   do: [ !security <- ^global Named Security at: securityId ;
-         security isntNA
-         ifTrue:
-           [ security :name <- name ;
-             security :price <- price ;
-           ] 
-         ifFalse:
-           [ securityId print ; " Not Found." printNL ;
-           ] ;
-        ] ;
-</b></tt></pre>
+using the data read from the file:
+<pre>
+  #--  use each record to update name and price properties of Security
+  xrecords
+  do: [ !security <- ^global Named Security at: securityId ;
+        security isntNA
+        ifTrue:
+          [ security :name <- name ;
+            security :price <- price ;
+          ]
+        ifFalse:
+          [ securityId print ; " Not Found." printNL ;
+          ] ;
+       ] ;
+</pre>
 <p>
 <hr>
-<h3><a name="more">Additional String Parsing Techniques</a></h3>
+<h2 id="more">Additional String Parsing Techniques</h2>
 <p>
 There are many additional messages defined at String which are useful
 for parsing data files.  
 <p>
 The <a href="mString.htm#asRecords"><i>asRecords</i></a> message 
 combines the <i>asFileContents</i> and <i>asLines</i> steps.  The
-expression: <pre><tt><b>
-     "sampleCode" asRecords
-</b></tt></pre>
-is the same as:<pre><tt><b>     "sampleCode" asFileContents asLines
-</b></tt></pre>
+expression:
+<pre>
+  "sampleCode" asRecords
+</pre>
+is the same as:
+<pre>
+  "sampleCode" asFileContents asLines
+</pre>
 <p>
 The <a href="mString.htm#asCSVRecords"><i>asCSVRecords</i></a> message 
 can be used to convert
 a <i>comma-separated-value</i> format file to a list
 of strings extended by the message <i>fields</i>.
 Embedded commas in the original file are preserved.  
-For example, if the file <i>sample.csv</i> contains:<pre><tt><b>
-     key1,description1,value1
-     key2,"description 2 with , character",value2
-</b></tt></pre>
-then:<pre><tt><b>
-     "sample.csv" asCSVRecords
-     do: [ "Field 1: " print ; fields at: 1 . printNL ;
-           "Field 2: " print ; fields at: 2 . printNL ;
-           "Field 3: " print ; fields at: 3 . printNL ;
-         ] ;
-</b></tt></pre>
-displays:<pre><tt><b>
-     Field 1: key1
-     Field 2: description1
-     Field 3: value1
-     Field 1: key2
-     Field 2: description 2 with , character
-     Field 3: value2
-</b></tt></pre>
+For example, if the file <i>sample.csv</i> contains:
+<pre>
+  key1,description1,value1
+  key2,"description 2 with , character",value2
+</pre>
+then:
+<pre>
+  "sample.csv" asCSVRecords
+  do: [ "Field 1: " print ; fields at: 1 . printNL ;
+        "Field 2: " print ; fields at: 2 . printNL ;
+        "Field 3: " print ; fields at: 3 . printNL ;
+      ] ;
+</pre>
+displays:
+<pre>
+  Field 1: key1
+  Field 2: description1
+  Field 3: value1
+  Field 1: key2
+  Field 2: description 2 with , character
+  Field 3: value2
+</pre>
 <p>
 Several messages are available for filtering the characters from the
 input file.  
@@ -250,34 +256,37 @@ every occurrence.
 The message <a href="mString.htm#translate:to:">
 <i>translate:to:</i></a> is used to replace all occurrences of the
 character in the first parameter with the string supplied in the
-second parameter.  For example:<pre><tt><b>
-     "sampleCode" asFileContents
-         stripChar: "+" . translate: "*" to: " " . 
-</b></tt></pre>
+second parameter.  For example:
+<pre>
+  "sampleCode" asFileContents
+     stripChar: "+" . translate: "*" to: " " .
+</pre>
 removes all the '+' characters from the string and changes all
 occurrences of the '*' character to a blank.
-<p>
-<a name="format"> </a>
+<p id="format">
 In some <a href="#readFixed.samp">earlier examples</a>, you have seen
 several techniques used for parsing the data fields and converting
-the values to different types.  In the expression:<pre><tt><b>
-     !securityId <- ^self take: 6 ;
-</b></tt></pre>
+the values to different types.  In the expression:
+<pre>
+  !securityId <- ^self take: 6 ;
+</pre>
 the message <a href="mString.htm#take:"><i>take:</i></a> is used to
 extract the first 6 characters of the string.  This message can be
 used in conjunction with
 the message <a href="mString.htm#drop:"><i>drop:</i></a> which 
 eliminates characters from the start or end of the string.  For
 example, if the name field starts in position 7 for 30 characters,
-the field could be extracted using:<pre><tt><b>
-     !name <- ^self drop: 6 . take: 30 ;
-</b></tt></pre>
+the field could be extracted using:
+<pre>
+  !name <- ^self drop: 6 . take: 30 ;
+</pre>
 The messages <a href="mString.htm#from:for:"><i>from:for:</i></a> 
 and <a href="mString.htm#from:to:"><i>from:to:</i></a> provides
-alternative ways to do the same thing.  For example:<pre><tt><b>
-     !alt1 <- ^self from: 7 for: 30 ;
-     !alt2 <- ^self from: 7 to: 36 ;
-</b></tt></pre>
+alternative ways to do the same thing.  For example:
+<pre>
+  !alt1 <- ^self from: 7 for: 30 ;
+  !alt2 <- ^self from: 7 to: 36 ;
+</pre>
 The messages <a href="mString.htm#from:"><i>from:</i></a> and
 <a href="mString.htm#to:"><i>to:</i></a> are variations on
 the <i>from:to:</i> message.  When the supplied parameter is a number,
@@ -290,13 +299,15 @@ with the first occurrence of this character.
 <p>
 The message <a href="mString.htm#stripBoundingBlanks">
 <i>stripBoundingBlanks</i></a> is used to eliminate blank
-characters from either end of a string.  For example:<pre><tt><b>
-     !alt3 <- ^self from: 7 for: 30 . stripBoundingBlanks ;
-</b></tt></pre>
+characters from either end of a string.  For example:
+<pre>
+  !alt3 <- ^self from: 7 for: 30 . stripBoundingBlanks ;
+</pre>
 <p>
-The expression:<pre><tt><b>
-     !price <- ^self from: 37 to: 47 . asNumber ;
-</b></tt></pre>
+The expression:
+<pre>
+  !price <- ^self from: 37 to: 47 . asNumber ;
+</pre>
 uses the message <a href="mString.htm#asNumber"><i>asNumber</i></a>
 to convert the string value to a numeric value.  The message
 <a href="mString.htm#convertToNumber"><i>convertToNumber</i></a>,
@@ -310,9 +321,10 @@ The message
 in the form <i>CCYYMMDD</i>, <i>YYMMDD</i>, <i>YYMM</i>, 
 or <i>YY</i> into a date where <i>CC</i> is the century,
 <i>YY</i> is the year, <i>MM</i> is the month, and <i>DD</i>
-is the day.  For example:<pre><tt><b>
-     !priceDate <- ^self from: 48 for: 10 . asNumber asInteger asDate ;
-</b></tt></pre>
+is the day.  For example:
+<pre>
+  !priceDate <- ^self from: 48 for: 10 . asNumber asInteger asDate ;
+</pre>
 If the field starting at position 48 for 10 characters contained 
 "&nbsp&nbsp 960515 &nbsp&nbsp", 
 the variable <i>priceDate</i> would be set to the date
@@ -327,27 +339,30 @@ have been defined including:
 <p>
 The message <a href="mObject.htm#else:"><i>else:</i></a> 
 is useful for assigning default values when a field does not convert
-as expected.  For example:<pre><tt><b>
-     !price <- ^self from: 37 to: 47 . asNumber else: 0.0 ;
-</b></tt></pre>
+as expected.  For example:
+<pre>
+  !price <- ^self from: 37 to: 47 . asNumber else: 0.0 ;
+</pre>
 returns the value <i>0.0</i> if the field cannot be converted to a numeric
-value (i.e., the <i>asNumber</i> message returns an NA) and<pre><tt><b>
-     !priceDate <- ^self from: 48 for: 10 . 
-        asNumber asInteger asDate else: ^today ;
-</b></tt></pre>
+value (i.e., the <i>asNumber</i> message returns an NA) and
+<pre>
+  !priceDate <- ^self from: 48 for: 10 .
+     asNumber asInteger asDate else: ^today ;
+</pre>
 returns the value <i>^today</i> if the field cannot be converted to a
 date (i.e., the <i>asDate</i> message returns an NA).
 
 <p>
 <hr>
-<h3><a name="adv">Memory Resources and Advanced Data Loading Techniques</a></h3>
+<h2 id="adv">Memory Resources and Advanced Data Loading Techniques</h2>
 
-<h4><a name="adv_mem">Private Memory and String Structures</a></h4>
+<h3 id="adv_mem">Private Memory and String Structures</h3>
 <p>
 The amount of private memory allocated at any point in your Vision session for temporary
-and permanent structures can be displayed using the following query:<pre><tt><b>
-     AdminTools totalNetworkAllocation
-</pre></tt></b>
+and permanent structures can be displayed using the following query:
+<pre>
+  AdminTools totalNetworkAllocation
+</pre>
 For example, if you executed the above as the first query after starting a new session
 you would get a baseline (<i>per process</i>) memory allocation, in bytes, for your
 Vision database.  You can monitor private memory usage after loading a data file or at
@@ -374,62 +389,69 @@ The amount of memory used to store these permanently referenced strings depends 
 strings are created.  Strings are stored in <a href="Classes.htm#cluster"<i>clusters</i></a>
 or <i>stores</i>, as are all classes and their instances.  Since the String class is
 a <i>Built-in</i> class, new strings do not get added to its default cluster.  The Vision
-expression:<pre><tt><b>
-     String instanceList count
-</pre></tt></b>
+expression:
+<pre>
+  String instanceList count
+</pre>
 will always return a value of 1.
 <p>
 The variables created to reference strings actually represent the newly created string
 clusters. For example:
-<pre><tt><b>
-     !theFile <- "myFile" asFileContents ;
-     theFile instanceList count
-</pre></tt></b>
+<pre>
+  !theFile <- "myFile" asFileContents ;
+  theFile instanceList count
+</pre>
 will return a value of 1 since the entire file is returned as a single string object.
 The subsequent conversion of the single string into a list of strings creates another
-string cluster:<pre><tt><b>
-     !records <- theFile asLines;
-</pre></tt></b>
+string cluster:
+<pre>
+  !records <- theFile asLines;
+</pre>
 The variable <i>records</i> returns a <i>List</i> object which contains references to the
-new strings, and the Vision query:<pre><tt><b>
-     records count
-</pre></tt></b>
+new strings, and the Vision query:
+<pre>
+  records count
+</pre>
 returns the number of elements in the list.  To access the new string cluster, you need
-to access any element of the list; for example:<pre><tt><b>
-     records at: 1 . instanceList count
-</pre></tt></b>
+to access any element of the list; for example:
+<pre>
+  records at: 1 . instanceList count
+</pre>
 will return the number of strings in the new cluster.
 <p>
 The size of each string cluster (number of characters) can be obtained using the Vision
-code:<pre><tt><b>
-     #-- single string
-     theFile count printNL;
+code:
+<pre>
+  #-- single string
+  theFile count printNL;
 
-     #-- list of strings
-     records at: 1 . instanceList total: [ count ] . printNL;
-</pre></tt></b>
+  #-- list of strings
+  records at: 1 . instanceList total: [ count ] . printNL;
+</pre>
 <p>
 The final parsing of each string into its respective field items using a fixed field
-input file:<pre><tt><b>
-   !xrecords <- records
-     extendBy: [ !securityId <- ^self take: 6 . stripBoundingBlanks ;
-                 !name <- ^self from: 7 for: 30 . stripBoundingBlanks ; 
-                 !price <- ^self from: 37 to: 47 . asNumber ;
-               ] ;
-</pre></tt></b>
+input file:
+<pre>
+  !xrecords <- records
+    extendBy: [ !securityId <- ^self take: 6 . stripBoundingBlanks ;
+                !name <- ^self from: 7 for: 30 . stripBoundingBlanks ;
+                !price <- ^self from: 37 to: 47 . asNumber ;
+              ] ;
+</pre>
 creates a new string cluster for each property that is not further converted into another
 type. Each string cluster contains the same number of strings as there are records in the
 input file.
 <p>
 For a comma-delimited input file, the final parsing of each string into its field
-items using the form:<pre><tt><b>
-   !xrecords <- records
-      extendBy: [ !fields <- ^self breakOn: "," ;     # break on delimiter 
-                  !securityId <- fields at: 1 . stripBoundingBlanks ;
-                  !name <- fields at: 2 . stripBoundingBlanks ;
-                  !price <- fields at: 3 . asNumber ;
-                ] ;
-</pre></tt></b>
+items using the form:
+<pre>
+  !xrecords <- records
+     extendBy: [ !fields <- ^self breakOn: "," ;     # break on delimiter
+                 !securityId <- fields at: 1 . stripBoundingBlanks ;
+                 !name <- fields at: 2 . stripBoundingBlanks ;
+                 !price <- fields at: 3 . asNumber ;
+               ] ;
+</pre>
 could potentially create references to string clusters containing more than just the
 strings associated with a given field.  The <i>breakOn:</i> message breaks the string
 record into fields based on one or more delimiter characters and returns a list of strings.
@@ -440,34 +462,36 @@ the original string would have been returned by the method.  A new string cluste
 have been created if blanks were indeed stripped, containing just the strings for the single
 field item.
 <p>
-Subsequent use of these strings to update or create permanent structures:<pre><tt><b>
-   xrecords
-   do: [ !security <- ^global Named Security at: securityId ;
-          security isNA
-            ifTrue: [ :security <- ^global Security createInstance: securityId ] ;
-          security name != name
-            ifTrue: [ security :name <- name ] ;
-          security :price <- price ;
-        ] ;
-</pre></tt></b>
+Subsequent use of these strings to update or create permanent structures:
+<pre>
+  xrecords
+  do: [ !security <- ^global Named Security at: securityId ;
+         security isNA
+           ifTrue: [ :security <- ^global Security createInstance: securityId ] ;
+         security name != name
+           ifTrue: [ security :name <- name ] ;
+         security :price <- price ;
+       ] ;
+</pre>
 results in permanent references to string clusters that can contain minimally string
 values for a given field or in the worst case, all strings in the original input file.
 <p>
 A simple technique to disassociate the strings representing field values from the
 cluster referenced by the field item is to create a copy of each string at the
 point where it is to be used to update a property in a permanent object.  The
-above code would need to be revised as follows:<pre><tt><b>
-   xrecords
-   do: [ !security <- ^global Named Security at: securityId ;
-          security isNA
-            ifTrue: [ :security <- ^global Security
-                        createInstance: securityId copyString #<--- update code
-                    ] ;
-          security name != name
-            ifTrue: [ security :name <- name copyString ] ;   #<--- update name
-          security :price <- price ;
-        ] ;
-</pre></tt></b>
+above code would need to be revised as follows:
+<pre>
+  xrecords
+  do: [ !security <- ^global Named Security at: securityId ;
+         security isNA
+           ifTrue: [ :security <- ^global Security
+                       createInstance: securityId copyString #<--- update code
+                   ] ;
+         security name != name
+           ifTrue: [ security :name <- name copyString ] ;   #<--- update name
+         security :price <- price ;
+       ] ;
+</pre>
 The resultant string cluster representing a property value would only include those
 strings which were actually used to update the property.  For example, if a data
 file contained 2,000 records with 2 string fields and if only 20 new securities were
@@ -481,23 +505,25 @@ format parser, the two properties could potentially reference a single cluster c
 <p>
 For installations that may not yet have the method <i>copyString</i> available, the
 following code needs to be executed at the start of an interactive session or committed
-permanently in the database:<pre><tt><b>
-   String
-   defineMethod: [ | copyString |
-     ^self asSelf drop: 0
-   ] ;
-</pre></tt></b>
+permanently in the database:
+<pre>
+  String
+  defineMethod: [ | copyString |
+    ^self asSelf drop: 0
+  ] ;
+</pre>
 Messages that manipulate string content, such as <i>take:</i>, <i>drop:</i>, <i>concat:</i>,
 all return a modified copy of the recipient string.  In this case, nothing is changed in the
 recipient string, only a new copy of the string is returned.
 <p>
 Another technique to further decrease the amount of memory needed to load data would be
-to omit creating references to intermediate string clusters:<pre><tt><b>
-   !xrecords <- "myFile" asFileContents asLines
-     extendBy: [ . . .
-                 . . .
-               ] ;
-</pre></tt></b>
+to omit creating references to intermediate string clusters:
+<pre>
+  !xrecords <- "myFile" asFileContents asLines
+    extendBy: [ . . .
+                . . .
+              ] ;
+</pre>
 In the above revision, the intermediate reference to the single string representing
 the data file does not remain and only the string cluster created by <i>asLines</i>
 and referenced by <i>xrecords</i> remains in memory as long as the Vision session is
@@ -508,7 +534,7 @@ To optimize private memory usage when loading data, methods should be defined to
 process the data load so that following execution any unreferenced temporary variables
 or string clusters are no longer resident in memory.
 <p>
-<h4><a name="adv_batch">Batch Loads</a></h4>
+<h3 id="adv_batch">Batch Loads</h3>
 <p>
 The message <i>asFileContents</i> is suitable for loading data from files that
 are relatively small, on the order of 5-30 MB, consisting of a single file or
@@ -525,15 +551,16 @@ To <a href="tkOpenVision.htm#Accessing Files">access</a> a file with <b>read-onl
 permission, use the message <i>asOpenVisionChannel</i> and supply <b>file</b> as the
 <i>type</i> and the file name as the <i>resource</i> in its specification string.
 Choose the appropriate <a href="tkOpenVision.htm#The Trim Format Option">trim format</a>
-option, which controls the removal of leading and trailing blanks from strings.<pre><tt><b>
-     #-- create a string containing the file name
-     !fileName <- "/users/xyz/dir1/file.txt" ;
+option, which controls the removal of leading and trailing blanks from strings.
+<pre>
+  #-- create a string containing the file name
+  !fileName <- "/users/xyz/dir1/file.txt" ;
 
-     #-- open a channel to the file and set a trim format
-     !file <- "file:" concat: fileName .
-          asOpenVisionChannel
-          setTrimFormatToTrailingBlanks ;
-</b></tt></pre>
+  #-- open a channel to the file and set a trim format
+  !file <- "file:" concat: fileName .
+       asOpenVisionChannel
+       setTrimFormatToTrailingBlanks ;
+</pre>
 To process the file in batches, you would supply a batch size (number of records to process
 at a time) and calculate the file size, the record size, the number of records, and the
 number of batches to process.  The following messages are sent to the <i>channel</i> object
@@ -543,65 +570,67 @@ The message <i>byteCount</i> returns the size of the file, the message <i>getLin
 a string obtained by reading the next line from the channel, the message <i>getString:</i>
 <b>size</b> <i>at:</i> <b>anOffset</b> returns a string containing the number of characters
 specified by the size argument beginning at the offset position in the file, and the message
-<i>close</i> closes the file.<pre><tt><b>
-     #-- get the file size
-     !fileSize <- file byteCount ;
+<i>close</i> closes the file.
+<pre>
+  #-- get the file size
+  !fileSize <- file byteCount ;
 
-     #-- calculate the record size and number of records
-     !recSize <- file getLine count ;
-     !records <- (fileSize / recSize) asInteger ;
+  #-- calculate the record size and number of records
+  !recSize <- file getLine count ;
+  !records <- (fileSize / recSize) asInteger ;
 
-     #-- specify a batch (no. of records)
-     !batchCount <- 1000 ;
+  #-- specify a batch (no. of records)
+  !batchCount <- 1000 ;
 
-     #-- calculate the batch size and the number of batches
-     !batchSize <- batchCount * recSize ;
-     !batches <- (records / batchCount + 1) asInteger ;
-</pre></tt></b>
+  #-- calculate the batch size and the number of batches
+  !batchSize <- batchCount * recSize ;
+  !batches <- (records / batchCount + 1) asInteger ;
+</pre>
 The Vision code below illustrates the iterative process of reading in a batch of
 records, specified above, as a single string and parsing it using techniques described
-earlier in this document:<pre><tt><b>
-     #-- batch numbers start with 0
-     !firstBatch <- 0;
-     !lastBatch <- (batches - 1) asInteger;
+earlier in this document:
+<pre>
+  #-- batch numbers start with 0
+  !firstBatch <- 0;
+  !lastBatch <- (batches - 1) asInteger;
 
-     #-- iterate over the batches
-     batches sequence0
-     iterate:
-       [ !batchNum <- ^self;
+  #-- iterate over the batches
+  batches sequence0
+  iterate:
+    [ !batchNum <- ^self;
 
-         #-- get offset for current batch
-         !offset <- (batchNum * ^my batchSize + 1) asInteger;
+      #-- get offset for current batch
+      !offset <- (batchNum * ^my batchSize + 1) asInteger;
 
-         #-- get size of current batch
-         !bytesLeft <- ^my fileSize - offset + 1;
-         !size <- ^my batchSize min: bytesLeft . max: 0 . asInteger ;
+      #-- get size of current batch
+      !bytesLeft <- ^my fileSize - offset + 1;
+      !size <- ^my batchSize min: bytesLeft . max: 0 . asInteger ;
 
-         #-- load current batch
-         !string <- ^my file getString: size at: offset ;
+      #-- load current batch
+      !string <- ^my file getString: size at: offset ;
 
-         string count > 0 ifTrue:
-          [ #-- parse records in current batch
-            !xrecords <- string asLines
-              extendBy:
-                [ !id <- ^self take: 6 . stripBoundingBlanks ;
-                  !name <- ^self from: 7 for: 30 . stripBoundingBlanks;
-                    . . .
-                ];
-            #-- process records in current batch
-            xrecords do:
-              [ !security <- ^global Named Security at: id ;
-                security isntNA ifTrue:
-                  [ security :name <- name copyString;
-                     . . .
-                  ];
-              ];
-          ];
-       ];  ## end iterate
+      string count > 0 ifTrue:
+       [ #-- parse records in current batch
+         !xrecords <- string asLines
+           extendBy:
+             [ !id <- ^self take: 6 . stripBoundingBlanks ;
+               !name <- ^self from: 7 for: 30 . stripBoundingBlanks;
+                 . . .
+             ];
+         #-- process records in current batch
+         xrecords do:
+           [ !security <- ^global Named Security at: id ;
+             security isntNA ifTrue:
+               [ security :name <- name copyString;
+                  . . .
+               ];
+           ];
+       ];
+    ];  ## end iterate
 
-     #-- close the file
-     file close ;
-</pre></tt></b>
+  #-- close the file
+  file close ;
+</pre>
 The batch sequence count begins with 0 in order to get the correct offset into the
 file for the first iteration. The method <i>sequence0</i> when sent to an integer returns
 a list of integers beginning with 0 and ending with 1 less than the recipient integer.
@@ -611,7 +640,7 @@ by the amount of characters left to process since the last batch is not guarante
 the full number of records as specified by the value of <i>batchCount</i>. A final check of
 string size greater than 0 is added in the event that an empty string is returned.
 <p>
-<h4><a name="adv_multi">Multiple File Loads</a></h4>
+<h3 id="adv_multi">Multiple File Loads</h3>
 <p>
 If data to be loaded is provided in separate files rather than in a single file, the
 <a href="#adv_batch">batch load</a> technique may not be appropriate. In this
@@ -623,27 +652,29 @@ data file.  The data file provides the id, name and score for a universe of secu
 given date in comma delimited format.  The method creates new Security instances if they do not
 exist in order to store the full score history.  In this example, data files to be processed range
 in size from 1 to 2 MB and span dates from 8712 to 9709. The data is loaded using the following
-Vision code:<pre><tt><b>
-   Security loadMonthlyScoresAsOf: 8712 fromFile: "score.8712" ;
-   Security loadMonthlyScoresAsOf: 8801 fromFile: "score.8801" ;
-    .
-    .
-    .
-   Security loadMonthlyScoresAsOf: 9708 fromFile: "score.9708" ;
-   Security loadMonthlyScoresAsOf: 9709 fromFile: "score.9709" ;
-</b></tt></pre>
-or equivalently:<pre><tt><b>
-   !start <- 8801 asDate;
-   !end <- 9709 asDate;
-   !date <- start;
+Vision code:
+<pre>
+  Security loadMonthlyScoresAsOf: 8712 fromFile: "score.8712" ;
+  Security loadMonthlyScoresAsOf: 8801 fromFile: "score.8801" ;
+   .
+   .
+   .
+  Security loadMonthlyScoresAsOf: 9708 fromFile: "score.9708" ;
+  Security loadMonthlyScoresAsOf: 9709 fromFile: "score.9709" ;
+</pre>
+or equivalently:
+<pre>
+  !start <- 8801 asDate;
+  !end <- 9709 asDate;
+  !date <- start;
 
-   [ date <= end ]
-   whileTrue:
-     [ !file <- "score." concat: (date asInteger drop: 2 . take: 4);
-       Security loadMonthlyScoresAsOf: date fromFile: file ;
-      :date <- date + 1 monthEnds;
-     ];
-</b></tt></pre>
+  [ date <= end ]
+  whileTrue:
+    [ !file <- "score." concat: (date asInteger drop: 2 . take: 4);
+      Security loadMonthlyScoresAsOf: date fromFile: file ;
+     :date <- date + 1 monthEnds;
+    ];
+</pre>
 Depending on the available memory resources at the time of execution, the serial load
 of the files might not complete and will use up a large amount of swap if executed in a
 single Vision query as shown above.
@@ -654,32 +685,23 @@ or by pressing the <b>F2</b> key.  Although both load styles above are serial, u
 this technique should not be used for processing multiple file loads.
 <p>
 The most optimized multiple file load forces query execution after each file is processed; there
-is no overhead in processing time: <b><tt><pre>
-   Security loadMonthlyScoresAsOf: 8712 fromFile: "score.8712" ;
-   ?g
-   Security loadMonthlyScoresAsOf: 8801 fromFile: "score.8801" ;
-   ?g
-    .
-    .
-   Security loadMonthlyScoresAsOf: 9708 fromFile: "score.9708" ;
-   ?g
-   Security loadMonthlyScoresAsOf: 9709 fromFile: "score.9709" ;
-   ?g
-</b></tt></pre>
+is no overhead in processing time:
+<pre>
+  Security loadMonthlyScoresAsOf: 8712 fromFile: "score.8712" ;
+  ?g
+  Security loadMonthlyScoresAsOf: 8801 fromFile: "score.8801" ;
+  ?g
+   .
+   .
+  Security loadMonthlyScoresAsOf: 9708 fromFile: "score.9708" ;
+  ?g
+  Security loadMonthlyScoresAsOf: 9709 fromFile: "score.9709" ;
+  ?g
+</pre>
 <p>
 A further optimization would be to reverse the load order, i.e. start with the largest file
 (dated 9707). However, the amount of additional savings in swap is not of the same order
 of magnitude; therefore, this step can be omitted if data loads cannot be processed in
 any random order.
 
-<p>
-<hr>
-
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated February 19, 1998</font>
-</table>
-
-</body>
-</html>
+{% include doc-footer.htm copydates="1998" %}

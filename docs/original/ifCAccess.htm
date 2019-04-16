@@ -1,70 +1,12 @@
-<!DOCTYPE html>
-<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
-<html>
-<head>
-   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="GENERATOR" content="Mozilla/4.7 [en] (WinNT; U) [Netscape]">
-   <title>Sample C++ Access to Vision</title>
-</head>
-<body bgcolor="#FFFFFF">
+---
+title: Sample C++ Access to Vision
+---
 
-<h2>
-Sample C++ Access to Vision</h2>
-| <a href="FHome.htm">Home</a> | <a href="vifaces.htm">Interfaces</a> |
-<a href="ifDownload.htm#ifCAccess">Download
-Scripts</a> |
-<hr>
-<h3>
-Topics Covered:</h3>
-
-<ul type=square>
-<li>
-<a href="#Introduction">Introduction</a></li>
-
-<li>
-<a href="#Operation">Operation</a></li>
-
-<li>
-<a href="#Compilation">Compilation</a></li>
-
-<li>
-<a href="#Reference">Reference</a></li>
-
-<li>
-<a href="#VArrayBase">class VArrayBase</a></li>
-
-<li>
-<a href="#VArray">class VArray</a></li>
-
-<li>
-<a href="#VConnection">class VConnection</a></li>
-
-<li>
-<a href="#VConnectionUse">class VConnectionUse</a></li>
-
-<li>
-<a href="#VDatum">class VDatum</a></li>
-
-<li>
-<a href="#VExtractWS">class VExtractWS</a></li>
-
-<li>
-<a href="#VSockets">class VSockets</a></li>
-
-<li>
-<a href="#VStringBase">class VStringBase</a></li>
-
-<li>
-<a href="#VString">class VString</a></li>
-</ul>
-
-<hr><a NAME="Introduction"></a>
-<h3>
-Introduction</h3>
+<h2 id="Introduction">Introduction</h2>
 The Vision C++ interface kit consists of a set of C++ classes that you
 use to provide structured access to Vision data. The classes in this kit
 provide you with array and character based access to Vision.
-<p>The Vision C++ interface kit is supplied in <a href="ifDownload.htm#ifCAccess">source
+<p>The Vision C++ interface kit is supplied in source
 code form.</a> You are encouraged to modify that source code to suit your
 needs. The kit has been tested using default compilation options under
 the following combinations of operating systems and compilers:
@@ -103,9 +45,7 @@ the following combinations of operating systems and compilers:
 
 <p>The functionality of the Vision C++ interface kit is also available in COM form
 using the <a href="ifVAccess.htm">VAccess COM objects</a>.
-<br><a NAME="Operation"></a>
-<h3>
-Operation</h3>
+<h2 id="Operation">Operation</h2>
 The Vision C++ interface kit provides array and character oriented, socket
 based access to Vision. When you use the kit, you primarily work with instances
 of the six classes summarized in the following table:
@@ -186,11 +126,11 @@ of this document supply the names of those files. Every file that includes
 one of those class definition files should include <i>VStdLib.h</i> before
 it includes any of the interface kit's class definition files. The example
 illustrated in this section needs the following files:
-<b><pre>&nbsp;&nbsp;&nbsp; #include "VStdLib.h"
+<pre>&nbsp;&nbsp;&nbsp; #include "VStdLib.h"
 
 &nbsp;&nbsp;&nbsp; #include "VSockets.h"
 &nbsp;&nbsp;&nbsp; #include "VConnection.h"
-&nbsp;&nbsp;&nbsp; #include "VExtractWS.h"</pre></b>
+&nbsp;&nbsp;&nbsp; #include "VExtractWS.h"</pre>
 Note that because <i>VStdLib.h</i> already includes a number of standard
 C++ header files, you may not need to include them again yourself, although
 there is generally no harm done if you do.
@@ -202,7 +142,7 @@ uses the Vision C++ interface kit needs to create a single instance of
 class <i>VSockets</i> when it starts. The first few lines of this main
 program create that instance and test to make certain that it was properly
 initialized:
-<b><pre>&nbsp;&nbsp;&nbsp; int main (int argc, char* argv[])
+<pre>&nbsp;&nbsp;&nbsp; int main (int argc, char* argv[])
 &nbsp;&nbsp;&nbsp; {
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VSockets SocketSubsystem (VTrue);
 
@@ -214,7 +154,7 @@ initialized:
 
 &nbsp;&nbsp;&nbsp; //&nbsp; Do something useful here...
 
-&nbsp;&nbsp;&nbsp; }</pre></b>
+&nbsp;&nbsp;&nbsp; }</pre>
 The <i>VSockets</i> class encapsulates the operating system dependencies
 associated with using sockets. One of those dependencies is the need to
 make an explicit initialization call when using the Windows based implementation
@@ -231,14 +171,14 @@ servers. Most applications, including the one illustrated here, only need
 one connection to do their work, but you can create as many connections
 as you need. The following statement creates a
 <i>VConnection</i> object:
-<b><pre>&nbsp;&nbsp;&nbsp; VConnection myConnection (SocketSubsystem);</pre></b>
+<pre>&nbsp;&nbsp;&nbsp; VConnection myConnection (SocketSubsystem);</pre>
 Creating a <i>VConnection</i> object does not actually connect you to a
 Vision session. To do that, you need to call either the <b>rexec</b> or
 <b>connect</b><i>VConnection</i>
 member function.
 <p>The <b>rexec</b> member function uses the remote execution daemon to
 start a private Vision session for your use:
-<b><pre>&nbsp;&nbsp;&nbsp; char iMessageBuffer[256];
+<pre>&nbsp;&nbsp;&nbsp; char iMessageBuffer[256];
 &nbsp;&nbsp;&nbsp; if (!myConnection.rexec (
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iMessageBuffer, sizeof (iMessageBuffer),
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Host&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (argc, argv),
@@ -254,7 +194,7 @@ start a private Vision session for your use:
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iMessageBuffer
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; );
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return -1;
-&nbsp;&nbsp;&nbsp; }</pre></b>
+&nbsp;&nbsp;&nbsp; }</pre>
 This function accepts six arguments, the first two of which supply a buffer
 which will be filled with an error message if your session could not be
 started. The next three arguments specify the host, user name, and password
@@ -270,11 +210,11 @@ value. If it fails it returns 0 and places a string in the message buffer
 you supplied indicating the reason for its failure.
 <p>The <b>connect</b> member function is the other way to establish a connection
 to a Vision session:
-<b><pre>&nbsp;&nbsp;&nbsp; if (!myConnection.connect (Host (argc, argv), 8001))
+<pre>&nbsp;&nbsp;&nbsp; if (!myConnection.connect (Host (argc, argv), 8001))
 &nbsp;&nbsp;&nbsp; {
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; fprintf (stderr, "Connection Attempt Failed!!\n");
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return -1;
-&nbsp;&nbsp;&nbsp; }</pre></b>
+&nbsp;&nbsp;&nbsp; }</pre>
 This function accepts two arguments -- the name of a host and the number
 of a port. It expects to find a Vision server listening for connections
 at the specified port on the specified host. In the case illustrated here,
@@ -291,14 +231,14 @@ session based on the argument values you supply.
 you can use it to run Vision expressions and retrieve data from Vision.
 The 'submit' VConnection member function allows you to run an arbitrary
 Vision expression and collect the output it generates. For example:
-<b><pre>&nbsp;&nbsp;&nbsp; VString iBalanceSheet;
+<pre>&nbsp;&nbsp;&nbsp; VString iBalanceSheet;
 &nbsp;&nbsp;&nbsp; if (myConnection.submit (
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iBalanceSheet,
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Named Company IBM balanceSheet"
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )
 &nbsp;&nbsp;&nbsp; ) printf (
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Balance Sheet:\n%s\n", (char const*)iBalanceSheet
-&nbsp;&nbsp;&nbsp; );</pre></b>
+&nbsp;&nbsp;&nbsp; );</pre>
 requests a balance sheet from Vision and writes it to standard output.
 <p>The <b>submit</b> member function expects two required arguments --
 an instance of a <i>VString</i> object which will receive the output generated
@@ -323,7 +263,7 @@ and the default currency to which to convert monetary values when processing
 that request. Both arguments are specified as strings and can be null (i.e.,
 (char const*)0) to select your system's default value for the parameter.
 For example:
-<b><pre>&nbsp;&nbsp;&nbsp; VString iBalanceSheet;
+<pre>&nbsp;&nbsp;&nbsp; VString iBalanceSheet;
 &nbsp;&nbsp;&nbsp; if (myConnection.submit (
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iBalanceSheet,
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Named Company IBM balanceSheet",
@@ -332,9 +272,9 @@ For example:
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )
 &nbsp;&nbsp;&nbsp; ) printf (
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Balance Sheet:\n%s\n", (char const*)iBalanceSheet
-&nbsp;&nbsp;&nbsp; );</pre></b>
+&nbsp;&nbsp;&nbsp; );</pre>
 requests IBM's balance sheet reported in Swiss Francs while:
-<b><pre>&nbsp;&nbsp;&nbsp; VString iBalanceSheet;
+<pre>&nbsp;&nbsp;&nbsp; VString iBalanceSheet;
 &nbsp;&nbsp;&nbsp; if (myConnection.submit (
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iBalanceSheet,
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Named Company IBM balanceSheet",
@@ -342,9 +282,9 @@ requests IBM's balance sheet reported in Swiss Francs while:
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )
 &nbsp;&nbsp;&nbsp; ) printf (
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Balance Sheet:\n%s\n", (char const*)iBalanceSheet
-&nbsp;&nbsp;&nbsp; );</pre></b>
+&nbsp;&nbsp;&nbsp; );</pre>
 requests IBM's balance sheet as of 1993, and:
-<b><pre>&nbsp;&nbsp;&nbsp; VString iBalanceSheet;
+<pre>&nbsp;&nbsp;&nbsp; VString iBalanceSheet;
 &nbsp;&nbsp;&nbsp; if (myConnection.submit (
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iBalanceSheet,
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Named Company IBM balanceSheet",
@@ -353,7 +293,7 @@ requests IBM's balance sheet as of 1993, and:
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )
 &nbsp;&nbsp;&nbsp; ) printf (
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Balance Sheet:\n%s\n", (char const*)iBalanceSheet
-&nbsp;&nbsp;&nbsp; );</pre></b>
+&nbsp;&nbsp;&nbsp; );</pre>
 requests IBM's balance sheet as of 1993 reported in Swiss Francs.
 <p>The fifth and sixth arguments to <b>submit</b> specify, respectively,
 how much buffer space to initially allocate for the reply to your request
@@ -379,10 +319,10 @@ the file and zero if they could not.
 <p>Finally, the <i>VConnection</i> class provides the <b>getValue</b> member
 functions. These member functions access the value of an item for an entity
 in your Vision data base. For example:
-<b><pre>&nbsp;&nbsp;&nbsp; double iReal;
+<pre>&nbsp;&nbsp;&nbsp; double iReal;
 &nbsp;&nbsp;&nbsp; if (myConnection.getValue (iReal, "Company", "IBM", "sales"))
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Display (iReal);
-&nbsp;&nbsp;&nbsp; else printf ("Could not get IBM's sales!\n");</pre></b>
+&nbsp;&nbsp;&nbsp; else printf ("Could not get IBM's sales!\n");</pre>
 returns the value of IBM's sales as of the current date, expressed in the
 default currency for your data base. The <b>getValue</b> function is overloaded
 based on the C++ data type you want returned. The overload used here returns
@@ -395,23 +335,23 @@ member you called.
 <p>The <b>getValue</b> member functions also accept two optional arguments
 that specify the date and currency to use when retrieving the item. For
 example:
-<b><pre>&nbsp;&nbsp;&nbsp; if (myConnection.getValue (
+<pre>&nbsp;&nbsp;&nbsp; if (myConnection.getValue (
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iReal, "Company", "IBM", "sales", "93"
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )
 &nbsp;&nbsp;&nbsp; ) Display (iReal);
-&nbsp;&nbsp;&nbsp; else printf ("Could not get IBM's sales!\n");</pre></b>
+&nbsp;&nbsp;&nbsp; else printf ("Could not get IBM's sales!\n");</pre>
 accesses IBM's sales as of 1993 while:
-<b><pre>&nbsp;&nbsp;&nbsp; if (myConnection.getValue (
+<pre>&nbsp;&nbsp;&nbsp; if (myConnection.getValue (
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iReal, "Company", "IBM", "sales", 0, "CHF"
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )
 &nbsp;&nbsp;&nbsp; ) Display (iReal);
-&nbsp;&nbsp;&nbsp; else printf ("Could not get IBM's sales!\n");</pre></b>
+&nbsp;&nbsp;&nbsp; else printf ("Could not get IBM's sales!\n");</pre>
 accesses IBM's most recent sales expressed in Swiss Francs and:
-<b><pre>&nbsp;&nbsp;&nbsp; if (myConnection.getValue (
+<pre>&nbsp;&nbsp;&nbsp; if (myConnection.getValue (
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iReal, "Company", "IBM", "sales", "93", "CHF"
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )
 &nbsp;&nbsp;&nbsp; ) Display (iReal);
-&nbsp;&nbsp;&nbsp; else printf ("Could not get IBM's sales!\n");</pre></b>
+&nbsp;&nbsp;&nbsp; else printf ("Could not get IBM's sales!\n");</pre>
 accesses IBM's sales as of 1993 expressed in Swiss Francs.
 <p>The <i>VConnection</i> class provides a relatively unstructured interface
 to
@@ -421,7 +361,7 @@ you with access to the <b>Interface ExtractWS</b> Vision ToolKit for retrieving
 array structured data from Vision. The following Vision C++ interface kit
 code creates a VExtractWS object initialized to request a 4 row by 3 column
 entity by item array of data:
-<b><pre>&nbsp;&nbsp;&nbsp; VExtractWS iExtractWS1 (&amp;myConnection);
+<pre>&nbsp;&nbsp;&nbsp; VExtractWS iExtractWS1 (&amp;myConnection);
 &nbsp;&nbsp;&nbsp; iExtractWS1
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setOrientationToEI ()
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setDelimiterTo ("##")
@@ -433,17 +373,17 @@ entity by item array of data:
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addItem ("name"&nbsp;&nbsp;&nbsp; , VDatumKind_String)
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addItem ("price"&nbsp;&nbsp; , VDatumKind_Real)
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addItem ("price@95", VDatumKind_Real)
-&nbsp;&nbsp;&nbsp; ;</pre></b>
+&nbsp;&nbsp;&nbsp; ;</pre>
 The preceeding code fragment specifies the data you want to retrieve; the
 following interface kit code actually gets it:
-<b><pre>&nbsp;&nbsp;&nbsp; VDatumArray iDatumArray1;
+<pre>&nbsp;&nbsp;&nbsp; VDatumArray iDatumArray1;
 
 &nbsp;&nbsp;&nbsp; if (iExtractWS1.run (iDatumArray1))
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DisplayArray (iDatumArray1);</pre></b>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DisplayArray (iDatumArray1);</pre>
 The <b>DisplayArray</b> function is not part of the interface kit -- it
 is an example of a routine you would write to do something with the data
 you retrieved. It might look like this:
-<b><pre>&nbsp;&nbsp;&nbsp; void DisplayArray (VDatumArray const&amp; myDataArray)
+<pre>&nbsp;&nbsp;&nbsp; void DisplayArray (VDatumArray const&amp; myDataArray)
 &nbsp;&nbsp;&nbsp; {
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; size_t rowCount = myDataArray.elementCount(0);
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; size_t colCount = myDataArray.elementCount(1);
@@ -486,7 +426,7 @@ you retrieved. It might look like this:
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
-&nbsp;&nbsp;&nbsp; }</pre></b>
+&nbsp;&nbsp;&nbsp; }</pre>
 The <b>run</b> member function returns a non-zero value when it succeeds
 and zero when it fails. When the call illustrated above succeeds, iDatumArray1
 contains four rows -- one for each Security -- and three columns -- one
@@ -508,22 +448,22 @@ value.
 and re-run it. The following example adds an entity and an item to the
 extract workspace object created above, changes its orientation to item
 by entity, and re-runs it.
-<b><pre>&nbsp;&nbsp;&nbsp; iExtractWS1
+<pre>&nbsp;&nbsp;&nbsp; iExtractWS1
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setOrientationToIE ()
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addEntity ("ACD")
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addItem ("company compustat sales")
 &nbsp;&nbsp;&nbsp; ;
 &nbsp;&nbsp;&nbsp; if (iExtractWS1.run (iDatumArray1))
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DisplayArray (iDatumArray1);
-&nbsp;&nbsp;&nbsp; printf ("\n");</pre></b>
+&nbsp;&nbsp;&nbsp; printf ("\n");</pre>
 When you re-use an extract workspace object, only your changes are transmitted
 to Vision. You can request that all of the current settings in the workspace
 be re-transmitted when you re-run the workspace. You do that by passing
 a non-zero value as the value of the <b>run</b> member function's first
 optional parameter:
-<b><pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (iExtractWS1.run (iDatumArray1, VTrue))
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (iExtractWS1.run (iDatumArray1, VTrue))
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DisplayArray (iDatumArray1);
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf ("\n");</pre></b>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf ("\n");</pre>
 You can create as many <i>VExtractWS</i> and <i>VDatumArray</i> objects
 as your application needs. Each VExtractWS corresponds to a distinct ExtractWS
 object in your Vision session that does not interfere with any other workspace
@@ -531,7 +471,7 @@ object. When you destroy one of your <i>VExtractWS</i> objects, the correspondin
 remote object is also destroyed.
 <p>The following code creates and initializes a second workspace and uses
 it to fill a second data array:
-<b><pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VExtractWS iExtractWS2 (&amp;myConnection);
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VExtractWS iExtractWS2 (&amp;myConnection);
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iExtractWS2
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setOrientationToET ()
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setColumnLabelsOn ()
@@ -557,12 +497,12 @@ it to fill a second data array:
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VDatumArray iDatumArray2;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (iExtractWS2.run (iDatumArray2))
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DisplayArray (iDatumArray2);
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf ("\n");</pre></b>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf ("\n");</pre>
 Note that this example also illustrates one of two alternate methods for
 specifying an entity list. In this case, the entity list is specified as
 a comma separated list of values. You can also use Vision's Interface ExtractWS
 ability to generate the list dynamically as the following example illustrates:
-<b><pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VExtractWS iExtractWS3 (&amp;myConnection);
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VExtractWS iExtractWS3 (&amp;myConnection);
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iExtractWS3
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setOrientationToEI ()
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setColumnLabelsOn ()
@@ -580,13 +520,9 @@ ability to generate the list dynamically as the following example illustrates:
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (iExtractWS3.run (iDatumArray3))
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DisplayArray (iDatumArray3);
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf ("\n");</pre></b>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf ("\n");</pre>
 
-<pre>
-<hr WIDTH="100%"><a NAME="Compilation"></a></pre>
-
-<h3>
-Compilation</h3>
+<h2 id="Compilation">Compilation</h2>
 The Vision C++ interface kit is supplied in source code form. In general,
 you should add these files to the project or makefile you are using to
 develop your application, compile the '.c' versions of these files with
@@ -651,25 +587,18 @@ the socket calls made by the classes included in the interface kit.
 </table></center>
 
 <p>
-<hr WIDTH="100%">
-<br><a NAME="Reference"></a>
-<h3>
-Reference</h3>
+<h2 id="Reference">Reference</h2>
 
-<a NAME="VArrayBase"></a>
-<h4>
-class VArrayBase</h4>
+<h3 id="VArrayBase">class VArrayBase</h4>
 
-<h4>
-Synopsis</h4>
+<h4>Synopsis</h4>
 <b>Superclasses:</b>
 <br>&lt;none>
 <p><b>Subclasses:</b>
 <br>VArray&lt;T&gt;
 <p><b>Definition:</b>
 <br>#include "VArray.h"
-<h4>
-Overview</h4>
+<h4>Overview</h4>
 The <i>VArrayBase</i> class provides an abstract class foundation for multi-dimensional
 arrays of arbitrary size and shape.
 <p>This class is a pure abstract class that cannot be instantiated directly.
@@ -680,13 +609,14 @@ deal with setting and querying the size and shape of an array.
 or as a vector which linearizes the array in "row-major" order. The member
 functions defined in this class help you to construct and decode a linearized
 view of an array.
-<h4>
-Operations</h4>
+<h4>Operations</h4>
 
-<b><h5>Category:</h5><pre>
+<b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Counts and Sizes
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; size_t dimensionCount () const;
 
 &nbsp;&nbsp;&nbsp;&nbsp; size_t elementCount (unsigned int xDimension) const;
@@ -704,16 +634,18 @@ member functions return the total number of elements at or below a dimension.
 Without an argument or with an argument value of 0, the arraySize member
 function returns the total number of elements in the array. The following
 table summarizes the values returned for a 4 x 3 x 7 array:
-<b><pre>&nbsp;&nbsp;&nbsp; xDim&nbsp;&nbsp; elementCount(xDim)&nbsp;&nbsp; elementSize(xDim)&nbsp;&nbsp; arraySize(xDim)
+<pre>&nbsp;&nbsp;&nbsp; xDim&nbsp;&nbsp; elementCount(xDim)&nbsp;&nbsp; elementSize(xDim)&nbsp;&nbsp; arraySize(xDim)
 &nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 21&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 84
 &nbsp;&nbsp;&nbsp;&nbsp; 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 21
-&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 7</pre></b>
+&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 7</pre>
 You are most likely to use <b>dimensionCount()</b>, <b>elementCount(xDim)</b>,
 and <b>arraySize ()</b> in your applications.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Element Offset
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; unsigned int elementOffset (
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; unsigned int xSubscript0, ...
 &nbsp;&nbsp;&nbsp;&nbsp; ) const;
@@ -733,10 +665,12 @@ mechanisms -- variable length argument lists, &lt;stdarg.h> argument pointers,
 and subscript arrays. In all cases, it is your responsibility to pass as
 many subscripts as there are dimensions in your array or your application
 will fail and almost certainly crash.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Array Resizing
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; void reshape (VArrayBase const&amp; iOtherArray);
 
 &nbsp;&nbsp;&nbsp;&nbsp; void reshape (size_t sDimensionVector, ...);
@@ -798,10 +732,12 @@ the Vision C++ interface kit -- <i>VDatumArray</i> and <i>VStringArray</i>.
 <h4>
 Operations</h4>
 
-<b><h5>Category:</h5><pre>
+<b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Construction/Destruction
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; VArray (VArray&lt;T&gt; const&amp; iOther);
 &nbsp;&nbsp;&nbsp;&nbsp; VArray (size_t sDimensionVector = 1);
 
@@ -812,10 +748,12 @@ Operations</h4>
 constructors are provided -- a copy constructor and an empty array constructor.
 The empty array constructor also functions as a default constructor which
 creates an empty, one-dimensional array (i.e., a vector).
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Comparison
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; int operator== (VArray&lt;T&gt; const &amp;iOther) const;
 &nbsp;&nbsp;&nbsp;&nbsp; int operator!= (VArray&lt;T&gt; const &amp;iOther) const;
 
@@ -824,10 +762,12 @@ creates an empty, one-dimensional array (i.e., a vector).
 == if their shapes are the same (they have the same number of dimensions
 with the same number of elements in each dimension) and all of their elements
 are ==.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Element Access
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; E&amp; element (unsigned int xSubscript0, ...) const;
 &nbsp;&nbsp;&nbsp;&nbsp; E&amp; element (unsigned int const* pSubscriptVector) const;
 
@@ -842,19 +782,21 @@ subscript value for each dimension in the array -- either in the form of
 an explicit parameter list or an array of subscripts. When using the []
 operator, you are expected to supply a value between 0 and the total number
 of elements in the array - 1. All of the following forms are equivalent:
-<b><pre>&nbsp;&nbsp;&nbsp; myArray.element (0, 1);
+<pre>&nbsp;&nbsp;&nbsp; myArray.element (0, 1);
 
 &nbsp;&nbsp;&nbsp; myArray[elementOffset (0, 1)];
 
 &nbsp;&nbsp;&nbsp; unsigned int mySubscripts[2];
 &nbsp;&nbsp;&nbsp; mySubscripts[0] = 0;
 &nbsp;&nbsp;&nbsp; mySubscripts[1] = 1;
-&nbsp;&nbsp;&nbsp; myArray.element (mySubscripts);</pre></b>
+&nbsp;&nbsp;&nbsp; myArray.element (mySubscripts);</pre>
 All three member functions return a reference to the selected element.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Update
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; VArray&lt;T&gt;&amp; operator= (VArray&lt;T&gt; const&amp; iOther);
 
 &nbsp;&nbsp;&nbsp;&nbsp; VArray&lt;T&gt; operator&lt;&lt; (E const&amp; iElement);
@@ -908,10 +850,12 @@ are described below and illustrated in the usage section of this document.
 <h4>
 Operations</h4>
 
-<b><h5>Category:</h5><pre>
+<b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Construction/Destruction
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; VConnection (VSockets&amp; iSocketManager);
 
 &nbsp;&nbsp;&nbsp;&nbsp; virtual ~VConnection ();
@@ -923,10 +867,12 @@ dependencies of the socket library. That <i>VSockets</i> object must be
 passed to the <i>VConnection</i> constructor and must not be destroyed
 so long as any <i>VConnection</i> object can use it. The usage section
 of this document describes one technique for satisfying this requirement.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Remote Execution
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; int rexec (
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; char *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pErrorMessageBuffer,
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; size_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; sErrorMessageBuffer,
@@ -946,20 +892,24 @@ of the start-up error, if one is available, in the error message buffer.
 remote execution protocol. In particular, they return error messages using
 a separate channel and can be interrupted using the signal member function
 described below.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Connection
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; int connect (char const *pHostName, u_short xHostPort);
 
 </pre><h5>Remarks:</h5></b>
 <br>The <b>connect</b> member function establishes a connection to an existing
 Vision server listening on a known port which you or your Vision administrator
 selected when you created the service.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Disconnection
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; void disconnect ();
 
 </pre><h5>Remarks:</h5></b>
@@ -967,10 +917,12 @@ selected when you created the service.
 to which this <i>VConnection</i> object is currently connected. This member
 function is called by the <b>rexec</b> and <b>connect</b> member functions
 and the destructor for this class.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Request Execution
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; int submit (
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VString&amp;&nbsp;&nbsp;&nbsp; iReply,
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; char const* pRequest,
@@ -1030,10 +982,12 @@ member function allows you to inspect the output generated by your <i>include</i
 file while the one parameter form quietly discards that output. Both forms
 return a non-zero value if they were able to submit the include request
 to Vision and zero if they could not.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Value Retrieval
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp; int getValue (
 &nbsp;&nbsp;&nbsp;&nbsp; VDatum&amp;&nbsp;&nbsp;&nbsp;&nbsp; iResult,
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; char const* pEntityType,
@@ -1088,10 +1042,12 @@ for that argument.
 to submit your request to Vision and convert the value obtained to the
 return type associated with the overloaded member you invoked. They all
 return zero if they could not do both of these things.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Errors and Signals
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; int signal (char xSignal = 2);
 
 </pre><h5>Remarks:</h5></b>
@@ -1107,10 +1063,12 @@ the <b>connect</b> member function.
 member functions operate synchronously (i.e., they do not return until
 they have received a reply from Vision), you must create a separate thread
 to call this member function from your program.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Query
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; int isConnected () const;
 &nbsp;&nbsp;&nbsp;&nbsp; int isntConnected () const;
 
@@ -1155,20 +1113,24 @@ expressions to Vision for execution.
 <h4>
 Operations</h4>
 
-<b><h5>Category:</h5><pre>
+<b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Predicates
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; int isConnected () const;
 &nbsp;&nbsp;&nbsp;&nbsp; int isntConnected () const;
 
 </pre><h5>Remarks:</h5></b>
 <br>These member functions determine if the object is (is not) currently
 connected to a Vision session.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Request Execution
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; int submit (
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VString&amp;&nbsp;&nbsp;&nbsp; iReply,
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; char const* pRequest,
@@ -1218,7 +1180,7 @@ they retrieve from Vision in a <i>VDatumArray</i> (i.e., <i>VArray&lt;VDatum></i
 <h4>
 Supporting Types</h4>
 
-<b><pre>enum VDatumKind {
+<pre>enum VDatumKind {
 &nbsp;&nbsp;&nbsp; VDatumKind_NA,
 &nbsp;&nbsp;&nbsp; VDatumKind_Integer,
 &nbsp;&nbsp;&nbsp; VDatumKind_Real,
@@ -1230,7 +1192,8 @@ Operations
 Category:
 &nbsp;&nbsp;&nbsp;&nbsp; Construction/Destruction
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; VDatum (char const* pValue);
 &nbsp;&nbsp;&nbsp;&nbsp; VDatum (double iValue);
 &nbsp;&nbsp;&nbsp;&nbsp; VDatum (int iValue);
@@ -1243,10 +1206,12 @@ Category:
 supported for VDatum objects -- string, real, integer, and NA. When a VDatum
 object is constructed using the <i>VDatum</i> (char const *) constructor,
 the constructor makes a copy of the string data it is passed.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Access
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; VDatumKind kind () const;
 
 &nbsp;&nbsp;&nbsp;&nbsp; int isNA () const;
@@ -1284,10 +1249,12 @@ in this category are covers on the corresponding <b>as...</b> members that
 ignore the value returned in the <b>isValid</b> argument. They should be
 used only when you already know that the type of the <i>VDatum</i> object
 will allow them to succeed.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Comparison
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; int operator== (VDatum const &amp;iOther) const;
 &nbsp;&nbsp;&nbsp;&nbsp; int operator== (int iOther) const;
 &nbsp;&nbsp;&nbsp;&nbsp; int operator== (double iOther) const;
@@ -1303,10 +1270,12 @@ will allow them to succeed.
 other and to a set of standard C++ data types. Other than standard numeric
 conversions and those that you allow based on your own conversion operators,
 no conversions are automatically performed when making these comparisons.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Update
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; VDatum&amp; operator= (VDatum const&amp; iValue);
 &nbsp;&nbsp;&nbsp;&nbsp; VDatum&amp; operator= (char const* pValue);
 &nbsp;&nbsp;&nbsp;&nbsp; VDatum&amp; operator= (double iValue);
@@ -1366,7 +1335,7 @@ Synopsis</h4>
 <h4>
 Supporting Types</h4>
 
-<b><pre>enum VExtractOrientation {
+<pre>enum VExtractOrientation {
 &nbsp;&nbsp;&nbsp; VExtractOrientation_Unknown,
 &nbsp;&nbsp;&nbsp; VExtractOrientation_EI,
 &nbsp;&nbsp;&nbsp; VExtractOrientation_ET,
@@ -1374,7 +1343,7 @@ Supporting Types</h4>
 &nbsp;&nbsp;&nbsp; VExtractOrientation_IT,
 &nbsp;&nbsp;&nbsp; VExtractOrientation_TE,
 &nbsp;&nbsp;&nbsp; VExtractOrientation_TI
-};</pre></b>
+};</pre>
 
 <h4>
 Overview</h4>
@@ -1386,13 +1355,13 @@ specify the connection object it will use to talk to Vision. The following
 sample, which assumes that you have already created a VConnection object
 named
 <b>myConnection</b>, illustrates:
-<b><pre>&nbsp;&nbsp;&nbsp; VExtractWS&nbsp; myExtractWS (&amp;myConnection);</pre></b>
+<pre>&nbsp;&nbsp;&nbsp; VExtractWS&nbsp; myExtractWS (&amp;myConnection);</pre>
 Each <i>VExtractWS</i> object you create creates a corresponding <i>Interface
 ExtractWS</i> Vision object with which it interacts. To use a <i>VExtractWS</i>
 object, you use its <b>set...</b>, <b>add...</b>, and
 <b>clear...</b> operations
 to select the data you want. For example:
-<b><pre>&nbsp;&nbsp;&nbsp; myExtractWS
+<pre>&nbsp;&nbsp;&nbsp; myExtractWS
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setOrientationToEI ()
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setEntityTypeTo ("Security")
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addEntity ("GM")
@@ -1402,20 +1371,20 @@ to select the data you want. For example:
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addItem ("name"&nbsp;&nbsp;&nbsp; , VDatumKind_String)
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addItem ("price"&nbsp;&nbsp; , VDatumKind_Real)
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addItem ("price@95", VDatumKind_Real)
-&nbsp;&nbsp;&nbsp; ;</pre></b>
+&nbsp;&nbsp;&nbsp; ;</pre>
 With the extract workspace parameters set, you use the <b>run</b> operation
 to request your data. The following example creates an empty two dimensional
 array which it fills with the data specified by the extract workspace:
-<b><pre>&nbsp;&nbsp;&nbsp; VDatumArray myDataArray (2);
+<pre>&nbsp;&nbsp;&nbsp; VDatumArray myDataArray (2);
 &nbsp;&nbsp;&nbsp; if (!myExtractWS.run (myDataArray))
 &nbsp;&nbsp;&nbsp; {
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; reportError ("Run Failed\n");
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; exit (1);
-&nbsp;&nbsp;&nbsp; }</pre></b>
+&nbsp;&nbsp;&nbsp; }</pre>
 The <i>VDatumArray</i> is resized and reshaped as needed to hold the result
 of your query. The following code illustrates how you can display the data
 you retrieved:
-<b><pre>&nbsp;&nbsp;&nbsp; size_t rowCount = myDataArray.elementCount(0);
+<pre>&nbsp;&nbsp;&nbsp; size_t rowCount = myDataArray.elementCount(0);
 &nbsp;&nbsp;&nbsp; size_t colCount = myDataArray.elementCount(1);
 &nbsp;&nbsp;&nbsp; for (unsigned int row = 0; row &lt; rowCount; row++)
 &nbsp;&nbsp;&nbsp; {
@@ -1455,15 +1424,17 @@ you retrieved:
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; break;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
-&nbsp;&nbsp;&nbsp; }</pre></b>
+&nbsp;&nbsp;&nbsp; }</pre>
 
 <h4>
 Operations</h4>
 
-<b><h5>Category:</h5><pre>
+<b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Construction/Destruction
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; VExtractWS (VExtractWS const&amp; iOther);
 &nbsp;&nbsp;&nbsp;&nbsp; VExtractWS (VConnection* pConnection);
 
@@ -1481,20 +1452,24 @@ settings and connection data to the new workspace, the new workspace is
 given an opportunity to create a remote object for its own use. From an
 application perspective, you can use <i>VExtractWS's</i> copy constructor
 to generate new extract workspace objects from a prototype workspace.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Assignment
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; VExtractWS&amp; operator= (VExtractWS const&amp; iOther);
 
 </pre><h5>Remarks:</h5></b>
 <br>The assignment operator copies the settings from one extract workspace
 to another. The destination workspace remains attached to the same Vision
 connection and <i>Vision Interface ExtractWS</i> object as it had initially.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Parameter Setting
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; VExtractWS&amp; setCurrencyTo (char const *pName);
 
 &nbsp;&nbsp;&nbsp;&nbsp; VExtractWS&amp; setOrientationToEI ();
@@ -1581,10 +1556,12 @@ as an item's data type requests that its data be returned as a double or
 an NA. You can also turn off all conversion by specifying <b>VDatumKind_String</b>.
 In this case, the item's data is always returned as a string. By default,
 all row, column, and scalar label data is treated as string data.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Execution
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; int run (
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VDatumArray&amp; rDataArray, unsigned int fReset = VFalse
 &nbsp;&nbsp;&nbsp;&nbsp; );
@@ -1620,17 +1597,17 @@ associated with the use of sockets. Your application needs to create exactly
 one instance of this class when it starts. It must keep that instance alive
 and valid until it terminates. One way to do that is to create a local
 variable of type VSockets in your main program:
-<b><pre>&nbsp;&nbsp;&nbsp; int main (int argc, char* argv[])
+<pre>&nbsp;&nbsp;&nbsp; int main (int argc, char* argv[])
 &nbsp;&nbsp;&nbsp; {
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VSockets SocketSubsystem (VTrue);
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return 0;
-&nbsp;&nbsp;&nbsp; }</pre></b>
+&nbsp;&nbsp;&nbsp; }</pre>
 You can use your favorite technique. Because your single <i>VSockets</i>
 instance must be passed to the constructor for <i>VConnection</i> objects:
-<b><pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VConnection myConnection (SocketSubsystem);</pre></b>
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VConnection myConnection (SocketSubsystem);</pre>
 and must be kept alive as long as any <i>VConnection</i> object is alive,
 you must have access to it whenever you create an instance of class VConnection
 and you must insure that your <i>VSockets</i> object is not destroyed as
@@ -1649,10 +1626,12 @@ are intended for the use of the <i>VConnection</i> class.
 <h4>
 Operations</h4>
 
-<b><h5>Category:</h5><pre>
+<b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Construction/Destruction
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; VSockets (int fInitializationRequired);
 
 &nbsp;&nbsp;&nbsp;&nbsp; ~VSockets ();
@@ -1666,10 +1645,12 @@ makes the application initialization call, the <i>VSockets</i> destructor
 will also make whatever matching application termination calls are required.
 If you pass a zero to this constructor, you are responsible for making
 these calls yourself.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Predicates
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; int initialized ();
 
 </pre><h5>Remarks:</h5></b>
@@ -1680,10 +1661,11 @@ instance had responsibility for making the application initialization calls
 overview) AND those calls succeeded. If either or both of these conditions
 are true, this routine returns a non-zero value, otherwise, it returns
 zero.
-<b><pre>&nbsp;&nbsp; Category:
+<pre>&nbsp;&nbsp; Category:
 &nbsp;&nbsp;&nbsp;&nbsp; Remote Execution
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; int rexec (
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SOCKET&amp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xDataSocket,
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SOCKET&amp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xControlSocket,
@@ -1709,10 +1691,12 @@ execution daemon (rexecd) and are not repeated here. If the command cannot
 be run, usually because of a login or command string problem, this routine
 returns a description of the error in the error message buffer and returns
 zero. That description is usually obtained from the remote execution server.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Client Creation
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; SOCKET connect (
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; char const *pHostName, unsigned short xHostPort
 &nbsp;&nbsp;&nbsp;&nbsp; );
@@ -1725,10 +1709,12 @@ If this routine fails, it returns INVALID_SOCKET; if it succeeds, it returns
 a socket handle. The socket handle returned by this member function can
 be used to send and receive data subject to the rules defined by the contacted
 service.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Service Creation
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; SOCKET serve (u_short&amp; xPort, int sBacklog = 1);
 
 </pre><h5>Remarks:</h5></b>
@@ -1737,10 +1723,12 @@ at port <b>xPort</b>. If this routine succeeds it returns a handle for
 the listener socket; if it fails it returns INVALID_SOCKET. The socket
 handle returned by this member function can be passed to the <b>accept</b>
 function to accept new connections to this service.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Socket Query
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; int socketName (
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SOCKET xSocket, unsigned char iHost[4], unsigned short &amp;xPort
 &nbsp;&nbsp;&nbsp;&nbsp; ) const;
@@ -1753,10 +1741,12 @@ function to accept new connections to this service.
 host address and port of the local (socketName) and remote (peerName) end
 points of the socket whose handle is <b>xSocket</b>. These routines return
 a non-zero value when they succeed and zero when they fail.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Socket I/O
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; int send (SOCKET xSocket, char const *pData, size_t sData);
 &nbsp;&nbsp;&nbsp;&nbsp; int recv (SOCKET xSocket, char *pBuffer, size_t sBuffer);
 
@@ -1764,10 +1754,12 @@ a non-zero value when they succeed and zero when they fail.
 <br>These member functions send and receive data on a socket. They return
 the number of bytes actually transferred or the constant SOCKET_ERROR if
 they failed.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Socket Shutdown
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; int endReception&nbsp;&nbsp;&nbsp; (SOCKET xSocket);
 &nbsp;&nbsp;&nbsp;&nbsp; int endTransmission (SOCKET xSocket);
 
@@ -1819,19 +1811,23 @@ C or C++ string can be used.
 <h4>
 Operations</h4>
 
-<b><h5>Category:</h5><pre>
+<b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Globals
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; static char const* const WhiteSpace;
 
 </pre><h5>Remarks:</h5></b>
 <br>This constant character string contains the characters classified as
 white space by the Vision C++ interface kit routines that parse character
 strings.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Initialization
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; void initializeTo (VStringBase const&amp; iString);
 &nbsp;&nbsp;&nbsp;&nbsp; void initializeTo (char const* pString);
 &nbsp;&nbsp;&nbsp;&nbsp; void initializeTo (char const* pString, size_t sString);
@@ -1855,10 +1851,12 @@ must not be used to change the content of an initialized
 <i>VString</i>
 or <i>VStringBase</i> object. If that is your intent, use one of the <b>setTo</b>
 member functions or an assignment operator in a derived class.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Destruction
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; void destroy ();
 
 </pre><h5>Remarks:</h5></b>
@@ -1868,10 +1866,12 @@ or by a routine that behaves like a destructor (i.e., the
 <i>VDatum</i>
 routines that change the type of a string <i>VDatum</i> object to some
 other type or that destroy a <i>VDatum</i> object that contains a string).
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Buffer Sizing
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; int guarantee (size_t sBuffer);
 
 </pre><h5>Remarks:</h5></b>
@@ -1880,10 +1880,12 @@ used to hold the content of the <i>VStringBase</i> object is at least <b>sBuffer
 bytes in length. This routine can be called by your application to preallocate
 working space so that a series of updates to the same <i>VStringBase</i>
 derived object can run more efficiently.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Comparison
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; int operator&lt;&nbsp; (char const* pOther) const;
 &nbsp;&nbsp;&nbsp;&nbsp; int operator&lt;= (char const* pOther) const;
 &nbsp;&nbsp;&nbsp;&nbsp; int operator== (char const* pOther) const;
@@ -1896,10 +1898,12 @@ derived object can run more efficiently.
 object to another string. Because <i>VStringBase</i> objects are converted
 to type <b>char const*</b> if necessary, these routines are also used to
 compare <i>VStringBase</i> derived objects to each other.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Access
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; operator char const* () const;
 
 </pre><h5>Remarks:</h5></b>
@@ -1909,10 +1913,12 @@ in the <i>VStringBase</i> object. Because this pointer is shared with the
 object, it should be considered invalid as soon as the
 <i>VStringBase</i>
 object that supplied it is changed or destroyed.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Counts and Sizes
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; size_t strlen () const;
 
 </pre><h5>Remarks:</h5></b>
@@ -1921,10 +1927,12 @@ this <i>VStringBase</i> object. The value returned by this routine has
 the same interpretation as the value returned by the standard <b>strlen</b>
 function. The value returned from this routine is NOT the size of the internal
 string buffer.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Update
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; void clear ();
 
 &nbsp;&nbsp;&nbsp;&nbsp; void setTo (VStringBase const&amp; iString);
@@ -1999,10 +2007,12 @@ C++ class and that cannot be added to <i>VStringBase</i>.
 <h4>
 Operations</h4>
 
-<b><h5>Category:</h5><pre>
+<b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Construction/Destruction
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; VString (VString const&amp; iString)
 &nbsp;&nbsp;&nbsp;&nbsp; VString (char const* pString, size_t sString)
 &nbsp;&nbsp;&nbsp;&nbsp; VString (char const* pString)
@@ -2016,10 +2026,12 @@ Operations</h4>
 as well as two forms of C++ string based construction. As is the case for
 all <i>VStringBase</i> and <i>VString</i> routines, a private copy is made
 of the string data used to initialize a <i>VString</i> object.
-<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5><pre>
+<h5><hr WIDTH="50%"></h5><b><h5>Category:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; Assignment
 
-</pre><h5>Members:</h5><pre>
+</pre><h5>Members:</h5>
+<pre>
 &nbsp;&nbsp;&nbsp;&nbsp; VString&amp; operator= (VString const&amp; iString)
 &nbsp;&nbsp;&nbsp;&nbsp; VString&amp; operator= (char const* pString)
 &nbsp;&nbsp;&nbsp;&nbsp; VString&amp; operator= (double iValue)
@@ -2029,13 +2041,5 @@ of the string data used to initialize a <i>VString</i> object.
 </pre><h5>Remarks:</h5></b>
 <br>These member functions provide a number of <i>VString</i> assignment
 operators including assignment operators that convert numbers to strings.&nbsp;
-<hr>
-<table BORDER=0 WIDTH="100%" >
-<tr>
-<td align=left><font size=-1>Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated December 15, 2000</font>
-</tr>
-</table>
 
-</body>
-</html>
+{% include doc-footer.htm copydates="2000" %}

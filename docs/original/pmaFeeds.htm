@@ -1,32 +1,11 @@
-<!DOCTYPE html>
-<HTML><HEAD><TITLE>Vision Portfolio Management Application Feeds</TITLE>
-<META content="text/html; charset=windows-1252" http-equiv=Content-Type>
-<META content="MSHTML 5.00.3103.1000" name=GENERATOR></HEAD>
-<BODY bgColor=white>
-<H2>Vision Portfolio Management Application Feeds</H2>
-<P>| <A href="vpma.htm">Application 
-Overview</A> | <A 
-href="pmaAnalyst.htm">Analyst Tools</A> | <A 
-href="pmaDBA.htm">Database Administration</A> 
-| <A href="pmaXRef.htm">Application Cross 
-Reference</A> | <A href="clDataFeed.htm">The 
-Data Feed Class</A> | 
-<HR>
+---
+title: "Vision Portfolio Management Application Feeds"
 
-<H3>Topics Covered:</H3>
-<UL type=square>
-  <LI><A href="pmaFeeds.htm#overview">Overview</A> 
-  <LI><A href="pmaFeeds.htm#formats">DataFeed Formats</A> 
-  <LI><A href="pmaFeeds.htm#predefined">Pre-defined Feed Summary</A> 
-  <LI><A href="pmaFeeds.htm#starter">Starter Feeds</A> 
-  <LI><A href="pmaFeeds.htm#rejects">Reject Files</A> 
-  <LI><A href="pmaFeeds.htm#excel">Temporary Changes via Excel</A> 
-  <LI><A href="pmaFeeds.htm#vadmin">Permanent Changes via VAdmin</A> 
-  <LI><A href="pmaFeeds.htm#config">Configuration Files</A> </LI></UL>
-<P>
-<HR>
+sidebar:
+  nav: "sb_InvestmentManagers"
+---
 
-<H3><A name=overview>Overview</A></H3>
+<h2 id="overview">Overview</h2>
 <P>A standardized interface for loading security, portfolio, and related 
 investment data into Vision is provided as part of the <B>Portfolio Management 
 Application Layer</B>. <B>DataFeed</B> classes have been defined to translate 
@@ -37,7 +16,7 @@ relational database.
 <P>
 <HR>
 
-<H3><A name=formats>DataFeed Formats</A></H3>
+<h2 id="formats">DataFeed Formats</h2>
 <P>A separate <B>DataFeed</B> is defined for each format of external data you 
 wish to load into your Vision database. A data feed consists of one or more 
 records that are separated by carriage-return/line-feed. Each record contains 
@@ -109,7 +88,7 @@ different ways to map external data into Vision. These include:
 <P>
 <HR>
 
-<H3><A name=predefined>Pre-defined Feed Summary</A></H3>
+<h2 id="predefined">Pre-defined Feed Summary</h2>
 <P>A number of data feeds have been pre-defined to support the Portfolio 
 Management Application. These feeds are summarized below and are described in 
 detail in individual fact sheets. 
@@ -298,7 +277,7 @@ properties.
 <P>
 <HR>
 
-<H3><A name=starter>Starter Feeds</A></H3>
+<h2 id="starter">Starter Feeds</h2>
 <P>To successfully use the supplied <A 
 href="pmaApps.htm"><I>Headstart 
 Applications</I></A>, your initial feeds should include security, portfolio, and 
@@ -311,7 +290,7 @@ to use most of the starter portfolio reports without modification.
 <HR>
 
 
-<H3><A name=rejects>Reject Files</A> </H3>
+<h2 id="rejects">Reject Files</h2>
 <p>
 A reject file is generated when a data feed record is not processed for any reason. The reject file is created in the working directory with the same file name as the data feed appended by <i>.rejects</i>.     
 The first line of this file is the field order list used to process the feed followed by the records that were not processed by the feed.  Comments at the end of the record indicate a rejection reason where possible.
@@ -319,7 +298,7 @@ Once the reject reason has been resolved the reject file can be used as the data
 The <a href="#config">configuration file</a> option <i>rejectFileName</i> can be used to customize the location and name of the reject file.
 <p>
 <hr>
-<H3><A name=excel>Temporary Changes via Excel</A></H3>
+<h2 id="excel">Temporary Changes via Excel</h2>
 <P>Vision data feeds provide a potent means for an analyst that wants to use the 
 Vision browser applications on dynamically generated information. For example, 
 an analyst may want to create a composite account on the fly that can be used as 
@@ -354,7 +333,7 @@ Tools</I></A>.
 <P>
 <HR>
 
-<H3><A name=vadmin>Permanent Changes via VAdmin</A></H3>
+<h2 id="vadmin">Permanent Changes via VAdmin</h2>
 <P>Your Vision database is designed to store portfolio, security, holding, and 
 related information over time. Although you can load this data temporarily on an 
 as needed basis using <A 
@@ -369,8 +348,9 @@ administration functions.
 Administration</I></A>. 
 <P>
 <HR>
-<A name=config>
-<H3>Configuration Files</H3></A>A <I>configuration</I> file is a standard text 
+<h2 id="config">Configuration Files</h2>
+<p>
+A <I>configuration</I> file is a standard text 
 file which contains directions that override the default settings for loading a 
 data feed file. The configuration file must have the same name, through the 
 first '.', as the file it accompanies. For example, 
@@ -485,7 +465,7 @@ Configuration files can also be used with loadFromFile and <a href="clDataFeedAd
 <P>The following situations show where a configuration file is necessary and 
 provide examples of how it is used. 
 <UL></UL>
-<P><B><a name=fieldOrderList>fieldOrderList</a></B> 
+<P><B id=fieldOrderList>fieldOrderList</B> 
 <UL>If a feed has an incorrect headerline, the option <I>fieldOrderList</I> 
   should be used to change the headers. More specifically, if a feed contains 
   the header <I>symbol</I> for the data item that Vision recognizes as 
@@ -509,7 +489,7 @@ GM     | GeneralMotors | US
   <P>
   <UL><B>Sample Configuration:</B> <PRE>fieldOrderList | id, name, , country</PRE></UL>
   <P></P></UL>
-<P><B><a name=headerLineNumber>headerLineNumber</B></a> 
+<P><B id=headerLineNumber>headerLineNumber</B> 
 <UL>Another use of the configuration file is to provide headings to files that 
   do not have them. In addition to <I>fieldOrderList</I>, you need to set 
   <I>headerLineNumber</I> to 0 so that the top line of the instances is included (by default the first line is assumed to be a header). 
@@ -523,7 +503,7 @@ headerLineNumber | 0</PRE></UL>
   <P></P></UL>
 
 
-<P><B><a name=currency>currency</a></B> 
+<P><B id=currency>currency</B> 
 <UL>The configuration file option <i>currency</i> will set the currency value for all records in a feed that have no value or <i>NA</i> for currency.  
   <P>
   <UL><B>Sample File:</B> 
@@ -538,7 +518,7 @@ MHP  | McGraw-Hill Companies Inc | CAD</PRE></UL>
 In addition, <i>currency</i> can be used to set the currency value for all records in a feed where a currency field does not exist.  <P></P></UL>
 
 
-<P><B><a name=naPatternTest>naPatternTest</a></B> 
+<P><B id=naPatternTest>naPatternTest</B> 
 <UL>This configuration file option will convert data to NAs based on the exsitence of the pattern in the data.  The pattern can include the special pattern matching symbols supported as "regular expression".  For example:
   <P>
   <UL><B>Sample File:</B> 
@@ -551,7 +531,7 @@ In addition, <i>currency</i> can be used to set the currency value for all recor
 This example will load NA for <i>sharesOut</i> and <i>latestMarketCapUS</i> for security 45920010 but will load all of other values. <b>WARNING:</b> Practice extreme caution when using Regular Expressions - due to their nature it is easy for a regular expression to include more than intended as seen in the above example where it might not have been the intent for security 45920010's <i>latestMarketCapUS</i> value to be loaded as NA.
  <P></P></UL>
 
-<P><B><a name=skipTop>skipTop</a></B> 
+<P><B id=skipTop>skipTop</B> 
 <UL>Another use of the configuration file is for a multiline header. For 
   example, if a date has been included as a seperate header line, you need to 
   include <I>skipTop</I> set to 2, so that the two headers are not processed as 
@@ -566,7 +546,7 @@ GM     | GeneralMotors | USD</PRE></UL>
     <P><PRE>fieldOrderList | id,name,currency
 skipTop        | 2</PRE></UL>
   <P></P></UL>
-<P><B><a name=skipChars>skipChars</a></B> 
+<P><B id=skipChars>skipChars</B> 
 <UL>If a file has data that has quotation marks surrounding specific values, 
   uploads will be not be processed properly. To prevent this, you can use the 
   option <I>skipChars</I>. 
@@ -579,7 +559,7 @@ skipTop        | 2</PRE></UL>
   <P></P></UL>
 
 
-<P><B><a name=autoExpire>autoExpire</a></B> 
+<P><B id=autoExpire>autoExpire</B> 
 <UL>The <I>autoExpire</I> option provides the capability to add a default 
   value to a time series as of a certain offset for feeds associated with a 
   <B>DataRecord</B>. Since by default Vision returns the last available value 
@@ -617,7 +597,7 @@ mno | 06/30/99 | USD | 4.56</PRE></UL>
   the end of the next calendar quarter </P></UL>
 
 
-<P><B><a name=dateFormat>dateFormat</a></B> 
+<P><B id=dateFormat>dateFormat</B> 
 <UL>
   <P>If a file contains dates in any of the following alternative formats: MMYY, MMYYYY, MMDDYY, MMDDYYYY, or YYYYMM, you will need to use the 
   <I>dateFormat</I> option. Note: this only applies to the field named 'date'. 
@@ -633,7 +613,7 @@ The format YYYYMMXX will convert the supplied date in YYYYMMDD format to end of 
 
 
 
-<P><B><a name=asofDate>asofDate</a></B> 
+<P><B id=asofDate>asofDate</B> 
 <UL>If a file does not include a date, you can use the <I>asofDate</I> option. 
   For example: 
   <P>
@@ -642,7 +622,7 @@ The format YYYYMMXX will convert the supplied date in YYYYMMDD format to end of 
   <UL><B>Sample Configuration:</B> 
     <P><PRE>asofDate | 19990430</PRE></UL></UL>
 
-<P><B><a name=asofDateLineNumber>asofDateLineNumber</a></B> 
+<P><B id=asofDateLineNumber>asofDateLineNumber</B> 
 <UL>Alternatively, you can include the date in the feed file and use the 
   <I>asofDateLineNumber</I> option. For example: 
   <P>
@@ -652,7 +632,7 @@ memberID | groupID
 0036110  | 560</PRE><B>Sample Configuration:</B> 
     <P><PRE>asofDateLineNumber | 1
 HeaderLineNumber   | 2</PRE></UL></UL>
-<P><B><a name=adjustmentDate>adjustmentDate</a></B> 
+<P><B id=adjustmentDate>adjustmentDate</B> 
 <UL>If the data in your feed file has been adjusted to reflect splits but 
   <I>adjustmentDate</I> is not included as part of the data record, use this 
   option to set the adjustment date. For example: 
@@ -662,11 +642,5 @@ abc | 09/30/99 | USD | 37.39 | .59
 mno | 09/30/99 | USD | 44.56 | .38</PRE></UL>
   <UL><B>Sample Configuration:</B> 
     <P><PRE>adjustmentDate | 19991231</PRE></UL></UL>
-<HR>
 
-<TABLE border=0 width="100%">
-  <TBODY>
-  <TR>
-<td align=left><font size=-1>Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated December 15, 2000</font>
-</TR></TBODY></TABLE></BODY></HTML>
+{% include doc-footer.htm copydates="2000" %}

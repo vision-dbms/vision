@@ -1,60 +1,46 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision FAQ: Frequently Asked Questions</title>
-</head>
-<body bgcolor=white>
+---
+title: "Vision FAQ: Frequently Asked Questions"
 
-<center>
-<img src="insyte.gif" alt="Insyte Logo" border=0 width=150 height=57>
-</center>
-<hr>
+sidebar:
+  nav: "sb_UsingVision"
+---
 
-<center><table>
-<tr><th><i><font size=+2>Vision Online</font></i>
-</table></center>
-<hr>
-
-<center><table>
-<tr><th><i><font size=+2>VisionFAQ: Frequently Asked Questions</font></i>
-</table></center>
-<hr>
-
-<h3>Syntax Problems</h3>
+<p>
+<h2 id="SyntaxProblems">Syntax Problems</h2>
 <ul type="disk">
 <li><a href="faq.htm#print">Method Does Not Print</a>
 <li><a href="faq.htm#calculation">Printing Wrong Value In Calculation</a>
 <li><a href="faq.htm#snf"><i>Selector Not Found </i> message for <i>select: do:</i></a>
 </ul>
 
-<h3>Message Usage</h3>
+<h2 id="MessageUsage">Message Usage</h2>
 <ul type="disk">
 <li><a href="faq.htm#sorting">Multiple Sorts</a><br>
 <li><a href="faq.htm#list">Displaying messages for a Collection Element</a><br>
-<li><a href="faq.htm#current sector">Grouping List into a range of values</a><br>
+<li><a href="faq.htm#current_sector">Grouping List into a range of values</a><br>
 <li><a href="faq.htm#rating">Grouping elements by string values</a><br>
 <li><a href="faq.htm#showMessages">Sending <i>showMessages</i> message to a list</a><br>
 </ul>
 
-<h3>Techniques</h3>
+<h2 id="Techniques">Techniques</h2>
 <ul type="disk">
-<li><a href="faq.htm#^my">Using <i>^my</i> to copy variables</a>
+<li><a href="faq.htm#using_my">Using <i>^my</i> to copy variables</a>
 </ul>
 
 <hr>
 <p>
 
-<a name="print"><i><b>I defined a method to compute the price-earnings ratio and it does 
-not print anything.  What did I do wrong?</i></b></a>
+<span id="print"><i><b>I defined a method to compute the price-earnings ratio and it does 
+not print anything.  What did I do wrong?</i></b></span>
 <p>
 
 The most likely problem is that you terminated your method with the ; character 
 so it is not returning anything.  For example, the method:
 
 <ul>
-<pre><b>
+<pre>
 Company defineMethod: [ | peRatio | price / earningsPerShare ; ] 
-</b></pre>
+</pre>
 </ul>
 
 would perform the calculation but not return the value.  
@@ -65,19 +51,19 @@ See: <a href="clNA.htm#novalue">The noValue Value</a>
 <hr>
 <p>
 
-<a name="calculation"><i><b>I am printing the result of a ratio calculation 
+<span id="calculation"><i><b>I am printing the result of a ratio calculation 
 and the value printed is the value of the last item in the calculation.  
-What happened to the calculation?</i></b></a>
+What happened to the calculation?</i></b></span>
 
 <p>
 This is probably a precedence order problem.  For example, the program:
 
 <ul>
-<pre><b>
+<pre>
 myList 
 do: [ price / earningsPerShare printNL ; 
     ] ; 
-</b></pre>
+</pre>
 </ul>
 
 will print the value of <i>earningsPerShare</i>.  Because <i>unary</i> messages 
@@ -86,57 +72,57 @@ performing the calculation.  The results of the calculation are lost in this cas
 You could use either one of the following programs to print the correct value:
 
 <ul>
-<pre><b>
+<pre>
 myList 
 do: [ (price / earningsPerShare) printNL ; 
     ] ; 
-</b></pre>
+</pre>
 </ul>
 
 or
 
 <ul>
-<pre><b>
+<pre>
 myList 
 do: [ price / earningsPerShare printNL: 10 ; 
     ] ; 
-</b></pre>
+</pre>
 </ul>
 <p>
 See: <a href="Syntax.htm#order">Precedence Order</a>
 <hr>
 <p>
 
-<a name="snf"><i><b>I am getting the <b>Selector Not Found</b> message for 
-<b>select: do:</b>.  What does this mean?</i></b></a>
+<span id="snf"><i><b>I am getting the <b>Selector Not Found</b> message for 
+<b>select: do:</b>.  What does this mean?</i></b></span>
 <p>
 
 You are most likely missing a <i>.</i> character after the <i>select:</i> block.  
 The program:
 
 <ul>
-<pre><b>
+<pre>
 myList select: [ sales > 25000 ]         # <--  . omitted 
        do: [ ticker printNL ] ; 
-</b></pre>
+</pre>
 </ul>
 
 would produce this error message.  The correct expression is:
 
 <ul>
-<pre><b>
+<pre>
 myList select: [ sales > 25000 ] . 
   do: [ticker printNL]; 
-</b></pre>
+</pre>
 </ul>
 
 The program:
 
 <ul>
-<pre><b>
+<pre>
 "Automotive" take: 4. concat: " Industry" 
                  #  ^ this dot needs to be preceded by a space 
-</b></pre>
+</pre>
 </ul>
 
 illustrates a common variation of this problem.  In this case the 
@@ -146,9 +132,9 @@ number so the <i>Selector Not Found</i> message indicates that
 is:
 
 <ul>
-<pre><b>
+<pre>
 "Automotive" take: 4 . concat: " Industry" 
-</b></pre>
+</pre>
 </ul>
 <p>
 See: <a href="Syntax.htm#dot">The dot operator</a>,
@@ -156,8 +142,8 @@ See: <a href="Syntax.htm#dot">The dot operator</a>,
 <hr>
 <p>
 
-<a name="sorting"><i><b>I want to sort my list from highest to lowest score and then 
-alphabetically for ties.  How do I do this?</i></b></a>
+<span id="sorting"><i><b>I want to sort my list from highest to lowest score and then 
+alphabetically for ties.  How do I do this?</i></b></span>
 <p>
 
 The <a href="mList.htm#sortUpBy:then:"><i>sortUpBy:then:</i></a> and 
@@ -172,11 +158,11 @@ of sort first), you can produce the desired results.  For example,
 the expression:
 
 <ul>
-<pre><b>
+<pre>
 myList 
    sortUp: [ name ] . 
    sortDown: [ score ] 
-</b></pre>
+</pre>
 </ul>
 
 first sorts <i>myList</i> alphabetically by name.  This list is then sorted 
@@ -189,7 +175,7 @@ See: <a href="clCollect.htm#sorts">Sorting Collections</a>
 
 
 
-<a name="list"><i><b>How do I group my list into ranges of values?</i></b></a>
+<span id="list"><i><b>How do I group my list into ranges of values?</i></b></span>
 <p>
 
 The message <a href="mList.htm#groupedBy:usingCutoffs:"><i>groupedBy: usingCutoffs:</i></a>
@@ -200,11 +186,11 @@ For example, to group the company master list into price-earnings ratio
 ranges of < 0, 0-5, 5-10, 10-20, and > 20 you would use:
 
 <ul>
-<pre><b>
+<pre>
 Company masterList 
    groupedBy: [ price / earningsPerShare ] 
     usingCutoffs: 0, 5, 10, 20 
-</b></pre>
+</pre>
 </ul>
 
 This expression returns a list whose elements correspond to the five buckets 
@@ -222,7 +208,7 @@ The following program performs the grouping and displays the results in
 a useful format:
 
 <ul>
-<pre><b>
+<pre>
 Company masterList 
    groupedBy: [ price / earningsPerShare ] 
    usingCutoffs: 0, 5, 10, 20 . 
@@ -238,20 +224,20 @@ do: [ lowerBoundary isntNA
       ifFalse: [ " < " print ; upperBoundary print: -4 ; ] ; 
       groupList count printNL ; 
     ] ; 
-</b></pre>
+</pre>
 </ul>
 <hr>
 <p>
 
-<a name="current sector"><i><b>I am trying to find all the elements in a 
+<span id="current_sector"><i><b>I am trying to find all the elements in a 
 <b>groupList</b> that are in the current sector and the list is always 
-empty even though I know there are matches.  Why?</i></b></a>
+empty even though I know there are matches.  Why?</i></b></span>
 <p>
 
 Your program probably looks something like this:
 
 <ul>
-<pre><b>
+<pre>
 myList groupedBy: [ industry sector ] . 
 do: [ !currentSector <- ^self ; 
       currentSector code print: 10 ; 
@@ -259,7 +245,7 @@ do: [ !currentSector <- ^self ;
       groupList select: [ industry sector = ^my currentSector ] . 
           count printNL ; 
     ] ; 
-</b></pre>
+</pre>
 </ul>
 
 Since all the elements in <i>groupList</i> should be in the 
@@ -274,7 +260,7 @@ As a result, the two objects are not equal.
 The following programs offer two alternatives that will both produce 
 correct results:
 <ul>
-<pre><b>
+<pre>
 myList groupedBy: [ industry sector ] . 
 do: [ !currentSector <- ^self ; 
       currentSector code print: 10 ; 
@@ -283,13 +269,13 @@ do: [ !currentSector <- ^self ;
          select: [ industry sector code = ^my currentSector code ] . 
          count printNL ; 
     ] ; 
-</pre></b>
+</pre>
 </ul>
 
 or
 
 <ul>
-<pre><b>
+<pre>
 myList groupedBy: [ industry sector ] . 
 do: [ !currentSector <- ^self ; 
       currentSector code print: 10 ; 
@@ -297,7 +283,7 @@ do: [ !currentSector <- ^self ;
       groupList select: [ industry sector = ^my currentSector asSelf ] . 
           count printNL ; 
     ] ; 
-</b></pre>
+</pre>
 </ul>
 
 The <a href="mObject.htm#asSelf"><i>asSelf</i></a> message strips 
@@ -308,9 +294,9 @@ See: <a href="Classes.htm#hierarchy">Instance Hierarchy</a>,
 <hr>
 <p>
 
-<a name="rating"><i><b>I created a property 'rating' for company and assigned the values 
+<span id="rating"><i><b>I created a property 'rating' for company and assigned the values 
 A, B, or C to some instances.  When I group my company list by rating, 
-there are several groups with the same rating.  Why?</i></b></a>
+there are several groups with the same rating.  Why?</i></b></span>
 <p>
 
 The grouping operation groups objects into unique buckets.  If you 
@@ -320,17 +306,17 @@ if you assign the values in different executions.  For example, if you execute
 the expression:
 
 <ul>
-<pre><b>
+<pre>
 Named Company GM :rating <- "A" ; 
-</b></pre>
+</pre>
 </ul>
 
 and then execute the expression:
 
 <ul>
-<pre><b>
+<pre>
 Named Company IBM :rating <- "A" ; 
-</b></pre>
+</pre>
 </ul>
 
 in a separate execution, the ratings will not be grouped together.  To 
@@ -338,12 +324,12 @@ perform this assignment correctly, you could create class constants that
 represent each rating as illustrated below:
 
 <ul>
-<pre><b>
+<pre>
 Company define: 'ratingA' toBe: "A" ; 
 Company define: 'ratingB' toBe: "B" ; 
 Named Company GM do: [ :rating <- ratingA ] ; 
 Named Company IBM do: [ :rating <- ratingA ] ; 
-</b></pre>
+</pre>
 </ul>
 
 In this case, the two companies would appear in the same group since the 
@@ -352,14 +338,14 @@ a new class of rating values and assign each value to an entry in this table
 as illustrated below:
 
 <ul>
-<pre><b>
+<pre>
 Entity createSubclass: "Rating" ;       #-- code and name available 
 Rating createInstance: "A" ; 
 Rating createInstance: "B" ; 
 Rating createInstance: "C" ; 
 Named Company GM :rating <- Named Rating A ; 
 Named Company IBM :rating <- Named Rating A ; 
-</b></pre>
+</pre>
 </ul>
 
 In this case, you can also correctly group by the rating object.
@@ -370,21 +356,21 @@ inefficiency.  Instead of grouping by the rating, users will
 often group by the rating code value.  For example, the expressions:
 
 <ul>
-<pre><b>
+<pre>
 Company masterList 
 groupedBy: [ industry code ] . 
 do: [ print ; groupList count printNL ] ; 
-</b></pre>
+</pre>
 </ul>
 
 and
 
 <ul>
-<pre><b>
+<pre>
 Company masterList 
 groupedBy: [ industry ] . 
 do: [ print ; groupList count printNL ] ; 
-</b></pre>
+</pre>
 </ul>
 
 appear to work identically.  The inefficiency arises if you wish to access 
@@ -392,7 +378,7 @@ additional information about the industry.  For example, the two approaches
 are used below to also display the industry's name:
 
 <ul>
-<pre><b>
+<pre>
 #---  Group by industry code and also display the name 
 Company masterList 
 groupedBy: [ industry code ] . 
@@ -403,13 +389,13 @@ do: [ #-- ^self is the string value of code at this point
       ind name print: 30 ; 
       groupList count printNL ; 
     ] ; 
-</b></pre>
+</pre>
 </ul>
 
 and
 
 <ul>
-<pre><b>
+<pre>
 #---  Group by industry and also display the name 
 Company masterList 
 groupedBy: [ industry ] . 
@@ -419,7 +405,7 @@ do: [ #-- ^self is the industry at this time
       name print: 30 ; 
       groupList count printNL ; 
     ] ; 
-</b></pre>
+</pre>
 </ul>
 
 The second approach is much cleaner than the first.
@@ -431,21 +417,21 @@ See: <a href="clCollect.htm#groups">Grouping Collections</a>
 <hr>
 <p>
 
-<a name="showMessages"><i><b>When I send the <b>&quotshowMessages&quot</b> message to a list 
+<span id="showMessages"><i><b>When I send the <b>&quotshowMessages&quot</b> message to a list 
 I get the set of messages that all lists respond to.  
-How do I know what the elements of the list respond to?</i></b></a>
+How do I know what the elements of the list respond to?</i></b></span>
 <p>
 
 You really want the list of messages associated with the elements of the list.  
 You could execute the <i>showMessages</i> message inside the list using:
 
 <ul>
-<pre><b>
+<pre>
 myList do: [ ^self showMessages ] ; 
 
 #-- Note: omitting the ^self will display the messages defined 
 #--       inside the block - not what you want 
-</b></pre>
+</pre>
 </ul>
 
 This technique will work but generates the output for all elements in the 
@@ -454,9 +440,9 @@ class, this produces a good deal of extraneous output.  Assuming all the
 elements are from the same class, the expression:
 
 <ul>
-<pre><b>
+<pre>
 myList at: 1 . showMessages 
-</b></pre>
+</pre>
 </ul>
 
 can be used to display the messages to which any element of the list 
@@ -464,16 +450,16 @@ will respond.  To see what classes are actually present in the list, use
 the expression:
 
 <ul>
-<pre><b>
+<pre>
 myList groupedBy: [ whatAmI ] . 
     do: [ ^self print: 50 ; groupList count printNL ] ; 
-</b></pre>
+</pre>
 </ul>
 
 <hr>
 <p>
 
-<a name="^my"><i><b>When and why do you have to copy variables using ^my?</i></b></a>
+<span id="using_my"><i><b>When and why do you have to copy variables using ^my?</i></b></span>
 <p>
 
 Because the magic word <i>^my</i> can only "reach back" one level of 
@@ -484,7 +470,7 @@ For example, you could define a local variable x at each level of a 3-level
 grouping and display each of the values using the program:
 
 <ul>
-<pre><b>
+<pre>
 myList quintileDown: [ sales ] . 
 groupedBy: [ quintile ] . 
 do: [ !level1 <- ^current ; 
@@ -510,7 +496,7 @@ do: [ !level1 <- ^current ;
                 ] ; 
           ] ; 
     ] ; 
-</b></pre>
+</pre>
 </ul>
 
 This program will display the values for x from each level for each 
@@ -518,27 +504,5 @@ company in each group.  The actual values printed will be the same for
 all companies (i.e., 1, 2, and 3).
 <p>
 See: <a href="Execution.htm#my">The Magic Word ^my</a>
-<hr>
-<table border="0" width="100%">
-<tr>
-<td align="left"><font size="-1">Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
-<td align="right"><font size="-1">Updated January 28, 1999</font>
-</table>
 
-<hr>
-
-<font size=-1><Center> 
-| <a href="index.htm">Home</a> 
-| <a href="abtinsyt.htm">About Insyte</a> |
-<br>
-| <a href="vonline.htm">Vision On-line</a> 
-| <a href="visiontech.htm">Vision Technology</a>
-| <a href="vpma.htm">Investment Managers</a>  
-| <a href="trowestory.htm">Client Spotlight</a> |
-<br>
-| <a href="toc.htm">Table of Contents</a> |
-
-</center></font>
-
-
-</body></html>
+{% include doc-footer.htm copydates="1999" %}

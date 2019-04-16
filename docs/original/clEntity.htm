@@ -1,26 +1,20 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Class: Entity </title>
-</head>
-<body bgcolor=white>
-<h2>Vision Class: Entity</h2>
+---
+title: "Vision Class: Entity "
 
-<p>
-     | <a href="FHome.htm">Home</a> | <a href="mEntity.htm">Messages</a> | <a href="Classes.htm">Classes</a> | <a href="clXRef.htm">Class XRef</a> |
-<hr>
-<h3>Topics Covered:</h3>
-<ul type=square>
-<li><a href="#overview">Entity Overview</a>
-<li><a href="#access">Basic Access</a>
-<li><a href="#message">Popular Messages</a>
-<li><a href="#alias">Aliases </a>
-<li><a href="#subclass">Creating Entity Subclasses </a>
-<li><a href="#instance">Creating Entity Instances </a>
-<li><a href="#review">Review</a>
-</ul>
-<hr>
-<h3><a name="overview">Entity Overview</a></h3>
+related_topics:
+  - url: "mEntity.htm"
+    title: "Messages"
+  - url: "Classes.htm"
+    title: "Classes"
+  - url: "clXRef.htm"
+    title: "Class XRef"
+
+
+sidebar:
+  nav: "sb_ClassXRef"
+---
+
+<h2 id="overview">Entity Overview</h2>
 <p>
 The <b>Entity</b> class is an abstract class that is used to organize the
 classes in the hierarchy whose instances represent real-world entities
@@ -31,21 +25,20 @@ entities such as <i>GM</i>.  Instances of the class <i>Industry</i>
 represent specific industries such as <i>Autos</i>.
 <p>
 The Entity class is a direct subclass of Object:
-<font size=+1><pre>
-          <a href="clObject.htm">Object</a>
-             |
-             <b>Entity</b>
-                |
-                |-- <a href="clClassify.htm">Classification</a>
-                |
-                |-- <a href="clCurrency.htm">Currency</a>
-                |
-                |-- <a href="clUniverse.htm">Universe</a>
-
-</pre></font>
+<pre>
+  <a href="clObject.htm">Object</a>
+     |
+     <b>Entity</b>
+        |
+        |-- <a href="clClassify.htm">Classification</a>
+        |
+        |-- <a href="clCurrency.htm">Currency</a>
+        |
+        |-- <a href="clUniverse.htm">Universe</a>
+</pre>
 <hr>
 <p>
-<h3><a name="access">Basic Access</a></h3>
+<h2 id="access">Basic Access</h2>
 <p>
 Since it is useful to be able to address individual entities, 
 entity instances are explicitly named.  To avoid conflicting names
@@ -53,37 +46,43 @@ entity instances are explicitly named.  To avoid conflicting names
 <a href="clDict.htm#named">naming dictionaries</a>
 are created for each entity subclass.  For
 example, to access the object representing the company GM, you would
-execute the expression:<pre><tt><b>
-     Named Company GM
-</b></tt></pre>
+execute the expression:
+<pre>
+  Named Company GM
+</pre>
 and to access the object representing the account GM, you would
-execute the expression:<pre><tt><b>
-     Named Account GM
-</b></tt></pre>
-The general form to get to a specific instance of an entity class is:<pre><tt><b>
-     Named entityClass entityId
-</b></tt></pre>
+execute the expression:
+<pre>
+  Named Account GM
+</pre>
+The general form to get to a specific instance of an entity class is:
+<pre>
+  Named entityClass entityId
+</pre>
 where <i>entityClass</i> is the name of an entity
 class and <i>entityId</i> is the name of the actual
 instance.  Note that the <i>entityId</i> must start with a letter
 or the _ character.  If it does not, you should use the \ (escape) 
 character to precede the name.  For example, if the id for US
-currency is 1, the expression:<pre><tt><b>
-     Named Currency \1
-</b></tt></pre>
+currency is 1, the expression:
+<pre>
+  Named Currency \1
+</pre>
 can be used to access this object.
 An alternative to using the escape character for individual special
-characters is to identify the entire code as a string using the form:<pre><tt><b>
-     Named Currency <a href="mDict.htm#at:">at:</a> "code" .
-</b></tt></pre>
-For example:<pre><tt><b>
-     Named Currency at: "1" .
-</b></tt></pre>
+characters is to identify the entire code as a string using the form:
+<pre>
+  Named Currency <a href="mDict.htm#at:">at:</a> "code" .
+</pre>
+For example:
+<pre>
+  Named Currency at: "1" .
+</pre>
 Additional information on <a href="Lang.htm#variable">valid identifiers</a>
 is available.  
 <hr>
 <p>
-<h3><a name="message">Popular Messages</a>  <font size=+2><a href="mEntity.htm">X</a></font></h3>
+<h2 id="message"><a href="mEntity.htm">Popular Messages</a></h2>
 <p>
 All entities responds the the messages <a href="mObject.htm#code">code</a>
 and <a href="mEntity.htm#name">name</a>.
@@ -92,9 +91,10 @@ is usually changed
 from its initial value to a more descriptive name for the
 entity.  An entity's name can be changed using the message
 <a href="mEntity.htm#setNameTo:">setNameTo:</a>.  For example, the
-expression:<pre><tt><b>
-     Named Currency US setNameTo: "U.S. Dollar" ;
-</b></tt></pre>
+expression:
+<pre>
+  Named Currency US setNameTo: "U.S. Dollar" ;
+</pre>
 sets the value of the property <i>name</i> to the string supplied.
 <p>
 The properties <i>shortName</i> and <i>sortCode</i> are also initialized with
@@ -121,24 +121,27 @@ Some classes redefine this message to display additional information.
 The message <a href="mObject.htm#masterList">masterList</a>
 returns the list of all non-default entities in a
 class.  For example, to display the <i>code</i> and <i>name</i> for each
-Currency you could use:<pre><tt><b>
+Currency you could use:
+<pre>
      Currency masterList
      do: [ code print: 10 ; 
            name printNL ;
          ] ;
-</b></tt></pre>
+</pre>
 <p>
 <hr>
 <p>
-<h3><a name="alias">Aliases</a></h3>
+<h2 id="alias">Aliases</h2>
 <p>
 Each entity instance can have more than one name.  For example,
 your installation may have named the
-currency instance for US as "USD" and "US".  The expressions:<pre><tt><b>
-     Named Currency USD
-</b>and<b>
+currency instance for US as "USD" and "US".  The expressions:
+<pre>
+  Named Currency USD
+</pre>and
+<pre>
      Named Currency US
-</b></tt></pre>
+</pre>
 can both be used to return the currency instance that represents the
 US currency.  
 <p>
@@ -150,45 +153,53 @@ By default, the value of the <a href="mObject.htm#code">code</a>
 property for an entity is used as the first alias created.
 Additional aliases can be added using the message
 <a href="mEntity.htm#addAlias:">addAlias:</a>.  For example, the
-alias <i>USA</i> can be added to this entity using:<pre><tt><b>
-     Named Currency US addAlias: "USA" ;
-</b></tt></pre>
-The expression:<pre><tt><b>
-     Named Currency US = Named Currency USA
-</b></tt></pre>
+alias <i>USA</i> can be added to this entity using:
+<pre>
+  Named Currency US addAlias: "USA" ;
+</pre>
+The expression:
+<pre>
+  Named Currency US = Named Currency USA
+</pre>
 would then return the value </i>TRUE</i>.
 <p>
 To display all the aliases associated with a specific entity you can 
 display the list of strings stored in the <i>aliases</i> property.  For
-example, to see the aliases defined for the US currency use:<pre><tt><b>
-     Named Currency US aliases do: [ printNL ] ;
-</b></tt></pre>
+example, to see the aliases defined for the US currency use:
+<pre>
+  Named Currency US aliases do: [ printNL ] ;
+</pre>
 <p>
-To delete an alias use the message <i>deleteAlias:</i>.  For example:<pre><tt><b>
-     Named Currency US deleteAlias: "USA" ;
-</b></tt></pre>
+To delete an alias use the message <i>deleteAlias:</i>.  For example:
+<pre>
+  Named Currency US deleteAlias: "USA" ;
+</pre>
 deletes the <i>USA</i> alias for the US currency.
-To display the aliases available for each currency, use:<pre><tt><b>
-     Currency masterList sortUp: [ name ] .
-     do: [ name print: 30 ; 
-           aliases do: [ " / " print ; print ; ] ;
-           newLine print ;
-         ] ;
-</b></tt></pre>
+To display the aliases available for each currency, use:
+<pre>
+  Currency masterList sortUp: [ name ] .
+  do: [ name print: 30 ; 
+        aliases do: [ " / " print ; print ; ] ;
+        newLine print ;
+      ] ;
+</pre>
 <p>
 <hr>
 <p>
-<h3><a name="subclass">Creating Entity Subclasses</a></h3>
+<h2 id="subclass">Creating Entity Subclasses</h2>
 <p>
-The expression:<pre><tt><b>
-     Entity createSubclass: "Company"
-</b></tt></pre>
+The expression:
+<pre>
+  Entity createSubclass: "Company"
+</pre>
 is used to create a new subclass of the Entity class that represents
-company objects.  Once created, this class can be accessed using:<pre><tt><b>
-     Company
-</b>or<b>
-     Named Company Default
-</b></tt></pre>
+company objects.  Once created, this class can be accessed using:
+<pre>
+  Company
+</pre>or
+<pre>
+  Named Company Default
+</pre>
 The variations of the <a href="Classes.htm#subclass">createSubclass</a>
 messages have been redefined at the Entity class to perform the following
 additional functions:
@@ -200,17 +211,19 @@ to name the instances of the new class.
 <li>Define the name <i>Default</i> in this naming dictionary to return
 the default instance of this new class.  
 <li>Define the constant <i>named</i> at the new class to return the new
-class' naming dictionary.  The expressions:<pre><tt><b>
-     Named Company
-</b>and<b>
-     Named Company Default named
-</b>and<b>
-     Company named
-</b></tt></pre>
+class' naming dictionary.  The expressions:
+<pre>
+  Named Company
+</pre>and
+<pre>
+  Named Company Default named
+</pre>and
+<pre>
+  Company named
+</pre>
 all return the naming dictionary for the Company class.
 </ol>
-<p>
-<a name="default"></a>
+<p id="default">
 When a subclass of Entity is created, an initial instance representing the
 <a href="Classes.htm#default">default instance</a>
 for the class is also created.
@@ -219,18 +232,19 @@ messages to store values that are copied to new instances.
 This instance in all ways behaves like other instances
 in the class.  To determine if an object is the default instance
 in its class, the <i>isDefault</i> and <i>isntDefault</i> messages are defined.
-Both return boolean (i.e., TRUE/FALSE) values.  For example: <pre><tt><b>
-     Named Currency US isDefault
-</b>returns FALSE<b>
-
-     Named Currency US isntDefault
-</b>returns TRUE<b>
-
-     Named Currency Default isDefault  
-</b>returns TRUE and<b>
-
-     Named Currency Default isntDefault 
-</b>returns FALSE.</tt></pre>
+Both return boolean (i.e., TRUE/FALSE) values.  For example:
+<pre>
+  Named Currency US isDefault
+</pre>returns FALSE
+<pre>
+  Named Currency US isntDefault
+</pre>returns TRUE
+<pre>
+  Named Currency Default isDefault  
+</pre>returns TRUE and
+<pre>
+  Named Currency Default isntDefault 
+</pre>returns FALSE.
 <p>
 Note that the message <a href="mObject.htm#instanceList">instanceList</a>
 returns the list of all instances in a class including the default instance
@@ -239,15 +253,17 @@ returns the list of all instances in a class excluding the default instance.
 <p>
 <hr>
 <p>
-<h3><a name="instance">Creating Entity Instances</a></h3>
+<h2 id="instance">Creating Entity Instances</h2>
 <p>
-The expression:<pre><tt><b>
-     Company createInstance: "XYZ"
-</b></tt></pre>
+The expression:
+<pre>
+  Company createInstance: "XYZ"
+</pre>
 is used to create a new instance of the <i>Company</i> class named <i>XYZ</i>.
-Once created, this instance can be accessed using:<pre><tt><b>
-     Named Company XYZ
-</b></tt></pre>
+Once created, this instance can be accessed using:
+<pre>
+  Named Company XYZ
+</pre>
 The variations of the <a href="Classes.htm#instance">createInstance</a>
 messages have been redefined at the Entity class to perform the following
 additional functions:
@@ -257,45 +273,48 @@ additional functions:
 <li>Initialize the values of <i>name, shortName, and sortCode</i>.
 <li>Initialize other default values defined for the class.
 </ol>
-<p>
-<a name="inits"></a>
+<p id="inits">
 Several additional messages have been define at Entity which are used
 to initialize properties in the new
 instance.  Initial values can automatically be copied from the default
-instance.  For example, define the following:<pre><tt><b>
-     Company
-         defineFixedProperty: 'property1' .
-         defineFixedProperty: 'property2' ;
+instance.  For example, define the following:
+<pre>
+  Company
+      defineFixedProperty: 'property1' .
+      defineFixedProperty: 'property2' ;
 
-     Named Company Default :property1 <- 10 ;
-     Named Company Default :property2 <- "xyz" ;
-
-</b></tt></pre>
+  Named Company Default :property1 <- 10 ;
+  Named Company Default :property2 <- "xyz" ;
+</pre>
 The following technique can be used to automatically initialize these
-values in new instances:<pre><tt><b>
-     Company createInitializationListFrom: NA ;
-     Company updateInitializationListWith: [ :property1 ] ;
-     Company updateInitializationListWith: [ :property2 ] ;
-</b></tt></pre>
+values in new instances:
+<pre>
+  Company createInitializationListFrom: NA ;
+  Company updateInitializationListWith: [ :property1 ] ;
+  Company updateInitializationListWith: [ :property2 ] ;
+</pre>
 The first statement defines an empty initialization list.  You could
 supply an existing list here instead.  The next statements add the two
 properties to the automatic initialization process.  When new
 instances are created, the values for these properties will be copied
-from the default instance.  For example:<pre><tt><b>
-             Company createInstance: "GM"
-</b></tt></pre>
+from the default instance.  For example:
+<pre>
+  Company createInstance: "GM"
+</pre>
 will create a new company instance named GM and automatically
-copy the values for <i>property1</i> and <i>property2</i>.  The expression:<pre><tt><b>
-             Named Company GM property1
-</b></tt></pre>
-will return the value 10 and the expression:<pre><tt><b>
-             Named Company GM property2
-</b></tt></pre>
+copy the values for <i>property1</i> and <i>property2</i>.  The expression:
+<pre>
+  Named Company GM property1
+</pre>
+will return the value 10 and the expression:
+<pre>
+  Named Company GM property2
+</pre>
 will return the string "xyz".
 <p>
 <hr>
 <p>
-<h3><a name="review">Review</a></h3>
+<h2 id="review">Review</h2>
 <p>
 Suppose you needed to created several classes which represent simple
 tables of information that provide short and long names for various
@@ -305,58 +324,58 @@ could be defined to store names for various status codes such as
 "Approved" and "Restricted".
 <p>
 To begin, create a subclass of Entity that will be the super class of all
-Table subclasses:<pre><tt><b>
-     Entity createSubclass: "Table";
-</b></tt></pre>
-Next, define the Rating class and its instances:<pre><tt><b>
-     Table createSubclass: "Rating" ;
-     Rating createInstance: "A" . setNameTo: "Excellent" ;
-     Rating createInstance: "B" . setNameTo: "Good" ;
-     Rating createInstance: "C" . setNameTo: "Fair" ;
-     Rating createInstance: "D" . setNameTo: "Poor" ;
-     Rating createInstance: "F" . setNameTo: "Failure" ;
-</b></tt></pre>
-Finally, define the Status class and its instances:<pre><tt><b>
-     Table createSubclass: "Status" ;
-     Status createInstance: "A" . setNameTo: "Approved" ;
-     Status createInstance: "R" . setNameTo: "Restricted" ;
-     Status createInstance: "D" . setNameTo: "Discard" ;
-</b></tt></pre>
-The <i>A</i> rating instance is accessed using:<pre><tt><b>
-     Named Rating A
-</b></tt></pre>
-The <i>A</i> status instance is accessed using:<pre><tt><b>
-     Named Status A
-</b></tt></pre>
+Table subclasses:
+<pre>
+  Entity createSubclass: "Table";
+</pre>
+Next, define the Rating class and its instances:
+<pre>
+  Table createSubclass: "Rating" ;
+  Rating createInstance: "A" . setNameTo: "Excellent" ;
+  Rating createInstance: "B" . setNameTo: "Good" ;
+  Rating createInstance: "C" . setNameTo: "Fair" ;
+  Rating createInstance: "D" . setNameTo: "Poor" ;
+  Rating createInstance: "F" . setNameTo: "Failure" ;
+</pre>
+Finally, define the Status class and its instances:
+<pre>
+  Table createSubclass: "Status" ;
+  Status createInstance: "A" . setNameTo: "Approved" ;
+  Status createInstance: "R" . setNameTo: "Restricted" ;
+  Status createInstance: "D" . setNameTo: "Discard" ;
+</pre>
+The <i>A</i> rating instance is accessed using:
+<pre>
+  Named Rating A
+</pre>
+The <i>A</i> status instance is accessed using:
+<pre>
+  Named Status A
+</pre>
 Notice that although both the classes have instances named
 <i>A</i> these objects have distinct access paths.
 <p>
 To display all the instances in the Rating class including the default
-use:<pre><tt><b>
-     Rating instanceList
-        do: [ code print: 3 ; name printNL ] ;
-</b></tt></pre>
+use:
+<pre>
+  Rating instanceList
+     do: [ code print: 3 ; name printNL ] ;
+</pre>
 To display all the instances in the Status class excluding the default
-use:<pre><tt><b>
-     Status masterList
-        do: [ code print: 3 ; name printNL ] ;
-</b></tt></pre>
-To display all the subclasses of the Table class use:<pre><tt><b>
-     Table showInheritance
-</b></tt></pre>
+use:
+<pre>
+  Status masterList
+     do: [ code print: 3 ; name printNL ] ;
+</pre>
+To display all the subclasses of the Table class use:
+<pre>
+  Table showInheritance
+</pre>
 To create a status property at the Company class and assign the approved
-status for GM use:<pre><tt><b>
-     Company defineFixedProperty: 'status' ;
-     Named Company GM :status <- Named Status A ;
-</b></tt></pre>
-<p>
-<hr>
+status for GM use:
+<pre>
+  Company defineFixedProperty: 'status' ;
+  Named Company GM :status <- Named Status A ;
+</pre>
 
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated June 19, 1997</font>
-</table>
-
-</body>
-</html>
+{% include doc-footer.htm copydates="1997" %}

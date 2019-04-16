@@ -1,14 +1,10 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Portfolio Management FAQ: Model Data </title>
+---
+title: "Vision Portfolio Management FAQ: Model Data "
 
-</head>
-<body>
-<body bgcolor=white>
-<h2>Vision Portfolio Management FAQ:  Model Data</h2>
-<hr><p>
-<h4>Goal:</h4>
+sidebar:
+  nav: "sb_InvestmentManagers"
+---
+<h4 id="goal">Goal</h4>
 <ul>
 To track several model scores about a company over time  
 by using <a href="#excel"><i>Excel</i></a> or the 
@@ -16,7 +12,7 @@ by using <a href="#excel"><i>Excel</i></a> or the
 </ul>
 
 <p>
-<h4>Description:</h4>
+<h4 id="description">Description</h4>
 <ul>
 <i>DataRecord</i> classes
 are used to manage sets of related
@@ -28,7 +24,7 @@ defined at the <i>Entity</i> instance with which it is associated.
 </ul>
 
 <p>
-<h4>DataFeed Assumptions:</h4>
+<h4 id="assumptions">DataFeed Assumptions</h4>
 <p>
 <center><table border=1 width=80% cellpadding=4 cellspacing=2>
 <tr><th>DataFeed<th>Fields
@@ -38,10 +34,8 @@ defined at the <i>Entity</i> instance with which it is associated.
 </table></center>
 <p>
 
-<a name="excel"><h4>Using <i>Excel</i> to load model data</h4></a>
+<h4 id="excel">Using <i>Excel</i> to load model data</h4>
 
-<p>
-<h4>Steps:</h4>
 <p>
 <ol type="A">
 
@@ -71,12 +65,12 @@ The feed <i>ModelDataFeed</i> has been created, which is found in the <i>Entity 
 Set up the spreadsheet to look like the following.  Note that the feed name
 is in the top left of the range.
 <pre>
-        PropertySetup		
+        PropertySetup
 
-	<b>classId	        Property      tsflag	datatype</b>	
-	ModelData	model1	      N	        Number
-	ModelData	model2	      N	        Number
-	ModelData	model3	      N	        Number
+  <u>classId         Property      tsflag    datatype</u>
+  ModelData       model1        N         Number
+  ModelData       model2        N         Number
+  ModelData       model3        N         Number
 </pre>
 
 Note that if you want to explicitly limit the type of value to integer or
@@ -95,13 +89,13 @@ non integer numbers, use the <i>dataType</i> of Integer or Double.
 set up the spreadsheet to look like the following example:
 
 <pre>
-	<b>id	date	model1	model2	model3</b>
-	ibm	9710	4.9	4.7	4.6
-	ibm	9711	4.3	4.8	4.2
-	ibm	9712	4.3	4.2	4.9
-	gm	9710	8.4	8.5	8.9
-	gm	9711	7.9	8.1	8.5
-	gm	9712	8.3	8.5	8.3
+  <u>id      date    model1  model2  model3</u>
+  ibm     9710    4.9     4.7     4.6
+  ibm     9711    4.3     4.8     4.2
+  ibm     9712    4.3     4.2     4.9
+  gm      9710    8.4     8.5     8.9
+  gm      9711    7.9     8.1     8.5
+  gm      9712    8.3     8.5     8.3
 </pre>
 
 <li>Select the range.
@@ -120,9 +114,9 @@ set up the spreadsheet to look like the following example:
 <li>set up the spreadsheet to look like the following example:
 
 <pre>
-<b>		modelData model1	modelData model2</b>
-	ibm	
-	gm	
+  <u>        modelData model1        modelData model2</u>
+  ibm
+  gm
 </pre>
 
 <li>Select the range.
@@ -133,9 +127,9 @@ set up the spreadsheet to look like the following example:
 The output will look similar to the following example:
 
 <pre>
-<b>		modelData model1	modelData model2</b>
-	ibm	4.3	                4.2
-	gm	8.3                     8.5
+  <u>        modelData model1        modelData model2</u>
+  ibm     4.3                     4.2
+  gm      8.3                     8.5
 </pre>
 
 Your Extraction is complete.
@@ -145,12 +139,9 @@ Your Extraction is complete.
 
 <hr>
 <p>
-<a name="vadmin"><h4>Using <i>VAdmin</i> to load model data</h4></a>
+<h4 id="vadmin">Using <i>VAdmin</i> to load model data</h4>
 <p>
 
-<p>
-<h4>Steps:</h4>
-<p>
 <ol type="A">
 
 <p>
@@ -178,10 +169,10 @@ The feed <i>ModelDataFeed</i> has been created, which is found in the <i>Entity 
 
 Set up a text file look like the following.  Each column should be seperated by a tab.
 <pre>
-	<b>classId	Property      tsflag	datatype</b>	
-	ModelData	model1	      N         Number
-	ModelData	model2	      N	        Number
-	ModelData	model3	      N	        Number
+  <u>classId         Property      tsflag    datatype</u>
+  ModelData       model1        N         Number
+  ModelData       model2        N         Number
+  ModelData       model3        N         Number
 </pre>
 <p>
 
@@ -206,13 +197,13 @@ Save the File (ie property.txt) and put it in the <i>/localvision/upload/feeds</
 set up a tab delimited text file to look like the following example:
 
 <pre>
-	<b>id	date	model1	model2	model3</b>
-	ibm	9710	4.9	4.7	4.6
-	ibm	9711	4.3	4.8	4.2
-	ibm	9712	4.3	4.2	4.9
-	gm	9710	8.4	8.5	8.9
-	gm	9711	7.9	8.1	8.5
-	gm	9712	8.3	8.5	8.3
+  <u>id      date    model1  model2  model3</u>
+  ibm     9710    4.9     4.7     4.6
+  ibm     9711    4.3     4.8     4.2
+  ibm     9712    4.3     4.2     4.9
+  gm      9710    8.4     8.5     8.9
+  gm      9711    7.9     8.1     8.5
+  gm      9712    8.3     8.5     8.3
 </pre>
 
 Save the file and put it in the <i>/localvision/upload/feeds</i> directory.
@@ -232,9 +223,9 @@ Save the file and put it in the <i>/localvision/upload/feeds</i> directory.
 <li>Set up the spreadsheet to look like the following example:
 
 <pre>
-<b>		modelData model1	modelData model2</b>
-	ibm	
-	gm	
+  <u>        modelData model1        modelData model2</u>
+  ibm
+  gm
 </pre>
 
 <li>Select the range.
@@ -245,19 +236,12 @@ Save the file and put it in the <i>/localvision/upload/feeds</i> directory.
 The output will look similar to the following example:
 
 <pre>
-<b>		modelData model1	modelData model2</b>
-	ibm	4.3	                4.2
-	gm	8.3                     8.5
+  <u>        modelData model1        modelData model2</u>
+  ibm     4.3                     4.2
+  gm      8.3                     8.5
 </pre>
 
 Your Extraction is complete.
 </ol></ol></ul>
-<hr>
-<table border="0" width="100%">
-<tr>
-<td align="left"><font size="-1">Copyright &copy; 1998 Innovative Systems Techniques, Inc.</font>
-<td align="right"><font size="-1">Updated December 23, 1998</font>
-</table>
-</body>
-</html>
 
+{% include doc-footer.htm copydates="1998" %}

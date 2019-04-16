@@ -1,37 +1,31 @@
-<!DOCTYPE html>
-<html>
-<head>
-   <title>Case Study 2: Basic Tabular Reporting</title>
-</head>
-<body>
-<body bgcolor=white>
+---
+title: "Case Study 2: Basic Tabular Reporting"
 
-<h2>Case Study 2: Basic Tabular Reporting</h2>
+toc: false
 
-<p>| <a href="FHome.htm">Home</a> 
-   | <a href="vtutor.htm">Tutorials</a> | 
-<hr>
+sidebar:
+  nav: "sb_UsingVision"
+---
 
 <blockquote><hr>
-<center><b><font size+1>Reminder!</font></b> </a></center>
+<center><b><font size+1>Reminder!</font></b></center>
 To run these examples, you should first start a new session and then load the sample database using:
-<pre><tt><b>     "/localvision/samples/general/sample.load" asFileContents evaluate ; 
-</b></tt></pre>
+<pre>
+  "/localvision/samples/general/sample.load" asFileContents evaluate ; 
+</pre>
 Any other files referenced can be read from the <i>/localvision/samples/general/</i>
 directory.
 <p>
 <b>Note:</b> The <i>sample.load</i> file runs by default on a <i>Unix</i> environment.  If you are using a <i>Windows NT</i> platform, this location may be prefixed by a drive  and optional path (e.g. <i>d:/visiondb/localvision/samples/general/sample.load</i>).  Check with your Vision Administrator for further details.<hr></blockquote>
-<p>
 
-<hr>
 <p>
 It is often useful to display many data items for a list of entities.  Read 
 the file <i>example2.a</i> you should see:
 
-<pre><b>
+<pre>
  !testList <- Company masterList 
     rankDown: [ sales ] . 
-    select: [ rank <= 20 ] ; </b></pre>
+    select: [ rank <= 20 ] ; </pre>
 
 Execute this program.  This variable <i>testList</i> will now contain the list 
 of top 20 companies by sales.
@@ -40,7 +34,7 @@ of top 20 companies by sales.
 
 The file <i>example2.b</i> displays sample data for each company in this list:
 <ul>
-<Pre><b>
+<pre>
  "***  Multiple Company Data Sheet  ***" centerNL: 70 . print; 
  newLine print ; 
 
@@ -62,12 +56,12 @@ The file <i>example2.b</i> displays sample data for each company in this list:
      newLine print ; 
      ] ; 
 
-</b></pre>
+</pre>
 </ul>
 Execute this program.  You should see:
 
 <ul>
-<Pre><b>
+<pre>
              ***  Multiple Company Data Sheet  ***
 
 Ticker  Name                    Industry   Sales      P-E
@@ -78,7 +72,7 @@ AN      Amoco Corp              OIL        20174.00   19.91
 ARC     Atlantic Richfield      OIL        16282.00   18.15
 CI      CIGNA Corp              INSUR      16909.30    6.90
 ...
-</b></Pre>
+</pre>
 </ul>
 
 The first line of the program centers a title over the report.  The next 
@@ -92,7 +86,7 @@ price-earnings ratio are then displayed for each company.
 The file <i>example2.c</i> groups the companies into industries and displays the industry code and name followed by the companies in the industry for each industry present in the list:
 
 <ul>
-<Pre><b>
+<pre>
  "***  Multiple Company Data Sheet  ***" centerNL: 70 . print; 
  newLine print ; 
  "Ticker" print: 10 ; 
@@ -118,11 +112,11 @@ The file <i>example2.c</i> groups the companies into industries and displays the
        newLine print ;                #-- skip line between industries 
       ] ; 
 
-</b></pre>
+</pre>
 </ul>
 Execute this program.  You should see:
 <ul>
-<Pre><B>
+<pre>
                ***  Multiple Company Data Sheet  ***
 
 Ticker  Name                      Industry     Sales     P-E
@@ -142,7 +136,7 @@ RETAIL  Retail Store
 KM      K Mart Corp               RETAIL    24046.00   17.96
 S       Sears Roebuck & Co        RETAIL    48439.61   10.29
 ...
-</b></pre>
+</pre>
 </ul>
 
 This report displays the code and name for each industry 
@@ -164,7 +158,7 @@ defined as the average ratio for the companies in the industry.  The
 file <i>example2.d</i> includes the summary information:
 
 <ul>
-<Pre><b>
+<pre>
  "***  Multiple Company Data Sheet  ***" centerNL: 70 . print; 
  newLine print ; 
  "Ticker" print: 10 ; 
@@ -193,12 +187,12 @@ file <i>example2.d</i> includes the summary information:
            ] ; 
        newLine print ; 
      ] ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 <ul>
-<pre><b>
+<pre>
                ***  Multiple Company Data Sheet  ***
 
 Ticker  Name                 Industry   Sales          P-E
@@ -218,7 +212,7 @@ RETAIL  Retail Store                    72485.61       14.12
 KM      K Mart Corp             RETAIL  24046.00       17.96
 S       Sears Roebuck & Co      RETAIL  48439.61       10.29
 . . .
-</b></pre>
+</pre>
 </ul>
 After grouping by industry, this program displays the industry's code 
 and name followed by 10 blanks.  These blanks correspond to industry 
@@ -236,7 +230,7 @@ total industry sales is printed instead.  To perform this calculation, the
 individual company's sales value is divided by the total industry sales 
 value.  This result is multiplied by 100.  Read in the file <i>example2.e</i>:
 <ul>
-<pre><b>
+<pre>
  "***  Multiple Company Data Sheet  ***" centerNL: 70 . print;
  newLine print ; 
  "Ticker" print: 10 ; 
@@ -270,12 +264,12 @@ value.  This result is multiplied by 100.  Read in the file <i>example2.e</i>:
          ] ; 
     newLine print ; 
      ] ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 <ul>
-<pre><b>
+<pre>
                ***  Multiple Company Data Sheet  ***
 
 Ticker  Name                   % of Ind    Sales     P-E
@@ -298,14 +292,16 @@ S       Sears Roebuck & Co       66.83   48439.61    10.29
 BANK    Banks                            27988.01     3.67
 CCI     Citicorp                100.00   27988.01     3.67
 . . .
-</b></pre>
+</pre>
 </ul>
 After grouping by industry, two temporary variables are created 
 <i>industrySales</i> and <i>industryPE</i>.  These values are printed 
 as part of each industry's subtotal line.  The expression:
 
 <ul>
-<pre><b>sales / ^my industrySales * 100 print: 10</b></tt></b></pre>
+<pre>
+sales / ^my industrySales * 100 print: 10
+</pre>
 </ul>
 
 <p>
@@ -326,7 +322,7 @@ commas.  The industry <i>code</i> and <i>name</i> continue to print, followed by
 the company data:
 
 <ul>
-<pre><b>
+<pre>
  "***  Multiple Company Data Sheet  ***" centerNL: 70 . print; 
  newLine print ; 
  "Ticker" print: 10 ; 
@@ -359,11 +355,11 @@ the company data:
       newLine print ; 
       newLine print ; 
  ] ; 
-</b></pre>
+</pre>
 </ul>
 Execute this program.  You should see:
 <ul>
-<pre><b>
+<pre>
                ***  Multiple Company Data Sheet  ***
 
 Ticker  Name                  % of Ind   Sales    P-E
@@ -388,7 +384,7 @@ S       Sears Roebuck & Co       66.83   48,440   10.29
 --> Industry Totals:            100.00   72,486   14.12
 
 . . .
-</b></pre>
+</pre>
 </ul>
 
 The subtotals are now displayed after each industry's company detail.
@@ -401,7 +397,7 @@ percentage of sector and percentage of industry sales.  Sales and
 price-earnings ratio are subtotalled at the industry and sector levels:
 
 <ul>
-<pre><b>
+<pre>
  "***  Multiple Company Data Sheet  ***" centerNL: 70 . print; 
  newLine print ; 
  "Ticker" print: 10 ; 
@@ -455,13 +451,13 @@ price-earnings ratio are subtotalled at the industry and sector levels:
     newLine print ; 
     newLine print ; 
     ] ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 
 <ul>
-<pre><b>
+<pre>
                ***  Multiple Company Data Sheet  ***
 
 Ticker    Name                  % of    Sec/Ind    Sales    P-E
@@ -488,7 +484,7 @@ Industry Totals:              100.0    100.0       199701    4.89
 
 Sector DUR Totals:            100.0    100.0       199701    4.89
                               ...   
-</b></pre>
+</pre>
 </ul>
 
 After grouping by sector, two temporary variables are created <i>sectorSales</i> 
@@ -505,9 +501,9 @@ The message <i>groupList</i> at the industry level returns the list of
 companies in the current industry.  The expression:
 
 <ul>
-<pre><b>
+<pre>
  sales / ^my sectorSales * 100 print: 10 
-</b></pre>
+</pre>
 </ul>
 
 computes the percentage contribution each company makes to its total sector sales.  
@@ -519,7 +515,7 @@ to each company via the <i>^my</i> message.
 The next version of the report restricts the output to the top 2 sectors 
 based on total sector sales.  Read in the file <i>example2.h</i>.
 <ul>
-<pre><b>
+<pre>
  "***  Multiple Company Data Sheet  ***" centerNL: 70 . print; 
  "Sector-Industry Breakdown" centerNL: 70 . print; 
  "Top 2 Sectors By Sales" centerNL: 70 . print;   #-- modify title 
@@ -572,12 +568,12 @@ based on total sector sales.  Read in the file <i>example2.h</i>.
        newLine print ; 
        newLine print ; 
      ] ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 <ul>
-<pre><b>
+<pre>
                ***  Multiple Company Data Sheet  ***
                       Sector-Industry Breakdown
                         Top 2 Sectors By Sales
@@ -610,7 +606,7 @@ Industry Totals:                 13.8   100.0    30,468  19.16
 
 Sector   MAT Totals:            100.0   100.0   220,578  20.40
 </ul>
-</b></pre>
+</pre>
 
 This report is only displayed for the sectors MAT (Materials) and 
 DUR (Durables), the two largest sectors.  Because the 
@@ -628,7 +624,7 @@ requires changing the <i>do:</i> message to a <i>defineMethod:</i>
 message and naming the method.  The contents of the program itself need not 
 change, except in defining the name of the list to use:
 <ul>
-<pre><b>
+<pre>
  Company defineMethod: 
  [ | sectorIndustryReportFor: list | 
  #-- list  is a list of company objects 
@@ -688,7 +684,7 @@ change, except in defining the name of the list to use:
 
  #--  Run this New Method 
  Company sectorIndustryReportFor: testList ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  This report should be identical to the previous one.
@@ -700,7 +696,7 @@ you to vary the cutoff for the number of sectors to display.  Read in the
 file <i>example2.j:</i>
 
 <ul>
-<pre><b>
+<pre>
  Company 
  defineMethod: 
  [ | sectorIndustryReportFor: list forTop: cutoff | 
@@ -764,13 +760,13 @@ file <i>example2.j:</i>
 
  #--  Run this New Method 
  Company sectorIndustryReportFor: testList forTop: 1 ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 <ul>
 
-<pre><b>                ***  Multiple Company Data Sheet  ***                 
+<pre>                ***  Multiple Company Data Sheet  ***                 
                       Sector-Industry Breakdown                       
                         Top 1 Sectors By Sales                        
 
@@ -790,7 +786,7 @@ Industry CHEM      Chemicals
 DD        DuPont EI de Nemours            13.8 100.0    30,468   19.16
 Industry Totals:                          13.8 100.0    30,468   19.16
 
-Sector MAT Totals:                       100.0 100.0   220,578   20.40</b></pre>
+Sector MAT Totals:                       100.0 100.0   220,578   20.40</pre>
 </ul>
 
 The title now includes the cutoff supplied as a parameter.  The 
@@ -808,15 +804,15 @@ the value located is the input value.
 The file <i>example2.k</i> produces a similar report.  In this report the top two sectors are chosen from <i>masterList</i> not <i>testList</i>:
 
 <ul>
-<pre><b>
+<pre>
  Company sectorIndustryReportFor: Company masterList forTop: 2 ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 
 <ul>
-<pre><b>
+<pre>
       ***  Multiple Company Data Sheet  ***
            Sector-Industry Breakdown
             Top 2 Sectors By Sales
@@ -844,7 +840,7 @@ WMT       Wal-Mart Stores        11.0    11.0     11,909   147.81
 Industry Totals:                100.0   100.0    108,394    44.53
 
 Sector RETAIL Totals:           100.0   100.0    108,394    44.53
-</b></pre>
+</pre>
 </ul>
 
 The report displays the top 2 sectors using all companies in the database.
@@ -856,15 +852,15 @@ like any other Vision program.  The file <i>example2.l</i> produces the
 report for the top 2 sectors in 1989 for the entire company universe:
 
 <ul>
-<pre><b>
+<pre>
  89 evaluate: 
    [ Company sectorIndustryReportFor: Company masterList forTop: 2 ] ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 <ul>
-<Pre><b>
+<pre>
                 ***  Multiple Company Data Sheet  ***                 
                       Sector-Industry Breakdown                       
                         Top 2 Sectors By Sales                        
@@ -897,7 +893,7 @@ DOW       Dow Chemical Co                  5.5  30.5    13,377   12.96
 DD        DuPont EI de Nemours            12.5  69.5    30,468   19.16
 Industry Totals:                          17.9 100.0    43,845   16.06
 
-Sector MAT Totals:                       100.0 100.0   244,676   74.21</b></pre>
+Sector MAT Totals:                       100.0 100.0   244,676   74.21</pre>
 </ul>
 <hr>
 
@@ -907,14 +903,5 @@ Sector MAT Totals:                       100.0 100.0   244,676   74.21</b></pre>
 | <a href="tuList.htm">Using Lists</a> 
 | <a href="tuTS.htm">Using Dates and TimeSeries</a> |
 
-<hr>
 
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated January 25, 1999</font>
-</tr>
-</table>
-
-</body>
-</html>
+{% include doc-footer.htm copydates="1999" %}

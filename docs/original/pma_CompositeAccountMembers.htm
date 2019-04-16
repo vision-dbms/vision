@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Upload Format: CompositeAccountMembers </title>
+---
+title: "Vision Upload Format: CompositeAccountMembers "
 
-</head>
-<body>
-<body bgcolor=white>
+sidebar:
+  nav: "sb_InvestmentManagers"
+---
 <h2>Vision Portfolio Management Application Layer: Data Feeds</h2>
 <p>
 | <a href="pmaFeeds.htm">Application Feeds</a> |
@@ -13,7 +11,7 @@
 <font size=+2><b>Data Feed: </b><i>CompositeAccountMembers</i></font><p>
 <font size=+1><b>Category: </b><i>MembershipFeed</i></font><p>
 
-<h3>Summary:</h3>
+<h2>Summary:</h2>
 <p>
 <ul>The <i>CompositeAccountMembers</i> feed is used to define the
      weighted combinations of
@@ -30,7 +28,7 @@
 </ul>
 <p>
 
-<h3>Available Fields:</h3>
+<h2>Available Fields:</h2>
 <p>
 <center><table border=1 width=80% cellpadding=4 cellspacing=2>
 <tr><th>Field<th>Type<th>Description
@@ -55,7 +53,7 @@
 <tr>
 </table></center>
 <p>
-<h3>Special Processing Rules:</h3>
+<h2>Special Processing Rules:</h2>
 <p>
 <ul type=disc>
 <li>The <i>groupId</i> and <i>memberId</i> fields must be supplied.
@@ -96,7 +94,7 @@
 
 <p>
 <a name="related feeds">
-<h3>Related Feeds:</h3></a>
+<h2>Related Feeds:</h2></a>
 <p>
 <ul type=disc>
 <li><a href="pma_CompositeAccountMaster.htm"><i>CompositeAccountMaster</i></a>:
@@ -117,38 +115,28 @@ creates holdings for one or more IndexAccount instances over time using
 existing Security Universe instances and a weighting rule
 </ul>
 <p>
-<h3>Sample Upload:</h3>
+<h2>Sample Upload:</h2>
 <p>
 The following tab-delimited feed could be used to 
 define <b>CompositeAccount</b> memberships over time.  
-<pre><tt><b>
-     Interface ExternalFeedManager upload: "CompositeAccountMembers" using:
-     "date  groupId     memberId     weight
+<pre>
+  Interface ExternalFeedManager upload: "CompositeAccountMembers" using:
+  "date  groupId     memberId     weight
 
-      #- create a composite representing 50% of PORT1's holdings
-      97    COMP1       PORT1        50
+   #- create a composite representing 50% of PORT1's holdings
+   97    COMP1       PORT1        50
 
-      #- create a composite represent equal amounts of 4 accounts
-      #- in 95, unequal amounts in 96
-      95    COMP2       PORT7      25
-      95    COMP2       AGG1       25
-      95    COMP2       INDEX7     25
-      95    COMP2       COMP1      25
-      96    COMP2       PORT7      33
-      96    COMP2       AGG1       33
-      96    COMP2       INDEX7     33
-      96    COMP2       COMP1      1
-     " ;
-</b></tt></pre>
+   #- create a composite represent equal amounts of 4 accounts
+   #- in 95, unequal amounts in 96
+   95    COMP2       PORT7      25
+   95    COMP2       AGG1       25
+   95    COMP2       INDEX7     25
+   95    COMP2       COMP1      25
+   96    COMP2       PORT7      33
+   96    COMP2       AGG1       33
+   96    COMP2       INDEX7     33
+   96    COMP2       COMP1      1
+  " ;
+</pre>
 
-<p>
-<hr>
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated October 31, 1999</font>
-</tr>
-</table>
-
-</body>
-</html>
+{% include doc-footer.htm copydates="1998-1999" %}

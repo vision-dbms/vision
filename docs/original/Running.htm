@@ -1,25 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Running Vision</title>
-</head>
-<body bgcolor = white>
+---
+title: Running Vision
 
-<h2>Running Vision</h2>
+related_topics:
+  - url: "vifaces.htm"
+    title: Interfaces
+
+sidebar:
+  nav: "sb_UsingVision"
+---
 <p>
-     | <a href="FHome.htm">Home</a> | <a href="Input.htm">Loading Data</a> | <a href="Output.htm">Formatting Output</a> | <a href="vifaces.htm">Interfaces</a> |
-<hr>
-<h3>Topics Covered:</h3>
-<ul type="square">
-<li><a href="#overview">Overview</a>
-<li><a href="#editor">Interactive Vision Sessions</a>
-<li><a href="#batch">Batch Processing</a>
-<li><a href="#ospace">Object Spaces</a>
-<li><a href="#option">Startup Options</a>
-<li><a href="#qcommand">? Commands</a>
-</ul>
-<hr>
-<h3><a name="overview">Overview</a></h3>
+<h2 id="overview">Overview</h2>
 <p>
 Before you run Vision, a number of configuration options may need to
 be set to define your environment.  If you have problems starting
@@ -27,23 +17,26 @@ and executing the examples in this section, you should ask your
 Vision Administrator to check your configuration</a>.
 <p>
 To connect to your Vision database, you run the <i>batchvision</i>
-program.  Type:<pre><tt><b>
-     batchvision
-</b></tt></pre>
+program.  Type:
+<pre>
+  batchvision
+</pre>
 This starts up Vision without a "front-end".  You should
 see the prompt <i>V> </i>.  At this point, you can enter a Vision
 request.  A request can be any 
 <a href="Program.htm">Vision program</a> ranging from simple
 calculations to complex procedures.  A request must be terminated by
 the characters <b>?g</b> on a single line followed by a carriage
-return.  For example:<pre><tt><b>
-     <i>V> </i>2 + 2
-     <i>V> </i>?g
-</b></tt></pre>
-produces:<pre><tt><b>
-          4.00
-     <i>V> </i>
-</b></tt></pre>
+return.  For example:
+<pre>
+  <i>V> </i>2 + 2
+  <i>V> </i>?g
+</pre>
+produces:
+<pre>
+       4.00
+  <i>V> </i>
+</pre>
 Vision requests can span multiple lines.  Each time you enter a
 carriage return character, you will see another <i>V> </i> prompt.
 The <b>?g</b> command is your indication to Vision that you are done
@@ -55,7 +48,7 @@ To exit, type <i>Ctrl-D</i> or <i>QUIT</i> followed by a carriage
 return.
 <p>
 <hr>
-<h3><a name="editor">Interactive Vision Sessions</a></h3>
+<h2 id="editor">Interactive Vision Sessions</h2>
 <p>
 Although you can use the <i>batchvision</i> program interactively,
 there are no editing tools defined in this mode of operation
@@ -64,14 +57,11 @@ shell.  For interactive program development and execution, it is
 more useful to interact with Vision via an editor that communicates
 with the <i>batchvision</i> program.
 <p>
-Insyte provides a <i>vt100</i>-based editor and a
-<i>Windows</i>-based editor for interacting with the
-<i>batchvision</i> program.  Both editors are designed to
+Insyte provides a <i>vt100</i>-based editor for interacting with the
+<i>batchvision</i> program.  That editor is designed to
 keep track of your entire session's interactions, enabling you
 to develop and test your programs incrementally.
-Both of these Editors provide an
-<b>Edit Window</b> which is used to compose
-your Vision programs.  You can create new programs, recall earlier
+You can create new programs, recall earlier
 programs developed during this session, and load prestored programs
 from files into the Edit Window.  The <b>Output Window</b> is used
 to display the results of running your Vision program.  
@@ -81,7 +71,7 @@ editors such as <i>emacs</i> and <i>vi</i> to a
 <i>batchvision</i> session via the macro facilities available with
 these programs.
 <p>
-<h4><a name="vt100">The <i>vt100</i>-based Editor</a></h4>
+<h3 id="vt100">The <i>vt100</i>-based Editor</h3>
 <p>
 The <i>vt100</i>-based editor can be used in environments that house
 the Vision database on a Unix machine.  It can be used to access Vision from
@@ -90,47 +80,27 @@ Unix or Windows workstations.  Your display should be simulating a
 variable should be set to <i>vt100</i>.  
 <p>
 To start Vision with this editor, log into the Unix environment
-and enter:<pre><tt><b>
-     vision
-</b></tt></pre>
+and enter:
+<pre>
+  vision
+</pre>
 Once the editor is displayed, you can enter any
 Vision request.  To submit the request, press the <i>F2</i> function
-key.  For example:<pre><tt><b>
-     2 + 2       </b><i># push the F2 key</i><b>
-</b></tt></pre>
-You should see the output:<pre><tt><b>
-     Output:
-          4.00
-</b></tt></pre>
+key.  For example:
+<pre>
+  2 + 2       </b><i># push the F2 key</i>
+</pre>
+You should see the output:
+<pre>
+  Output:
+       4.00
+</pre>
 See the 
 <a href="Editor.htm#vt100"><i>Vision vt100 Editor Summary</i></a>
 for more information.
 <p>
-<h4><a name="session">The <i>Windows</i>-based Editor</a></h4>
-<p>
-The <i>Windows</i>-based editor can be used with Vision databases
-housed on any hardware platform.  This interface is part of the
-<a href="ifVLink.htm#concepts">VLink OLE Server</a> module and appears as the 
-<i>Vision Session</i> icon in the <i>Team Vision</i> program group.
-<p>
-To start Vision, click the <i>Vision Session</i> icon.
-Enter the display area at the top and enter a Vision request.
-To submit the request, press the <i>Run</i> icon in the middle of the
-tool bar or select <i>Session / Submit</i> from the menu bar.
-For example:<pre><tt><b>
-     2 + 2       </b><i># push the Run icon</i><b>
-</b></tt></pre>
-You should see the output:<pre><tt><b>
-          4.00
-</b></tt></pre>
-in the Output Window.
-<p>
-See the 
-<a href="Editor.htm#windows"><i>Vision Windows Editor Summary</i></a>
-for more information.
-<p>
 <hr>
-<h3><a name="batch">Batch Processing</a></h3>
+<h2 id="batch">Batch Processing</h2>
 <p>
 The <i>batchvision</i> program can also be used to execute
 non-interactive programs.  Requests can be submitted to
@@ -143,14 +113,16 @@ Vision to begin executing the request.
 For example, assume the message <i>displayWeeklyReports</i> has been
 saved in the Vision database and you want to run this program.  You
 could create the file <i>testfile</i> which contains the following
-lines:<pre><tt><b>
-     displayWeeklyReports
-     ?g
-</b></tt></pre>
+lines:
+<pre>
+  displayWeeklyReports
+  ?g
+</pre>
 To execute this command file, it can be used as standard input to the 
-<i>batchvision</i> program as shown below:<pre><tt><b>
-     batchvision < testfile
-</b></tt></pre>
+<i>batchvision</i> program as shown below:
+<pre>
+  batchvision < testfile
+</pre>
 The requests in a command file can access, create, and manipulate
 any Vision structures that have been saved in the database or defined
 in the command file.
@@ -160,12 +132,13 @@ to any device or output file and the execution can be started as a
 background process.  Exact conventions will vary depending on your
 operating system and "shell".  In Unix C-shell for example, the
 output of this command can be saved in the file <i>testfile.out</i>
-and the entire process executed in background using the following:<pre><tt><b>
-     batchvision < testfile >& testfile.out &
-</b></tt></pre>
+and the entire process executed in background using the following:
+<pre>
+  batchvision < testfile >& testfile.out &
+</pre>
 <p>
 <hr>
-<h3><a name="ospace">Object Spaces</a></h3>
+<h2 id="ospace">Object Spaces</h2>
 <p>
 Your Vision database contains the objects, data, and navigation
 rules needed to integrate, access, manipulate, and update
@@ -197,9 +170,9 @@ visible to all users.  New object spaces are assigned the next
 available number when created.  You normally do not need to know
 which object space houses the specific information being requested,
 since messages encapsulate these navigations for you.
-<p>
+<p id="top">
 When a Vision session is started, a 
-<a name="top"><b>Top-Level Object Space</b></a> can
+<b>Top-Level Object Space</b> can
 be specified explicitly.  If no space is specified, a 
 <b>Temporary Work Space</b> is created as your top-level environment.
 When you start Vision without any special
@@ -212,81 +185,91 @@ user's top-level
 space first, followed by object space 3, then object space 2 to
 locate any top-level messages that have been sent.  The message is
 resolved at the first place it is found.  This message search path is
-illustrated below:<pre><tt>
-              top-level space       (temporary or explicit object space)
-                    |
-                    |
-                    V
-              object space 3        (shared application core)
-                    |
-                    |
-                    V
-              object space 2        (shared built-in core)
-</tt></pre>
+illustrated below:
+<pre>
+  top-level space  (temporary or explicit object space)
+        |
+        |
+        V
+  object space 3   (shared application core)
+        |
+        |
+        V
+  object space 2   (shared built-in core)
+</pre>
 <p>
 For example, the selector <i>Company</i>
 could be defined as a message in object space 3 that
 returns the default instance of the class Company.  When the Vision
-expression:<pre><tt><b>
-     Company
-</b></tt></pre>
+expression:
+<pre>
+  Company
+</pre>
 is executed, the default company is returned.  If you execute the
-expression:<pre><tt><b>
-     !Company <- 10 ;
-</b></tt></pre>
+expression:
+<pre>
+  !Company <- 10 ;
+</pre>
 the selector <i>Company</i> is temporarily created in your
-top-level space.  When the expression:<pre><tt><b>
-     Company
-</b></tt></pre>
+top-level space.  When the expression:
+<pre>
+  Company
+</pre>
 is executed in this session, it
 will return the number 10, since Vision finds this definition first.
 To access the original, "shared" definition
-of <i>Company</i>, you would use the expression:<pre><tt><b>
-     super Company
-</b></tt></pre>
+of <i>Company</i>, you would use the expression:
+<pre>
+  super Company
+</pre>
 <p>
 To display all the messages defined in the top-level space, 
-use:<pre><tt><b>
-     displayMessages
-</b></tt></pre>
+use:
+<pre>
+  displayMessages
+</pre>
 Note that if you started your session with an explicit object space number,
 this request displays all the messages that have been defined for
 that object space, in addition to any new messages that have been
 defined in this session.
 <p>
 To display all the messages that are defined in object space 3, 
-use the expression:<pre><tt><b>
-     super displayMessages
-</b></tt></pre>
+use the expression:
+<pre>
+  super displayMessages
+</pre>
 and to display all the messages that are defined in object space 2,
-use the expression:<pre><tt><b>
-     super super displayMessages
-</b></tt></pre>
+use the expression:
+<pre>
+  super super displayMessages
+</pre>
 <p>
 The magic word <a href="Execution.htm#global"><i>^global</i></a>
 is used to access your top-level from within a Vision program.  
-For example:<pre><tt><b>
-     object 
-     do: [ #---  misc messages to object
-           ^global displayMessages;
-         ] ;
-</b></tt></pre>
+For example:
+<pre>
+  object
+  do: [ #---  misc messages to object
+        ^global displayMessages;
+      ] ;
+</pre>
 displays all the messages defined for your top-level space,
 independent of the object with which you are working.  The message
 <i>CoreWorkspace</i> will always return the top-level of object space 3
-independent of your top-level starting point.  For example:<pre><tt><b>
-     object 
-     do: [ #---  misc messages to object
-           ^global CoreWorkspace displayMessages;
-         ] ;
-</b></tt></pre>
+independent of your top-level starting point.  For example:
+<pre>
+  object
+  do: [ #---  misc messages to object
+        ^global CoreWorkspace displayMessages;
+      ] ;
+</pre>
 displays all the messages defined for the top-level of object space 3.
 <p>
 More information about <a href="Execution.htm">resolving messages</a> 
 is available.
 <p>
 <hr>
-<h3><a name="option">Startup Options</a></h3>
+<h2 id="option">Startup Options</h2>
 <p>
 There are several command line options that can be used when
 you start the <i>batchvision</i> program. 
@@ -297,55 +280,61 @@ Some of the frequently used options are described below.
 To run Vision with a database other than the default database, you
 must specify the <a href="#ospace">NDF</a> of the database you wish to use. 
 The <b>-n</b> option can be used to specify a
-different NDF.  For example:<pre><tt><b>
-     batchvision -n /newvision/network/NDF
-</b></tt></pre>
+different NDF.  For example:
+<pre>
+  batchvision -n /newvision/network/NDF
+</pre>
 This opens up the database managed by the NDF located in the
 <i>/newvision/network</i> directory.  Alternatively, you can set the
 <i>NDFPathName</i> environment variable to point to this NDF file.
-In Unix:<pre><tt><b>
-     setenv NDFPathName /newvision/network/NDF
-     batchvision
-</b></tt></pre>
+In Unix:
+<pre>
+  setenv NDFPathName /newvision/network/NDF
+  batchvision
+</pre>
 is equivalent to starting Vision with the <b>-n</b> option.
 <p>
 To start Vision with a specific <a href="#top">top-level space</a>,
 you can use the
 <b>-U#</b> to specify the object space number to use as your global
-environment.  For example:<pre><tt><b>
-     batchvision -U10
-</b></tt></pre>
+environment.  For example:
+<pre>
+  batchvision -U10
+</pre>
 starts Vision with object space 10 as your global environment.
 Alternatively, you can set the
 <i>UserOSI</i> environment variable to point to this object space
-number.  In Unix:<pre><tt><b>
-     setenv UserOSI 10
-     batchvision
-</b></tt></pre>
+number.  In Unix:
+<pre>
+  setenv UserOSI 10
+  batchvision
+</pre>
 is equivalent to starting Vision with the <b>-U10</b> option.
 <p>
 To run Vision with a startup expression, you can use the <b>-x</b> option
 to specify a startup string.  Vision will execute this expression
 when your session begins.  For example, if you always want Vision
 to create a new class named <i>MyClass</i>, you can start Vision 
-using:<pre><tt><b>
-     batchvision -x 'Entity createSubclass: "MyClass"; '
-</b></tt></pre>
+using:
+<pre>
+  batchvision -x 'Entity createSubclass: "MyClass"; '
+</pre>
 Note that if your startup expression generates terminal
 output and you are using a Vision Editor, the output will not be
 displayed.  This technique can be used to read and evaluate a file
 containing Vision code.  
-<a name="include">For example,</a> 
+<span id="include">For example,</span>
 if the file <i>include.v</i> contains
-Vision code, the expression:<pre><tt><b>
-     batchvision -x ' "include.v" asFileContents evaluate; '
-</b></tt></pre>
+Vision code, the expression:
+<pre>
+  batchvision -x ' "include.v" asFileContents evaluate; '
+</pre>
 can be used to read and execute the Vision code in this file at startup.  
 The environment variable <i>VisionStartExpr</i> can be used as an
 alternative to the <b>-x</b> option.
 <p>
 <hr>
-<h3><a name="qcommand">? Commands</a></h3>
+<h2 id="qcommand">? Commands</h2>
 <p>
 In <i>batchvision</i>, text is collected into a buffer until you
 type a <b><font size=+1>? </font></b> command on its own line.  For
@@ -402,14 +391,5 @@ expression, but is still used in some scripts.
 Note that <b><font size=+1>? </font></b> commands must appear on
 their own line.  The first character in the line must be the
 <b><font size=+1>? </font></b>.
-<p>
-<hr>
 
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated June 19, 1997</font>
-</table>
-
-</body>
-</html>
+{% include doc-footer.htm copydates="1997" %}

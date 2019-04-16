@@ -1,31 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision and the Euro Conversion</title>
-</head>
-<body bgcolor=white>
-<center>
-<h2>Vision and the Euro Conversion</h2>
-<h3><i>Issues, Questions, and Answers</i></h3>
-</center>
+---
+title: Vision and the Euro Conversion
 
-<p>
-| <a href="clCurrency.htm">The Class Currency</a> 
-| <a href="FHome.htm">Home</a>
-|
-<hr>
-<h3>Topics Covered:</h3>
-<ul type=square>
-<li><a href="#overview">Overview</a>
-<li><a href="#euroDef">Defining the Euro Currency</a>
-<li><a href="#euroHistory">Historical Analysis</a>
-<li><a href="#legacy">Using the Legacy Currency</a>
-<li><a href="#entityData">Monetary Data Stored at Entity</a>
-<li><a href="#visionCode">Suggested Vision Modifications</a>
-</ul>
+related_topics:
+  - url: "clCurrency.htm"
+    title: "The Class Currency"
 
-<p><hr>
-<h3><a name="overview">Overview</a></h3>
+sidebar:
+  nav: "sb_InvestmentManagers"
+---
+
+<h2 id="overview">Overview</h2>
 <p>
 On January 1, 1999, eleven countries are scheduled to begin using
  the <i>euro</i> as their currency.  Daily exchange rates from
@@ -45,7 +29,7 @@ consistent views of the data.  These changes can be installed as is
 or can serve as a guide to designing your own solution.
 
 <p><hr>
-<h3><a name="euroDef">Defining the Euro Currency</a></h3>
+<h2 id="euroDef">Defining the Euro Currency</h2>
 <p>
 The <i>euro</i> is simply another instance of currency.  It will
 normally be created as part of your standard currency or exchange
@@ -57,7 +41,7 @@ this value will be stored in
 the time series <i>usExchange</i> for the <i>EUR</i> currency instance.
 
 <p><hr>
-<h3><a name="euroHistory">Historical Analysis</a></h3>
+<h2 id="euroHistory">Historical Analysis</h2>
 <p>
 Most of the issues involved with using the <i>euro</i> relate to
 viewing data that existed prior to its introduction.  Since there will be no
@@ -107,7 +91,7 @@ Implementation changes needed to support these approaches
 are <a href="#visionCode">described later in this document</a>.
 
 <p><hr>
-<h3><a name="legacy">Using the Legacy Currency</a></h3>
+<h2 id="legacy">Using the Legacy Currency</h2>
 <p>
 Many Vision installations
 want to change the default currency for securities and companies
@@ -125,8 +109,9 @@ displayed in <i>euros</i>.  For example, assume the following:
 <li>The fixed conversion rate from DEM to EUR is 2
 </ul></ul>
 <p>
-The Vision expression:<pre><b>
-     981231 evaluate: [ Named Security GermanSec price] </b></pre>
+The Vision expression:
+<pre>
+     981231 evaluate: [ Named Security GermanSec price] </pre>
 will return the value of 50 <i>euros</i>, since price data is
 automatically converted from reported currency to the security's
 base currency.  
@@ -139,11 +124,12 @@ that are being changed to the <i>euro</i>.  The cover method
 otherwise.
 <p>
 If desired, a new currency, <i>LEGACY</i>, can be introduced to support
-the Vision expression:<pre><b>
+the Vision expression:
+<pre>
      Named Currency LEGACY evaluate:
        [ securityList do: [ ] ;
        ] ;
-</b></pre>
+</pre>
 This usage instructs Vision to display the data for each security
 in the list using its legacy currency.  A minor change to
 the <i>currency</i> method will be needed to support this.
@@ -151,7 +137,7 @@ These changes
 are <a href="#visionCode">described later in this document</a>.
 
 <p><hr>
-<h3><a name="entityData">Monetary Data Stored at Entity</a></h3>
+<h2 id="entityData">Monetary Data Stored at Entity</h2>
 <p>
 If you decide to reassign the <i>baseCurrency</i> to <i>EUR</i>
 for securities and companies in participating countries and you
@@ -191,12 +177,12 @@ based on the evaluation date.
 These changes are <a href="#visionCode">described later in this document</a>.
 
 <p><hr>
-<h3><a name="visionCode">Suggested Vision Modifications</a></h3>
+<h2 id="visionCode">Suggested Vision Modifications</h2>
 <p>
 This section supplies the suggested Vision code patches to address
 the introduction of the <i>euro</i>:
 <p>
-<h4>Summary of changes</h4>
+<h3 id="vcSummaryOfChanges">Summary of changes</h3>
 <p>
 <ol>
 <li>Introduce EUR currency
@@ -215,16 +201,17 @@ This approach assumes that you continue to update the legacy currency
 exchange rates after 1/1/99.  These rates will continue to provide
 the Legacy to US exchange rate.  If your currency source does not 
 provide these values, they can be computed and stored daily using
-the calculation:<pre><b>legacy fixed rate to EUR * daily EUR to US rate
-</b></pre>
+the calculation:
+<pre>legacy fixed rate to EUR * daily EUR to US rate
+</pre>
 </blockquote>
 
 <p>
-<h4>Vision Code</h4>
+<h3 id="vcVisionCode">Vision Code</h3>
 <p>
 The following patch should serve as a guide for making these changes:
 <p>
-<pre><b>
+<pre>
 ##################################################
 #  Vision Changes in support of Euro processing
 ##################################################
@@ -433,20 +420,10 @@ Entity defineMethod: [ | currencyFactor |
 #  Support for ECU synthetic euro history
 #    Create another currency ; update with synthetic history pre-euro;
 #    update with EUR values post-euro
-####################</pre></b>
+####################
 
-Currency createInstance: "ECU" . setNameTo: "EURO (SYNTHETIC)" ;</pre></b>
-<hr><table border="0" width="100%"><tr> <td align="left"><font size="-1">Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font> <td align="right"><font size="-1">Updated January 28, 1999</font></table><hr>
+Currency createInstance: "ECU" . setNameTo: "EURO (SYNTHETIC)" ;
 
-<font size=-1><center> 
-| <a href="index.htm">Home</a> 
-| <a href="abtinsyt.htm">About Insyte</a> |<br>
-| <a href="vonline.htm">Vision On-line</a> 
-| <a href="visiontech.htm">Vision Technology</a>
-| <a href="vpma.htm">Investment Managers</a>  
-| <a href="trowestory.htm">Client Spotlight</a>
-| <a href="euro.htm">Euro</a> |
-<br>
-| <a href="toc.htm">Table of Contents</a> |</center>
+</pre>
 
-</center></font></body></html>
+{% include doc-footer.htm %}

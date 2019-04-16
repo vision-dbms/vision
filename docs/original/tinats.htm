@@ -1,16 +1,12 @@
 ---
-layout: default
+title: "Time Is Not A Time-Series"
+
+sidebar:
+   nav: "sb_TheVisionStory"
 ---
-
-<!DOCTYPE html>
-<html>
-<head><title>Time Is Not A Time-Series</title>
   
-</head>
-<body bgcolor=white>
 
-<center><h1>Time Is Not A Time-Series</h1></center>
-<h2>Introduction</h2>
+<h2 id="Introduction">Introduction</h2>
 Representing time-varying data in a database has long been a problem.
 While it has always been possible to build structures tagged with time
 fields, the database tools for maintaining and analyzing time-varying
@@ -42,19 +38,19 @@ and using Vision<sup>TM</sup> -- our commercial, temporal,
 object-oriented database system -- tells us that the problem is larger
 than that.</p>
 <ul><p>
-<a href="tinats.htm#Capturing Relationships">Capturing Relationships</a>
+<a href="tinats.htm#CapturingRelationships">Capturing Relationships</a>
 </p>
 
-<p><a href="tinats.htm#Encapsulating Complexity">Encapsulating Complexity</a>
+<p><a href="tinats.htm#EncapsulatingComplexity">Encapsulating Complexity</a>
 </p>
 
-<p><a href="tinats.htm#Querying The Data Base">Querying The Data Base</a>
+<p><a href="tinats.htm#QueryingTheDataBase">Querying The Data Base</a>
 </p>
 
-<p><a href="tinats.htm#Solving The Problem">Solving The Problem</a> </p>
+<p><a href="tinats.htm#SolvingTheProblem">Solving The Problem</a> </p>
 </ul>
 
-<h2><a name="Capturing Relationships"></a>Capturing Relationships -- How
+<h2 id="CapturingRelationships">Capturing Relationships -- How
 Time Affects A Data Model</h2>
 
 <p>Providing a <i>TimeSeries</i> class -- a type of indexed collection
@@ -114,7 +110,7 @@ properties actually need to be made time-varying is a function of the informatio
 the database needs to capture and how that information will be used.  That
 is a fact of life and a source of complexity that must be managed.</p>
 
-<h2><a name="Encapsulating Complexity"></a>Encapsulating Complexity --How Time Affects A Program</h2>
+<h2 id="EncapsulatingComplexity">Encapsulating Complexity --How Time Affects A Program</h2>
 
 <p>An application can use time-varying data in a database in one of two
 general ways.  It can directly examine a time-series to display its content,
@@ -178,7 +174,7 @@ the <i>when?</i> question.  The ability to create new properties and methods,
 is, after all, part of every object-oriented programming environment. The
 problem is not quite that simple.</p>
 
-<h2><a name="Querying The Data Base"></a>Querying The Data Base -- The
+<h2 id="QueryingTheDataBase">Querying The Data Base -- The
 Problem Goes Global</h2>
 
 <p>There is a major problem here, and it comes from the use of global variables
@@ -213,7 +209,7 @@ In effect, this <i>work-around</i> has removed the problem from the database
 system -- where it can be optimized by designers who know how to do
 such things -- and hidden it in the bowels of an application's logic. </p>
 
-<h2><a name="Solving The Problem"></a>Solving The Problem -- Dimensionality
+<h2 id="SolvingTheProblem">Solving The Problem -- Dimensionality
 Is Architectural</h2>
 
 <p>That time is special should not come as a surprise.  The world is multi-dimensional
@@ -245,28 +241,5 @@ model specifies the rules for accessing and using monetary values consistently;
 <i>in the large</i>, the perspective of the user determines how those rules
 get used. Other properties such as <i>Scenario</i> and <i>Version</i> play
 similar roles in other applications.</p>
-<hr>
-<table border="0" width="100%">
-<tr>
-<td align="left"><font size="-1">Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
-<td align="right"><font size="-1">Updated January 28, 1999</font>
-</table>
 
-<hr>
-
-<font size=-1><Center> 
-| <a href="index.htm">Home</a> 
-| <a href="abtinsyt.htm">About Insyte</a> |
-<br>
-| <a href="vonline.htm">Vision On-line</a> 
-| <a href="visiontech.htm">Vision Technology</a>
-| <a href="vpma.htm">Investment Managers</a>  
-| <a href="trowestory.htm">Client Spotlight</a>
-| <a href="euro.htm">Euro</a> |
-<br>
-| <a href="toc.htm">Table of Contents</a> |
-
-</center></font>
-
-
-</body></html>
+{% include doc-footer.htm copydates="1999" %}

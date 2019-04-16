@@ -1,26 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>The Account Classes</title>
-</head>
+---
+title: The Account Classes
 
-<body bgcolor=white>
-<h2>The Account Classes</h2>
-| <a href="FHome.htm">Home</a> | <a href="invRef.htm">Investment Reference</a> | <a href="invHolding.htm">The Holding Class</a> |
-<hr>
+related_topics:
+  - url: "invRef.htm"
+    title: "Investment Reference"
+  - url: "invHolding.htm"
+    title: "The Holding Class"
 
-<h3>Topics Covered:</h3>
-<ul type = square>
-<li><a href="#Overview">Overview</a>
-<li><a href="#The Account Class">The Account Class</a>
-<li><a href="#The Portfolio Class">The Portfolio Class</a>
-<li><a href="#The AggAccount Class">The AggAccount Class</a>
-<li><a href="#The IndexAccount Class">The IndexAccount Class</a>
-<li><a href="#New Instances and Additional Messages">New Instances and Additional Messages</a>
-</ul>
-<hr>
+---
 
-<a name="Overview"><h3>Overview</h3></a>
+<h2 id="Overview">Overview</h2>
 
 The  class  <b>Account</b>  is  a  super  class  of  the  classes  <b>Portfolio</b>,
 <b>AggAccount</b>,  and  <b>IndexAccount</b>.   A Portfolio is defined as an account
@@ -41,24 +30,30 @@ subclass.  Your installation may define additional subclasses.
 
 Instances of the Account classes are named at the lowest level  class.
 For example, portfolio XYZ would be accessed using:
-<pre><b>    Named Portfolio XYZ </b></pre>
+<pre>
+  Named Portfolio XYZ
+</pre>
 
 An extra naming dictionary is defined at the Account  class  to  allow
 interchangeable   access   among   the   classes.   For  example,  the
 expression:
-<pre><b>    Named Account XYZ </b></pre>
+<pre>
+  Named Account XYZ
+</pre>
 
 also returns portfolio XYZ.  If the same id  is  used  to  identify  a
 portfolio and another account instance, the expression will return the
 portfolio instance.  The property  <i>uniqueId</i>  is  used  to  create  a
 unique identifier for each instance.  The expressions:
-<pre><b>    Named Account P_XYZ = Named Portfolio XYZ
+<pre>
+  Named Account P_XYZ = Named Portfolio XYZ
 
-    Named Account A_XYZ = Named AggAccount XYZ </b></pre>
-
+  Named Account A_XYZ = Named AggAccount XYZ
+</pre>
       and
-
-<pre><b>    Named Account I_XYZ = Named IndexAccount XYZ </b></pre>
+<pre>
+  Named Account I_XYZ = Named IndexAccount XYZ
+</pre>
 
 all return the value TRUE.
 
@@ -78,7 +73,9 @@ the following search rule:
 
 For example, the expression:
 
-<pre><b>    Account locateId: "XYZ" </b></pre>
+<pre>
+  Account locateId: "XYZ"
+</pre>
 
 returns <i>Named Account XYZ</i> if it is  defined,  otherwise  it  returns
 <i>Named  Portfolio  XYZ</i>,  otherwise  <i>Named AggAccount XYZ</i>, otherwise
@@ -87,7 +84,7 @@ returns <i>Named Account XYZ</i> if it is  defined,  otherwise  it  returns
 
 <hr>
 
-<a name="The Account Class"><h3>The Account Class</h3></a>
+<h2 id="TheAccountClass">The Account Class</h2>
 
 The class Account is used to unify all the protocol that is common  to
 portfolios,   aggregates,   and  index  accounts.  The  following  key
@@ -148,24 +145,28 @@ updated.  These values are retained over time.
 
 The <i>profile</i> message can be used to display a summary description  of an Account:
 
-<pre><b>    Named Account A_XYZ profile</b></pre>
+<pre>
+  Named Account A_XYZ profile
+</pre>
 
 produces:
 
-<pre><b>    *** AggAccount Profile For: XYZ
-    Code:                         XYZ
-    Aliases:                      XYZ /
+<pre>
+  *** AggAccount Profile For: XYZ
+  Code:                         XYZ
+  Aliases:                      XYZ /
 
-    ---  Links   ---
-    baseCurrency :                US        US Dollars
-    manager :                     Default   Default
+  ---  Links   ---
+  baseCurrency :                US        US Dollars
+  manager :                     Default   Default
 
-    ---  XRefs  ---
+  ---  XRefs  ---
 
-    ---  Supplemental Data  ---
-    uniqueId:                     A_XYZ
-    holdings (count):                           0
-    totalMarketValue (US):                    NA</b></pre>
+  ---  Supplemental Data  ---
+  uniqueId:                     A_XYZ
+  holdings (count):                           0
+  totalMarketValue (US):                    NA
+</pre>
 
 Additional messages defined at the Account class include:
 <p>
@@ -192,7 +193,7 @@ Additional messages defined at the Account class include:
               
 <hr>
 
-<a name="The Portfolio Class"><h3>The Portfolio Class</h3></a>
+<h2 id="ThePortfolioClass">The Portfolio Class</h2>
 
 Instances of the class <b>Portfolio</b> correspond to portfolios  as  defined
 by  the  accounting  system.   A  new  Portfolio  instance  is created
@@ -229,33 +230,39 @@ prefix <i>P_</i>.
 <p>
 For example, the expression:
 <p>
-<pre><b>    Portfolio createInstance: "XYZ" .
-    setNameTo: "Sample XYZ Portfolio" </b></pre>
+<pre>
+  Portfolio createInstance: "XYZ" .
+  setNameTo: "Sample XYZ Portfolio"
+</pre>
 
 creates a new Portfolio instance with a <i>code</i> of <i>XYZ</i>, a  <i>uniqueId</i>
 of  <i>P_XYZ</i>, and the supplied name.  The <i>profile</i> message can be used
 to display a summary description of this portfolio:
 <p>
-<pre><b>    Named Portfolio XYZ profile </b></pre>
+<pre>
+  Named Portfolio XYZ profile
+</pre>
 
 produces:
 
-<pre><b>    *** Portfolio Profile For: Sample XYZ Portfolio
-    Code:                         XYZ
-    Aliases:                      XYZ /
+<pre>
+  *** Portfolio Profile For: Sample XYZ Portfolio
+  Code:                         XYZ
+  Aliases:                      XYZ /
 
-    ---  Links   ---
-    baseCurrency :                US        US Dollars
-    manager :                     Default   Default
+  ---  Links   ---
+  baseCurrency :                US        US Dollars
+  manager :                     Default   Default
 
-    ---  XRefs  ---
+  ---  XRefs  ---
 
-    ---  Supplemental Data  ---
-    uniqueId:                     P_XYZ
-    holdings (count):                           0
-    totalMarketValue (US):                    NA
+  ---  Supplemental Data  ---
+  uniqueId:                     P_XYZ
+  holdings (count):                           0
+  totalMarketValue (US):                    NA
 
-    aggregateList (count):                      0 </b></pre>
+  aggregateList (count):                      0
+</pre>
 
 Portfolios can be added and removed from  AggAccount  instances.   The
 following  messages  are  used  to  manage  the relationship between a
@@ -276,7 +283,7 @@ AggAccounts are described in more detail in the next section.
 
 <hr>
 
-<a name="The AggAccount Class"><h3>The AggAccount Class</h3></a>
+<h2 id="TheAggAccountClass">The AggAccount Class</h2>
 
 Instances of the class <b>AggAccount</b> correspond to user defined groupings
 of  portfolios.   A  new AggAccount instance and its portfolio members
@@ -290,7 +297,9 @@ included in the aggregate's definition.
 Several messages are  available  to  create  and  maintain  AggAccount
 instances.  To create a new AggAccount, type the expression:
 
-<pre><b>    AggAccount create: "code" fromPortfolioList: list </b></pre>
+<pre>
+  AggAccount create: "code" fromPortfolioList: list
+</pre>
 
 where code is name you wish to use to reference the AggAccount
 and list is a list of portfolios to be used or a block defining a rule which returns a list of portfolios
@@ -316,33 +325,39 @@ property is set to the block.
 <p>
 For example:
 
-<pre><b>    AggAccount create: "Test1"
-        fromPortfolioList: (Named Portfolio XYZ, Named Portfolio ABC) ; </b></pre>
+<pre>
+  AggAccount create: "Test1"
+      fromPortfolioList: (Named Portfolio XYZ, Named Portfolio ABC) ;
+</pre>
 
 This message will create an AggAccount named Test1 with two  portfolio
 members  (assuming  they exist).  The <i>profile</i> message can be used to
 display a summary description of this aggregate:
 
-<pre><b>    Named AggAccount Test1 profile </b></pre>
+<pre>
+  Named AggAccount Test1 profile
+</pre>
 
 produces:
 
-<pre><b>    *** AggAccount Profile For: Test1
-    Code:                         Test1
-    Aliases:                      Test1 /
+<pre>
+  *** AggAccount Profile For: Test1
+  Code:                         Test1
+  Aliases:                      Test1 /
 
-    ---  Links   ---
-    baseCurrency :                US        US Dollars
-    manager :                     Default   Default
+  ---  Links   ---
+  baseCurrency :                US        US Dollars
+  manager :                     Default   Default
 
-    ---  XRefs  ---
+  ---  XRefs  ---
 
-    ---  Supplemental Data  ---
-    uniqueId:                     A_Test1
-    holdings (count):                           0
-    totalMarketValue (US):                    NA
+  ---  Supplemental Data  ---
+  uniqueId:                     A_Test1
+  holdings (count):                           0
+  totalMarketValue (US):                    NA
 
-    memberList (count):                         2 </b></pre>
+  memberList (count):                         2
+</pre>
 
 
 To create an AggAccount using a rule instead of an explicit list,  you
@@ -352,49 +367,59 @@ supply  a  block that can be executed to produce a list of portfolios.
 For example:
 
 
-<pre><b>    AggAccount create: "Test2"
-       fromPortfolioList: [ ^global Portfolio masterList ] ; </b></pre>
+<pre>
+  AggAccount create: "Test2"
+     fromPortfolioList: [ ^global Portfolio masterList ] ;
+</pre>
 
 This message will create an AggAccount named Test2 and will update its
 member list whenever you execute the <i>updateMemberships</i> message.  For
 example, if there are currently 10 portfolio instances defined in your
 database, the expression:
 
-<pre><b>    Named AggAccount Test2 updateMemberships profile </b></pre>
+<pre>
+  Named AggAccount Test2 updateMemberships profile
+</pre>
 
 produces:
 
-<pre><b>    *** AggAccount Profile For: Test2
-    Code:                         Test2
-    Aliases:                      Test2 /
+<pre>
+  *** AggAccount Profile For: Test2
+  Code:                         Test2
+  Aliases:                      Test2 /
 
-    ---  Links   ---
-    baseCurrency :                US        US Dollars
-    manager :                     Default   Default
+  ---  Links   ---
+  baseCurrency :                US        US Dollars
+  manager :                     Default   Default
 
-    ---  XRefs  ---
+  ---  XRefs  ---
 
-    ---  Supplemental Data  ---
-    uniqueId:                     A_Test2
-    holdings (count):                           0
-    totalMarketValue (US):                    NA
+  ---  Supplemental Data  ---
+  uniqueId:                     A_Test2
+  holdings (count):                           0
+  totalMarketValue (US):                    NA
 
-    memberList (count):                        10
-    membershipRule:
-    [ | membershipRule | ^global Portfolio masterList ] </b></pre>
+  memberList (count):                        10
+  membershipRule:
+  [ | membershipRule | ^global Portfolio masterList ]
+</pre>
 
 
 To change the membership rule, use the <i>setMembershipRuleTo:</i> message.
 For example:
-<pre><b>    Named AggAccount Test2
-      setMembershipRuleTo: [ ^global Portfolio activeList ] ; </b></pre>
+<pre>
+  Named AggAccount Test2
+    setMembershipRuleTo: [ ^global Portfolio activeList ] ;
+</pre>
 
 By  default,  an  AggAccount  will  not   have   any   holdings.    To
 automatically create the AggAccount and build the appropriate holdings
 structures, use the form:
 
-<pre><b>    AggAccount createAndInitialize: "Test" fromPortfolioList:
-       (Named Portfolio XYZ, Named Portfolio ABC) ; </b></pre>
+<pre>
+  AggAccount createAndInitialize: "Test" fromPortfolioList:
+     (Named Portfolio XYZ, Named Portfolio ABC) ;
+</pre>
 
 This  message  will  create  an  AggAccount  named  Test,  create  the
 appropriate  holding  instances,  and  compute portfolio level summary
@@ -404,21 +429,29 @@ described more fully in <a href="invHolding.htm"><i>The Holding Class</i></a>.
 To set the membership list to an  explicit  portfolio  list,  use  the
 expression:
 
-<pre><b>    Named AggAccount Test setPortfolioListTo:
-      (Named Portfolio XYZ, Named Portfolio DEF) ; </b></pre>
+<pre>
+  Named AggAccount Test setPortfolioListTo:
+    (Named Portfolio XYZ, Named Portfolio DEF) ;
+</pre>
 
 To add a portfolio to this AggAccount, use the expression:
 
-<pre><b>    Named AggAccount Test addPortfolio: Named Portfolio DEF ; </b></pre>
+<pre>
+  Named AggAccount Test addPortfolio: Named Portfolio DEF ;
+</pre>
 
 To delete a portfolio from the AggAccount, use:
 
-<pre><b>    Named AggAccount Test deletePortfolio: Named Portfolio ABC ; </b></pre>
+<pre>
+  Named AggAccount Test deletePortfolio: Named Portfolio ABC ;
+</pre>
 
 After you have added and/or deleted portfolios from an aggregate,  you
 must rebuild its holdings-related data using the expression:
 
-<pre><b>    Named AggAccount Test doPrecalcs </b></pre>
+<pre>
+  Named AggAccount Test doPrecalcs
+</pre>
 
 The precalcs are not done automatically so that you can add and delete
 several portfolios quickly.
@@ -426,13 +459,17 @@ several portfolios quickly.
 
 To display the current portfolios in this aggregate, use:
 
-<pre><b>    Named AggAccount Test portfolioList
-      do: [ code print: 10 ; name printNL ] ; </b></pre>
+<pre>
+  Named AggAccount Test portfolioList
+    do: [ code print: 10 ; name printNL ] ;
+</pre>
 
 To determine which aggregates include a particular portfolio, use  the
 expression:
 
-<pre><b>    Named Portfolio XYZ displayAggregateList </b></pre>
+<pre>
+  Named Portfolio XYZ displayAggregateList
+</pre>
 
 
 This list will display all AggAccounts that include this Portfolio.
@@ -440,7 +477,7 @@ This list will display all AggAccounts that include this Portfolio.
 
 <hr>
 
-<a name="The IndexAccount Class"><h3>The IndexAccount Class</h3></a>
+<h2 id="TheIndexAccountClass">The IndexAccount Class</h2>
 
 Instances of the class IndexAccount correspond to user  defined  lists
 of  securities  that  can be viewed as an Account.  A new IndexAccount
@@ -453,9 +490,11 @@ currently included in the index portfolio's definition.
 
 To create a new IndexAccount and assign an initial list of securities,
 type the expression:
-<pre><b>    IndexAccount createInstance: "MyIndex" .
-       setSecuritiesTo: (Named Security GM, Named Security IBM )
-       asOf: earliestPossibleDate ; </b></pre>
+<pre>
+  IndexAccount createInstance: "MyIndex" .
+     setSecuritiesTo: (Named Security GM, Named Security IBM )
+     asOf: earliestPossibleDate ;
+</pre>
 
 This message  creates  a  new  IndexAccount  named  <i>MyIndex</i>  with  2
 members.   The  member  list can be accessed via the <i>memberList</i> time
@@ -463,35 +502,41 @@ series which returns the list of security members as  of  the  current
 evaluation  date.   The  <i>profile</i>  message  can  be used to display a
 summary description of this aggregate:
 
-<pre><b>    Named IndexAccount MyIndex profile </b></pre>
+<pre>
+  Named IndexAccount MyIndex profile
+</pre>
 
 produces:
 
-<pre><b>    *** IndexAccount Profile For: MyIndex
-    Code:                         MyIndex
-    Aliases:                      MyIndex /
+<pre>
+  *** IndexAccount Profile For: MyIndex
+  Code:                         MyIndex
+  Aliases:                      MyIndex /
 
-    ---  Links   ---
-    baseCurrency :                US        US Dollars
-    manager :                     Default   Default
+  ---  Links   ---
+  baseCurrency :                US        US Dollars
+  manager :                     Default   Default
 
-    ---  XRefs  ---
+  ---  XRefs  ---
 
-    ---  Supplemental Data  ---
-    uniqueId:                     I_MyIndex
-    holdings (count):                           0
-    totalMarketValue (US):                    NA
+  ---  Supplemental Data  ---
+  uniqueId:                     I_MyIndex
+  holdings (count):                           0
+  totalMarketValue (US):                    NA
 
-    memberList (count):                         2 </b></pre>
+  memberList (count):                         2
+</pre>
 
 
 To create the membership for an IndexAccount using a rule  instead  of
 an explicit list, you supply a block that can be executed to produce a
 list of securities.  For example:
 
-<pre><b>    Named IndexAccount MyIndex
-      setMembershipRuleTo:
-      [ ^global Security masterList select: [ baseCurrency isUS ] ]; </b></pre>
+<pre>
+  Named IndexAccount MyIndex
+    setMembershipRuleTo:
+    [ ^global Security masterList select: [ baseCurrency isUS ] ];
+</pre>
 
 The <i>getMembers</i> message returns the list of security members  for  an
 IndexAccount  as  of  the  evaluation  date.   If a membership rule is
@@ -505,7 +550,9 @@ defined membership rule.
 The message <i>addMember:</i> can be used to add a security to the  current
 member list of the index as of the evaluation date.  For example:
 
-<pre><b>    Named IndexAccount MyIndex addMember: Named Security IBM </b></pre>
+<pre>
+  Named IndexAccount MyIndex addMember: Named Security IBM
+</pre>
 
 adds this security to the most recent membership list for  this  index
 if  it  is  not  already a member.  The message <i>deleteMember:</i> can be
@@ -516,8 +563,10 @@ The message <i>getIndices</i> defined at the Security class returns a  list
 of  IndexAccount  instances  that  include  that  security  as  of the
 evaluation date.  For example, the expression:
 
-<pre><b>    Named Security IBM getIndices
-    do: [ code printNL ] ; </b></pre>
+<pre>
+  Named Security IBM getIndices
+  do: [ code printNL ] ;
+</pre>
 
 displays the list of IndexAccounts that include IBM as of  the  latest
 membership update date.
@@ -528,12 +577,14 @@ the  current  list  of  member  securities  by  their market value and
 weights based on various weighting schemes.  The message  returns  the
 member security list extended by the following messages:
 
-<pre><b>    pctEvenDollar
-    mvalEvenDollar
-    pctMCapWeighted
-    mvalMCapWeighted
-    pctMValWeighted
-    mvalMValWeighted </b></pre>
+<pre>
+  pctEvenDollar
+  mvalEvenDollar
+  pctMCapWeighted
+  mvalMCapWeighted
+  pctMValWeighted
+  mvalMValWeighted
+</pre>
 
 
 The  <i>MVal</i>-weighted  values  are  computed  using  the  corresponding
@@ -550,13 +601,15 @@ evaluation date's price.
 
 For example, the expression:
 
-<pre><b>    Named IndexAccount MyIndex getMemberWeightsUsingAccount: NA .
-    do: [ ticker print: 10 ;      #-  security ticker
-          name print: 30 ;        #-  security name
-          pctEvenDollar print ;   #-  %held if even dollar weighted
-          pctMCapWeighted print ; #-  %held if mkt cap weighted
-          newLine print ;
-        ] ; </b></pre>
+<pre>
+  Named IndexAccount MyIndex getMemberWeightsUsingAccount: NA .
+  do: [ ticker print: 10 ;      #-  security ticker
+        name print: 30 ;        #-  security name
+        pctEvenDollar print ;   #-  %held if even dollar weighted
+        pctMCapWeighted print ; #-  %held if mkt cap weighted
+        newLine print ;
+      ] ;
+</pre>
 
 generates a report that  shows  the  <i>even  dollar</i>  and  <i>market  cap
 weighted</i> percentages held for each security in the the IndexAccount.
@@ -566,18 +619,20 @@ Several messages  have  been  defined  to  generate  holdings  for  an
 IndexAccount  using  various  rules  for  generated  ownership.  These
 messages include:
 
-<pre><b>    createEvenDollarHoldingsAsOf:
-    createEvenShareHoldingsAsOf:
-    createMCapWeightedHoldingsAsOf:
-    createMValWeightedHoldingsAsOf:using:
-    setSharesIn:to: </b></pre>
+<pre>
+  createEvenDollarHoldingsAsOf:
+  createEvenShareHoldingsAsOf:
+  createMCapWeightedHoldingsAsOf:
+  createMValWeightedHoldingsAsOf:using:
+  setSharesIn:to:
+</pre>
 
 These messages are describe in detail in <a href="invHolding.htm"><i>The Holding Class</i></a>.
 <p>
 
 <hr>
 
-<a name="New Instances and Additional Messages"><h3>New Instances and Additional Messages</h3></a>
+<h2 id="NewInstancesAndAdditionalMessages">New Instances and Additional Messages</h2>
 
 Account instances are usually created and  maintained  as  part  of  a
 nightly  production  cycle.   The  specific processing rules used vary
@@ -589,23 +644,17 @@ various Account classes.  The <i>showMessages</i> message is the fastest
 way to determine the current list of messages available for  a  class.
 For example:
 
-<pre><b>    Portfolio showMessages </b></pre>
+<pre>
+  Portfolio showMessages
+</pre>
 
 displays the messages defined for the Portfolio class and
 
-<pre><b>    Portfolio showMessagesX </b></pre>
+<pre>
+  Portfolio showMessagesX
+</pre>
 
 displays the messages  defined  for  Portfolio  and  its  superclasses
 Account and Entity.
-<hr>
 
-<table border="0" width="100%">
-<tr>
-<td align="left"><font size="-1">Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
-<td align="right"><font size="-1">Created June 11, 1997</font>
-</table>
-<hr>
-
-</center></font>
-</body>
-</html>
+{% include doc-footer.htm copydates="1997" %}

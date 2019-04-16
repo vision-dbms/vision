@@ -1,9 +1,8 @@
-<!DOCTYPE html>
-<html><head><title>Release 6.1.2 Upgrade for Unix</title></head>
-<body bgcolor=white>
-<h2>Release 6.1.2 Upgrade for Unix</h2><hr>
+---
+title: "Release 6.1.2 Upgrade for Unix"
+---
 <p>
-<h3>Download Contents:</h3>
+<h2>Download Contents:</h2>
 <ul type=disc><table>
 <tr align=left valign=right><td>ReadMe.txt<td>Installation instructions (this document).
 
@@ -16,7 +15,7 @@
 <tr align=left valign=right><td>rollbackNetwork.cmd<td>A C-Shell Unix script that has been updated to work with the PMA 1.6 release. This file is read by the <i>visionUpgrade_1.5_to_1.6.unix</i> script.
 </table></ul> 
 
-<h3>Installation Procedures:</h3>
+<h2>Installation Procedures:</h2>
 <p>These installation procedures have been automated for PMA installations.  Non-PMA installations can review the release contents for applicability to their environment.
 <p><ol type=1>
 <li>Backup the current <i>/vision</i> and <i>/localvision</i> contents by following the 
@@ -33,7 +32,7 @@
 
    <li>Extract the files from:
 
-<b><pre>               tar xpf VisionUpgrade.tar</pre></b>
+<pre>               tar xpf VisionUpgrade.tar</pre>
 </ol>
 
 <li>Install the new vision executables over the old version or create a new link.
@@ -42,11 +41,11 @@
    <li>Copy the appropriate <a href="download/vision.sol.tar.Z">vision.sol.tar.Z</a>, <a href="download/vision.hpux.tar.Z">vision.hpux.tar.Z</a>, or <a href="download/vision.aix.tar.Z">vision.aix.tar.Z</a> file to this directory. 
    <li>Decompress the tar file using the appropriate options to preserve permissions: 
 
-<b><pre>               uncompress vision.*.tar.Z</pre></b>
+<pre>               uncompress vision.*.tar.Z</pre>
 
    <li>Extract the files and subdirectories from: 
 
-<b><pre>               tar xpf vision.*.tar</pre></b>
+<pre>               tar xpf vision.*.tar</pre>
    <li>Re-link if necesary.
 
   </ol>
@@ -55,13 +54,10 @@
   <ol type=a>
    <li>Execute the script from the directory that has the <i>VisionUpgrade.tar</i> file.
 
-<b><pre>               visionUpgrade_1.5_to_1.6.unix</pre></b>
+<pre>               visionUpgrade_1.5_to_1.6.unix</pre>
   </ol>
 <li>Review the upgrade output in the generated log:
-<b><pre>                    /localvision/logs/visionUpgrade_1.5_to_1.6.log</pre></b>
+<pre>                    /localvision/logs/visionUpgrade_1.5_to_1.6.log</pre>
 </ol>
 
-
-<p><hr><table border=0 width="100%"><tr><td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated March 26, 1999</font></tr></table>
-</body></html>
+{% include doc-footer.htm copydates="1999" %}

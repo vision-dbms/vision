@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Upload Format: DivFeed</title>
+---
+title: "Vision Upload Format: DivFeed"
 
-</head>
-<body>
-<body bgcolor=white>
+sidebar:
+  nav: "sb_InvestmentManagers"
+---
 <h2>Vision Portfolio Management Application Layer: Data Feeds</h2>
 <p>
 | <a href="pmaFeeds.htm">Application Feeds</a> |
@@ -13,7 +11,7 @@
 <font size=+2><b>Data Feed: </b><i>DivFeed</i></font><p>
 <font size=+1><b>Category: </b><i>EntityExtenderFeed</i></font><p>
 
-<h3>Summary:</h3>
+<h2>Summary:</h2>
 <p>
 <ul>
 The <i>DivFeed</i> feed is used to create and update <b>DivRecord</b>
@@ -26,7 +24,7 @@ The <i>DivFeed</i> feed is used to create and update <b>DivRecord</b>
 </ul>
 <p>
 
-<h3>Available Fields:</h3>
+<h2>Available Fields:</h2>
 <p>
 <center><table border=1 width=80% cellpadding=4 cellspacing=2>
 <tr><th>Field<th>DivRecord Property<th>Type<th>Description
@@ -62,7 +60,7 @@ The <i>DivFeed</i> feed is used to create and update <b>DivRecord</b>
 </table></center>
 <p>
 
-<h3>Special Processing Rules:</h3>
+<h2>Special Processing Rules:</h2>
 <p>
 <ul type=disc>
 <li>The <i>entityId</i> must correspond to an existing <b>Security</b>
@@ -104,7 +102,7 @@ The <i>DivFeed</i> feed is used to create and update <b>DivRecord</b>
 </ul>
 <p>
 <a name="related">
-<h3>Related Feeds:</h3>
+<h2>Related Feeds:</h2>
 <p>
 <ul type=disc>
 <li><a href="pma_
@@ -115,11 +113,11 @@ loads cusip/sedol changes and adds other aliases that
 can serve as the <i>entityId</i> for a security.
 </ul>
 <p>
-<h3>Sample Upload:</h3>
+<h2>Sample Upload:</h2>
 <p>
 The following tab-delimited feed could be used to create <b>DividendRecord</b>
 instances:
-<pre><tt><b>
+<pre>
      Interface ExternalFeedManager upload: "DivFeed" using:
      "entityId     date          currencyId     recordValue
       45920010     05/07/1997    USD             0.20 
@@ -129,16 +127,6 @@ instances:
       37044210     08/12/1997    USD             0.50
       37044210     11/10/1997    USD             0.50
      " ;
-</b></tt></pre>
+</pre>
 
-<p>
-<hr>
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated December 15, 2000</font>
-</tr>
-</table>
-
-</body>
-</html>
+{% include doc-footer.htm copydates="2000" %}

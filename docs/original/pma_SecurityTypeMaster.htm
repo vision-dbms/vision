@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Upload Format: SecurityTypeMaster </title>
+---
+title: "Vision Upload Format: SecurityTypeMaster "
 
-</head>
-<body>
-<body bgcolor=white>
+sidebar:
+  nav: "sb_InvestmentManagers"
+---
 <h2>Vision Portfolio Management Application Layer: Data Feeds</h2>
 <p>
 | <a href="pmaFeeds.htm">Application Feeds</a> |
@@ -13,7 +11,7 @@
 <font size=+2><b>Data Feed: </b><i>SecurityTypeMaster</i></font><p>
 <font size=+1><b>Category: </b><i>MasterFeed</i></font><p>
 
-<h3>Summary:</h3>
+<h2>Summary:</h2>
 <p>
 <ul>
 The <i>SecurityTypeMaster</i> feed is used to create
@@ -25,7 +23,7 @@ The <i>SecurityTypeMaster</i> feed is used to create
 </ul>
 <p>
 
-<h3>Available Fields:</h3>
+<h2>Available Fields:</h2>
 <p>
 <center><table border=1 width=80% cellpadding=4 cellspacing=2>
 <tr><th>Field<th>Vision<br>Property<th>Type<th>Description
@@ -73,7 +71,7 @@ The <i>SecurityTypeMaster</i> feed is used to create
 </table></center>
 <p>
 
-<h3>Special Processing Rules:</h3>
+<h2>Special Processing Rules:</h2>
 <p>
 <ul type=disc>
 <li>The <i>assetCategory</i> and <i>unitCalc</i> values are used as
@@ -83,18 +81,18 @@ The <i>SecurityTypeMaster</i> feed is used to create
 </ul>
 <p>
 <a name="related">
-<h3>Related Feeds:</h3>
+<h2>Related Feeds:</h2>
 <p>
 <ul type=disc>
 <li><a href="pma_AssetCatMaster.htm"><i>AssestCatMaster</i></a>:
 defines AssetCategory instances by SecurityType
 </ul>
 <p>
-<h3>Sample Upload:</h3>
+<h2>Sample Upload:</h2>
 <p>
 The following tab-delimited feed could be used to create <b>SecurityType</b> instances
 and refresh basic information:
-<pre><tt><b>
+<pre>
    Interface ExternalFeedManager upload: "SecurityTypeMaster" using:
    "Id	 Name	           UnitCalc     AssetCategory
     0    Cash & Equiv	    1.00	 Cash
@@ -103,16 +101,6 @@ and refresh basic information:
     3    Gvt Bond          10.00         Fixed
     4    Option           100.00         Other 
    " ;
-</b></tt></pre>
+</pre>w
 
-<p>
-<hr>
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated August 27, 1998</font>
-</tr>
-</table>
-
-</body>
-</html>
+{% include doc-footer.htm copydates="1998" %}

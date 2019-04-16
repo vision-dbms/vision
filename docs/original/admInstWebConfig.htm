@@ -1,18 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Setup: Web Configuration</title>
-</head>
-<body bgcolor=white>
-<h2>Vision Setup: Web Configuration</h2>
-<hr>
-<h3>Topics Covered</h3>
-<ul type=square>
-<li><a href="#Installation">Installation</a><br>
-<li><a href="#Steps">Steps</a><br>
-<li><a href="#Test">Test</a><br>
-</ul><hr>
-<h3><a name="Installation">Installation</a></h3>
+---
+title: "Vision Setup: Web Configuration"
+---
+
+<h2 id="Installation">Installation</h2>
 <p>
 Vision Applications are delivered to users via a Web-based browser
 running on an internal intranet. There are two archives that contain
@@ -42,7 +32,7 @@ paths, if necessary.
 file will need to be transfered via FTP to the Unix platform before it is uncompressed.)</i>
 
 <p>
-<hr><h3><a name="Steps">Steps</a></h3>
+<hr><h2 id="Steps">Steps</h2>
 <p>
 <ol>
 <li>Go to the directory representing your Web server location and
@@ -88,7 +78,7 @@ the <a href="#sameMach">Same Machine</a> section; if they are running
 on different machines, follow the instructions in the 
 <a href="#diffMach">Different Machine</a> section.
 <p>
-<i><a name="sameMach">Same Machine:</a></i>
+<i id="sameMach">Same Machine:</i>
 <ul type=circle><li>Locate the <i>vquery.cfg</i> file in your environment.
 The default location of this file is
 <i>/localvision/include/vquery.cfg</i>.  For NT installations, this
@@ -106,7 +96,7 @@ that starts your Web Server.
 </pre>
 </ul><p>
 
-<i><a name="diffMach">Different Machine:</a></i>
+<i id="diffMach">Different Machine:</i>
 <ul type=circle><li>Edit the first line in the <i>/vision/cgi-misc/vquery.cfg</i> file
 installed from the Web Server archive you just unpacked.  By 
 default, that line is <i>server default localhost:7001</i>.  
@@ -133,8 +123,7 @@ the script that starts your Web Server.
 
 
 
-<a name="webMods"><i>Modifying Interface Documents</i></a>
-<p>
+<p id="webMods"><i>Modifying Interface Documents</i>
 If you cannot create the Web Server alias <i>visionWeb</i> or
 if you locate the <i>vquery.exe</i> program somewhere other than
 the Web Server's standard <i>cgi-bin</i> directory, you will
@@ -160,21 +149,12 @@ the location of the <i>NetCharts</i> package.
 </ul>
 </ol>
 <p><hr>
-<h3><a name="Test">Test</a></h3>
+<h2 id="Test">Test</h2>
 <p>
 To test that basic web access is available, try accessing the URL
  <i>http://visionWeb/vision</i> from a Vision Client machine.
 You should see the home page for accessing your Vision applications.
 Note that if you did not create the <i>visionWeb</i> alias, this
 name should be replaced by the name of your web server.  
-<p>
 
-<hr>
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated July 5, 2000</font>
-</table>
-
-</body>
-</html>
+{% include doc-footer.htm copydates="2000" %}

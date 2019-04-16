@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Upload Format: ExchangeRateFeed</title>
+---
+title: "Vision Upload Format: ExchangeRateFeed"
 
-</head>
-<body>
-<body bgcolor=white>
+sidebar:
+  nav: "sb_InvestmentManagers"
+---
 <h2>Vision Portfolio Management Application Layer: Data Feeds</h2>
 <p>
 | <a href="pmaFeeds.htm">Application Feeds</a> |
@@ -13,7 +11,7 @@
 <font size=+2><b>Data Feed: </b><i>ExchangeRateFeed</i></font><p>
 <font size=+1><b>Category: </b><i>EntityExtenderFeed</i></font><p>
 
-<h3>Summary:</h3>
+<h2>Summary:</h2>
 <p>
 <ul>
 The <i>ExchangeRateFeed</i> feed is used to update currency exchange
@@ -29,7 +27,7 @@ The <i>ExchangeRateFeed</i> feed is used to update currency exchange
 </ul>
 <p>
 
-<h3>Available Fields:</h3>
+<h2>Available Fields:</h2>
 <p>
 <center><table border=1 width=80% cellpadding=4 cellspacing=2>
 <tr><th>Field<th>Currency<br>Property<th>Type<th>Description
@@ -53,7 +51,7 @@ The <i>ExchangeRateFeed</i> feed is used to update currency exchange
 </table></center>
 <p>
 
-<h3>Special Processing Rules:</h3>
+<h2>Special Processing Rules:</h2>
 <p>
 <ul type=disc>
 <li>The <i>entityId</i> must correspond to an existing <b>Currency</b>
@@ -76,18 +74,18 @@ The <i>ExchangeRateFeed</i> feed is used to update currency exchange
 
 <p>
 <a name="related">
-<h3>Related Feeds:</h3>
+<h2>Related Feeds:</h2>
 <p>
 <ul type=disc>
 <li><a href="pma_CurrencyMaster.htm"><i>CurrencyMaster</i></a>:
 defines Currency instances referenced by this feed
 </ul>
 <p>
-<h3>Sample Upload:</h3>
+<h2>Sample Upload:</h2>
 <p>
 The following tab-delimited feed could be used to update currency exchange rates.
-<pre><tt><b>
- Interface ExternalFeedManager upload: "ExchangeRateFeed" using:
+<pre>
+terface ExternalFeedManager upload: "ExchangeRateFeed" using:
      "entityId        date      usExchange
       CAD             19971128  1.4234	
       CAD             19971201  1.4238	
@@ -99,16 +97,6 @@ The following tab-delimited feed could be used to update currency exchange rates
       ATS             19971201 12.5080	
       ATS             19971202 12.4888	
      " ;
-</b></tt></pre>
+</pre>
 
-<p>
-<hr>
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated December 15, 2000</font>
-</tr>
-</table>
-
-</body>
-</html>
+{% include doc-footer.htm copydates="2000" %}

@@ -1,29 +1,17 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Portfolio Management Application Classes</title>
-</head>
-<body bgcolor=white>
-<h2>Vision Portfolio Management Application Classes</h2>
+---
+title: Vision Portfolio Management Application Classes
 
-<p>
-| <a href="vpma.htm">Application Overview</a> 
-| <a href="pmaXRef.htm">Application Cross Reference</a>
-|
-<hr>
-<h3>Topics Covered:</h3>
-<ul type=square>
-<li><a href="#overview">Overview</a>
-<li><a href="#company">The Company Class</a>
-<li><a href="#security">The Security Class</a>
-<li><a href="#datarec">The PriceRecord and DivRecord Classes</a>
-<li><a href="#account">The Account Classes</a>
-<li><a href="#holding">The Holding Class</a>
-<li><a href="#core">General Application Classes</a>
-</ul>
-<p>
-<hr>
-<h3><a name="overview">Overview</a></h3>
+related_topics:
+  - url: "vpma.htm"
+    title: "Application Overview"
+  - url: "pmaXRef.htm"
+    title: "Application Cross Reference"
+
+sidebar:
+  nav: "sb_InvestmentManagers"
+---
+
+<h2 id="overview">Overview</h2>
 <p>
 The core Vision system comes with a set of classes already defined.
 These classes include an initial set of methods which can be
@@ -40,52 +28,51 @@ structures to meet the specific needs of your organization.
 The <b>Portfolio Management Application Layer</b> includes the
 following classes:
 <pre>
-          Object
-             |
-             DataRecord
-             |  |
-             |  |-- <a href="#datarec">DivRecord</a>
-             |  |
-             |  |-- <a href="#datarec">PriceRecord</a>
-             |
-             Entity
-             |  |
-             |  |-- <a href="#account">Account</a>
-             |  |      |
-             |  |      |-- AggAccount
-             |  |      |
-             |  |      |-- CompositeAccount
-             |  |      |
-             |  |      |-- IndexAccount
-             |  |      |
-             |  |      |-- Portfolio
-             |  |
-             |  |-- <a href="#core">Classification</a>
-             |  |      |
-             |  |      |-- <a href="clpmaCompany.htm#related">AssetCategory</a>
-             |  |      |
-             |  |      |-- <a href="clpmaCompany.htm#related">Country</a>
-             |  |      |
-             |  |      |-- <a href="clpmaCompany.htm#related">Industry</a>
-             |  |      |
-             |  |      |-- <a href="clpmaCompany.htm#related">Sector</a>
-             |  |      |
-             |  |      |-- <a href="clpmaCompany.htm#related">SecurityType</a>
-             |  |
-             |  |-- <a href="#company">Company</a>
-             |  |
-             |  |-- <a href="#core">Currency</a>
-             |  |
-             |  |-- <a href="#security">Security</a>
-             |  |
-             |  |-- <a href="#core">Universe</a>
-             |
-             LinkRecord
-                |
-                |-- <a href="#account">CompositeAccount Component</a>
-                |
-                |-- <a href="#account">Holding</a>
-
+  Object
+     |
+     DataRecord
+     |  |
+     |  |-- <a href="#datarec">DivRecord</a>
+     |  |
+     |  |-- <a href="#datarec">PriceRecord</a>
+     |
+     Entity
+     |  |
+     |  |-- <a href="#account">Account</a>
+     |  |      |
+     |  |      |-- AggAccount
+     |  |      |
+     |  |      |-- CompositeAccount
+     |  |      |
+     |  |      |-- IndexAccount
+     |  |      |
+     |  |      |-- Portfolio
+     |  |
+     |  |-- <a href="#core">Classification</a>
+     |  |      |
+     |  |      |-- <a href="clpmaCompany.htm#related">AssetCategory</a>
+     |  |      |
+     |  |      |-- <a href="clpmaCompany.htm#related">Country</a>
+     |  |      |
+     |  |      |-- <a href="clpmaCompany.htm#related">Industry</a>
+     |  |      |
+     |  |      |-- <a href="clpmaCompany.htm#related">Sector</a>
+     |  |      |
+     |  |      |-- <a href="clpmaCompany.htm#related">SecurityType</a>
+     |  |
+     |  |-- <a href="#company">Company</a>
+     |  |
+     |  |-- <a href="#core">Currency</a>
+     |  |
+     |  |-- <a href="#security">Security</a>
+     |  |
+     |  |-- <a href="#core">Universe</a>
+     |
+     LinkRecord
+        |
+        |-- <a href="#account">CompositeAccount Component</a>
+        |
+        |-- <a href="#account">Holding</a>
 </pre>
 
 <a name="optional"></a>
@@ -97,41 +84,40 @@ can be installed as is or modified as needed, depending on your
 requirements.  Many of the <i>Headstart Applications</i> use
 data defined for these classes.  Optional classes include:
 <pre>
-          Object
-             |
-             DataRecord
-             |  |
-             |  |-- AnalystEstimate
-             |  |
-             |  |-- EconomicData
-             |  |
-             |  |-- FundamentalData
-             |         |
-             |         |-- FundamentalDataA
-             |         |
-             |         |-- FundamentalDataM
-             |         |
-             |         |-- FundamentalDataQ
-             |
-             Entity
-                |
-                |-- Analyst
-                |
-                |-- Classification
-                       |
-                       |-- RangeClassification
-                              |
-                              |--  MCapGroup
-                              |
-                              |--  PBGroup
-                              |
-                              |--  PEGroup
-       
+  Object
+     |
+     DataRecord
+     |  |
+     |  |-- AnalystEstimate
+     |  |
+     |  |-- EconomicData
+     |  |
+     |  |-- FundamentalData
+     |         |
+     |         |-- FundamentalDataA
+     |         |
+     |         |-- FundamentalDataM
+     |         |
+     |         |-- FundamentalDataQ
+     |
+     Entity
+        |
+        |-- Analyst
+        |
+        |-- Classification
+        |
+        |-- RangeClassification
+              |
+              |--  MCapGroup
+              |
+              |--  PBGroup
+              |
+              |--  PEGroup
 </pre>
 
 <p>
 <hr>
-<h3><a href="clpmaCompany.htm" name="company">The Company Class</a></h3>
+<h2 id="company"><a href="clpmaCompany.htm">The Company Class</a></h2>
 <p>
 The instances of the class <b>Company</b> represent the individual 
 corporate entities for which you track information.  Information
@@ -143,7 +129,7 @@ The document,
 describes the class <b>Company</b> and related classes.
 <p>
 <hr>
-<h3><a href="clpmaCompany.htm" name="security">The Security Class</a></h3>
+<h2 id="security"><a href="clpmaCompany.htm">The Security Class</a></h2>
 <p>
 The instances of the class <b>Security</b> represent the individual 
 securities issued by a corporation, government, or other entity.
@@ -161,8 +147,7 @@ describes the class <b>Security</b> and related classes.
 
 <p>
 <hr>
-<h3><a href="clpmaCompany.htm#datarec" name="datarec">
-The PriceRecord and DivRecord Classes</a></h3>
+<h2 id="datarec"><a href="clpmaCompany.htm#datarec">The PriceRecord and DivRecord Classes</a></h2>
 <p>
 The classes <b>PriceRecord</b> and <b>DivRecord</b> are used to store
 pricing and dividend information over time.  Price and dividend records
@@ -177,7 +162,7 @@ describes these classes in more details.
 
 <p>
 <hr>
-<h3><a href="clpmaAccount.htm" name="account">The Account Class</a></h3>
+<h2 id="account"><a href="clpmaAccount.htm">The Account Class</a></h2>
 <p>
 The class <b>Account</b> is a super class of the classes
 <b>Portfolio</b>, <b>AggAccount</b>, <b>IndexAccount</b>,
@@ -196,7 +181,7 @@ describes the class <b>Account</b> and related classes.
 
 <p>
 <hr>
-<h3><a href="clpmaAccount.htm#holding" name="holding">The Holding Class</a></h3>
+<h2 id="holding"><a href="clpmaAccount.htm#holding">The Holding Class</a></h2>
 <p>
 The class <b>Holding</b> is used to represent a specific security held in
 an account as of a specific point in time.  
@@ -211,7 +196,7 @@ describes the <b>Holding</b> class.
 
 <p>
 <hr>
-<h3><a href= "appClasses.htm" name="core">General Application Classes</a></h3>
+<h2 id="core"><a href= "appClasses.htm">General Application Classes</a></h2>
 <p>
 All Vision installations include a basic hierarchy of classes defined
 for organizing application classes.  These abstract classes include:
@@ -236,18 +221,5 @@ The classes <a href="clClassify.htm"><b>Classification</b></a>,
 and <a href="clUniverse.htm"><b>Universe</b></a>
 are <b>Entity</b> subclasses that are useful in a wide range of applications.
 These classes are included as a standard component of all Vision databases.
-<p>
 
-<p>
-<hr>
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Created March 11, 1998</font>
-</table>
-
-</body>
-</html>
-
-
-
+{% include doc-footer.htm copydates="1998" %}

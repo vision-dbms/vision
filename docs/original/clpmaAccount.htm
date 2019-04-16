@@ -1,41 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Application Classes: The Account Classes </title>
+---
+title: "Vision Application Classes: The Account Classes "
 
-</head>
+related_topics:
+  - url: "vpma.htm"
+    title: "Application Overview"
+  - url: "pmaIssues.htm"
+    title: "Data Issues"
+  - url: "pmaClasses.htm"
+    title: "Application Classes"
+  - url: "mpmaAccount.htm"
+    title: "Account Messages"
+  - url: "mpmaHolding.htm"
+    title: "Holding Messages"
+  - url: "pmaXRef.htm"
+    title: "Application Cross Reference"
 
-<body bgcolor=white>
-<h2>Vision Application Classes: The Account Classes</h2>
 
-<p>
-| <a href="vpma.htm">Application Overview</a> 
-| <a href="pmaIssues.htm">Data Issues</a>
-| <a href="pmaClasses.htm">Application Classes</a>
-| <a href="mpmaAccount.htm">Account Messages</a> 
-| <a href="mpmaHolding.htm">Holding Messages</a> 
-| <a href="pmaXRef.htm">Application Cross Reference</a>
-|
-<hr>
-<h3>Topics Covered:</h3>
-<ul type=square>
-<li><a href="#overview">Overview</a>
-<li><a href="#basic">Basic Access</a>
-<li><a href="#account">The Account Class</a>
-<li><a href="#holdings">The Holding Class</a>
-<li><a href="#portfolio">The Portfolio Class</a>
-<li><a href="#portfolioUp">Updating Portfolio Data</a>
-<li><a href="#agg">The AggAccount Class</a>
-<li><a href="#aggUp">Updating AggAccount Data</a>
-<li><a href="#index">The IndexAccount Class</a>
-<li><a href="#indexUp">Updating IndexAccount Data</a>
-<li><a href="#composite">The CompositeAccount Class</a>
-<li><a href="#compositeUp">Updating CompositeAccount Data</a>
-<li><a href="#updates">Updating Account and Holding Data - Summary</a>
-<li><a href="#secXRef">Account and Holding Access By Security</a>
-</ul>
-<hr>
-<h3><a name="overview">Overview</a></h3>
+sidebar:
+  nav: "sb_ClassXRef"
+---
+
+<h2 id="overview">Overview</h2>
 <p>
 
 The class <b>Account</b> is a super class of the classes
@@ -68,65 +53,69 @@ respond to the messages defined for the class <b>Account</b>.
 The following subset of the class hierarchy displays the classes
 directly related to <b>Account</b>:
 <pre>
-          Object
-             |
-             Entity
-             |  |
-             |  |-- Account
-             |        |
-             |        |-- AggAccount
-             |        |
-             |        |-- CompositeAccount
-             |        |
-             |        |-- IndexAccount
-             |        |
-             |        |-- Portfolio
-             |
-             LinkRecord
-                |
-                |-- CompositeAccount Component
-                |
-                |-- Holding
-
+  Object
+     |
+     Entity
+     |  |
+     |  |-- Account
+     |        |
+     |        |-- AggAccount
+     |        |
+     |        |-- CompositeAccount
+     |        |
+     |        |-- IndexAccount
+     |        |
+     |        |-- Portfolio
+     |
+     LinkRecord
+        |
+        |-- CompositeAccount Component
+        |
+        |-- Holding
 </pre>
 
 <p>
 <hr>
 <p>
-<h3><a name="basic">Basic Access</a></h3>
+<h2 id="basic">Basic Access</h2>
 <p>
 The 
 <a href="clDict.htm#named">naming dictionaries</a>
 <b>Named Portfolio</b>, <b>Named AggAccount</b>,
 <b>Named IndexAccount</b>, and <b>Named CompositeAccount</b>,
 are used for naming individual instances of the <b>Account</b>
-subclasses.  For example:<pre><tt><b>
-     Named Portfolio XYZ
-</b></tt></pre>
-accesses the <b>Portfolio</b> named <i>XYZ</i> and:<pre><tt><b>
-     Named AggAccount Agg1
-</b></tt></pre>
+subclasses.  For example:
+<pre>
+  Named Portfolio XYZ
+</pre>
+accesses the <b>Portfolio</b> named <i>XYZ</i> and:
+<pre>
+  Named AggAccount Agg1
+</pre>
 accesses the <b>AggAccount</b> named <i>Agg1</i>.
 <p>
 An extra naming dictionary is defined at the <b>Account</b>  class  to  allow
 interchangeable   access   among   the   classes.   For  example,  the
-expression:<pre><tt><b>
-     Named Account XYZ
-</b></tt></pre>
+expression:
+<pre>
+  Named Account XYZ
+</pre>
 also returns portfolio XYZ.  If the same id  is  used  to  identify  a
 <b>Portfolio</b> and an instance of another <b>Account</b> subclass,
 the value in the <b>Account</b> naming dictionary will return the
 <b>Portfolio</b> instance.  
 The property  <i>uniqueId</i>  is  used  to  create  a
-unique identifier for each instance.  The expressions:<pre><tt><b>
-     Named Account P_XYZ = Named Portfolio XYZ
+unique identifier for each instance.  The expressions:
+<pre>
+  Named Account P_XYZ = Named Portfolio XYZ
 
-     Named Account A_XYZ = Named AggAccount XYZ
+  Named Account A_XYZ = Named AggAccount XYZ
 
-     Named Account I_XYZ = Named IndexAccount XYZ 
-</b>and<b>
-     Named Account C_XYZ = Named CompositeAccount XYZ 
-</b></tt></pre>
+  Named Account I_XYZ = Named IndexAccount XYZ 
+</pre>and
+<pre>
+  Named Account C_XYZ = Named CompositeAccount XYZ 
+</pre>
 all return the value TRUE.
 <p>
 The message <i>locateId:</i> has been redefined at the Account class to use
@@ -139,9 +128,10 @@ the following search rule:<p>
 <li>Named CompositeAccount
 </ul>
 <p>
-For example, the expression:<pre><b>
-     Account locateId: "XYZ" 
-</b></pre>
+For example, the expression:
+<pre>
+  Account locateId: "XYZ" 
+</pre>
 returns <i>Named Account XYZ</i> if it is  defined,  otherwise  it  returns
 <i>Named  Portfolio  XYZ</i>,  otherwise it returns
 <i>Named AggAccount XYZ</i>, otherwise it returns
@@ -153,45 +143,49 @@ Account instances respond to all <b>Entity</b> and
 <i>baseCurrency</b>.
 The message <i>profile</i> has been redefined at <b>Account</b>
 and some of the subclasses 
-to display account-related information.  For example:<pre><tt><b>
-     Named Portfolio XYZ displayInfo ;
-</b></tt></pre>
-displays a summary line of information about the portfolio XYZ and:<pre><tt><b>
-     Named AggAccount AGG1 profile ;
-</b></tt></pre>
+to display account-related information.  For example:
+<pre>
+  Named Portfolio XYZ displayInfo ;
+</pre>
+displays a summary line of information about the portfolio XYZ and:
+<pre>
+  Named AggAccount AGG1 profile ;
+</pre>
 displays key information about the aggregate AGG1.
 <p>
 The message <i>masterList</i>
 can be used to return the list of non-default instances for any of the
 <b>Account</b> subclasses.  For example,
 to display the <i>code</i> and <i>name</i> for each
-<b>Portfolio</b> instance, use:<pre><tt><b>
-     Portfolio masterList
-     do: [ code print: 10 ; 
-           name printNL ;
-         ] ;
-</b></tt></pre>
-To display the number of <b>AggAccount</b> instances, use:<pre><tt><b>
-     AggAccount masterList count 
-
-</b></tt></pre>
+<b>Portfolio</b> instance, use:
+<pre>
+  Portfolio masterList
+  do: [ code print: 10 ; 
+        name printNL ;
+      ] ;
+</pre>
+To display the number of <b>AggAccount</b> instances, use:
+<pre>
+  AggAccount masterList count 
+</pre>
 If you send the <i>masterList</i> message to the <b>Account</b> class,
 you will get the list of all non-default instances for all of the
-subclasses.  For example:<pre><tt><b>
-     Account masterList             #--  get instances of all subclasses
-       groupedBy: [ whatAmI ] .     #--  group by subclass name
-    do: [ printNL ;                 #--  print subclass name
-          groupList                 #--  for each instance in class do:
-          do: [ code print: 10 ;         #--  print code
-                name printNL ;           #--  print name
-              ] ;                        #--  end of instances in class
-        ] ;
-</b></tt></pre>
+subclasses.  For example:
+<pre>
+  Account masterList             #--  get instances of all subclasses
+    groupedBy: [ whatAmI ] .     #--  group by subclass name
+ do: [ printNL ;                 #--  print subclass name
+       groupList                 #--  for each instance in class do:
+       do: [ code print: 10 ;         #--  print code
+             name printNL ;           #--  print name
+           ] ;                        #--  end of instances in class
+     ] ;
+</pre>
 
 <p>
 <hr>
 <p>
-<h3><a name="account">The Account Class</a></h3>
+<h2 id="account">The Account Class</h2>
 <p>
 The class <b>Account</b> is used to unify the protocol that is common  to
 all the subclasses.  
@@ -240,52 +234,53 @@ recomputed each time holdings are updated.  The time series property
 time in the <i>baseCurrency</i> of the <b>Account</b>.  The message
 <i>totalMarketValue</i> returns the market value in the account's
 base currency by default or a currency override, if defined.
-For example:<pre><b>
+For example:
+<pre>
+  Named Portfolio XYZ
+  do: [ baseCurrency code print: 5 ;               #- default currency
+        currency code print: 5 ;                   #- currency override
+        _totalMarketValue printWithCommas: 18.0 ;  #- latest raw value
+        totalMarketValue printWithCommas: 18.0 ;   #- currency adjusted
+      ] ;
+
+  ^today - 1 monthEnds evaluate:
+     [
      Named Portfolio XYZ
      do: [ baseCurrency code print: 5 ;               #- default currency
            currency code print: 5 ;                   #- currency override
-           _totalMarketValue printWithCommas: 18.0 ;  #- latest raw value
+           _totalMarketValue printWithCommas: 18.0 ;  #- eom raw value
            totalMarketValue printWithCommas: 18.0 ;   #- currency adjusted
          ] ;
-
-     ^today - 1 monthEnds evaluate:
-        [
-        Named Portfolio XYZ
-        do: [ baseCurrency code print: 5 ;               #- default currency
-              currency code print: 5 ;                   #- currency override
-              _totalMarketValue printWithCommas: 18.0 ;  #- eom raw value
-              totalMarketValue printWithCommas: 18.0 ;   #- currency adjusted
-            ] ;
-        ] ;
-</b></pre>
+     ] ;
+</pre>
 displays the latest and prior month-end
 market value in the portfolio's base currency
 and the currency override.  In this case the values are the same.  The
-expressions:<pre><b>
-     "DEM" asCurrency evaluate:
-        [
-        Named Portfolio XYZ
-        do: [ baseCurrency code print: 5 ;               #- default currency
-              currency code print: 5 ;                   #- DEM
-              _totalMarketValue printWithCommas: 18.0 ;  #- latest raw value
-              totalMarketValue printWithCommas: 18.0 ;   #- value in DEM
-            ] ;
-        ] ;
-
-     "DEM" asCurrency evaluate:
+expressions:
+<pre>
+  "DEM" asCurrency evaluate:
      [
-     ^today - 1 monthEnds evaluate:
-        [
-        Named Portfolio XYZ
-        do: [ baseCurrency code print: 5 ;               #- default currency
-              currency code print: 5 ;                   #- DEM
-              _totalMarketValue printWithCommas: 18.0 ;  #- eom raw value
-              totalMarketValue printWithCommas: 18.0 ;   #- value in DEM
-            ] ;
-        ] ;
-    ] ;
+     Named Portfolio XYZ
+     do: [ baseCurrency code print: 5 ;               #- default currency
+           currency code print: 5 ;                   #- DEM
+           _totalMarketValue printWithCommas: 18.0 ;  #- latest raw value
+           totalMarketValue printWithCommas: 18.0 ;   #- value in DEM
+         ] ;
+     ] ;
 
-</b></pre>
+  "DEM" asCurrency evaluate:
+  [
+  ^today - 1 monthEnds evaluate:
+     [
+     Named Portfolio XYZ
+     do: [ baseCurrency code print: 5 ;               #- default currency
+           currency code print: 5 ;                   #- DEM
+           _totalMarketValue printWithCommas: 18.0 ;  #- eom raw value
+           totalMarketValue printWithCommas: 18.0 ;   #- value in DEM
+         ] ;
+     ] ;
+ ] ;
+</pre>
 displays the latest and prior month-end
 market value in the portfolio's base currency
 and the currency override of <i>DEM</i>.
@@ -294,15 +289,16 @@ The messages <i>totalMarketValueEquity</i>, <i>totalMarketValueCash</i>,
 and <i>totalMarketValueFixed</i> return the total market values for
 the different <a href="clpmaCompany.htm#type">asset categories</a>.
 For example, to show the total market value and percent cash for
-each <b>Portfolio</b> use:<pre><b>
-     Portfolio masterList
-     do: [ code print: 10 ;
-           name print: 25 ;
-           totalMarketValue printWithCommas: 15.0 ;      
-           totalMarketValueCash / totalMarketValue * 100 print: 10.2 ;
-           newLine print ;
-         ] ;
-</b></pre>
+each <b>Portfolio</b> use:
+<pre>
+  Portfolio masterList
+  do: [ code print: 10 ;
+        name print: 25 ;
+        totalMarketValue printWithCommas: 15.0 ;      
+        totalMarketValueCash / totalMarketValue * 100 print: 10.2 ;
+        newLine print ;
+      ] ;
+</pre>
 <p>
 For general descriptions of all the <b>Account</b> messages, see the
 document <a href="mpmaAccount.htm">
@@ -311,7 +307,7 @@ document <a href="mpmaAccount.htm">
 <p>
 <hr>
 <p>
-<h3><a name="holdings">The Holding Class</a></h3>
+<h2 id="holdings">The Holding Class</h2>
 <p>
 The class <b>Holding</b> is used  to  represent  a  specific  holding  by  an
 account  in  a  security as of a specific point in time.  Holdings are
@@ -351,7 +347,7 @@ For general descriptions of all the <b>Holding</b> messages, see the
 document <a href="mpmaLinkRecord.htm">
 <i>Vision Application Messages: Holding</i></a>.
 <p>
-<h4><a name="holdingAccess">Holdings Access</a></h4>
+<h3 id="holdingAccess">Holdings Access</h3>
 <p>
 Each <b>Holding</b> responds to the messages <i>security</i> and
 <i>account</i> by returning an instance of those classes; therefore,
@@ -359,9 +355,10 @@ any messages defined at <b>Security</b> or <b>Account</b>
 can be referenced via a specific <b>Holding</b>.  
 The message <i>id</i> has been defined at <b>Holding</b> 
 to return a string in the form <i>securityCode---accountCode</i>.
-For example,  the expression:<pre><b>
-     Named Portfolio XYZ getHoldingIn: Named Security GM . id
-</b></pre>
+For example,  the expression:
+<pre>
+  Named Portfolio XYZ getHoldingIn: Named Security GM . id
+</pre>
 displays the string <i>37044210---XYZ</i>.
 <p>
 The message <i>holdings</i> is defined for the <b>Account</b>
@@ -371,101 +368,109 @@ associated with the security or account as of the
 current evaluation date. Since the message <i>holdings</i> returns a  
 <b>List</b>, any  message defined for the <b>List</b> class
 can be sent to it (e.g., <i>do:</i>, <i>select:</i> , 
-<i>groupedBy:</i>, <i>sortUp:</i> , etc.).  For example:<pre><b>
-     Named Portfolio XYZ holdings                #-- returns List of Holdings
-     do: [
-         security name print: 30 ;               #-- security level
-         security price print: 10 ;              #-- security level
-         totalMarketValue printNL: 15 ;          #-- holding level
-         ] ;
+<i>groupedBy:</i>, <i>sortUp:</i> , etc.).  For example:
+<pre>
+  Named Portfolio XYZ holdings                #-- returns List of Holdings
+  do: [
+      security name print: 30 ;               #-- security level
+      security price print: 10 ;              #-- security level
+      totalMarketValue printNL: 15 ;          #-- holding level
+      ] ;
 
-     Named Portfolio XYZ holdings
-       groupedBy: [ security company country ] .
-     do: [
-         code print: 10 ; name printNL ;         #-- country level
-         groupList sortDown: [ percentOfPort ] .
-         do: [
-             security name print: 30 ;           #-- security level
-             security price print: 10 ;          #-- security level
-             totalMarketValue print: 15 ;        #-- holding level
-             percentOfPort printNL ;             #-- holding level
-             ] ;
-        newLine print ;
-        ] ;
-</b></pre>
+  Named Portfolio XYZ holdings
+    groupedBy: [ security company country ] .
+  do: [
+      code print: 10 ; name printNL ;         #-- country level
+      groupList sortDown: [ percentOfPort ] .
+      do: [
+          security name print: 30 ;           #-- security level
+          security price print: 10 ;          #-- security level
+          totalMarketValue print: 15 ;        #-- holding level
+          percentOfPort printNL ;             #-- holding level
+          ] ;
+     newLine print ;
+     ] ;
+</pre>
 
 The message <i>getHoldingIn:</i> is used to get an account's <b>Holding</b>
 in a specific security if it exists.  A default <b>Holding</b> is returned
-otherwise.  For example:<pre><b>
-     Named Portfolio XYZ
-        getHoldingIn: Named Security GM . percentOfPort 
-</b></pre>
+otherwise.  For example:
+<pre>
+  Named Portfolio XYZ
+     getHoldingIn: Named Security GM . percentOfPort 
+</pre>
 returns the percentage of <i>Portfolio XYZ</i> represented by the holding
 in  <i>GM</i>.  The message <i>holds:</i> is used to indicate whether or not an
 account holds a specific security.  It returns a <b>Boolean</b> value.   For
-example:<pre><b>
-     Portfolio masterList
-        select: [ ^self holds: ^global Named Security GM ] .
-     do: [ code print: 10 ; name printNL ] ;
-</b></pre>
+example:
+<pre>
+  Portfolio masterList
+     select: [ ^self holds: ^global Named Security GM ] .
+  do: [ code print: 10 ; name printNL ] ;
+</pre>
 displays the <i>code</i> and <i>name</i> of every <b>Portfolio</b>
 that currently holds <i>GM</i>.
 <p>
 Since holdings are stored over time, you can access a <b>Portfolio's</b>
-holdings as of a different date using:<pre><b>
-    9612 evaluate:
-       [
-       Named Portfolio XYZ holdings
-       do: [
-           security name print: 30 ;
-           security price print: 10 ;
-           totalMarketValue printNL: 15 ;
-           ] ;
-       ]
-</b></pre>
+holdings as of a different date using:
+<pre>
+  9612 evaluate:
+    [
+    Named Portfolio XYZ holdings
+    do: [
+        security name print: 30 ;
+        security price print: 10 ;
+        totalMarketValue printNL: 15 ;
+        ] ;
+    ]
+</pre>
 This
 displays the holdings information as of Dec 31, 1996.   The  message
 <i>holdingsDate</i>  can  be  used  to  display  the  effective date of the
-holdings list being accessed.  For example:<pre><b>
-     9612 evaluate:
-       [
-       Named Portfolio XYZ
-       do: [ "Holdings As Of: " print; holdingsDate printNL ;
-              holdings
-              do: [
-                  security name print: 30 ;
-                  security price print: 10 ;
-                  totalMarketValue printNL: 15 ;
-                  ] ;
-           ]
-       ] ;
-</b></pre>
+holdings list being accessed.  For example:
+<pre>
+  9612 evaluate:
+    [
+    Named Portfolio XYZ
+    do: [ "Holdings As Of: " print; holdingsDate printNL ;
+           holdings
+           do: [
+               security name print: 30 ;
+               security price print: 10 ;
+               totalMarketValue printNL: 15 ;
+               ] ;
+        ]
+    ] ;
+</pre>
 The message <i>hasHoldings</i> is defined for the <b>Account</b>
 class to indicate whether the account has holdings as of the current
-evaluation date.  For example, the expression:<pre><b>
-     Portfolio masterList select: [ hasHoldings ] .
-     do: [ displayInfo ] ;
- </b></pre>
+evaluation date.  For example, the expression:
+<pre>
+  Portfolio masterList select: [ hasHoldings ] .
+  do: [ displayInfo ] ;
+ </pre>
 displays the list of portfolios that have current holdings and the
-expression:<pre><b>
-     9612 evaluate:
-       [ Portfolio masterList select: [ hasHoldings ] .
-         do: [ displayInfo ] ;
-       ] ;
-</b></pre>
+expression:
+<pre>
+  9612 evaluate:
+    [ Portfolio masterList select: [ hasHoldings ] .
+      do: [ displayInfo ] ;
+    ] ;
+</pre>
 displays the list of portfolios that had holdings as of Dec 31, 1996.
 <p>
 The message <i>holdings</i> can be used to access the <b>List</b>
 of <b>Holdings</b>
-associated with a <b>Security</b> as well.  For example:<pre><b>
-     Named Security GM holdings               #-- returns List of Holdings
-     do: [
-         account code print: 5 ;              #--  account level
-         account name print: 20 ;             #--  account level
-         security price print: 10 ;           #--  security level
-         totalMarketValue printNL: 15 ;       #--  holding level
-         ] ;
-</b></pre>
+associated with a <b>Security</b> as well.  For example:
+<pre>
+  Named Security GM holdings               #-- returns List of Holdings
+  do: [
+      account code print: 5 ;              #--  account level
+      account name print: 20 ;             #--  account level
+      security price print: 10 ;           #--  security level
+      totalMarketValue printNL: 15 ;       #--  holding level
+      ] ;
+</pre>
 <p>
 Holdings access by <b>Security</b> is described in more detail
 <a href="#secXRef">later in this document.</a>
@@ -475,39 +480,39 @@ The <b>Holding</b> class structure is illustrated below:
 <center><b>Holding Class Structure</b></center>
 <p>
 <pre>
-    _____________
-    |  Holding  |--|
-    |___________|  |                     ______________
-                   |---- security   ---> |  Security  |
-                   |                     |____________|          ___________
-                   |                        |                    |   ...   |
-                   |                        |---- holdings  ---> | Holding |
-                   |                        |                    | Holding |
-                   |                        |                    |   ...   |
-                   |                        |                    |_________|
-                   |                        |
-                   |                        |---- code
-                   |                        |---- name
-                   |                        |---- price
-                   |                        |---- company --->
-                   |                     __________________
-                   |---- account    ---> |  Account       |
-                   |                     |________________|      ___________
-                   |                        |                    |   ...   |
-                   |                        |---- holdings  ---> | Holding |
-                   |                        |                    | Holding |
-                   |                        |                    |   ...   |
-                   |                        |                    |_________|
-                   |---- date               |---  code
-                   |---- baseCurrency       |---  name
-                   |---- percentOfPort      |---- baseCurrency
-                   |---- shares             |---- totalMarketValue
-                   |---- totalCost          |---- totalMarketValueEquity
-                   |---- totalMarketValue   |---  totalMarketValueCash
-                   |                        |
+  _____________
+  |  Holding  |--|
+  |___________|  |                     ______________
+                 |---- security   ---> |  Security  |
+                 |                     |____________|          ___________
+                 |                        |                    |   ...   |
+                 |                        |---- holdings  ---> | Holding |
+                 |                        |                    | Holding |
+                 |                        |                    |   ...   |
+                 |                        |                    |_________|
+                 |                        |
+                 |                        |---- code
+                 |                        |---- name
+                 |                        |---- price
+                 |                        |---- company --->
+                 |                     __________________
+                 |---- account    ---> |  Account       |
+                 |                     |________________|      ___________
+                 |                        |                    |   ...   |
+                 |                        |---- holdings  ---> | Holding |
+                 |                        |                    | Holding |
+                 |                        |                    |   ...   |
+                 |                        |                    |_________|
+                 |---- date               |---  code
+                 |---- baseCurrency       |---  name
+                 |---- percentOfPort      |---- baseCurrency
+                 |---- shares             |---- totalMarketValue
+                 |---- totalCost          |---- totalMarketValueEquity
+                 |---- totalMarketValue   |---  totalMarketValueCash
+                 |                        |
 </pre>
 <p>
-<h4><a name="holdingCreation">Holdings Creation</a></h4>
+<h3 id="holdingCreation">Holdings Creation</h3>
 <p>
 A <b>Holding</b> in a <b>Portfolio</b> represents the actual number of
 shares held by the <b>Portfolio</b> in a <b>Security</b> on a specific date. 
@@ -559,7 +564,7 @@ data</a>.
 <p>
 <hr>
 <p>
-<h3><a name="portfolio">The Portfolio Class</a></h3>
+<h2 id="portfolio">The Portfolio Class</h2>
 <p>
 The class <b>Portfolio</b> is used to define the messages that are 
 specific to portfolios.  In addition to the messages defined for
@@ -576,17 +581,19 @@ A <b>Portfolio</b> can be a member of any number of <b>AggAccount</b>
 instances.  Portfolios can be added to and deleted from aggregates 
 over time.  The <i>aggregateList</i> message returns the list
 of <b>AggAccount</b> instances that include the <b>Portfolio</b>
-as of the evaluation date.  For example:<pre><b>
-     Named Portfolio XYZ aggregateList        #- current agg list
-     do: [ displayInfo ] ;
-</b></pre>
+as of the evaluation date.  For example:
+<pre>
+  Named Portfolio XYZ aggregateList        #- current agg list
+  do: [ displayInfo ] ;
+</pre>
 displays the list of current <b>AggAccount</b> instances that include
-<i>Portfolio XYZ</i> and: <pre><b>
-     9612 evaluate: 
-       [ Named Portfolio XYZ aggregateList        #- 12/96 agg list
-         do: [ displayInfo ] ;
-       ] ;
-</b></pre>
+<i>Portfolio XYZ</i> and:
+<pre>
+  9612 evaluate: 
+    [ Named Portfolio XYZ aggregateList        #- 12/96 agg list
+      do: [ displayInfo ] ;
+    ] ;
+</pre>
 displays the list of <b>AggAccount</b> instances as of Dec 31, 1996
 that include <i>Portfolio XYZ</i>.
 <p>
@@ -599,67 +606,71 @@ document <a href="mpmaAccount.htm">
 <p>
 <hr>
 <p>
-<h3><a name="portfolioUp">Updating Portfolio Data</a></h3>
+<h2 id="portfolioUp">Updating Portfolio Data</h2>
 <p>
 The <a href="pma_PortfolioMaster"><b>PortfolioMaster</b></a>
 data feed can be used to create and refresh <b>Portfolio</b> 
-instances:<pre><tt><b>
-     Interface ExternalFeedManager upload: "PortfolioMaster" using:
-   #-- make sure this is tab-delimited
-     "EntityId     Name                      ShortName
-      PORT1        EQUITY INCOME FUND        EI FUND
-      PORT2        GROWTH FUND               GR FUND
-     " ;
-</b></tt></pre>
+instances:
+<pre>
+  Interface ExternalFeedManager upload: "PortfolioMaster" using:
+#-- make sure this is tab-delimited
+  "EntityId     Name                      ShortName
+   PORT1        EQUITY INCOME FUND        EI FUND
+   PORT2        GROWTH FUND               GR FUND
+  " ;
+</pre>
 <p>
 The <a href="pma_HoldingsFeed"><b>HoldingsFeed</b></a>
 data feed can be used to create holdings over time for one or more
 <b>Portfolios</b>.
 The following tab-delimited feed could be used to create <b>Portfolio</b>
 holdings for several portfolios on a single date.  Market values will be
-derived for each holding:<pre><tt><b>
-     Interface ExternalFeedManager upload: "HoldingsFeed" using:
-   #-- make sure this is tab-delimited
-     "date     acctId      secId     shares
-      9712     PORT1       GM        1000
-      9712     PORT1       F         2000
-      9712     PORT1       CASH     20000
-      9712     PORT2       IBM      10000
-      9712     PORT2       DELL     15000
-      9712     PORT2       CASH     20000
-     " ;
-</b></tt></pre>
+derived for each holding:
+<pre>
+  Interface ExternalFeedManager upload: "HoldingsFeed" using:
+#-- make sure this is tab-delimited
+  "date     acctId      secId     shares
+   9712     PORT1       GM        1000
+   9712     PORT1       F         2000
+   9712     PORT1       CASH     20000
+   9712     PORT2       IBM      10000
+   9712     PORT2       DELL     15000
+   9712     PORT2       CASH     20000
+  " ;
+</pre>
 The following tab-delimited feed could be used to create <b>Portfolio</b>
 holdings for several portfolios on several dates.  Market values are
-assigned directly from this feed:<pre><tt><b>
-     Interface ExternalFeedManager upload: "HoldingsFeed" using:
-   #-- make sure this is tab-delimited
-     "date     acctId      secId     mval
-      9712     PORT1       GM        1234.56
-      9712     PORT1       F         2345.67
-      9712     PORT1       CASH     20000.00
-      9712     PORT2       IBM       9876.54
-      9712     PORT2       DELL      8765.43
-      9712     PORT2       CASH     10000.00
-      9711     PORT1       GM        1233.21
-      9711     PORT1       F         2344.32
-      9711     PORT1       CASH     20000.00
-     " ;
-</b></tt></pre>
+assigned directly from this feed:
+<pre>
+  Interface ExternalFeedManager upload: "HoldingsFeed" using:
+#-- make sure this is tab-delimited
+  "date     acctId      secId     mval
+   9712     PORT1       GM        1234.56
+   9712     PORT1       F         2345.67
+   9712     PORT1       CASH     20000.00
+   9712     PORT2       IBM       9876.54
+   9712     PORT2       DELL      8765.43
+   9712     PORT2       CASH     10000.00
+   9711     PORT1       GM        1233.21
+   9711     PORT1       F         2344.32
+   9711     PORT1       CASH     20000.00
+  " ;
+</pre>
 <p>
-After running this upload, you can access the holdings using:<pre><b>
-     Named Portfolio PORT1 holdings              #-- returns List of Holdings
-     do: [
-         security name print: 30 ;               #-- security level
-         totalMarketValue print: 15 ;            #-- holding level
-         percentOfPort printNL ;                 #-- holding level        
-         ] ;
-</b></pre>
+After running this upload, you can access the holdings using:
+<pre>
+  Named Portfolio PORT1 holdings              #-- returns List of Holdings
+  do: [
+      security name print: 30 ;               #-- security level
+      totalMarketValue print: 15 ;            #-- holding level
+      percentOfPort printNL ;                 #-- holding level        
+      ] ;
+</pre>
 
 <p>
 <hr>
 <p>
-<h3><a name="agg">The AggAccount Class</a></h3>
+<h2 id="agg">The AggAccount Class</h2>
 <p>
 The class <b>AggAccount</b> is used to define the messages that are 
 specific to aggregate accounts.
@@ -674,17 +685,19 @@ the following messages:<p>
 An <b>AggAccount</b> can be composed of any number of <b>Portfolio</b>
 instances.  Portfolios can be added to and deleted from aggregates
 over time.  The <i>memberList</i> message returns the list of <b>Portfolio</b>
-instances in the aggregate as of the evaluation date.  For example:<pre><b>
-     Named AggAccount AGG1 memberList            #-- current memberList
-     do: [ displayInfo ] ;
-</b></pre>
+instances in the aggregate as of the evaluation date.  For example:
+<pre>
+  Named AggAccount AGG1 memberList            #-- current memberList
+  do: [ displayInfo ] ;
+</pre>
 displays the list of current <b>Portfolio</b> instances in
-<i>AggAccount AGG1</i> and: <pre><b>
-     9612 evaluate: 
-       [ Named AggAccount AGG1 memberList       #-- members as of 12/31/96
-         do: [ displayInfo ] ;
-       ] ;
-</b></pre>
+<i>AggAccount AGG1</i> and:
+<pre>
+  9612 evaluate: 
+    [ Named AggAccount AGG1 memberList       #-- members as of 12/31/96
+      do: [ displayInfo ] ;
+    ] ;
+</pre>
 displays the list of <b>Portfolio</b> instances as of Dec 31, 1996
 included in <i>AggAccount AGG1</i>.
 <p>
@@ -701,53 +714,56 @@ the membership of the <b>AggAccount</b> is changed.
 <p>
 <hr>
 <p>
-<h3><a name="aggUp">Updating AggAccount Data</a></h3>
+<h2 id="aggUp">Updating AggAccount Data</h2>
 <p>
 The <a href="pma_AggAccountMaster"><b>AggAccountMaster</b></a>
 data feed can be used to create and refresh <b>AggAccount</b> 
-instances:<pre><tt><b>
+instances:
+<pre>
      Interface ExternalFeedManager upload: "AggAccountMaster" using:
    #-- make sure this is tab-delimited
      "EntityId     Name                      ShortName
       AGG1         Aggregate Account 1       Agg Acct 1
       AGG2         Aggregate Account 2       Agg Acct 2
      " ;
-</b></tt></pre>
+</pre>
 <p>
 The <a href="pma_PortfolioAggregates"><b>PortfolioAggregates</b></a>
-data feed can be used to define memberships over time:<pre><tt><b>
-     Interface ExternalFeedManager upload: "PortfolioAggregates" using:
-   #-- make sure this is tab-delimited
-     "groupId     memberId     date
+data feed can be used to define memberships over time:
+<pre>
+  Interface ExternalFeedManager upload: "PortfolioAggregates" using:
+#-- make sure this is tab-delimited
+  "groupId     memberId     date
 
-      #-  define AGG1 to have 3 members since earliest possible date
-      AGG1        PORT1        Default
-      AGG1        PORT2        Default
-      AGG1        PORT3        Default
+   #-  define AGG1 to have 3 members since earliest possible date
+   AGG1        PORT1        Default
+   AGG1        PORT2        Default
+   AGG1        PORT3        Default
 
-      #- define AGG2 to have 2 members in 95 and a third added in 96
-      AGG2        PORT2        1/1/95
-      AGG2        PORT7        1/1/95
-      AGG2        PORT2        1/1/96
-      AGG2        PORT7        1/1/96
-      AGG2        PORT4        1/1/96
-     " ;
-</b></tt></pre>
+   #- define AGG2 to have 2 members in 95 and a third added in 96
+   AGG2        PORT2        1/1/95
+   AGG2        PORT7        1/1/95
+   AGG2        PORT2        1/1/96
+   AGG2        PORT7        1/1/96
+   AGG2        PORT4        1/1/96
+  " ;
+</pre>
 <p>
 After running an upload, you can access an <b>AggAccount's</b>
-holdings just like any other <b>Account</b>.  For example:<pre><b>
+holdings just like any other <b>Account</b>.  For example:
+<pre>
      Named AggAccount AGG2 holdings              #-- returns List of Holdings
      do: [
          security name print: 30 ;               #-- security level
          totalMarketValue print: 15 ;            #-- holding level
          percentOfPort printNL ;                 #-- holding level        
          ] ;
-</b></pre>
+</pre>
 
 <p>
 <hr>
 <p>
-<h3><a name="index">The IndexAccount Class</a></h3>
+<h2 id="index">The IndexAccount Class</h2>
 <p>
 The class <b>IndexAccount</b> is used to define the messages that are 
 specific to index accounts.
@@ -766,17 +782,19 @@ was derived.
 <p>
 An <b>IndexAccount</b> is defined based on a list of <b>Security</b>
 members.  This list is stored in the property <i>memberList</i>
-and can vary over time.  For example:<pre><b>
+and can vary over time.  For example:
+<pre>
      Named IndexAccount INDEX1 memberList            #-- current memberList
      do: [ displayInfo ] ;
-</b></pre>
+</pre>
 displays the list of current <b>Security</b> instances in
-<i>IndexAccount INDEX1</i> and: <pre><b>
+<i>IndexAccount INDEX1</i> and:
+<pre>
      9612 evaluate: 
        [ Named IndexAccount INDEX1 memberList       #-- members as of 12/31/96
          do: [ displayInfo ] ;
        ] ;
-</b></pre>
+</pre>
 displays the list of <b>Security</b> instances as of Dec 31, 1996
 included in <i>IndexAccount INDEX1</i>.
 <p>
@@ -804,7 +822,8 @@ technique  assumes  that  you  own  the  same  number of shares in the
 security that you own in the supplied account, valued at  the  current
 evaluation date's price.
 <p>
-For example, the expression:<pre><b>
+For example, the expression:
+<pre>
      Named IndexAccount INDEX1 getMemberWeightsUsingAccount: NA .
      do: [ ticker print: 10 ;      #-  security ticker
            name print: 30 ;        #-  security name
@@ -812,7 +831,7 @@ For example, the expression:<pre><b>
            pctMCapWeighted print ; #-  %held if mkt cap weighted
            newLine print ;
          ] ; 
-</b></pre>
+</pre>
 generates a report that  shows  the  <i>even  dollar</i>  and  <i>market  cap
 weighted</i> percentages held for each security in the the <b>IndexAccount</b>.
 <p>
@@ -824,19 +843,20 @@ document <a href="mpmaAccount.htm">
 <p>
 <hr>
 <p>
-<h3><a name="indexUp">Updating IndexAccount Data</a></h3>
+<h2 id="indexUp">Updating IndexAccount Data</h2>
 <p>
 <p>
 The <a href="pma_IndexAccountMaster"><b>IndexAccountMaster</b></a>
 data feed can be used to create and refresh <b>IndexAccount</b> 
-instances:<pre><tt><b>
-     Interface ExternalFeedManager upload: "IndexAccountMaster" using:
-   #-- make sure this is tab-delimited
-     "EntityId     Name                      ShortName
-      INDEX1         Index Account 1       Index Acct 1
-      INDEX2         Index Account 2       Index Acct 2
-     " ;
-</b></tt></pre>
+instances:
+<pre>
+  Interface ExternalFeedManager upload: "IndexAccountMaster" using:
+#-- make sure this is tab-delimited
+  "EntityId     Name                      ShortName
+   INDEX1         Index Account 1       Index Acct 1
+   INDEX2         Index Account 2       Index Acct 2
+  " ;
+</pre>
 <p>
 
 Several techniques are available for generating holdings for an
@@ -846,7 +866,8 @@ You can supply explicit <i>shares</i> and/or <i>mval</i> values
 to derive the holdings.  For example,
 the following tab-delimited feed could be used to create <b>IndexAccount</b>
 holdings for several accounts on a single date.  Market values will be
-derived for each holding using the security's price:<b><pre>
+derived for each holding using the security's price:<b>
+<pre>
      Interface ExternalFeedManager upload: "HoldingsFeed" using:
      "date     acctId      secId     shares
       9712     INDEX1       GM        1000
@@ -854,10 +875,11 @@ derived for each holding using the security's price:<b><pre>
       9712     INDEX2       IBM      10000
       9712     INDEX2       DELL     15000
      " ;
-</b></pre>
+</pre>
 <p>
 The following tab-delimited feed could be used to create
-<i>even dollar</i> holdings for several <b>IndexAccounts</b>:<pre><b>
+<i>even dollar</i> holdings for several <b>IndexAccounts</b>:
+<pre>
      Interface ExternalFeedManager upload: "HoldingsFeed" using:
    #-- make sure this is tab-delimited
      "date     acctId       secId     mval
@@ -871,10 +893,11 @@ The following tab-delimited feed could be used to create
       9711     INDEX1       F         100
       9711     INDEX1       C         100
      " ;
-</b></pre>
+</pre>
 <p>
 The following tab-delimited feed could be used to create
-<i>market-cap-weighted</i> holdings for several <b>IndexAccounts</b>:<pre><b>
+<i>market-cap-weighted</i> holdings for several <b>IndexAccounts</b>:
+<pre>
      Interface ExternalFeedManager upload: "HoldingsFeed" using:
    #-- make sure this is tab-delimited
      "date     acctId       secId    mval
@@ -886,7 +909,7 @@ The following tab-delimited feed could be used to create
       9712     INDEX2       DELL     8765.43
       9712     INDEX2       HWP      9876.54
      " ;
-</b></pre>
+</pre>
 You can exclude the <i>mval</i> column if the <i>marketCap</i> message has 
 been defined for <b>Security</b>.
 <p>
@@ -899,14 +922,15 @@ Whenever a membership is updated, the holdings for
 the <b>IndexAccount</b> are recreated for that date.
 <p>
 The following tab-delimited feed could be used to derive <b>IndexAccount</b>
-holdings from existing <b>Universe</b> memberships:<pre><b>
+holdings from existing <b>Universe</b> memberships:
+<pre>
      Interface ExternalFeedManager upload: "IndexAccountBuilder" using:
    #-- make sure this is tab-delimited
      "entityId     date     universeId     style
       INDEX1       96       SP500          EVEN
       INDEX1       97       SP500          MCAP
      " ;
-</b></pre>
+</pre>
 This upload uses the securities in the <i>SP500 Universe</i> as of
 year-end 1996 to create even-dollar holdings (i.e., each holding
 will have the same <i>totalMarketValue</i> and the same
@@ -919,18 +943,19 @@ evaluation date.
 <p>
 After running any of these uploads, you can access
 an <b>IndexAccount's</b>
-holdings just like any other <b>Account</b>.  For example:<pre><b>
+holdings just like any other <b>Account</b>.  For example:
+<pre>
      Named IndexAccount INDEX1 holdings          #-- returns List of Holdings
      do: [
          security name print: 30 ;               #-- security level
          totalMarketValue print: 15 ;            #-- holding level
          percentOfPort printNL ;                 #-- holding level        
          ] ;
-</b></pre>
+</pre>
 <p>
 <hr>
 <p>
-<h3><a name="composite">The CompositeAccount Class</a></h3>
+<h2 id="composite">The CompositeAccount Class</h2>
 <p>
 The class <b>CompositeAccount</b> is used to define the messages that are 
 specific to composite accounts.
@@ -964,15 +989,17 @@ A <b>CompositeAccount</b> can be composed of any number of <b>Account</b>
 instances.  Accounts can be added to and deleted from composites
 over time.  The <i>comonentList</i> message returns the 
 list of <b>CompositeAccount Component</b>
-instances in the composite as of the evaluation date.  For example:<pre><b>
+instances in the composite as of the evaluation date.  For example:
+<pre>
      Named CompositeAccount COMP1 componentList     #-- current components
      do: [ account code print: 10 ;                 #-- account code
            account name print: 25 ;                 #-- account name
            weight printNL ;                         #-- weight 
          ] ;
-</b></pre>
+</pre>
 displays the current list of accounts and weights in
-<i>CompositeAccount COMP1</i> and: <pre><b>
+<i>CompositeAccount COMP1</i> and:
+<pre>
      9612 evaluate: 
        [ 
        Named CompositeAccount COMP1 componentList   #-- 12/31/96 components
@@ -981,7 +1008,7 @@ displays the current list of accounts and weights in
              weight printNL ;                       #-- weight 
            ] ;
        ] ;
-</b></pre>
+</pre>
 displays the list of accounts and weights in
 <i>CompositeAccount COMP1</i> as of Dec 31, 1996.
 <p>
@@ -1003,19 +1030,20 @@ the <b>CompositeAccountMembers</b> data feed described
 <p>
 <hr>
 <p>
-<h3><a name="compositeUp">Updating CompositeAccount Data</a></h3>
+<h2 id="compositeUp">Updating CompositeAccount Data</h2>
 <p>
 
 The <a href="pma_CompositeAccountMaster"><b>CompositeAccountMaster</b></a>
 data feed can be used to create and refresh <b>CompositeAccount</b> 
-instances:<pre><tt><b>
-     Interface ExternalFeedManager upload: "CompositeAccountMaster" using:
-   #-- make sure this is tab-delimited
-     "EntityId     Name                      ShortName
-      COMP1         Composite Account 1       Comp Acct 1
-      COMP2         Composite Account 2       Comp Acct 2
-     " ;
-</b></tt></pre>
+instances:
+<pre>
+  Interface ExternalFeedManager upload: "CompositeAccountMaster" using:
+#-- make sure this is tab-delimited
+  "EntityId     Name                      ShortName
+   COMP1         Composite Account 1       Comp Acct 1
+   COMP2         Composite Account 2       Comp Acct 2
+  " ;
+</pre>
 <p>
 The <a href="pma_CompositeAccountMembers"><b>CompositeAccountMembers</b></a>
 data feed is used to define the weighted combinations of
@@ -1027,41 +1055,43 @@ Whenever a membership is updated with this feed, the holdings for
 the <b>CompositeAccount</b> are recreated for that date.
 <p>
 For example, this tab-delimited string
-can be used to define memberships over time:<pre><tt><b>
-     Interface ExternalFeedManager upload: "CompositeAccountMembers" using:
-   #-- make sure this is tab-delimited
-     "date  groupId     memberId     weight
+can be used to define memberships over time:
+<pre>
+  Interface ExternalFeedManager upload: "CompositeAccountMembers" using:
+#-- make sure this is tab-delimited
+  "date  groupId     memberId     weight
 
-      #- create a composite representing 50% of PORT1's holdings
-      97    COMP1       PORT1        50
+   #- create a composite representing 50% of PORT1's holdings
+   97    COMP1       PORT1        50
 
-      #- create a composite representing equal amounts of 4 accounts
-      #- in 95, unequal amounts in 96
-      95    COMP2       PORT7      25
-      95    COMP2       AGG1       25
-      95    COMP2       INDEX7     25
-      95    COMP2       COMP1      25
-      96    COMP2       PORT7      33
-      96    COMP2       AGG1       33
-      96    COMP2       INDEX7     33
-      96    COMP2       COMP1      1
-     " ;
-</b></tt></pre>
+   #- create a composite representing equal amounts of 4 accounts
+   #- in 95, unequal amounts in 96
+   95    COMP2       PORT7      25
+   95    COMP2       AGG1       25
+   95    COMP2       INDEX7     25
+   95    COMP2       COMP1      25
+   96    COMP2       PORT7      33
+   96    COMP2       AGG1       33
+   96    COMP2       INDEX7     33
+   96    COMP2       COMP1      1
+  " ;
+</pre>
 <p>
 After running this upload, you can access <i>CompositeAccount Comp2's</i>
-holdings just like any other <b>Account</b>.  For example:<pre><b>
-     Named Account COMP2 holdings                #-- returns List of Holdings
-     do: [
-         security name print: 30 ;               #-- security level
-         totalMarketValue print: 15 ;            #-- holding level
-         percentOfPort printNL ;                 #-- holding level        
-         ] ;
-</b></pre>
+holdings just like any other <b>Account</b>.  For example:
+<pre>
+  Named Account COMP2 holdings                #-- returns List of Holdings
+  do: [
+      security name print: 30 ;               #-- security level
+      totalMarketValue print: 15 ;            #-- holding level
+      percentOfPort printNL ;                 #-- holding level        
+      ] ;
+</pre>
 
 <p>
 <hr>
 <p>
-<h3><a name="updates">Updating Account and Holding Data - Summary</a></h3>
+<h2 id="updates">Updating Account and Holding Data - Summary</h2>
 <p>
 
 The <b>Interface</b> class 
@@ -1117,7 +1147,7 @@ instances that make up a composite over time
 <p>
 <hr>
 <p>
-<h3><a name="secXRef">Account and Holding Access By Security</a></h3>
+<h2 id="secXRef">Account and Holding Access By Security</h2>
 <p>
 A number of messages are defined at <b>Security</b>
 to return related <b>Account</b> and <b>Holding</b>
@@ -1138,42 +1168,33 @@ security as a member (relative to ^date)
 <p>
 The message <i>holdings</i> can be used to access the <b>List</b>
 of <b>Holdings</b>
-associated with a <b>Security</b>.  For example:<pre><b>
-     Named Security GM holdings               #-- returns List of Holdings
-     do: [
-         account code print: 5 ;              #--  account level
-         account name print: 20 ;             #--  account level
-         security price print: 10 ;           #--  security level
-         totalMarketValue printNL: 15 ;       #--  holding level
-         ] ;
-</b></pre>
+associated with a <b>Security</b>.  For example:
+<pre>
+  Named Security GM holdings               #-- returns List of Holdings
+  do: [
+      account code print: 5 ;              #--  account level
+      account name print: 20 ;             #--  account level
+      security price print: 10 ;           #--  security level
+      totalMarketValue printNL: 15 ;       #--  holding level
+      ] ;
+</pre>
 <p>
 Note that this <b>List</b> of <b>Holding</b> instances only includes
 <b>Portfolios</b> holdings.
 <p>
 Since holdings are stored over time, you can access the holdings in
-a <b>Security</b> as of a different date using:<pre><b>
-    9612 evaluate:
-       [
-       Named Security GM holdings               #-- returns List of Holdings
-       do: [
-           account code print: 5 ;              #--  account level
-           account name print: 20 ;             #--  account level
-           security price print: 10 ;           #--  security level
-           totalMarketValue printNL: 15 ;       #--  holding level
-           ] ;
-       ] ;
-</b></pre>
-<p>
+a <b>Security</b> as of a different date using:
+<pre>
+  9612 evaluate:
+    [
+    Named Security GM holdings               #-- returns List of Holdings
+    do: [
+        account code print: 5 ;              #--  account level
+        account name print: 20 ;             #--  account level
+        security price print: 10 ;           #--  security level
+        totalMarketValue printNL: 15 ;       #--  holding level
+        ] ;
+    ] ;
+</pre>
 
-
-<p>
-<hr>
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Created August 31, 1998</font>
-</table>
-
-</body>
-</html>
+{% include doc-footer.htm copydates="1998" %}

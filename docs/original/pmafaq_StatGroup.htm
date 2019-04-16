@@ -1,20 +1,18 @@
-<!DOCTYPE html>
-<html>
-<body>
-<title>Vision Portfolio Management FAQ: Customizing the Account Characteristic Application </title>
+---
+title: "Vision Portfolio Management FAQ: Customizing the Account Characteristic Application"
 
-<body>
-<body bgcolor=white>
-<h2>Vision Portfolio Management FAQ: Customizing the Account Characteristic Application</h2>
-<hr><p>
-<h4>Goal:</h4>
+sidebar:
+  nav: "sb_InvestmentManagers"
+---
+
+<h4 id="goal">Goal</h4>
 
 <ul>
 To change the statistics displayed in the Account Characteristics report.
 </ul>
 <p>
 
-<h4>Description:</h4>
+<h4 id="description">Description:</h4>
 <p>
 
 <ul>
@@ -30,8 +28,8 @@ you can use the <a href="pma_UniverseMaster.htm">UniverseMaster</a> and
 <p>
 A number of data items have been pre-defined and are displayed on the
 characteristic report by default:
-<ul><pre>
-<b>DataItem     BaseClass     AccessPath</b>
+<ul>
+<pre>DataItem     BaseClass     AccessPath</b>
 mcapUS       Security      marketCapUS 
 pe           Security      pe
 pb           Security      priceToBook
@@ -45,7 +43,7 @@ the data relative to the base class.
 <p>
 
 <p>
-<h4>DataFeed Assumptions:</h4>
+<h4 id="assumptions">DataFeed Assumptions:</h4>
 <p>
 <center><table border=1 width=80% cellpadding=4 cellspacing=2>
 <tr><th>DataFeed<th>Fields
@@ -70,12 +68,7 @@ showAvg, showWtAvg, showMed
 </table></center>
 <p>
 
-<h4>
-Topic 1: Defining Statistics
-
-</h4>
-
-<h4>Steps:</h4>
+<h4 id="statistics">Topic 1: Defining Statistics</h4>
 
 <ol type="A">
 
@@ -87,14 +80,14 @@ Topic 1: Defining Statistics
 Note that the feed name <i>DataItemFeed</i> is in the top left of the range.
 
 <ul>
-<pre><b>
+<pre>
 DataItemFeed
 
 id     shortName  baseClass  accessPath     isStat  showTot showAvg showWtAvg showMed
 
 sales  Sales      Company    funDataA sales   T     T       T       F         F
 qsales Qtr Sales  Company    funDataQ sales   T     T       F       F         F
-</b></pre>
+</pre>
 </ul>
 
 <li>Select the entire range.
@@ -136,7 +129,7 @@ should now appear as part of report.
 </ol>
 <hr>
 
-<h4>Topic 2: Creating Sets of Characteristics</h4>
+<h4 id="characteristics">Topic 2: Creating Sets of Characteristics</h4>
 
 <ol type="A">
 
@@ -151,11 +144,11 @@ Note that the feed name <i>UniverseMaster</i> is in the top left of the range.
 <p>
 
 <ul>
-<pre><b>
+<pre>
 UniverseMaster
 id          name                     memberType
 SalesChars  Sales Characteristics    DataItem
-</b></pre>
+</pre>
 </ul>
 
 
@@ -179,13 +172,13 @@ SalesChars  Sales Characteristics    DataItem
 Note that the feed name <i>UniverseMembers</i> is in the top left of the range.
 
 <ul>
-<pre><b>
+<pre>
 UniverseMembers
 
 groupId            memberId
 SalesChars         sales
 SalesChars         qsales
-</b></pre>
+</pre>
 </ul>
 
 
@@ -216,11 +209,5 @@ If you choose this one, the report should only include these two statistics.
 <p>
 </ol>
 </ol>
-<hr>
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated January 28, 1999</font>
-</tr>
-</table></body>
-</html>
+
+{% include doc-footer.htm copydates="1999" %}

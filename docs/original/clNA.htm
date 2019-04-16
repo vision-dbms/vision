@@ -1,27 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Class: Undefined (NA) </title>
-</head>
-<body bgcolor = white>
-<h2>Vision Class: Undefined (NA)</h2>
+---
+title: "Vision Class: Undefined (NA) "
 
-<p>
-     | <a href="FHome.htm">Home</a> | <a href="clXRef.htm">Class XRef</a> | <a href="clBoolean.htm">The Boolean Class</a> |
-<hr> 
-<h3>Topics Covered:</h3> 
-<ul type=square> 
-<li><a href="#overview">Overview</a>
-<li><a href="#creation">Generating NA Values</a>
-<li><a href="#message">NA Messages</a>
-<li><a href="#conditional">NAs and Conditional Tests</a>
-<li><a href="#subclass">Creating NA Subclasses</a>
-<li><a href="#novalue">The <i>NoValue</i> Value</a>
-<li><a href="#other">Related Topics</a>
-</ul>
-<p>
-<hr>
-<h3><a name="overview">Overview</a></h3> 
+related_topics:
+  - url: "Fund.htm#default"
+    title: "Assigning Property Values"
+  - url: "Classes.htm#sampleNAvsDefault"
+    title: "NAs and Default Values"
+  - url: "Messages.htm#default"
+    title: "Assigning Default Values"
+  - url: "Navigate.htm#message"
+    title: "General Message Information"
+  - url: "clBoolean.htm"
+    title: "The Boolean Class"
+  - url: "clXRef.htm"
+    title: "Class XRef"
+
+
+sidebar:
+  nav: "sb_ClassXRef"
+---
+
+<h2 id="overview">Overview</h2> 
 <p> 
 The <b>Undefined</b> class has a single instance
 that represents a value that is not available.  This
@@ -45,18 +44,17 @@ You can, however,
 which  have any number of instances.
 <p>
 The Undefined class is a direct subclass of Object:
-<font size=+1><pre>
-          <a href="clObject.htm">Object</a>
-             |
-             <b>Undefined</b>
-                |
-                |-- <a href="#novalue">NoValue</a>
-
-</pre></font>
+<pre>
+  <a href="clObject.htm">Object</a>
+     |
+     <b>Undefined</b>
+        |
+        |-- <a href="#novalue">NoValue</a>
+</pre>
 
 <p>
 <hr>
-<h3><a name="creation">Generating NA Values</a></h3>
+<h2 id="creation">Generating NA Values</h2>
 <p>
 The message <i>NA</i> is defined at the class <i>Object</i> to
 return the object representing the <i>NA</i>
@@ -68,77 +66,72 @@ value.  <i>NA</i> values can be generated in a number of ways:
 The <i>NA</i> value can be assigned into a variable or property</a>
 <li><a href="#return">A method or class constant can return an <i>NA</i></a>
 </ol>
-<p>
-<a name="init"> </a>
+<p id="init">
 When you define a 
 <a href="Lang.htm#variable">variable</a>, a
 <a href="Fund.htm#fixed">fixed property</a>, or a
 <a href="Fund.htm#ts">time series property</a>,
-its initial value is <i>NA</i>.  For example: <pre><tt><b>
-     !variable ;
-     variable print ;
-
-</b>and<b>
-
-     Currency defineFixedProperty: 'fixed' ;
-     Named Currency USD fixed print ;
-
-</b>and<b>
-
-     Currency define: 'ts' ;
-     Named Currency USD ts print ;
-</b></tt></pre>
+its initial value is <i>NA</i>.  For example:
+<pre>
+  !variable ;
+  variable print ;
+</pre>and<pre>
+  Currency defineFixedProperty: 'fixed' ;
+  Named Currency USD fixed print ;
+</pre>and
+<pre>
+  Currency define: 'ts' ;
+  Named Currency USD ts print ;
+</pre>
 all return and print the value <i>NA</i>.
-<p>
-<a name="assign"> </a>
+<p id="assign">
 Since <i>NA</i> is just an object, it can be assigned as the value of
-a property.  For example:<pre><tt><b>
-     !variable <- 10 ;                     #- assign value
-     variable print ;                      #- print it
-     :variable <- NA ;                     #- assign NA
-     variable print ;                      #- print it
-
-</b>and<b>
-
-     Named Currency USD :fixed <- 10 ;     #- assign value
-     Named Currency USD fixed print ;      #- print it
-     Named Currency USD :fixed <- NA ;     #- assign NA
-     Named Currency USD fixed print ;      #- print it
-
-</b>and<b>
-
-     Named Currency USD :ts 
-                asOf: 93 put: 10 ;         #- assign value
-     Named Currency USD ts print ;         #- print it
-     Named Currency USD :ts 
-                asOf: 94 put: NA ;         #- assign NA
-     Named Currency USD ts print ;         #- print it
-</b></tt></pre>
-<p>
-<a name="return"> </a>
+a property.  For example:
+<pre>
+  !variable <- 10 ;                     #- assign value
+  variable print ;                      #- print it
+  :variable <- NA ;                     #- assign NA
+  variable print ;                      #- print it
+</pre>and<pre>
+  Named Currency USD :fixed <- 10 ;     #- assign value
+  Named Currency USD fixed print ;      #- print it
+  Named Currency USD :fixed <- NA ;     #- assign NA
+  Named Currency USD fixed print ;      #- print it
+</pre>and<pre>
+  Named Currency USD :ts 
+             asOf: 93 put: 10 ;         #- assign value
+  Named Currency USD ts print ;         #- print it
+  Named Currency USD :ts 
+             asOf: 94 put: NA ;         #- assign NA
+  Named Currency USD ts print ;         #- print it
+</pre>
+<p id="return">
 Many methods return <i>NA</i> values.  For example, the
 <i>asDate</i> message defined at the class <i>Integer</i> returns
 <i>NA</i> if the recipient integer cannot be converted to a valid
-date:<pre><tt><b>
-     9513 asDate whatAmI print ;
-</b></tt></pre>
+date:
+<pre>
+  9513 asDate whatAmI print ;
+</pre>
 The arithmetic messages return <i>NA</i> if the recipient or parameter
-value is <i>NA</i>.  For example:<pre><tt><b>
-     9513 asDate asInteger + 5
-</b></tt></pre>
+value is <i>NA</i>.  For example:
+<pre>
+  9513 asDate asInteger + 5
+</pre>
 returns the <i>NA</i> value because the expression <i>9513 asDate asInteger</i>
 returns <i>NA</i> and adding <i>5</i> to <i>NA</i> returns <i>NA</i>.
 <p>
 You can define a class constant to return the <i>NA</i> value if
 you want all instances of the class to return <i>NA</i> independent
-of the instance.  For example: <pre><tt><b>
-     String define: 'returnNA' toBe: NA ;
-     "abc" returnNA print ;
-</b></tt></pre>
+of the instance.  For example:
+<pre>
+  String define: 'returnNA' toBe: NA ;
+  "abc" returnNA print ;
+</pre>
 returns and prints the value <i>NA</i>.
 <p>
 <hr>
-<h3><a name="message">NA Messages</a></h3>
+<h2 id="message">NA Messages</h2>
 <p>
 Most of the <a href="clNumber.htm#compute">numeric computation</a>
 and <a href="clNumber.htm#convert">various conversion</a> messages have
@@ -146,35 +139,39 @@ been defined at the <i>NA</i> class to return the <i>NA</i> value.
 If you perform any calculation using <i>NA</i> as
 the recipient or parameter, the <i>NA</i> value is returned.
 For example the following calculations will all return
-and print the <i>NA</i> value:<pre><tt><b>
-     (3 + NA) print ;
-     (NA * 5) print ;
-     3 min: NA . print ;
-     NA max: 5 . print ;
-</b></tt></pre>
+and print the <i>NA</i> value:
+<pre>
+  (3 + NA) print ;
+  (NA * 5) print ;
+  3 min: NA . print ;
+  NA max: 5 . print ;
+</pre>
 <p>
 Many of the messages that convert objects from one class to another
 are also defined at <i>NA</i> to return the <i>NA</i> value.
-For example:<pre><tt><b>
-     NA asInteger
-</b></tt></pre>
+For example:
+<pre>
+  NA asInteger
+</pre>
 returns the value <i>NA</i>.
 <p>
 <i>NA</i> is used as a value for many properties that contain
 numeric data.  Therefore, when you define messages at one of the <i>Number</i>
 classes, it is often useful to define the same message at the <i>NA</i>
 class.  Normally the message returns the value <i>NA</i>.  For 
-example:<pre><tt><b>
-     Number defineMethod: [ | double | ^self * 2 ] ;
-     NA define: 'double' toBe: NA ;
-</b></tt></pre>
+example:
+<pre>
+  Number defineMethod: [ | double | ^self * 2 ] ;
+  NA define: 'double' toBe: NA ;
+</pre>
 You can define the <i>double</i> message as a
 <a href="Fund.htm#constant">class constant</a>
 for the <i>NA</i> class since it always returns the <i>NA</i> value.
 If you want to define a parameterized selector as a class constant,
-use:<pre><tt><b>
-     NA define: 'within:percentOf:' toBe: NA ;
-</b></tt></pre>
+use:
+<pre>
+  NA define: 'within:percentOf:' toBe: NA ;
+</pre>
 Note that the message name must be a 
 <a href="Lang.htm#names">valid selector</a>
 with the ':' character following each parameter and no blank spaces
@@ -182,7 +179,7 @@ between the single quotes.
 
 <p>
 <hr>
-<h3><a name="conditional">NAs and Conditional Tests</a></h3>
+<h2 id="conditional">NAs and Conditional Tests</h2>
 <p>
 Several messages that perform conditional tests can be sent
 to <i>NA</i>:
@@ -196,14 +193,15 @@ to <i>NA</i>:
 </ul>
 <p>
 If any of the first three of these messages is sent to <i>NA</i>,
-the <i>else:</i> clause will be evaluated.  For example:<pre><tt><b>
-     "10" asNumber > 5      # case 1
-         ifTrue: [ " passes test " printNL ] 
-           else: [ " fails test" printNL ] ;
-     "abc" asNumber > 5     # case 2
-         ifTrue: [ " passes test " printNL ] 
-           else: [ " fails test" printNL ] ;
-</b></tt></pre>
+the <i>else:</i> clause will be evaluated.  For example:
+<pre>
+  "10" asNumber > 5      # case 1
+      ifTrue: [ " passes test " printNL ] 
+        else: [ " fails test" printNL ] ;
+  "abc" asNumber > 5     # case 2
+      ifTrue: [ " passes test " printNL ] 
+        else: [ " fails test" printNL ] ;
+</pre>
 In case 1, the string <i>"10"</i> converts to a number greater than
 5 so the <i>ifTrue:</i> clause is executed and the "passes test" message
 is displayed.  In case 2, the string <i>"abc"</i> cannot be converted
@@ -219,8 +217,7 @@ are only defined for the
 If you send any of these messages to the <i>NA</i> object,
 you will generate a <a href="Error.htm#snf"><i>Selector Not Found</i></a>
 error.
-<p>
-<a name="else"> </a>
+<p id="else">
 The messages <a href="mNA.htm#else:"><i>else:</i></a> and
 <a href="mNA.htm#elseIf:then:"><i>elseIf:then:</i></a>
 can be sent to any object.  When either message is sent to a
@@ -232,13 +229,14 @@ When the <i>elseIf:then:</i> message is sent to an <i>NA</i>,
 the first parameter is evaluated.  If it returns <i>TRUE</i>,
 the second parameter is evaluated and returned, otherwise <i>NA</i> is
 returned.  These two messages are often used in unison to
-perform a series of conditional tests.  For example:<pre><tt><b>
-   v isNumber
-     ifTrue: [ "it's a number" ] else: [ NA ] .
-     elseIf: [ v isString ] then: [ "it's a string"  ] .
-     else: [ "Unknown object type" ] . 
-     print ;
-</b></tt></pre>
+perform a series of conditional tests.  For example:
+<pre>
+  v isNumber
+    ifTrue: [ "it's a number" ] else: [ NA ] .
+    elseIf: [ v isString ] then: [ "it's a string"  ] .
+    else: [ "Unknown object type" ] . 
+    print ;
+</pre>
 <p>
 If the variable <i>v</i> is a number, the <i>ifTrue:</i> clause
 will be evaluated.  This message returns the string <i>"it's a number"</i>
@@ -257,7 +255,7 @@ The final <i>print</i> will display the actual string returned.
 
 <p>
 <hr>
-<h3><a name="subclass">Creating NA Subclasses</a></h3>
+<h2 id="subclass">Creating NA Subclasses</h2>
 <p>
 You can create subclasses of the <i>Undefined</i> class using
 the <a href="Fund.htm#class">standard procedures</a>.  Although
@@ -267,7 +265,7 @@ create.  For example, you might want to create a subclass to
 store different types of <i>NA</i> values.
 <p>
 <blockquote><hr>
-<center><a name="naSubclass.warn"><b>Warning!! </b> </a></center>
+<center id="naSubclass.warn"><b>Warning!! </b> </center>
 Because the <i>Undefined</i> class is a built-in class that is
 created primitively as part of the Vision database bootstrap,
 its subclasses do not inherit a place to store fixed property
@@ -280,73 +278,51 @@ version of the <i>new</i> message to instantiate this class
 if you want to be able to access the instances with the
 <i>instanceList</i> message.
 <p>
-For example:<pre><tt><b>
-     Undefined createSubclass: "MyNA" ;    #- create subclass
-     MyNA defineFixedProperty: 'code' ;    #- redefine property
-     MyNA defineFixedProperty: 'name' ;    #- new property
-     MyNA clusterNew                       #- new instance
-     do: [ :code <- "NM" ;
-           :name <- "Not Meaningful" ;    
-         ] ;
-     MyNA clusterNew                       #- new instance
-     do: [ :code <- "NS" ;
-           :name <- "Not Significant" ;    
-         ] ;
-     MyNA instanceList                     #- get all instances
-     do: [code print: 5 ; name printNL ] ;
-</b></tt></pre>
+For example:
+<pre>
+  Undefined createSubclass: "MyNA" ;    #- create subclass
+  MyNA defineFixedProperty: 'code' ;    #- redefine property
+  MyNA defineFixedProperty: 'name' ;    #- new property
+  MyNA clusterNew                       #- new instance
+  do: [ :code <- "NM" ;
+        :name <- "Not Meaningful" ;    
+      ] ;
+  MyNA clusterNew                       #- new instance
+  do: [ :code <- "NS" ;
+        :name <- "Not Significant" ;    
+      ] ;
+  MyNA instanceList                     #- get all instances
+  do: [code print: 5 ; name printNL ] ;
+</pre>
 <hr></blockquote>
 
 <p>
 <hr>
-<h3><a name="novalue">The <i>NoValue</i> Value</a></h3>
+<h2 id="novalue">The <i>NoValue</i> Value</h2>
 <p>
 To distinguish between programs that return no value and the
 <i>NA</i> value, the built-in class <b>NoValue</b> has been defined
 as a subclass of the <i>Undefined</i> class.  This class has a
 single instance which is returned when a block returns
-"nothing".  In the expression:<pre><tt><b>
-     !x <- 3 < 5 ifTrue: [ 2 ; ]
-</b></tt></pre>
+"nothing".  In the expression:
+<pre>
+  !x <- 3 < 5 ifTrue: [ 2 ; ]
+</pre>
 the value of the variable <i>x</i> is set to the value returned by
 the <i>ifTrue:</i> block.  Since this block ends with the <i>';'</i>
 character, it is returning "nothing".  The <i>NoValue</i> object
 is defined not to print anything when it is returned.
 If you send the <i>showInheritance</i> message to this object, you will
-see the class hierarchy:<pre><tt><b>
-     Object
-       |
-     Undefined
-       |
-     NoValue
-</b></tt></pre>
+see the class hierarchy:
+<pre>
+  Object
+    |
+  Undefined
+    |
+  NoValue
+</pre>
 Because the <i>NoValue</i> object is a subclass of <i>Undefined</i>,
 it responds to the <i>isNA</i> and <i>isntNA</i> messages with the
 values <i>TRUE</i> and <i>FALSE</i>.
-<p>
-<hr>
-<h3><a name="other">Related Topics</a></h3>
-<p>
-<p>
-For additional information see:
-<p>
-<ul type=square>
-<li><a href="Output.htm#printNA">Printing NAs</a>
-<li><a href="Fund.htm#default">Assigning Property Values</a>
-<li><a href="Classes.htm#sampleNAvsDefault">NAs and Default Values</a>
-<li><a href="Messages.htm#default">Assigning Default Values</a>
-<li><a href="Navigate.htm#message">General Message Information</a>
-</ul>
-<p>
-<p>
-<hr>
 
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy 1996 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Created August 19, 1996</font>
-</tr>
-</table>
-
-</body>
-</html>
+{% include doc-footer.htm copydates="1996" %}

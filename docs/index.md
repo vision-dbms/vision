@@ -1,37 +1,39 @@
 ---
-layout: default
+title: "Welcome to Vision"
+
+layout: single
+
+sidebar:
+   nav: "sb_Home"
+
+toc: false
 ---
 
-## Building Vision
+Vision is an object-oriented, analytical database management technology that has been used to support mission critical, production systems for clients in a cross-section of industries including investment management, international trade, health care, and media research.  Vision is object-oriented, yet its heritage originates from database management theory and practice. This union of two distinct and effective information models gives Vision unmatched capabilities in storing, manipulating, and analyzing large, complex, time-sensitive databases.
 
-* [Unix & Linux Build Instructions](nix-build.html)
+At Vision's core is a scaleable, distributed database management engine.  An object-oriented programming language is built into the database engine, providing a single, integrated environment for defining, storing, and analyzing data. Vision is fully extensible by its users.  By integrating data and programs into one environment, Vision offers users unparalleled analytical power and real-world modeling capabilities, complementing the data collection and transactions processing capabilities of relational databases and greatly surpassing the analytical capabilities of OLAPs and other add-ons.
 
-## Using Vision
+[Learn more about the Vision technology](
+  {{ site.data.navigation.lp_TheVisionStory.url }}
+)
 
-Please pardon our appearance as we work to update and modernize the material in this section.
+[Learn how to install and run a Vision environment](
+  {{ site.data.navigation.lp_GettingVision.url }}
+)
 
-* [Vision Concepts](original/vconcep.htm)
-* [Writing Programs](original/writprog.htm) 
-* [Using Vision](original/usingv.htm)
+[Learn how to use Vision to organize your data and applications](
+  {{ site.data.navigation.lp_UsingVision.url }}
+)
 
-* [Class Cross Reference](original/vclassx.htm)
-* [Vision Tutorials](original/vtutor.htm)
-* [Vision Interfaces](original/vifaces.htm)
+[Explore the built-in Vision Classes](
+  {{ site.data.navigation.lp_ClassXRef.url }}
+)
 
-* [Administration](original/vadmin.htm)
-* [Applications](original/vapps.htm)
+[Take a deep dive into an Investment Management Case Study](
+  {{ site.data.navigation.lp_InvestmentManagers.url }}
+)
 
-* [Vision Help](original/vhelp.htm)
-* [Vision FAQ](original/faq.htm)
+[Review tips for troubleshooting in a production Vision environment](
+  {{ site.data.navigation.lp_Troubleshooting.url }}
+)
 
-## Legacy Documentation
-
-* [Start Page](original/index.htm)
-* [Running Vision](original/Running.htm)
-* [Admin Tools](original/admTools.htm) (`dbconvert`, `ndftool`, etc)
-* [Year End Stores](year-end)
-
-## Troubleshooting
-
-   * [Debug an Update Malloc Error](update-malloc-debugging.html)
-   * [Vision Database Scan](VdbScan)

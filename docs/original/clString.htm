@@ -1,30 +1,42 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Class: String </title>
-</head>
-<body bgcolor = white>
-<h2>Vision Class: String</h2>
+---
+title: "Vision Class: String "
 
-<p>
-     | <a href="FHome.htm">Home</a> | <a href="mString.htm">Messages</a> | <a href="clXRef.htm">Class XRef</a> | <a href="Input.htm">Input</a> | <a href="Output.htm">Output</a> |
-<hr> 
-<h3>Topics Covered:</h3> 
-<ul type=square> 
-<li><a href="#overview">Overview</a>
-<li><a href="#basic">Basic String Messages</a>
-<li><a href="#format">Formatting Messages</a>
-<li><a href="#io">Parsing, Input, and Output Messages</a>
-<li><a href="#conversion">Conversion Messages</a>
-<li><a href="#comparison">Comparison Messages</a>
-<li><a href="#identity">String Identity</a>
-<li><a href="#substring">Additional Substring Messages</a>
-<li><a href="#cluster">String Clustering</a>
-<li><a href="#other">Related Topics</a>
-</ul>
-<p>
-<hr>
-<h3><a name="overview">Overview</a></h3> 
+related_topics:
+  - url: "mString.htm"
+    title: "Messages"
+  - url: "clXRef.htm"
+    title: "Class XRef"
+  - url: "Input.htm"
+    title: "Input"
+  - url: "Output.htm"
+    title: "Output"
+  - url: "Output.htm#printString"
+    title: "Printing Strings"
+  - url: "Output.htm"
+    title: "Generating Output"
+  - url: "Input.htm#program"
+    title: "Reading Programs from Files"
+  - url: "Input.htm#data"
+    title: "Loading Data from Files"
+  - url: "Input.htm#adv"
+    title: "Memory Resources and Advanced Data Loading Techniques"
+  - url: "tkOpenVision.htm"
+    title: "Using Strings to Specify External Channel"
+  - url: "clBlock.htm#convert"
+    title: "Converting Strings to Blocks"
+  - url: "Output.htm#convert"
+    title: "Converting Objects to Strings"
+  - url: "Navigate.htm#message"
+    title: "General Message Information"
+  - url: "tuBasic.htm#Working with Numbers and Strings"
+    title: "Vision Basics Tutorial"
+
+
+sidebar:
+  nav: "sb_ClassXRef"
+---
+
+<h2 id="overview">Overview</h2> 
 <p> 
 <b>Strings</b> are objects that represent sequences of characters.
 Strings respond to messages that format, parse, and perform
@@ -41,25 +53,26 @@ delimited by double quotes.  For example:
 Any character may be included in a string.  If you need to include a
 double quote in the string, it must be <i>escaped</i> using the '\'
 character to avoid confusion with the string delimiters.  For
-example:<pre><tt><b>
-     "He said, \"The Vision language is fun\" "
-</b></tt></pre>
-returns the string:<pre><tt><b>
-     He said, "The Vision language is fun"
-</b></tt></pre>
+example:
+<pre>
+  "He said, \"The Vision language is fun\" "
+</pre>
+returns the string:
+<pre>
+  He said, "The Vision language is fun"
+</pre>
 <p>
 The <i>String</i> class is a direct subclass of the class <i>Ordinal</i>:
-<font size=+1><pre>
-          <a href="clObject.htm">Object</a>
-             |
-             Ordinal
-                |
-                <b>String</b>
-
-</pre></font>
+<pre>
+  <a href="clObject.htm">Object</a>
+     |
+     Ordinal
+        |
+        <b>String</b>
+</pre>
 <p>
 <hr>
-<h3><a name="basic">Basic String Messages</a></h3>
+<h2 id="basic">Basic String Messages</h2>
 <p>
 The following messages perform <b>basic</b> <i>String</i> operations.
 Except where noted, these messages return a <i>String</i> object.
@@ -106,7 +119,7 @@ is returned.
 
 <p>
 <hr>
-<h3><a name="format">Formatting Messages</a></h3>
+<h2 id="format">Formatting Messages</h2>
 <p>
 Many messages defined for the class <i>String</i> allow you to
 reformat the strings in a variety of ways.
@@ -223,7 +236,7 @@ with string supplied as second <i>parameter</i>
 
 <p>
 <hr>
-<h3><a name="io">Parsing, Input and Output Messages</a></h3>
+<h2 id="io">Parsing Input And Output Messages</h2>
 <p>
 Many messages defined for the class <i>String</i> allow you to
 read and parse input files and generate output files.
@@ -348,7 +361,7 @@ encountered in <i>parameter</i>, a block, as input
 
 <p>
 <hr>
-<h3><a name="conversion">Conversion Messages</a></h3>
+<h2 id="conversion">Conversion Messages</h2>
 <p>
 Several messages have been defined to <b>convert</b> an instance of
 <i>String</i> to an instance of another class:
@@ -424,7 +437,7 @@ the context of <i>parameter</i>
 <p>
 
 <hr>
-<h3><a name="comparison">Comparison Messages</a></h3>
+<h2 id="comparison">Comparison Messages</h2>
 <p>
 
 The following messages perform basic <b>comparison</b> operations
@@ -507,17 +520,18 @@ a list containing one or more elements?
 <p>
 
 <hr>
-<h3><a name="identity">String Identity</a></h3>
+<h2 id="identity">String Identity</h2>
 <p>
 <blockquote><hr>
 <center><b>Warning!! </b></center>
 Two strings with the same content may not be the same object.
-For example:<pre><tt><b>
-     !string1 <- "abc" ;
-     !string2 <- "ABC" toLower ;
-     (string1 = string2) printNL ;
-     (string1 == string2) printNL ;
-</b></tt></pre>
+For example:
+<pre>
+  !string1 <- "abc" ;
+  !string2 <- "ABC" toLower ;
+  (string1 = string2) printNL ;
+  (string1 == string2) printNL ;
+</pre>
 Strings are equal (i.e., = ) when they have the same content.
 Strings are identical (i.e., == ) when they are the same object.
 Strings that are created directly in quotes or by manipulating
@@ -535,57 +549,60 @@ you need to use the identical string to access the element from the list.
 Several techniques are available to preserve string identity.  For 
 example, suppose you wanted to rate each currency with an A, B, or C
 value.  You could create class constants to hold unique
-versions of the strings:<pre><tt><b>
-     #-- define constant
-     Currency define: 'ratingA' toBe: "A" ;
-     Currency define: 'ratingB' toBe: "B" ;
-     Currency define: 'ratingC' toBe: "C" ;
+versions of the strings:
+<pre>
+  #-- define constant
+  Currency define: 'ratingA' toBe: "A" ;
+  Currency define: 'ratingB' toBe: "B" ;
+  Currency define: 'ratingC' toBe: "C" ;
 
-     #-- define property
-     Currency defineFixedProperty: 'rating' ;
+  #-- define property
+  Currency defineFixedProperty: 'rating' ;
 
-     #-- assign values
-     Named Currency send: [ USD, CAD ] .
-        do: [ :rating <- ratingA ] ;
+  #-- assign values
+  Named Currency send: [ USD, CAD ] .
+     do: [ :rating <- ratingA ] ;
 
-     #-- compare
-     (Named Currency USD rating == Named Currency CAD rating) printNL ;
-</b></tt></pre>
+  #-- compare
+  (Named Currency USD rating == Named Currency CAD rating) printNL ;
+</pre>
 The US and Canadian currencies will have identical values for their rating.
 <p>
 You can create a <a href="clDict.htm"><i>Dictionary</i></a> to hold
-an unique version of the string:<pre><tt><b>
-     #--  create dictionary
-     Currency define: "StringLookup" toBe: Dictionary new ;
-     Currency StringLookup at: "A" put: "A" ;
-     Currency StringLookup at: "B" put: "B" ;
-     Currency StringLookup at: "C" put: "C" ;
+an unique version of the string:
+<pre>
+  #--  create dictionary
+  Currency define: "StringLookup" toBe: Dictionary new ;
+  Currency StringLookup at: "A" put: "A" ;
+  Currency StringLookup at: "B" put: "B" ;
+  Currency StringLookup at: "C" put: "C" ;
 
-     #-- define property
-     Currency defineFixedProperty: 'rating' ;
+  #-- define property
+  Currency defineFixedProperty: 'rating' ;
 
-     #-- assign values
-     Named Currency send: [ USD, CAD ] .
-        do: [ :rating <- StringLookup at: "A" ] ;
+  #-- assign values
+  Named Currency send: [ USD, CAD ] .
+     do: [ :rating <- StringLookup at: "A" ] ;
 
-     #-- compare
-     (Named Currency USD rating == Named Currency CAD rating) printNL ;
-</b></tt></pre>
+  #-- compare
+  (Named Currency USD rating == Named Currency CAD rating) printNL ;
+</pre>
 <p>
 Alternatively, you could create 
 a new class of rating values and assign each value to an entry in this table 
-as illustrated below:<pre><tt><b>
-     Entity createSubclass: "Rating" ;
-     Rating createInstance: "A" ; 
-     Rating createInstance: "B" ; 
-     Rating createInstance: "C" ; 
-     Named Currency USD :rating <- Named Rating A ; 
-     Named Currency CAD :rating <- Named Rating A ; 
-</b></tt></pre>
+as illustrated below:
+<pre>
+  Entity createSubclass: "Rating" ;
+  Rating createInstance: "A" ; 
+  Rating createInstance: "B" ; 
+  Rating createInstance: "C" ; 
+  Named Currency USD :rating <- Named Rating A ; 
+  Named Currency CAD :rating <- Named Rating A ; 
+</pre>
 
 <p>
 <hr>
-<h3><a name="substring">Additional Substring Messages</a></h3>
+<h2 id="substring">Additional Substring Messages</h2>
 <p>
 Many additional messages that support substring operations
 are defined for the class <i>String</i>:
@@ -626,8 +643,7 @@ beginning to its first occurrence
 </table></Center>
 <p>
 
-<p>
-<a name="inquiry"> </a>
+<p id="inquiry"> </a>
 The following messages are <b>inquiries</b> about the recipient
 and return a <i>Boolean</i> value:
 <p>
@@ -722,40 +738,9 @@ character in <i>parameter</i>
 
 </tr>
 </table></Center>
-
-<p>
 <hr>
-<h3><a name="cluster">String Clustering</a></h3>
+<h2 id="cluster">String Clustering</h2>
 <p>
 Currently in development ..
-<p>
-<hr>
-<h3><a name="other">Related Topics</a></h3>
-<p>
-For additional information see:
-<p>
-<ul type=square>
-<li><a href="Output.htm#printString">Printing Strings</a>
-<li><a href="Output.htm">Generating Output</a>
-<li><a href="Input.htm#program">Reading Programs from Files</a>
-<li><a href="Input.htm#data">Loading Data from Files</a>
-<li><a href="Input.htm#adv">Memory Resources and Advanced Data Loading Techniques</a>
-<li><a href="tkOpenVision.htm">Using Strings to Specify External Channel</a>
-<li><a href="clBlock.htm#convert">Converting Strings to Blocks</a>
-<li><a href="Output.htm#convert">Converting Objects to Strings</a>
-<li><a href="Navigate.htm#message">General Message Information</a>
-<li><a href="tuBasic.htm#Working with Numbers and Strings">Vision Basics Tutorial</a>
-</ul>
-<p>
-<p>
-<hr>
 
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated February 19, 1998 </font>
-</table>
-
-</body>
-</html>
-
+{% include doc-footer.htm copydates="1998" %}

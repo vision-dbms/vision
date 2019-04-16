@@ -1,34 +1,29 @@
-<!DOCTYPE html>
-<html>
-<head>
-   <title>Case Study 1: Single Company Reporting</title>
-</head>
-<body>
-<body bgcolor=white>
+---
+title: "Case Study 1: Single Company Reporting"
 
-<h2>Case Study 1: Single Company Reporting</h2>
+toc: false
 
-<p>| <a href="FHome.htm">Home</a> 
-   | <a href="vtutor.htm">Tutorials</a> | <hr>
+sidebar:
+  nav: "sb_UsingVision"
+---
 
 <blockquote><hr>
-<center><b><font size+1>Reminder!</font></b> </a></center>
+<center><b><font size+1>Reminder!</font></b></center>
 To run these examples, you should first start a new session and then load the sample database using:
-<pre><tt><b>     "/localvision/samples/general/sample.load" asFileContents evaluate ; 
-</b></tt></pre>
+<pre>
+  "/localvision/samples/general/sample.load" asFileContents evaluate ; 
+</pre>
 Any other files referenced can be read from the <i>/localvision/samples/general/</i>
 directory.
 <p>
 <b>Note:</b> The <i>sample.load</i> file runs by default on a <i>Unix</i> environment.  If you are using a <i>Windows NT</i> platform, this location may be prefixed by a drive  and optional path (e.g. <i>d:/visiondb/localvision/samples/general/sample.load</i>).  Check with your Vision Administrator for further details.<hr></blockquote>
-<p>
-
-<hr>
 
 <p>It is often useful to display many data items over time for a single
 company. Read the file <i>example1.a</i> You should see the following:
 
 <ul>
-<pre><b>Named Company GM 
+<pre>
+Named Company GM 
 do: [ 
      !dr <- 90 to: 88 by: 1 yearEnds ;          #--create date range 
      " " print: 15 ;                            #--indent
@@ -47,18 +42,18 @@ do: [
      dr evaluate: [ price print: 10 ] ; 
      newLine print ; 
     ] ;
-</b></pre>
+</pre>
 </ul>
 
 <p>Execute this program. You should see: 
 
 <ul>
-<pre><b>
+<pre>
                  1990         1989           1988
 Sales       101781.00    102813.00       96371.63
 EPS              5.03         4.11           6.14
 Price           32.12        32.12          32.12 
-</b></pre>
+</pre>
 </ul>
 
 <p>This program displays some basic financial data about GM for the years
@@ -70,7 +65,7 @@ The specific data item is then printed for each year, one year per column.
 the years. Read the file <i>example1.b</i>. You should see: 
 
 <ul>
-<pre><b>Named Company GM 
+<pre>Named Company GM 
 do: [ 
      !dr <- 90 to: 88 by: 1 yearEnds ;
      name centerNL: 45 . print;                  #-- center the name 
@@ -96,14 +91,14 @@ do: [
      dr evaluate: [ price print: 10 ] ; 
      newLine print ; 
    ] ; 
-</b></pre>
+</pre>
 </ul>
 
 <p>Execute this program. You should see: 
 
 
 <ul>
-<pre><b>         General Motors Corp 
+<pre>         General Motors Corp 
           Financial Summary 
 
            1990       1989       1988
@@ -111,7 +106,7 @@ do: [
 Sales 101781.00  102813.00   96371.63 
 EPS        5.03       4.11       6.14 
 Price     32.12      32.12      32.12 
-</b></pre>
+</pre>
 </ul>
 
 The report now contains a two-line title. The first line is the company
@@ -130,7 +125,7 @@ ratio of price to earnings. Read the file <i>example1.c.</i> You should
 see: 
 
 <ul>
-<pre><b>
+<pre>
 Named Company GM 
 do: [ 
      !dr <- 90 to: 88 by: 1 yearEnds ; 
@@ -161,12 +156,13 @@ do: [
      dr evaluate: [ price / earningsPerShare print: 10 ] ; 
      newLine print ; 
    ] ; 
-</b></pre>
+</pre>
 </ul>
 
 <p>Execute this program. You should see: </p>
 
-<ul><pre><b>       General Motors Corp 
+<ul>
+<pre>       General Motors Corp 
                 Financial Summary 
 Prepared: 12-Jan 1993 Latest Price: 32.12 
 
@@ -175,7 +171,7 @@ Prepared: 12-Jan 1993 Latest Price: 32.12
 Sales    101781.00 102813.00  96371.63 
 EPS           5.03      4.11      6.14 
 PE            6.39      7.82      5.23 
-</b></pre>
+</pre>
 </ul>
 
 The preparation date and the latest price now appear in the header.
@@ -192,7 +188,7 @@ of the program itself need not change. Read the file <i>example1.d</i>.
 You should see:
 
 <ul>
-<pre><b>
+<pre>
 Company defineMethod:      #-- this line is new 
 [ | financialAnalysis |    #-- name the method 
 !dr <- 90 to: 88 by: 1 yearEnds ; 
@@ -225,12 +221,13 @@ newLine print ;
 
 #--- Run the method 
 Named Company GM financialAnalysis ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program. You should see: 
 
-<ul><pre><b>            General Motors Corp 
+<ul>
+<pre>            General Motors Corp 
              Financial Summary 
 Prepared: 12-Jan 1993 Latest Price: 32.12 
 
@@ -239,7 +236,7 @@ Prepared: 12-Jan 1993 Latest Price: 32.12
 Sales  101781.00   102813.00   96371.63 
 EPS         5.03        4.11       6.14 
 PE          6.39        7.82       5.23 
-</b></pre>
+</pre>
 </ul>
 <hr>
 <p>
@@ -248,13 +245,13 @@ same report for another company, just change the company code.
 For example read the file <i>example1.e</i> or type:
 
 <ul>
-<pre><b>Named Company IBM financialAnalysis</b></pre> 
+<pre>Named Company IBM financialAnalysis</pre> 
 </ul>
 
 Execute this program. You should see: 
 
 <ul>
-<pre><b>
+<pre>
             IBM Corp 
          Financial Summary 
 Prepared: 12-Jan 1993 Latest Price: 80.75 
@@ -264,7 +261,7 @@ Prepared: 12-Jan 1993 Latest Price: 80.75
 Sales   54217.02     51250.02    50056.01
 EPS         8.72         7.81       10.67 
 PE          9.26        10.34        7.57
-</b></pre>
+</pre>
 </ul>
 
 <hr>
@@ -275,7 +272,7 @@ This version selects the top 3 companies based on percent change in sales
 from 1989 to 1990 and produces the report for each company in the list:
 
 <ul>
-<pre><b>90 evaluate:                  #-- run the program as of 1990 
+<pre>90 evaluate:                  #-- run the program as of 1990 
 [ 
  !top3 <- Company masterList          #-- start with all companies 
  rankDown: [ :sales pctChangeLag: 1 yearEnds ] . #-- 1990 to 1989
@@ -290,13 +287,13 @@ from 1989 to 1990 and produces the report for each company in the list:
        financialAnalysis ;            #-- run the method 
      ] ; 
 ] ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program. You should see: 
 
 <ul>
-<pre><b>*** Financial Summary Report For Top 3 Companies ***
+<pre>*** Financial Summary Report For Top 3 Companies ***
  (Using 1990 1989 Percent Change in Sales)
 
 
@@ -330,7 +327,7 @@ Prepared: 14-Dec-1998     Latest Price:     59.12
                 --------- --------- ---------
 Sales               11909   8451.46   6400.85
 EPS                  0.40      0.29      0.24
-PE                 147.81    203.88    246.35</b></pre>
+PE                 147.81    203.88    246.35</pre>
 </ul>
 
 The report is displayed for the top 3 companies. The list <i>top3</i> is created
@@ -349,7 +346,7 @@ changes the date range creation to use the last three years of available
 data based on the evaluation date: 
 
 <ul>
-<pre><b>
+<pre>
 Company defineMethod: 
 [ | financialAnalysis | 
  #-- get last available date for sales date 
@@ -381,13 +378,13 @@ Company defineMethod:
  newLine print ; 
 ] ; 
 Named Company GM financialAnalysis ;
-</b></pre>
+</pre>
 </ul>
 
 Execute this program. You should see: 
 
 <ul>
-<pre><b>           General Motors Corp 
+<pre>           General Motors Corp 
          Financial Summary
 Prepared: 12-Jan 1993 Latest Price:32.12 
 
@@ -395,7 +392,7 @@ Prepared: 12-Jan 1993 Latest Price:32.12
       ---------       ---------   --------- 
 Sales 101781.00       102813.00    96371.63
 EPS        5.03            4.11        6.14 
-PE         6.39            7.82        5.23</b></pre></ul>
+PE         6.39            7.82        5.23</pre></ul>
 
 This report is identical to the prior version of the GM report. Since
 the last date of sales data availability for GM is 1990, the report is
@@ -406,13 +403,13 @@ still generated for the years 1990, 1989, and 1988.
 or typing: 
 
 <ul>
-<pre><b>89 evaluate: [ Named Company GM financialAnalysis ] ;</b></pre>
+<pre>89 evaluate: [ Named Company GM financialAnalysis ] ;</pre>
 </ul>
 
 Execute this program. You should see: 
 
 <ul>
-<pre><b>              General Motors Corp 
+<pre>              General Motors Corp 
                       Financial Summary 
 Prepared: 12-Jan 1993 Latest Price: 32.12 
 
@@ -421,7 +418,7 @@ Prepared: 12-Jan 1993 Latest Price: 32.12
 Sales  102813.00  96371.63          NA
 EPS         4.11      6.14          NA 
 PE          7.82      5.23          NA
-</b></pre>
+</pre>
 </ul>
 
 The report starts with the year 1989 in this case. Since the first reporting
@@ -436,7 +433,7 @@ displayed.
 IBM by reading the file <i>example1.i</i> or typing: 
 
 <ul>
-<pre><b>
+<pre>
 Named Company GM 
 :sales asOf: 91 put: 123456.78 ;         #-- update GM data 
 
@@ -445,13 +442,13 @@ do: [ financialAnalysis ;                #-- and report for each element
       newLine print ; 
       newLine print ; 
     ] ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program. You should see: 
 
 <ul>
-<pre><b>
+<pre>
            General Motors Corp 
            Financial Summary 
 Prepared: 12-Jan 1993 Latest Price:32.12 
@@ -472,7 +469,7 @@ Sales   54217.02     51250.02    50056.01
 EPS         8.72         7.81       10.67 
 PE          9.26        10.34        7.57
 
-</b></pre>
+</pre>
 </ul>
 <hr>
 
@@ -485,7 +482,7 @@ of periods. The file <i>example1.j</i> defines this method and uses the
 supplied input to determine the number of periods to display: 
 
 <ul>
-<pre><b>
+<pre>
 Company defineMethod: 
 [ | financialAnalysisForPeriods: number | 
   !lastDate  <- :sales effectiveDate ;     #-- most recent date 
@@ -519,13 +516,13 @@ Company defineMethod:
 ] ; 
 
 Named Company GM financialAnalysisForPeriods: 4 ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program. You should see: 
 
 <ul>
-<pre><b>      
+<pre>      
             General Motors Corp 
             Financial Summary 
 Prepared: 12-Jan 1993 Latest Price:32.12 
@@ -535,7 +532,7 @@ Prepared: 12-Jan 1993 Latest Price:32.12
 Sales     123456.78  101781.00  102813.00   96371.63
 EPS            5.03       5.03       4.11       6.14
 PE             6.39       6.39       7.82       5.23 
-</b></pre>
+</pre>
 </ul>
 
 The report is displayed for 4 periods, 1991 - 1988. The new method uses
@@ -549,7 +546,7 @@ Because it is executed as of 12/31/1990, the last date will be based on
 the 1990 data. Read in the file <i>example1.k</i> or type: 
 
 <ul>
-<pre><b>
+<pre>
 90 evaluate: 
 [ Named Company send: [ GM, IBM ] . 
   do: [ 
@@ -559,13 +556,13 @@ the 1990 data. Read in the file <i>example1.k</i> or type:
        newLine print ; 
       ]; 
 ] ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program. You should see: 
 
 <ul>
-<pre><b>
+<pre>
             General Motors Corp 
             Financial Summary 
 Prepared: 12-Jan 1993 Latest Price: 32.12 
@@ -585,7 +582,7 @@ Prepared: 12-Jan 1993 Latest Price: 80.75
 Sales        54217.02     51250.02
 EPS              8.72         7.81 
 PE               9.26        10.34 
-</b></pre>
+</pre>
 </ul>
 
 The entire report is executed as of 12/31/90. For each company in the
@@ -600,20 +597,20 @@ is printed.
 use this new method. Read in the file <i>example1.l</i> or type: </p>
 
 <ul>
-<pre><b>
+<pre>
 Company defineMethod: 
 [ | financialAnalysis | 
   ^self financialAnalysisForPeriods: 3 ; 
 ] ; 
 
 Named Company GM financialAnalysis ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program. You should see: 
 
 <ul>
-<pre><b>      General Motors Corp 
+<pre>      General Motors Corp 
               Financial Summary 
 Prepared: 12-Jan 1993 Latest Price: 32.12 
 
@@ -622,7 +619,7 @@ Prepared: 12-Jan 1993 Latest Price: 32.12
 Sales  123456.78  101781.00  102813.00 
 EPS         5.03       5.03       4.11 
 PE          6.39       6.39       7.82 
-</b></pre>
+</pre>
 </ul>
 
 This report should look very familiar at this point. 
@@ -633,14 +630,5 @@ This report should look very familiar at this point.
 | <a href="tuSingle.htm">Single Object Access</a>
 | <a href="tuList.htm">Using Lists</a>
 | <a href="tuList.htm">Using Dates and TimeSeries</a> |
-<hr>
 
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated January 25, 1999</font>
-</tr>
-</table>
-
-</body>
-</html>
+{% include doc-footer.htm copydates="1999" %}

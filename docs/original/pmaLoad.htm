@@ -1,38 +1,31 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>PMA Tutorial : Loading Sample Data </title>
+---
+title: "PMA Tutorial : Loading Sample Data "
 
-</head>
-<body>
-<body bgcolor=white>
+related_topics:
+  - url: "vconcep.htm"
+    title: "Home"
+  - url: "vtutor.htm"
+    title: "Tutorials"
+  - url: "tuBasic.htm"
+    title: "Vision Basics"
+  - url: "tuLoad.htm"
+    title: "Creating a Demo Database"
+  - url: "tuSingle.htm"
+    title: "Single Object Access"
+  - url: "tuList.htm"
+    title: "Using Lists"
+  - url: "tuTS.htm"
+    title: "Using Dates and TimeSeries"
+  - url: "Input.htm"
+    title: "Loading Information"
+  - url: "clEntity.htm"
+    title: "The Entity Class"
+  - url: "Fund.htm"
+    title: "Class and Message Basics"
 
-<h2>PMA Tutorial : Loading Sample Data</h2>
+---
 
-<p>
-     | <a href="FHome.htm">Home</a> 
-     | <a href="vtutor.htm">Tutorials</a> 
-     | <a href="Input.htm">Loading Information</a> 
-     | <a href="clEntity.htm">The Entity Class</a> 
-     | <a href="Fund.htm">Class and Message Basics</a> | 
-<hr>
-<h3>Topics Covered:</h3>
-<ul type="square">
-<li><a href="#overview">Overview</a>
-<li><a href="#currency">Loading Currency Data</a>
-<li><a href="#country">Loading Country Data</a>
-<li><a href="#sector">Loading Sector Data</a>
-<li><a href="#industry">Loading Industry Data</a>
-<li><a href="#company">Loading Company Data</a>
-<li><a href="#sectype">Loading Security Type Data</a>
-<li><a href="#security">Loading Security Data</a>
-<li><a href="#portfolio">Loading Portfolio Data</a>
-<li><a href="#price">Loading Price Data</a>
-<li><a href="#holdings">Loading Holdings Data</a>
-<li><a href="#SeeAlso:">See Also:</a>
-</ul>
-<hr>
-<a name="overview"><h3>Overview</h3></a>
+<h2 id="overview">Overview</h2>
 <p>
 All sample <a href="pmaTutor.htm">PMA Tutorials</a>
 are based on the data described in this section.    Several sample data
@@ -116,9 +109,10 @@ You can read the <i>sample.load</i> file into your favorite
 <a href="Editor.htm">Vision Editor</a> or you can execute the 
 code in this file using the
 <a href="Input.htm#program">asFileContents evaluate</a>
-expression:<pre><tt><b>
-     "/localvision/samples/pma/sample.load" asFileContents evaluate ;
-</b></tt></pre>
+expression:
+<pre>
+  "/localvision/samples/pma/sample.load" asFileContents evaluate ;
+</pre>
 
 <p>
 <b>Note:</b>  The <i>sample.load</i> file runs by default
@@ -127,19 +121,21 @@ this location may be prefixed by a drive and optional path (e.g.,  <i>d:/visiond
 <p>
 <hr>
 
-<a name="currency"><h3>Loading Currency Data</h3></a>
+<h2 id="currency">Loading Currency Data</h2>
 <p>
 
 The file <i>Currency.pma</i> contains one line per currency.  Each line
 contains a currency identifier and a currency name.  
 
 The first few lines of this file are displayed
-below:<pre><tt>
-	<b>id	name</b>	
-	ADP	Andorran Peseta	
-	AED	UAE Dirham	
-        ...
-</tt></pre>
+
+below:
+<pre>
+  <b>id    name</b>
+  ADP   Andorran Peseta
+  AED   UAE Dirham
+  ...
+</pre>
 <p>
 
 <a href="pma_CurrencyMaster.htm"><i>CurrencyMaster</i></a> is the name of the feed that 
@@ -147,28 +143,29 @@ is used to create and refresh basic information for Currency instances.
 <p>
 To manually load the file, execute the following:
 <ul>
-<pre><b>
-Interface ExternalFeedManager upload:"CurrencyMaster" usingFile:
-"/localvision/samples/pma/Currency.pma";
-</b></pre>
+<pre>
+  Interface ExternalFeedManager upload:"CurrencyMaster" usingFile:
+  "/localvision/samples/pma/Currency.pma";
+</pre>
 </ul>
 <p>
 The output buffer will display the total number of currencies loaded.
 <p>
 <hr>
 
-<h3><a name="country">Loading Country Data</a></h3>
+<h2 id="country">Loading Country Data</h2>
 <p>
 The file <i>Country.pma</i> contains one line per country.  Each line
 contains a country identifier and a country name.  
 
 The first few lines of this file are displayed
-below:<pre><tt>
-	<b>id	name	                currency</b>
-	AD	Andorra	                ADP
-	AE	United Arab Emirates	AED
-        ...
-</tt></pre>
+below:
+<pre>
+  <b>id    name                    currency</b>
+  AD    Andorra                 ADP
+  AE    United Arab Emirates    AED
+  ...
+</pre>
 
 <p>
 
@@ -179,10 +176,10 @@ is used to create and refresh basic information for Country instances.
 To manually load the file, execute the following:
 
 <ul>
-<pre><b>
-Interface ExternalFeedManager upload:"CountryMaster" usingFile:
-"/localvision/samples/pma/Country.pma";
-</b></pre>
+<pre>
+  Interface ExternalFeedManager upload:"CountryMaster" usingFile:
+  "/localvision/samples/pma/Country.pma";
+</pre>
 </ul>
 <p>
 
@@ -191,17 +188,19 @@ The output buffer will display the total number of countries loaded.
 
 <hr>
 
-<h3><a name="sector">Loading Sector Data</a></h3>
+<h2 id="sector">Loading Sector Data</h2>
 <p>
 The file <i>Sector.pma</i> contains one line per sector.  Each line
 contains a sector identifier and a sector name.  
 
 The first few lines of this file are displayed
-below:<pre><tt>
-       <b>id       name</b>
-       NONDUR	Non-durables
-       DUR      Durables
-       ...</tt></pre>
+below:
+<pre>
+ <b>id          name</b>
+ NONDUR      Non-durables
+ DUR         Durables
+ ...
+</pre>
 
 <p>
 
@@ -213,10 +212,10 @@ is used to create and refresh basic information for Sector instances.
 To manually load the file, execute the following:
 
 <ul>
-<pre><b>
-Interface ExternalFeedManager upload:"SectorMaster" usingFile:
-"/localvision/samples/pma/Sector.pma";
-</b></pre>
+<pre>
+  Interface ExternalFeedManager upload:"SectorMaster" usingFile:
+  "/localvision/samples/pma/Sector.pma";
+</pre>
 </ul>
 <p>
 
@@ -226,16 +225,17 @@ The output buffer will display the total number of sectors loaded.
 
 <hr>
 
-<h3><a name="industry">Loading Industry Data</a></h3>
+<h2 id="industry">Loading Industry Data</h2>
 <p>
 The file <i>Industry.pma</i> contains one line per industry.  Each line
 contains an industry identifier, industry name, and a sector identifier.The first few lines of this file are displayed
-below:<pre><tt>
-<b>       id          name	           sector</b>
-       110	   Beverages	   NOND
-       120	   Cosmetics	   NOND
-       ...
-</tt></pre>
+below:
+<pre>
+    <b>id          name            sector</b>
+    110         Beverages       NOND
+    120         Cosmetics       NOND
+    ...
+</pre>
 
 <a href="pma_IndustryMaster.htm"><i>IndustryMaster</i></a> is the name of the feed that 
 is used to create and refresh basic information for Industry instances. 
@@ -245,10 +245,10 @@ is used to create and refresh basic information for Industry instances.
 To manually load the file, execute the following:
 
 <ul>
-<pre><b>
-Interface ExternalFeedManager upload:"IndustryMaster" usingFile:
-"/localvision/samples/pma/Industry.pma";
-</b></pre>
+<pre>
+  Interface ExternalFeedManager upload:"IndustryMaster" usingFile:
+  "/localvision/samples/pma/Industry.pma";
+</pre>
 </ul>
 <p>
 The output buffer will display the total number of industries loaded.
@@ -256,22 +256,23 @@ The output buffer will display the total number of industries loaded.
 
 
 <hr>
-<h3><a name="company">Loading Company Data</a></h3>
+<h2 id="company">Loading Company Data</h2>
 <p>
 
 The file <i>Company.pma</i> contains one line per company.  Each line
 contains a company identifier, company name, country identifier, 
- identifier, industry identifier, and a fiscalYearEnd date.	
+ identifier, industry identifier, and a fiscalYearEnd date.
   
 
 The first few lines of this file are displayed
-below:<pre><tt>
-<b>       id        name                          	Country	  Currency  Industry	fiscalYearEnd</b>
-       02364J10  AMERICA ONLINE INC            	US     	  USD       390    	6    	
-       37044210  GENERAL MOTORS CORP           	US     	  USD       210    	12   	
-       45920010  INTL BUSINESS MACHINES CORP   	US     	  USD       530    	12   	
-       ...
-</tt></pre>
+below:
+<pre>
+    <b>id        name                           Country   Currency  Industry    fiscalYearEnd</b>
+    02364J10  AMERICA ONLINE INC             US        USD       390         6
+    37044210  GENERAL MOTORS CORP            US        USD       210         12
+    45920010  INTL BUSINESS MACHINES CORP    US        USD       530         12
+    ...
+</pre>
 
 <a href="pma_CompanyMaster.htm"><i>CompanyMaster</i></a> is the name of the feed that 
 is used to create and refresh basic information for Company instances. 
@@ -280,10 +281,10 @@ is used to create and refresh basic information for Company instances.
 To manually load the file, execute the following:
 
 <ul>
-<pre><b>
-Interface ExternalFeedManager upload:"CompanyMaster" usingFile:
-"/localvision/samples/pma/Company.pma";
-</b></pre>
+<pre>
+  Interface ExternalFeedManager upload:"CompanyMaster" usingFile:
+  "/localvision/samples/pma/Company.pma";
+</pre>
 </ul>
 <p>
 The output buffer will display the total number of companies loaded.
@@ -291,20 +292,21 @@ The output buffer will display the total number of companies loaded.
 
 
 <hr>
-<h3><a name="sectype">Loading SecurityType Data</a></h3>
+<h2 id="sectype">Loading SecurityType Data</h2>
 <p>
 
 The file <i>SecType.pma</i> contains one line per security type.  Each line
 contains a security type identifier, security type name, UnitCalc, and an AssetCategory. 
 
 The first few lines of this file are displayed
-below:<pre><tt>
-<b>       id	name	           unitcalc	assetcategory</b>
-       0        Cash & Equiv	   1.00	        Cash
-       1        Common Stock	   1.00	        Equity
-       2        Preferred Stock    1.00	        Equity
-       ...
-</tt></pre>
+below:
+<pre>
+    <b>id       name               unitcalc     assetcategory</b>
+    0        Cash & Equiv       1.00         Cash
+    1        Common Stock       1.00         Equity
+    2        Preferred Stock    1.00         Equity
+    ...
+</pre>
 <p>
 <a href="pma_SecurityTypeMaster.htm"><i>SecutityTypeMaster</i></a> is the name of the feed that 
 is used to create and refresh basic information for SecurityType instances. 
@@ -314,10 +316,10 @@ is used to create and refresh basic information for SecurityType instances.
 To manually load the file, execute the following:
 
 <ul>
-<pre><b>
-Interface ExternalFeedManager upload:"SecurityTypeMaster" usingFile:
-"/localvision/samples/pma/SecType.pma";
-</b></pre>
+<pre>
+  Interface ExternalFeedManager upload:"SecurityTypeMaster" usingFile:
+  "/localvision/samples/pma/SecType.pma";
+</pre>
 </ul>
 <p>
 <p>
@@ -325,7 +327,7 @@ The output buffer will display the total number of security types loaded.
 <p>
 
 <hr>
-<h3><a name="security">Loading Security Data</a></h3>
+<h2 id="security">Loading Security Data</h2>
 <p>
 
 The file <i>Security.pma</i> contains one line per security.  Each line
@@ -334,14 +336,14 @@ contains a security identifier,  security name,  currency identifier,
   
 
 The first few lines of this file are displayed
-below:<pre><tt>
-<b>      id      	name                              currency   cusip   	ticker	companyId   type    latestMarketCapUS</b>
-
-      02364J10	AMERICA ONLINE INC DEL COM     	  USD        02364J10	AOL   	02364J10    1        4792900.00
-      37044210	GENERAL MTRS CORP COM          	  USD        37044210	GM    	37044210    1       42734805.00
-      45920010	INTERNATIONAL BUSINESS MACH COM	  USD        45920010	IBM   	45920010    1       88261698.75
-      ...
-</tt></pre>
+below:
+<pre>
+   <b>id        name                              currency   cusip      ticker  companyId   type    latestMarketCapUS</b>
+    02364J10  AMERICA ONLINE INC DEL COM        USD        02364J10   AOL     02364J10    1        4792900.00
+   37044210  GENERAL MTRS CORP COM             USD        37044210   GM      37044210    1       42734805.00
+   45920010  INTERNATIONAL BUSINESS MACH COM   USD        45920010   IBM     45920010    1       88261698.75
+   ...
+</pre>
 
 <a href="pma_SecurityMaster.htm"><i>SecurityMaster</i></a> is the name of the feed that 
 is used to create and refresh basic information for Security instances. 
@@ -351,10 +353,10 @@ is used to create and refresh basic information for Security instances.
 To manually load the file, execute the following:
 
 <ul>
-<pre><b>
-Interface ExternalFeedManager upload:"SecurityMaster" usingFile:
-"/localvision/samples/pma/Security.pma";
-</b></pre>
+<pre>
+  Interface ExternalFeedManager upload:"SecurityMaster" usingFile:
+  "/localvision/samples/pma/Security.pma";
+</pre>
 </ul>
 <p>
 <p>
@@ -362,21 +364,22 @@ The output buffer will display the total number of securities loaded.
 <p>
 
 <hr>
-<h3><a name="portfolio">Loading Portfolio Data</a></h3>
+<h2 id="portfolio">Loading Portfolio Data</h2>
 <p>
 
 The file <i>Portfolio.pma</i> contains one line per portfolio.  Each line
-contains a portfolio identifier and a portfolio name.	
+contains a portfolio identifier and a portfolio name.
   
 
 The first few lines of this file are displayed
-below:<pre><tt>
-<b>      id	name</b>
-      102       INSYTE GROWTH FUND	
-      232       INSYTE INCOME FUND	
-      332       INSYTE GROWTH & INCOME FUND	
-      ...
-</tt></pre>
+below:
+<pre>
+   <b>id        name</b>
+   102       INSYTE GROWTH FUND
+   232       INSYTE INCOME FUND
+   332       INSYTE GROWTH & INCOME FUND
+   ...
+</pre>
 
 <a href="pma_PortfolioMaster.htm"><i>PortfolioMaster</i></a> is the name of the feed that 
 is used to create and refresh basic information for Portfolio instances. 
@@ -386,10 +389,10 @@ is used to create and refresh basic information for Portfolio instances.
 To manually load the file, execute the following:
 
 <ul>
-<pre><b>
-Interface ExternalFeedManager upload:"PortfolioMaster" usingFile:
-"/localvision/samples/pma/Portfolio.pma";
-</b></pre>
+<pre>
+  Interface ExternalFeedManager upload:"PortfolioMaster" usingFile:
+  "/localvision/samples/pma/Portfolio.pma";
+</pre>
 </ul>
 
 <p>
@@ -399,20 +402,21 @@ The output buffer will display the total number of portfolios loaded.
 
 <hr>
 
-<h3><a name="price">Loading Price Data</a></h3>
+<h2 id="price">Loading Price Data</h2>
 <p>
 
 The file <i>Price.pma</i> contains multiple dates per security.  Each line
 represents a specific security identifier, date, currency identifier, adjustmentDate closing, price, and volume.
   
 
-The first few lines of this file are displayed below:<pre><tt>
-<b>     id      	date      	currency	adjustmentDate 	close  	volume</b>
-     02364J10	11/06/1997	USD     	12/18/1997	79.38  	2.55
-     02364J10	11/07/1997	USD     	12/18/1997	79.25  	4.85
-     02364J10	11/10/1997	USD     	12/18/1997	76.06  	1.75
-     ...
-</tt></pre>
+The first few lines of this file are displayed below:
+<pre>
+  <b>id         date            currency        adjustmentDate  close   volume</b>
+  02364J10   11/06/1997      USD             12/18/1997      79.38   2.55
+  02364J10   11/07/1997      USD             12/18/1997      79.25   4.85
+  02364J10   11/10/1997      USD             12/18/1997      76.06   1.75
+  ...
+</pre>
 
 <a href="pma_PriceFeed.htm"><i>PriceFeed</i></a> is the name of the feed that 
 is used to create and refresh basic information for security prices. 
@@ -420,17 +424,17 @@ is used to create and refresh basic information for security prices.
 To manually load the file, execute the following:
 
 <ul>
-<pre><b>
-Interface ExternalFeedManager upload:"PriceFeed" usingFile:
-"/localvision/samples/pma/Price.pma";
-</b></pre>
+<pre>
+  Interface ExternalFeedManager upload:"PriceFeed" usingFile:
+  "/localvision/samples/pma/Price.pma";
+</pre>
 </ul>
 <p>
 The output buffer will display the total number of prices loaded.
 <p>
 
 <hr>
-<h3><a name="holdings">Loading Holdings Data</a></h3>
+<h2 id="holdings">Loading Holdings Data</h2>
 <p>
 
 The file <i>Holdings.pma</i> contains a line for each security held in a portfolio on a date.
@@ -438,13 +442,14 @@ Multiple dates of holdings for a portfolio are involved.  Each line
 contains a date, an account identifier, and security identifier. 
   
 
-The first few lines of this file are displayed below:<pre><tt>
-<b>      date	acctId	secId	  shares	mval	</b>
-      19971215  102  	37044210  7800	   497741.40	
-      19971215  102  	00949T10  15200	   589000.00	
-      19971215  102  	02364J10  8200	   695975.00	
-      ...
-</tt></pre>
+The first few lines of this file are displayed below:
+<pre>
+   <b>date      acctId  secId     shares        mval</b>
+   19971215  102     37044210  7800     497741.40
+   19971215  102     00949T10  15200    589000.00
+   19971215  102     02364J10  8200     695975.00
+   ...
+</pre>
 
 <a href="pma_HoldingsFeed.htm"><i>HoldingsFeed</i></a> is the name of the feed that 
 is used to create and refresh basic information for Account holdings. 
@@ -454,31 +459,14 @@ is used to create and refresh basic information for Account holdings.
 To manually load the file, execute the following:
 
 <ul>
-<pre><b>
-Interface ExternalFeedManager upload:"HoldingsFeed" usingFile:
-"/localvision/samples/pma/Holdings.pma";
-</b></pre>
+<pre>
+  Interface ExternalFeedManager upload:"HoldingsFeed" usingFile:
+  "/localvision/samples/pma/Holdings.pma";
+</pre>
 </ul>
 
 <p>
 The output buffer will display the total number of holdings loaded.
 <p>
 
-<hr>
-<a name="SeeAlso:"><b><h3>See Also:</h3></b></a>
-| <a href="tuBasic.htm">Vision Basics</a>  
-| <a href="tuLoad.htm">Creating a Demo Database</a>
-| <a href="tuSingle.htm">Single Object Access</a> 
-| <a href="tuList.htm">Using Lists</a> 
-| <a href="tuTS.htm">Using Dates and TimeSeries</a> |
-
-<hr>
-
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Created January 28, 1999</font>
-</table>
-
-</body>
-</html>
+{% include doc-footer.htm copydates="1999" %}

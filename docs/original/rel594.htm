@@ -1,17 +1,9 @@
-<!DOCTYPE html>
-<html><head><title>Vision Release Notes 5.9.4</title></head>
-<body bgcolor=white><h2>Vision Release Notes 5.9.4</h2>
-<hr><h3>Topics Covered:</h3>
-<ul type=square><br><li><a href="#description">Description</a>
-<br><li><a href="#adminnotes">Administrative Notes</a> 
-<br><li><a href="#newfc">New Features and Capabilities</a> 
-<br><li><a href="#newadmin">New Administrative Methods</a> 
-<br><li><a href="#newprim">New Primitives</a> 
-<br><li><a href="#bcbf">Behavior Changes and Bug Fixes</a> 
-<br><li><a href="#newmessages">New Messages</a> 
-</ul>
-<p><hr><p>
-<h3><a name=description>Description</a></h3>
+---
+title: "Vision Release Notes 5.9.4"
+---
+
+<p>
+<h2 id=description>Description</h2>
 
 This document outlines the changes made in Vision release 5.9.4 and describes
 the new <i>AdminTools</i> protocol that was added for improved database maintenance.
@@ -46,7 +38,7 @@ Please note that the FIX files redefine some standard Vision messages.  You may
 wish to evaluate whether these changes are practical for your installation.<p><p>
 
 </ul>
-<b><hr><a name=adminnotes>Administrative Notes</a></b><p><p>
+<b><hr id=adminnotes>Administrative Notes</b><p><p>
 
 
 The operational task of aligning and cleaning structures, which the Vision
@@ -73,7 +65,8 @@ in <a href="#newadmin">New Administrative Methods</a> and
 The following modified or new (*) scripts have been provided to make use of
 these new primitives and administrative methods:
 
-<ul type=disc><pre><b>   scripts file             replaces
+<ul type=disc>
+<pre>   scripts file             replaces
    ---------------------    ----------------------------------
    runNetworkMaintenance    /localvision/admin/scripts/runNetworkMaintenance
    RunDaily                 /localvision/update/Cleanup/RunDaily
@@ -94,7 +87,7 @@ these new primitives and administrative methods:
    DeleteSegs               /localvision/tools
    GCandCompact             /localvision/tools
    GCollect                 /localvision/tools
-   cleanupOSD               /localvision/tools</b></pre></ul>
+   cleanupOSD               /localvision/tools</pre></ul>
 
 
 The addition of scripts currently in <i>/vision/tools</i> to <i>/localvision/tools</i> is
@@ -153,7 +146,7 @@ network cleanup is run on any day, a modified cleanup can be run by <i>DailyClea
 The files <i>cleanNetworkExcl.S</i> and <i>cleanNetworkIncl.S</i> in the <i>scripts</i> directory have been provided as examples which could be used to define additional versions of <i>RunDaily</i>. They can be added to <i>/localvision/update/Cleanup/scripts</i> and used as needed.  Note also that <i>ltools/Clean</i> is a site-specific script, so that it can also be modified if needed.<p>
 
 
-<b><hr><a name=newfc>New Features and Capabilities</a></b>
+<b><hr id=newfc>New Features and Capabilities</b>
 
 <p>
 <ol type=a start=a><li>  Size-based Container Segregation
@@ -181,16 +174,18 @@ There are several ways to define <i>small</i> and <i>large</i>:<p>
       The <i>VisionLargeContainerSize</i> is space attribute 7, and can be installed
       into a Vision network via the following method:
 
-<ul type=disc><pre><b>Utility SessionAttribute
+<ul type=disc>
+<pre>Utility SessionAttribute
 defineMethod: 
 [ | largeContainerSize: space |
     (space * 65536 + 7) asInteger asPointerTo: super
-];</b></pre></ul>
+];</pre></ul>
 
       For example, space 3's threshold could be set to 20,000 via the following
       expression:
 
-<ul type=disc><pre><b>Utility SessionAttribute largeContainerSize: 3 . <- 20000;</b></pre></ul>
+<ul type=disc>
+<pre>Utility SessionAttribute largeContainerSize: 3 . <- 20000;</pre></ul>
 </ul>
       This option not only gives the flexibility to provide a space-specific
       override to the threshold, but allows the threshold to be set at runtime,
@@ -209,15 +204,15 @@ the Vision session can save the changes made. This will move the <i>read-write</
 containers to <i>read</i>-only space and reclaim room in <i>read-write</i> space; the Vision
 session will continue without encountering a private memory allocation error.
 <p></ol></ol>
-<b><hr><a name=newadmin>New Administrative Methods</a></b>
+<b><hr id=newadmin>New Administrative Methods</b>
 <p>
 This release introduces a new ToolKit class <i>AdminTools</i>, which includes the
 following <u>top-level administrative methods</u> added for network update and
 maintenance purposes.  Other cluster profiling protocol available in this
 release will be described in a later document.
 
-<b><pre>Class	  AdminTools
-Message	  cleanNetwork</pre></b>
+<pre>Class	  AdminTools
+Message	  cleanNetwork</pre>
 
 <ul type=disc>Top-level method designed to align and clean all containers in the network.
 It is implemented to serially traverse all object spaces in the network and
@@ -227,17 +222,19 @@ collection. To insure that updates succeed, <i>updateNetworkIfSpaceIsLow</i> is
 called at critical junctures. It is expected that the allocation threshold is
 tuned by the calling scripts for each installation as memory resources dictate.
 <p>
-</ul><b><pre>Class	  AdminTools
-Message	  cleanNetworkInclude: osList</pre></b>
+</ul>
+<pre>Class	  AdminTools
+Message	  cleanNetworkInclude: osList</pre>
 
 <ul type=disc>Top-level method designed to align and clean all containers in the object spaces
 provided by the argument <i>osList</i>, which can be a single integer or a list of
 integers.  These integers refer to object space numbers, but they can be recast
 as <i>ObjectSpace</i> instances. For example, the following expressions are equivalent:
 
-<ul type=disc><b><pre>AdminTools cleanNetworkInclude: (3, 5) ;
+<ul type=disc>
+<pre>AdminTools cleanNetworkInclude: (3, 5) ;
 
-AdminTools cleanNetworkInclude: (3 asObjectSpace, 5 asObjectSpace) ;</pre></b></ul>
+AdminTools cleanNetworkInclude: (3 asObjectSpace, 5 asObjectSpace) ;</pre></ul>
 
 and indicate that only object spaces 3 and 5 should be cleaned.
 <p>
@@ -247,8 +244,8 @@ collection. To insure that updates succeed, <i>updateNetworkIfSpaceIsLow</i> is
 called at critical junctures.  It is expected that the allocation threshold is
 tuned by the calling scripts for each installation as memory resources dictate.
 </ul>
-<b><pre>Class	  AdminTools
-Message	  cleanNetworkExclude: osList</pre></b>
+<pre>Class	  AdminTools
+Message	  cleanNetworkExclude: osList</pre>
 
 <ul type=disc>Top-level method designed to align and clean all containers in the network
 except for the object spaces provided by the argument <i>osList</i>, which can be a
@@ -256,9 +253,10 @@ single integer or a list of integers.  These integers refer to object space
 numbers, but they can be recast as <i>ObjectSpace</i> instances.  For example, the
 following expressions are equivalent:
 
-<ul type=disc><b><pre>    AdminTools cleanNetworkExclude: 3 ;
+<ul type=disc>
+<pre>    AdminTools cleanNetworkExclude: 3 ;
 
-    AdminTools cleanNetworkExclude: 3 asObjectSpace ;</pre></b></ul>
+    AdminTools cleanNetworkExclude: 3 asObjectSpace ;</pre></ul>
 
 and indicate that object space 3 should be excluded from the cleanup; all other
 spaces in the database network will be cleaned.
@@ -270,8 +268,8 @@ called at critical junctures.  It is expected that the allocation threshold is
 tuned by the calling scripts for each installation as memory resources dictate.
 
 </ul>
-<b><pre>Class	  AdminTools
-Message	  updateNetworkIfSpaceIsLow</pre></b>
+<pre>Class	  AdminTools
+Message	  updateNetworkIfSpaceIsLow</pre>
 
 <ul type=disc>This message is used to force updates if the total network memory allocation
 exceeds the memory allocation threshold set for the session.  The default
@@ -281,8 +279,8 @@ this at critical points in an update method which has the potential to fail
 due to limited memory resources or due to the size of internal structures that
 are temporarily built to support the update.</ul>
 
-<b><pre>Class	  AdminTools
-Message	  setAllocationThresholdTo: bytes</pre></b>
+<pre>Class	  AdminTools
+Message	  setAllocationThresholdTo: bytes</pre>
 
 <ul type=disc>This message is used to temporarily change the default (2 GB) memory allocation
 threshold for a session.  It is typically used by scripts which run update
@@ -291,7 +289,8 @@ succeed given the available memory resources.<p>
 
 For example,
 
-    <ul type=disc><pre><b>AdminTools setAllocationThresholdTo: 200000000 ;</b></pre></ul>
+    <ul type=disc>
+<pre>AdminTools setAllocationThresholdTo: 200000000 ;</pre></ul>
 
 would change the threshold to 200 MB for the session.  Upon exiting the session
 and starting up again, the original default value would still be in effect.
@@ -299,8 +298,8 @@ and starting up again, the original default value would still be in effect.
 
 The following <u>support method</u>s are used by the methods described above.
 
-<b><pre>Class	  AdminTools ObjectSpace
-Message	  cleanSpace</pre></b>
+<pre>Class	  AdminTools ObjectSpace
+Message	  cleanSpace</pre>
 
 <ul type=disc>This message is the basic method used to align and clean all the containers
 in a given object space.  It consists of three methods - <i>cleanTables</i>, 
@@ -309,14 +308,15 @@ memory is low by calling <i>updateNetworkIfSpaceIsLow</i> as it iterates over
 its containers.  This message must be sent to an <i>ObjectSpace</i> instance;
 for example:
 
-    <ul type=disc><pre><b>3 asObjectSpace cleanSpace</b></pre></ul>
+    <ul type=disc>
+<pre>3 asObjectSpace cleanSpace</pre></ul>
 
 would be used to clean object space 3.  Note that this should only be used
 in analysis mode - to avoid unwanted updates, make sure that the allocation
 threshold has not been changed from the default (2 GB).
 </ul>
-<b><pre>Class	  AdminTools ObjectSpace
-Message	  cleanTables</pre></b>
+<pre>Class	  AdminTools ObjectSpace
+Message	  cleanTables</pre>
 
 <ul type=disc>Aligns and cleans all containers of type <i>Table</i> in an object space.  As it
 iterates over the containers, it calls <i>updateNetworkIfSpacesIsLow</i> to insure
@@ -325,14 +325,15 @@ but can also be used for analysis purposes as long as the allocation threshold
 has not been changed from the default (2 GB) to avoid unwanted updates.
 For example:
 
-    <ul type=disc><b><pre>3 asObjectSpace cleanTables</pre></b></ul>
+    <ul type=disc>
+<pre>3 asObjectSpace cleanTables</pre></ul>
 
 will clean the Tables in object space 3.  In addition, it provides statistical
 information such as the number of Tables to be considered, the current network
 allocation, the current allocation threshold and the number of Tables cleaned.</ul>
 
-<b><pre>Class	  AdminTools ObjectSpace
-Message	  cleanIndexedLists</pre></b>
+<pre>Class	  AdminTools ObjectSpace
+Message	  cleanIndexedLists</pre>
 
 <ul type=disc>Aligns and cleans all containers of type <i>IndexedList</i> in an object space. As it
 iterates over the containers, it calls <i>updateNetworkIfSpacesIsLow</i> to insure
@@ -341,15 +342,16 @@ but can also be used for analysis purposes as long as the allocation threshold
 has not been changed from the default (2 GB) to avoid unwanted updates.
 For example:
 
-    <ul type=disc><b><pre>3 asObjectSpace cleanIndexedLists</pre></b></ul>
+    <ul type=disc>
+<pre>3 asObjectSpace cleanIndexedLists</pre></ul>
 
 will clean the <i>IndexedLists</i> in object space 3. In addition, it provides
 statistical information such as the number of <i>IndexedLists</i> to be considered,
 the current network allocation, the current allocation threshold and the number
 of <i>IndexedLists</i> cleaned.</ul>
 
-<b><pre>Class	  AdminTools ObjectSpace
-Message	  cleanLists</pre></b><ul type=disc>
+<pre>Class	  AdminTools ObjectSpace
+Message	  cleanLists</pre><ul type=disc>
 
 Aligns and cleans all containers of type <i>List</i> in an object space.  As it
 iterates over the containers, it calls <i>updateNetworkIfSpacesIsLow</i> to insure a
@@ -358,14 +360,16 @@ but can also be used for analysis purposes as long as the allocation threshold
 has not been changed from the default value to avoid unwanted updates.
 For example:
 
-<ul type=disc><pre><b>3 asObjectSpace cleanLists</pre></b></ul>
+<ul type=disc>
+<pre>3 asObjectSpace cleanLists</pre></ul>
 
 will clean the Lists in object space 3. In addition, it provides statistical
 information such as the number of Lists to be considered, the current network
 allocation, the current allocation threshold and the number of Lists cleaned.
 
-</ul><pre><b>Class	  AdminTools ObjectSpace
-Message	  getSpace</pre></b><ul type=disc>
+</ul>
+<pre>Class	  AdminTools ObjectSpace
+Message	  getSpace</pre><ul type=disc>
 
 Returns the actual Environment for the <i>ObjectSpace</i> instance or NA if the network
 does not contain a particular object space number.  To get to the object space
@@ -373,32 +377,37 @@ Environment <i>(^global)</i>, you can start a session with the <i>-U</i> option 
 <i>getSpace</i> if <i>-U</i> was omitted at session startup.
 For example, the following are equivalent:
 
-<ul type=disc><pre><b>vision -U15                vision
-displayMessages ;          15 asObjectSpace getSpace displayMessages ;</b></pre></ul>
+<ul type=disc>
+<pre>vision -U15                vision
+displayMessages ;          15 asObjectSpace getSpace displayMessages ;</pre></ul>
 
 Note that if a network does not contain object space 15, <i>asObjectSpace</i> will
 return NA.  To avoid getting Selector errors, the test <i>15 asObjectSpace isntNA</i>
 should be used before sending the <i>getSpace</i> message.
 
-</ul><pre><b>Class	  Integer
-Message	  asObjectSpace</pre></b><ul type=disc>
+</ul>
+<pre>Class	  Integer
+Message	  asObjectSpace</pre><ul type=disc>
 
 Converts an integer into an <i>ObjectSpace</i> instance.  Typically used by network
 maintenance and analysis methods, but is also useful for navigating to other
 object space Environments via the <i>ObjectSpace</i> method <i>getSpace</i>.
 For example:
 
-<ul type=disc><b><pre>5 asObjectSpace getSpace displayInfo</pre></b></ul>
+<ul type=disc>
+<pre>5 asObjectSpace getSpace displayInfo</pre></ul>
 
 displays
 
-<ul type=disc><b><pre>Object Space Number:         5
+<ul type=disc>
+<pre>Object Space Number:         5
 This Space Contains: Schema Management Tools
-Shared Access Via: Environment DBA Schema</pre></b></ul>
+Shared Access Via: Environment DBA Schema</pre></ul>
 
 and the two navigational paths are equivalent:
 
-<ul type=disc><b><pre>5 asObjectSpace getSpace = Environment DBA Schema   #-- returns TRUE</pre></b></ul>
+<ul type=disc>
+<pre>5 asObjectSpace getSpace = Environment DBA Schema   #-- returns TRUE</pre></ul>
 
 Note that not all integers can be converted into an <i>ObjectSpace</i> instance since
 the network may not have an actual object space Environment for that number.
@@ -407,7 +416,7 @@ message.
 <p>
 </ul>
 
-<b><hr><a name=newprim>New Primitives</a></b><p>
+<b><hr id=newprim>New Primitives</b><p>
 
 This release makes available the following primitives which have been used to
 implement network analysis tools and operations support.
@@ -494,7 +503,7 @@ implement network analysis tools and operations support.
   returned. Otherwise, an NA is returned. Note that the POP may not reference an
   existing space or container.
 <ul type=disc>
-  <pre><b>Binary Converse Message required: _packPOPWithSpace:</pre></b>
+  <pre>Binary Converse Message required: _packPOPWithSpace:</pre>
 </ul></ul>
  <p> <b><i>_extractSpace</i>
 </b><ul type=disc>
@@ -517,7 +526,7 @@ implement network analysis tools and operations support.
 <ul type=disc><b>  Binary Converse Message required:  <i>_nthPOPReferencedBy:</i></b></ul>
 <p>
 </ol></ul>
-<b><hr><a name=bcbf>Behavior Changes and Bug Fixes</a></b><p>
+<b><hr id=bcbf>Behavior Changes and Bug Fixes</b><p>
 <ol type=a>
 
 <li>(Solaris 2) signal handling.
@@ -566,9 +575,9 @@ a typo in the layout file.
 <b><hr>
 <a name=newmessages>New Messages</a></b><p>
 
-<b><pre>********************
+<pre>********************
    FIXcore.5.9.4
-********************</pre></b>
+********************</pre>
 
 The standard protocol has been modified to allow you to distinguish between
 an NA value, and the <i>non-value</i> returned when a block is terminated with a
@@ -576,29 +585,31 @@ semi-colon (i.e., when a block does not return anything).  The class <i>NoValue
 </i>is a subclass of NA.  The FIX file adds the <i>whatAmI</i> and <i>isNoValue</i> messages
 to make it easier to distinguish between the two forms.  For example:  
 
-<ul type=disc><b><pre>[ ; ] value
+<ul type=disc>
+<pre>[ ; ] value
    do: [ whatAmI print: 30 ; isNoValue print ; isNA printNL ] ;
 NA
-   do: [ whatAmI print: 30 ; isNoValue print ; isNA printNL ] ;</pre></b></ul>
+   do: [ whatAmI print: 30 ; isNoValue print ; isNA printNL ] ;</pre></ul>
 In addition, these methods have been modified:
 
-<b><pre>Class     NoValue
+<pre>Class     NoValue
 Message   else:
-          elseIf:</pre></b>
+          elseIf:</pre>
 
 <ul type=disc>These message have been modified so that the parameter is not evaluated when
 the recipient is the <i>NoValue</i> instance of NA.  As a result, the expression:
 
-<ul type=disc><b><pre>3 &lt; 5 ifTrue: [ "yes" print ; ] .
-        else: [ "no" print ; ] ;</pre></b></ul>
+<ul type=disc>
+<pre>3 &lt; 5 ifTrue: [ "yes" print ; ] .
+        else: [ "no" print ; ] ;</pre></ul>
 
 only runs the <i>ifTrue</i>: block.  Prior to this patch, both blocks would have
 executed.
 
 </ul>
-<b><pre>Class     Object
+<pre>Class     Object
 Message   masterList
-          activeList</pre></b>
+          activeList</pre>
 
 <ul type=disc>These messages have been modified to send the <i>asSelf</i> message to <i>^self</i> prior
 to sending the <i>instanceList</i> message.  This enables these messages to work
@@ -606,43 +617,47 @@ correctly from within a block without needing the <i>^self</i> in front of the
 message invocation.  For example, in the past the following code would have been
 necessary if you wanted to use <i>masterList</i> inside the <i>run</i> method:
 
-<ul type=disc><b><pre>className
+<ul type=disc>
+<pre>className
 defineMethod: [ | run | 
   !list &lt;- ^self getInstances ;
   list count print ; " found." printNL ;
 ] .
 defineMethod: [ | getInstances | 
    ^self masterList
-] ;</pre></b></ul>
+] ;</pre></ul>
 
 The new version of <i>masterList</i> allows you to eliminate the <i>^self</i> messages:
 
-<ul type=disc><b><pre>className
+<ul type=disc>
+<pre>className
 defineMethod: [ | run | 
   !list &lt;- getInstances ;
   list count print ; " found." printNL ;
 ] .
 defineMethod: [ | getInstances | 
    masterList
-] ;</pre></b></ul>
+] ;</pre></ul>
 
 Note that the <i>^self</i> is still needed with <i>instanceList</i> since this is a
 primitive message that would otherwise return the list of instances associated
 with <i>^current</i>.
 </ul>
-<b><pre>Class     Collection
-Message   groupedBy:in:</pre></b><ul type=disc>
+<pre>Class     Collection
+Message   groupedBy:in:</pre><ul type=disc>
 
 This message has been modified to preserve the sort order of the list supplied
 as the second parameter.
 
-</ul><b><pre>Class     Collection
-Message   iterate:</pre></b><ul type=disc>
+</ul>
+<pre>Class     Collection
+Message   iterate:</pre><ul type=disc>
 
 This message has been modified to work with collections of lists correctly.
 
-</ul><b><pre>Class     TimeSeries
-Message   from:to:</pre></b><ul type=disc>
+</ul>
+<pre>Class     TimeSeries
+Message   from:to:</pre><ul type=disc>
 
 This message has been modified to work correctly with NA values.  If the <i>from</i>
 parameter cannot be converted to a valid date, the first date in the time series
@@ -650,91 +665,105 @@ is used.  If the <i>to</i> parameter cannot be converted to a valid date, the la
 date in the time series is used.  If both dates are NA the recipient time series
 is returned.  In the prior implementation, the original time series was returned
 if either date was NA.  
-</ul><b><pre>Class     Integer
-Message   mod:</pre></b><ul type=disc>
+</ul>
+<pre>Class     Integer
+Message   mod:</pre><ul type=disc>
 
 This message has been modified to work with 0 as a recipient.  <i>0 mod: n</i>
 always returns 0.  In the prior implementation, the value NA was returned
 if the recipient was 0 or negative.
 
-</ul><b><pre>Class     String
-Message   asLines</pre></b><ul type=disc>
+</ul>
+<pre>Class     String
+Message   asLines</pre><ul type=disc>
 
 This message has been modified to strip extra control M characters (\015) from
 the file before determining line boundaries.  These extra characters appear in
 files transferred between PC and Unix environments.  Once stripped, the line
 boundary continues to be the <i>newLine</i> character.
 
-</ul><b><pre>Class     Named
-Message   at:</pre></b><ul type=disc>
+</ul>
+<pre>Class     Named
+Message   at:</pre><ul type=disc>
 
 This message has been modified to check the upper case version of the supplied
 parameter if the supplied parameter is not explicitly in the naming dictionary.
 If the supplied parameter is not a string, NA is always returned.
 
-</ul><b><pre>Class     RangeClassification
-Message   getClassificationFor: input</pre></b><ul type=disc>
+</ul>
+<pre>Class     RangeClassification
+Message   getClassificationFor: input</pre><ul type=disc>
 
 This message has been modified to return the <i>defaultInstance</i> of the class when
 the input is NA.
 
-</ul><b><pre>Class     Schema
-Message   getClassesNeedingUpdate</pre></b><ul type=disc>
+</ul>
+<pre>Class     Schema
+Message   getClassesNeedingUpdate</pre><ul type=disc>
 
 This message has been modified so that object space changes are only posted if
 one or more properties or methods have been defined since the last Schema update.
 Previously, all object spaces were updated in each run.
 
-</ul><b><pre>Class     Schema ClassDescriptor
-Message   inheritsFrom:</pre></b><ul type=disc>
+</ul>
+<pre>Class     Schema ClassDescriptor
+Message   inheritsFrom:</pre><ul type=disc>
 
 This message has been modified to strip extensions off the supplied parameter
 prior to checking for inheritance.  
 
-</ul><b><pre>Class     Schema ClassDescriptor
-Message   setNamingDictionaryTo:</pre></b><ul type=disc>
+</ul>
+<pre>Class     Schema ClassDescriptor
+Message   setNamingDictionaryTo:</pre><ul type=disc>
 
 This message has been modified to automatically add the <i>Default</i> entry when an
 explicit naming dictionary is assigned to a Schema <i>ClassDescriptor</i>.
 
-</ul><b><pre>Class     Schema ClassDescriptor
-Message   isObjectDescriptor</pre></b><ul type=disc>
+</ul>
+<pre>Class     Schema ClassDescriptor
+Message   isObjectDescriptor</pre><ul type=disc>
 
 Strips any extensions off recipient before testing if it is the class descriptor
 associated with the <i>Object</i> class.
 <p>
-</ul><pre><b>********************
+</ul>
+<pre>********************
    EXTcore.5.9.4
-********************</b></pre>
+********************</pre>
 
 These methods have been added to the core classes as a supplement to release 5.9.4.
 
-<b><pre>Class     Object
-Message   define: name withDefault: default</pre></b><ul type=disc>
+<pre>Class     Object
+Message   define: name withDefault: default</pre><ul type=disc>
 
 Creates a new time series property and sets a default value which is used to
 initialize new instances.
 
-</ul><b><pre>Class     Object
-Message   respondsTo: message</pre></b><ul type=disc>
+</ul>
+<pre>Class     Object
+Message   respondsTo: message</pre><ul type=disc>
 
 Returns a Boolean value indicating whether recipient responds to supplied message.
 For example:
-     <ul type=disc><b><pre>3.0 respondsTo: "absoluteValue" . printNL ;
+     <ul type=disc>
+<pre>3.0 respondsTo: "absoluteValue" . printNL ;
 3.0 respondsTo: "mod:" . printNL ;
 3.0 respondsTo: "+" . printNL ;
-3.0 respondsTo: "within:percentOf:" . printNL ;</pre></b></ul>
+3.0 respondsTo: "within:percentOf:" . printNL ;</pre></ul>
 
-</ul><b><pre>Class     Object
-Message   subclassList</pre></b><ul type=disc>
+</ul>
+<pre>Class     Object
+Message   subclassList</pre><ul type=disc>
 
 Returns a list containing the default instance of each subclass of recipient.
 For example:
-<ul type=disc><b><pre>Entity subclassList
-do: [ whatAmI print: 30 ; masterList count printNL ] ;</pre></b></ul>
+<ul type=disc>
+<pre>Entity subclassList
+do: [ whatAmI print: 30 ; masterList count printNL ] ;</pre></ul>
 
-</ul><b><pre>Class     String
-Message   as: type</pre></b><ul type=disc>
+</ul>
+<pre>Class     String
+Message   as: type</pre><ul type=disc>
 
 Converts the recipient String to an instance of the class indicated by the
 parameter, if possible.  If the type is a string that is not the default String,
@@ -745,8 +774,9 @@ default naming dictionary, if it exists.  If the recipient String contains the
 "," character, this method returns a list of objects of the supplied type.  Any
 String that cannot be converted to the supplied class returns NA.
 
-</ul><b><pre>Class     Object, String, Number, Integer, Double, Float, Date, Boolean, Block
-Message   convertFrom: string</pre></b><ul type=disc>
+</ul>
+<pre>Class     Object, String, Number, Integer, Double, Float, Date, Boolean, Block
+Message   convertFrom: string</pre><ul type=disc>
 
 This message converts the supplied string to an instance of the recipient's
 class if applicable, returning NA otherwise.  The definition at <i>Object</i> will look
@@ -760,47 +790,54 @@ upper/lower case combination of <i>false</i>.  The version at Block returns a bl
 containing the string as a message.  This message is called by the <i>as:</i> message
 at String.
 
-</ul><b><pre>
+</ul>
+<pre>
 Class     Entity
-Message   validateInputString: string</pre></b><ul type=disc>
+Message   validateInputString: string</pre><ul type=disc>
 
 This message modifies the version at Object which uses the class's default
 naming dictionary to use the <i>locateId:</i> message to search one or more naming
 dictionaries, if defined.
 
-</ul><b><pre>Class     Entity
-Message   locateIds: stringList</pre></b><ul type=disc>
+</ul>
+<pre>Class     Entity
+Message   locateIds: stringList</pre><ul type=disc>
 
 This message returns a list of objects of the recipient's class, one for each
 identifier included in the comma-separated string supplied as the parameter.  Any
 id that does not return a valid instance of the class will be eliminated from
 the returned list.  For example:
 
-<ul type=disc><b><pre>Currency locateIds: "USD, XYZ, CAD" .
-do: [ displayInfo ] ;</pre></b></ul>
+<ul type=disc>
+<pre>Currency locateIds: "USD, XYZ, CAD" .
+do: [ displayInfo ] ;</pre></ul>
 
 displays:
 
-<ul type=disc><b><pre>USD United States Dollar
-CAD Canadian Dollar</pre></b></ul>
+<ul type=disc>
+<pre>USD United States Dollar
+CAD Canadian Dollar</pre></ul>
 
-</ul><b><pre>Class     String
-Message   pad: n</pre></b><ul type=disc>
+</ul>
+<pre>Class     String
+Message   pad: n</pre><ul type=disc>
 
 Pads the string with blanks if number of characters in the string is less than
 supplied parameter. If <i>n</i> is negative, string is padded on the left; otherwise,
 it is padded on the right.
 
-</ul><b><pre>Class     String
-Message   from: pos</pre></b><ul type=disc>
+</ul>
+<pre>Class     String
+Message   from: pos</pre><ul type=disc>
 
 Returns a substring of recipient starting from the position indicated by the parameter.
 If <i>pos</i> is numeric, the substring starting with this character position to the
 end of the string is returned.  If <i>pos</i> is a character, the substring starting
 from the first occurrence of this character to the end of the string is returned.
 
-</ul><b><pre>Class     String
-Message   to: pos</pre></b><ul type=disc>
+</ul>
+<pre>Class     String
+Message   to: pos</pre><ul type=disc>
 
 Returns a substring of recipient from start of recipient to position indicated
 by parameter.  If <i>pos</i> is numeric, the substring ending with this character
@@ -808,36 +845,42 @@ position is returned.  If <i>pos</i> is a character, the substring starting from
 beginning of the recipient through to the first occurrence of this character is
 returned.
 
-</ul><b><pre>
+</ul>
+<pre>
 Class     String
-Message   asDate</pre></b><ul type=disc>
+Message   asDate</pre><ul type=disc>
 
 Converts the recipient String into a Date object.  The recipient can contain a
 value in one of the following forms: 
-<ul type=disc><b><pre>"yy", "yymm", "yymmdd", "yyyymmdd"
+<ul type=disc>
+<pre>"yy", "yymm", "yymmdd", "yyyymmdd"
 "m/d/y"     where m is 1-12; d is 1-31; y is yy or yyyy
 "m-d-y"     where m is 1-12; d is 1-31; y is yy or yyyy
 "+ # offset", where # is integer and offset is a DateOffset
 "- # offset", where # is integer and offset is a DateOffset
 "today"
-"yesterday"</pre></b></ul>
+"yesterday"</pre></ul>
 
 The <i>offset</i> formats add/subtract the offset from the current value of <i>^date</i>.
 For example:
-<ul type=disc><b><pre>"961231" asDate      --> 12/31/96
+<ul type=disc>
+<pre>"961231" asDate      --> 12/31/96
 "1/3/95" asDate      --> 1/3/95
 "+ 3 days"           --> current date + 3 days
-"today"              --> today's date</pre></b></ul>
+"today"              --> today's date</pre></ul>
 
-</ul><b><pre>Class     String
-Message   howManyOf: charset</pre></b><ul type=disc>
+</ul>
+<pre>Class     String
+Message   howManyOf: charset</pre><ul type=disc>
 
 Returns the number of occurrences of any of the characters in the supplied
 character set in the recipient String.  For example:
-<ul type=disc><b><pre>"1/15/96" howManyOf: "/" . printNL ;</pre></b></ul>
+<ul type=disc>
+<pre>"1/15/96" howManyOf: "/" . printNL ;</pre></ul>
 
-</ul><b><pre>Class     String
-Message   translateString: fromString to: toString</pre></b><ul type=disc>
+</ul>
+<pre>Class     String
+Message   translateString: fromString to: toString</pre><ul type=disc>
 
 Replaces all occurrences of <i>fromString</i> with <i>toString</i> in recipient.  Note that
 this differs from <i>translate:to:</i> which translates any character present in the
@@ -845,8 +888,9 @@ first parameter to the string supplied as the second parameter. This method does
 not currently work for the situation where overlapping replacements would be
 necessary.  In this case, an error message is printed and <i>NA</i> is returned.
 
-</ul><b><pre>Class     Block
-Message   asRowsColumns</pre></b><ul type=disc>
+</ul>
+<pre>Class     Block
+Message   asRowsColumns</pre><ul type=disc>
 
 Captures any printing done within the recipient block as a list of strings
 representing the rows of the output extended by the variable <i>columns</i> which
@@ -855,68 +899,74 @@ is a list of strings representing the columns for each row. The value of
 the value printed in the block.  The list <i>columns</i> is extended by the variable
 <i>position</i> which returns the column number of the corresponding element.
 
-</ul><b><pre>Class     Number, NA
+</ul>
+<pre>Class     Number, NA
 Message   printWithLeadingZeros: width
-          printWithLeadingZerosNL: width</pre></b><ul type=disc>
+          printWithLeadingZerosNL: width</pre><ul type=disc>
 
 Displays the recipient with leading 0s to fill out the supplied width if width
 is positive.  If width is negative, no padding is done.
 
-</ul><b><pre>
+</ul>
+<pre>
 Class     DateOffset
-Message   evaluate: block</pre></b><ul type=disc>
+Message   evaluate: block</pre><ul type=disc>
 
 Adds the recipient to the current ^date and evaluates the supplied block.
 For example:
-<ul type=disc><b><pre>-3 monthEnds evaluate: [ ^date printNL ] ;</pre></b></ul>
+<ul type=disc>
+<pre>-3 monthEnds evaluate: [ ^date printNL ] ;</pre></ul>
 
-</ul><b><pre>Class    String, Selector
-Message  asSelector</pre></b><ul type=disc>
+</ul>
+<pre>Class    String, Selector
+Message  asSelector</pre><ul type=disc>
 
 Returns the recipient as a selector object.  The version at Selector returns
 recipient.
 
-</ul><b><pre>Class     Value
+</ul>
+<pre>Class     Value
 Message   incrementBy: counter
-          increment</pre></b><ul type=disc>
+          increment</pre><ul type=disc>
 
 This message is used to increment the value of a fixed property by the amount
 supplied as the parameter.  The unary version of the message uses 1 as an
 increment.  The message is sent to the intensional form of the property.
 For example:
-<ul type=disc><b><pre>!x &lt;- 10 ;
+<ul type=disc>
+<pre>!x &lt;- 10 ;
 :x increment ;
 :x incrementBy: 3 ;
-x printNL ;</pre></b></ul>
+x printNL ;</pre></ul>
 
-</ul><b><pre>Class     Value
+</ul>
+<pre>Class     Value
 Message   decrementBy: counter
-          decrement</pre></b><ul type=disc>
+          decrement</pre><ul type=disc>
 
 This message is used to decrement the value of a fixed property by the amount
 supplied as the parameter.  The unary version of the message uses 1 as a
 decrement.  The message is sent to the intensional form of the property.
 For example:
-<ul type=disc><b><pre>!x &lt;- 10 ;
+<ul type=disc>
+<pre>!x &lt;- 10 ;
 :x decrement ;
 :x decrementBy: 3 ;
-x printNL ;</pre></b></ul>
+x printNL ;</pre></ul>
 
-</ul><b><pre>Class     NA
-Message   asCurrency</pre></b><ul type=disc>
+</ul>
+<pre>Class     NA
+Message   asCurrency</pre><ul type=disc>
 
 This message returns NA when sent to the NA class.
 
-</ul><b><pre>Class     Object, Schema ClassDescriptor
-Message   asClassDescriptor</pre></b><ul type=disc>
+</ul>
+<pre>Class     Object, Schema ClassDescriptor
+Message   asClassDescriptor</pre><ul type=disc>
 
 Returns the class descriptor instance in Schema <i>ClassDescriptor</i> for the
 recipient except when the recipient is a class descriptor, in which case,
 the recipient is returned stripped of any extensions.
 </ul></ul></ul>
 
-<p><hr><table width=100%>
-  <tr>
-    <td align=left><font size=-1>Copyright &copy; 1998 Innovative Systems Techniques, Inc.</font>
-    <td align=right><font size=-1>Updated December 23, 1998</font></table> </body></html>
-</body></head>
+{% include doc-footer.htm copydates="1998" %}

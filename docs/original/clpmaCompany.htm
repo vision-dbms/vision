@@ -1,35 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Application Classes: Company and Security </title>
+---
+title: "Vision Application Classes: Company and Security"
 
-</head>
+related_topics:
+  - url: "vpma.htm"
+    title: "Application Overview"
+  - url: "pmaIssues.htm"
+    title: "Data Issues"
+  - url: "pmaClasses.htm"
+    title: "Application Classes"
+  - url: "mpmaCompany.htm"
+    title: "Company Messages"
+  - url: "mpmaSecurity.htm"
+    title: "Security Messages"
+  - url: "pmaXRef.htm"
+    title: "Application Cross Reference"
 
-<body bgcolor=white>
-<h2>Vision Application Classes: Company and Security</h2>
 
-<p>
-| <a href="vpma.htm">Application Overview</a> 
-| <a href="pmaIssues.htm">Data Issues</a>
-| <a href="pmaClasses.htm">Application Classes</a>
-| <a href="mpmaCompany.htm">Company Messages</a> 
-| <a href="mpmaSecurity.htm">Security Messages</a> 
-| <a href="pmaXRef.htm">Application Cross Reference</a>
-|
-<hr>
-<h3>Topics Covered:</h3>
-<ul type=square>
-<li><a href="#overview">Overview</a>
-<li><a href="#basic">Basic Access</a>
-<li><a href="#company-security">The Company-Security Connection</a>
-<li><a href="#messages">Company and Security Message Summary </a>
-<li><a href="#datarec">Prices and Dividends </a>
-<li><a href="#splits">Split Adjustments </a>
-<li><a href="#updates">Updating Company and Security Data</a>
-<li><a href="#related">Related Classes</a>
-</ul>
-<hr>
-<h3><a name="overview">Overview</a></h3>
+sidebar:
+  nav: "sb_ClassXRef"
+---
+
+<h2 id="overview">Overview</h2>
 <p>
 The instances of the class <b>Company</b> 
 represent the individual  corporate
@@ -46,49 +37,51 @@ amounts of one or more securities.
 The following subset of the class hierarchy displays the classes
 directly related to <b>Company</b> and <b>Security</b>:
 <pre>
-          Object
-             |
-             Entity
-             |  |
-             |  |-- Company
-             |  |
-             |  |-- Security
-             |  |
-             |  |-- Classification
-             |         |
-             |         |-- <a href="#related">Country</a>
-             |         |
-             |         |-- <a href="#related">Industry</a>
-             |         |
-             |         |-- <a href="#related">Sector</a>
-             |         |
-             |         |-- <a href="#related">SecurityType</a>
-             |         |
-             |         |-- <a href="#related">AssetCategory</a>
-             |    
-             DataRecord
-                |
-                |-- <a href="#datarec">DivRecord</a>
-                |
-                |-- <a href="#datarec">PriceRecord</a>
+  Object
+     |
+     Entity
+     |  |
+     |  |-- Company
+     |  |
+     |  |-- Security
+     |  |
+     |  |-- Classification
+     |         |
+     |         |-- <a href="#related">Country</a>
+     |         |
+     |         |-- <a href="#related">Industry</a>
+     |         |
+     |         |-- <a href="#related">Sector</a>
+     |         |
+     |         |-- <a href="#related">SecurityType</a>
+     |         |
+     |         |-- <a href="#related">AssetCategory</a>
+     |    
+     DataRecord
+        |
+        |-- <a href="#datarec">DivRecord</a>
+        |
+        |-- <a href="#datarec">PriceRecord</a>
 
 </pre>
 
 <p>
 <hr>
 <p>
-<h3><a name="basic">Basic Access</a></h3>
+<h2 id="basic">Basic Access</h2>
 <p>
 The 
 <a href="clDict.htm#named">naming dictionaries</a>
 <b>Named Company</b> and <b>Named Security</b> are the primary
 dictionaries for accessing individual company and security instances.
-For example:<pre><tt><b>
-     Named Company IBM
-</b></tt></pre>
-accesses the company representing the corporate entity IBM and:<pre><tt><b>
-     Named Security IBM
-</b></tt></pre>
+For example:
+<pre>
+  Named Company IBM
+</pre>
+accesses the company representing the corporate entity IBM and:
+<pre>
+  Named Security IBM
+</pre>
 accesses the security representing the common stock IBM.
 <p>
 
@@ -106,9 +99,10 @@ added for a security is automatically added as an alias for its
 <p>
 To display all the aliases associated with a specific entity you can 
 display the list of strings stored in the <i>aliases</i> property.  For
-example, to see the aliases defined for the company IBM use:<pre><tt><b>
-     Named Company IBM aliases do: [ printNL ] ;
-</b></tt></pre>
+example, to see the aliases defined for the company IBM use:
+<pre>
+  Named Company IBM aliases do: [ printNL ] ;
+</pre>
 More information about company and security identification schemes
 is available in the document
 <a href="pmaIssues.htm#ids"><i>Portfolio Management Application Issues</i></a>.
@@ -120,30 +114,32 @@ The message <i>displayInfo</i>
 has been redefined to display the <i>code</i>, <i>ticker</i>, and <i>name</i>
 for <b>Security</b> and <b>Company</b>.
 The message <i>profile</i> has also been redefined for these classes
-to display additional information.  For example:<pre><tt><b>
-     Named Company IBM displayInfo ;
-</b></tt></pre>
-displays a summary line of information about the company IBM and:<pre><tt><b>
-     Named Security IBM profile ;
-</b></tt></pre>
+to display additional information.  For example:
+<pre>
+  Named Company IBM displayInfo ;
+</pre>
+displays a summary line of information about the company IBM and:
+<pre>
+  Named Security IBM profile ;
+</pre>
 displays key information about the security IBM.
 <p>
 The message <i>masterList</i>
 can be used to return the list of non-default companies or
 securities.  For example, to display the <i>code</i> and <i>name</i> for each
-<b>Company</b> instance, use:<pre><tt><b>
-     Company masterList
-     do: [ code print: 10 ; 
-           name printNL ;
-         ] ;
-
-</b></tt></pre>
-To display the number of <b>Security</b> instances, use:<pre><tt><b>
-     Security masterList count 
-
-</b></tt></pre>
+<b>Company</b> instance, use:
+<pre>
+  Company masterList
+  do: [ code print: 10 ; 
+        name printNL ;
+      ] ;
+</pre>
+To display the number of <b>Security</b> instances, use:
+<pre>
+  Security masterList count 
+</pre>
 <p>
-<h3><a name="company-security">The Company-Security Connection</a></h3>
+<h2 id="company-security">The Company-Security Connection</h2>
 <p>
 The security <i>IBM Common Stock</i> is a Vision object whose
 properties include pricing, dividend, and split information.  This
@@ -162,12 +158,14 @@ The  property  <i>company</i> is defined at
 <b>Security</b> to return the value of
 the  company  associated  with  the  security.   The   actual   object
 representing  the  company  is  returned.   For  example,  the  Vision
-expression:<pre><tt><b>
-     Named Security IBM company
-</b></tt></pre>
-returns the object representing the company IBM and the expression:<pre><tt><b>
-     Named Security IBM company = Named Company IBM
-</b></tt></pre>
+expression:
+<pre>
+  Named Security IBM company
+</pre>
+returns the object representing the company IBM and the expression:
+<pre>
+  Named Security IBM company = Named Company IBM
+</pre>
 yields the result TRUE.  Note that several  securities  may  have  the
 same value for <i>company</i> since more than one security can be issued by a
 single company entity.  By default,  the  value  of  <i>company</i>  for  a
@@ -181,13 +179,15 @@ divided by the earnings per  share  for  the  company.   The  property
 to return the value of the
 security defined as the primary security for the company.  The  actual
 object representing the security is returned.  For example, the Vision
-expression:<pre><tt><b>
-     Named Company IBM primarySecurity 
-</b></tt></pre>
+expression:
+<pre>
+  Named Company IBM primarySecurity 
+</pre>
 returns the object representing IBM's common  stock  security  and  the
-expression:<pre><tt><b>
-     Named Company IBM primarySecurity = Named Security IBM
-</b></tt></pre>
+expression:
+<pre>
+  Named Company IBM primarySecurity = Named Security IBM
+</pre>
 yields the result TRUE.  Note that only one security can  be  assigned
 as  the  <i>primarySecurity</i>  for  a  company.  By default, the value of
 <i>primarySecurity</i> for a company  is  the  default  security  instance.
@@ -195,30 +195,31 @@ Automated and manual rules can be used to link a company to its "real"
 primary security instance.
 <p>
 The <i>peRatio</i> method could therefore be defined for <b>Security</b>
-and <b>Company</b> as follows:<pre><tt><b>
-     Security defineMethod: [ | peRatio | 
-          price / company eps
-     ] ;
-     Company defineMethod: [ | peRatio | 
-          primarySecurity price / eps 
-     ] ;
-</b></tt></pre>
+and <b>Company</b> as follows:
+<pre>
+  Security defineMethod: [ | peRatio | 
+       price / company eps
+  ] ;
+  Company defineMethod: [ | peRatio | 
+       primarySecurity price / eps 
+  ] ;
+</pre>
 where <i>eps</i> would need to be defined as a
 <b>Company</b> message that returns the company's
 earnings per share.
 <p>
 The property <i>securityList</i> is defined at <b>Company</b> to
 return the list of securities associated with a company. 
-To look at the securities associated with a company, use:<pre><tt><b>
-     Named Company IBM securityList
-     do: [ displayInfo ] ;
-
-</b></tt></pre>
+To look at the securities associated with a company, use:
+<pre>
+  Named Company IBM securityList
+  do: [ displayInfo ] ;
+</pre>
 
 <p>
 <hr>
 <p>
-<h3><a name="messages">Company and Security Message Summary </a></h3>
+<h2 id="messages">Company and Security Message Summary </h2>
 <p>
 The following messages return basic <b>Company</b> information:
 <p>
@@ -248,12 +249,14 @@ The following messages return basic <b>Company</b> information:
 Messages such as <i>industry</i> and <i>primarySecurity</i>
 return an object of another entity class.  You can therefore navigate
 to that object and request any of its information.  For example,
-the expression:<pre><tt><b>
-     Named Company GM primarySecurity name
-</b></tt></pre>
-returns the name of GM's primary security and the expression:<pre><b>
-     Named Company GM industry showMessages
-</b></tt></pre>
+the expression:
+<pre>
+  Named Company GM primarySecurity name
+</pre>
+returns the name of GM's primary security and the expression:
+<pre>
+  Named Company GM industry showMessages
+</pre>
 displays the messages defined for the <b>Industry</b> class.
 <p>
 Company instances return instances of the
@@ -306,12 +309,14 @@ The following messages return basic <b>Security</b> information:
 Messages such as <i>securityType</i> and <i>company</i>
 return an object of another entity class.  You can therefore navigate
 to that object and request any of its information.  For example,
-the expression:<pre><tt><b>
-     Named Security GM company name
-</b></tt></pre>
-returns the name of GM's company and the expression:<pre><b>
+the expression:
+<pre>
+  Named Security GM company name
+</pre>
+returns the name of GM's company and the expression:
+<pre>
      Named Security GM type showMessages
-</b></tt></pre>
+</pre>
 displays the messages defined for the <b>SecurityType</b> class.
 <p>
 Security instances return instances of the classes 
@@ -342,7 +347,7 @@ These messages are described in more detail in the document
 <p>
 <hr>
 <p>
-<h3><a name="datarec">Prices and Dividends </a></h3>
+<h2 id="datarec">Prices and Dividends </h2>
 <p>
 The instances of the class <b>PriceRecord</b> contain a single date's
 pricing information for a specific <b>Security</b> instance.  The
@@ -359,26 +364,33 @@ defined at <b>Security</b> to return the most recent closing price
 and trading volume for the security as of the current evaluation date
 (i.e., <i>^date</i>).  The price and volume are adjusted for any splits
 that have happened since the data was stored.  The price is returned
-in the security's <i>baseCurrency</i> by default.  For example:  <pre><tt><b>
-     Named Security GM price
-</b></tt></pre>
-returns GM's latest price value in GM's base currency,<pre><tt><b>
-     Named Security GM :price asOf: 9702 .
-</b>or<b>
-     9702 evaluate: [ Named Security GM price ] 
-</b></tt></pre>
+in the security's <i>baseCurrency</i> by default.  For example:
+<pre>
+  Named Security GM price
+</pre>
+returns GM's latest price value in GM's base currency,
+<pre>
+  Named Security GM :price asOf: 9702 .
+</pre>or
+<pre>
+  9702 evaluate: [ Named Security GM price ] 
+</pre>
 returns the latest price as of Feb 28, 1997 in GM's base currency, 
-and<pre><tt><b>
+and
+<pre>
     "CAN" asCurrency evaluate: [ Named Security GM  price ]
-</b></tt></pre>
-returns GM's latest price in Canadian dollars.  The expression:<pre><tt><b>
-     Named Security GM volume
-</b></tt></pre>
-returns GM's latest trading volume and the expressions:<pre><tt><b>
-     Named Security GM :volume asOf: 9702 .
-</b>or<b>
-     9702 evaluate: [ Named Security GM volume ] 
-</b></tt></pre>
+</pre>
+returns GM's latest price in Canadian dollars.  The expression:
+<pre>
+  Named Security GM volume
+</pre>
+returns GM's latest trading volume and the expressions:
+<pre>
+  Named Security GM :volume asOf: 9702 .
+</pre>or
+<pre>
+  9702 evaluate: [ Named Security GM volume ] 
+</pre>
 returns the latest volume as of Feb 28, 1997.
 <p>
 All values are split-adjusted through the current date.  
@@ -410,39 +422,42 @@ The following messages are defined for the class <b>PriceRecord</b>:
 </table></center>      
 <p>
 To access a full price record as of a specific date, use the message
-<i>getPriceRecord</i>.  For example, the expression:<pre><tt><b>
-     Named Security GM getPriceRecord
-     do: [ price print ; _price printNL ] ;
-</b></tt></pre>
+<i>getPriceRecord</i>.  For example, the expression:
+<pre>
+  Named Security GM getPriceRecord
+  do: [ price print ; _price printNL ] ;
+</pre>
 displays the latest adjusted and unadjusted closing prices.
-The expressions:<pre><tt><b>
-     Named Security GM :getPriceRecord asOf: 9709 .
-       do: [ price print ; _price printNL ] ;
-</b>and<b>     
-     9709 evaluate: 
-       [ Named Security GM getPriceRecord
-             do: [ price print ; _price printNL ] ;
-       ] ;
-</b></tt></pre>
+The expressions:
+<pre>
+  Named Security GM :getPriceRecord asOf: 9709 .
+    do: [ price print ; _price printNL ] ;
+</pre>and
+<pre>
+  9709 evaluate: 
+    [ Named Security GM getPriceRecord
+          do: [ price print ; _price printNL ] ;
+    ] ;
+</pre>
 both display the latest adjusted and unadjusted closing prices as of
 September 30, 1997.
 <p>
 The message <i>prices</i> returns a <b>TimeSeries</b> of all 
 <b>PriceRecord</b> instances associated with a <b>Security</b>.
 For example, to display the adjusted and unadjusted prices
-and volumes for all points in GM's time series, you could use:<pre><tt><b>
-     Named Security GM prices
-     do: [ ^date print: 12 ;       #-- date in time series
-           recordDate print: 12 ;  #-- date in record - should match
-           price print ;           #-- adjusted value
-           _price print ;          #-- unadjusted value
-           volume print ;          #-- adjusted value
-           _volume print ;         #-- unadjusted value
-           currencyFactor print ;  #-- should be 1
-           newLine print ;
-         ] ;
-
-</b></tt></pre>
+and volumes for all points in GM's time series, you could use:
+<pre>
+  Named Security GM prices
+  do: [ ^date print: 12 ;       #-- date in time series
+        recordDate print: 12 ;  #-- date in record - should match
+        price print ;           #-- adjusted value
+        _price print ;          #-- unadjusted value
+        volume print ;          #-- adjusted value
+        _volume print ;         #-- unadjusted value
+        currencyFactor print ;  #-- should be 1
+        newLine print ;
+      ] ;
+</pre>
 Note that the <i>prices</i> message returns an actual time series
 object so you need not prepend the ":"  to the message name.  
 <p>
@@ -461,18 +476,22 @@ defined at <b>Security</b> to return the most recent cash dividend
 for the security as of the current evaluation date
 (i.e., <i>^date</i>).  The dividend is adjusted for any splits
 that have happened since the data was stored and is returned
-in the security's <i>baseCurrency</i> by default.  For example:  <pre><tt><b>
-     Named Security GM dividend
-</b></tt></pre>
-returns GM's latest dividend value in GM's base currency,<pre><tt><b>
-     Named Security GM :dividend asOf: 9702 .
-</b>or<b>
-     9702 evaluate: [ Named Security GM dividend ] 
-</b></tt></pre>
+in the security's <i>baseCurrency</i> by default.  For example:
+<pre>
+  Named Security GM dividend
+</pre>
+returns GM's latest dividend value in GM's base currency,
+<pre>
+  Named Security GM :dividend asOf: 9702 .
+</pre>or
+<pre>
+  9702 evaluate: [ Named Security GM dividend ] 
+</pre>
 returns the latest dividend as of Feb 28, 1997 in GM's base currency, 
-and<pre><tt><b>
-    "CAN" asCurrency evaluate: [ Named Security GM dividend ]
-</b></tt></pre>
+and
+<pre>
+ "CAN" asCurrency evaluate: [ Named Security GM dividend ]
+</pre>
 returns GM's latest dividend in Canadian dollars.  
 <p>
 All values are split-adjusted through the current date.  
@@ -496,16 +515,17 @@ The following messages are defined for the class <b>DivRecord</b>:
 The message <i>dividends</i> returns a <b>TimeSeries</b> of all 
 <b>DivRecord</b> instances associated with a <b>Security</b>.
 For example, to display the adjusted and unadjusted dividend values
-for each of GM's dividends, you could use:<pre><tt><b>
-     Named Security GM dividends
-     do: [ ^date print: 12 ;       #-- date in time series
-           recordDate print: 12 ;  #-- date in record - should match
-           div print ;             #-- adjusted value
-           _div print ;            #-- unadjusted value
-           currencyFactor print ;  #-- should be 1
-           newLine print ;
-         ] ;
-</b></tt></pre>
+for each of GM's dividends, you could use:
+<pre>
+  Named Security GM dividends
+  do: [ ^date print: 12 ;       #-- date in time series
+        recordDate print: 12 ;  #-- date in record - should match
+        div print ;             #-- adjusted value
+        _div print ;            #-- unadjusted value
+        currencyFactor print ;  #-- should be 1
+        newLine print ;
+      ] ;
+</pre>
 Note that the <i>dividends</i> message returns an actual time series
 object so you need not prepend the ":"  to the message name.  
 <p>
@@ -521,7 +541,7 @@ are described in the document
 <p>
 <hr>
 <p>
-<h3><a name="splits">Split Adjustments </a></h3>
+<h2 id="splits">Split Adjustments </h2>
 <p>
 To adjust per share data it is necessary to know what splits have
 occurred between the date the data is known to be adjusted through
@@ -551,7 +571,7 @@ The split adjustment process is described in detail in the document
 <p>
 <hr>
 <p>
-<h3><a name="updates">Updating Company and Security Data</a></h3>
+<h2 id="updates">Updating Company and Security Data</h2>
 <p>
 The <b>Interface</b> class 
 <a href="clDataFeed.htm"><b>ExternalFeedManager</b></a>
@@ -615,18 +635,19 @@ Several <b>DataFeed</b> classes have been defined to load data for
 The <a href="pma_CompanyMaster.htm"><b>CompanyMaster</b></a>
 data feed class can be used to create and refresh <b>Company</b> instances.
 The following tab-delimited feed could be used to create <b>Company</b>
-instances and refresh basic information:<pre><tt><b>
-     Interface ExternalFeedManager upload: "CompanyMaster" using:
-   #-- make sure this is tab-delimited
-     "Id          Name         fiscalYearEnd
-      00036110    AAR CORP          5    
-      00079410    ACC CORP          12    
-      00095710    ABM INDUSTRIES    10
-     " ;
-
-</b></tt></pre>
+instances and refresh basic information:
+<pre>
+  Interface ExternalFeedManager upload: "CompanyMaster" using:
+#-- make sure this is tab-delimited
+  "Id          Name         fiscalYearEnd
+   00036110    AAR CORP          5    
+   00079410    ACC CORP          12    
+   00095710    ABM INDUSTRIES    10
+  " ;
+</pre>
 The following tab-delimited string could be used to create
-and refresh <b>Security</b> instances:<pre><b>
+and refresh <b>Security</b> instances:
+<pre>
    Interface ExternalFeedManager upload: "SecurityMaster" using:
    #-- make sure this is tab-delimited
    "entityId    name       companyId   cusip      ticker  currencyId  type
@@ -635,40 +656,41 @@ and refresh <b>Security</b> instances:<pre><b>
     00095710    ABM IND    00095710    00095710   AMB     USD         1
     "  ;
 
-</b></pre>
+</pre>
 The following tab-delimited string could be used to update 
-prices:<pre><b>
-     Interface ExternalFeedManager upload: "PriceFeed" using:
-   #-- make sure this is tab-delimited
-     "entityId    date        currencyId    close     volume
-      12345610    19971117    USD           88.000    0.28
-      12345610    19971118    USD           87.500    0.15
-      12345610    19971119    USD           42.000    0.63    
-      98765410    19971117    CAD           30.500    0.32    
-      98765410    19971118    CAD           30.400    0.05    
-      98765410    19971119    CAD           29.900    0.07    
-     " ;
-
-</b></pre>
+prices:
+<pre>
+  Interface ExternalFeedManager upload: "PriceFeed" using:
+#-- make sure this is tab-delimited
+  "entityId    date        currencyId    close     volume
+   12345610    19971117    USD           88.000    0.28
+   12345610    19971118    USD           87.500    0.15
+   12345610    19971119    USD           42.000    0.63    
+   98765410    19971117    CAD           30.500    0.32    
+   98765410    19971118    CAD           30.400    0.05    
+   98765410    19971119    CAD           29.900    0.07    
+  " ;
+</pre>
 
 <p>
 <hr>
 <p>
-<h3><a name="related">Related Classes</a></h3>
+<h2 id="related">Related Classes</h2>
 
 <p>
-<h4><a name= "country">The Country Class</a></h4>
+<h3 id="country">The Country Class</h3>
 <p>
 Instances of the <b>Country</b> class correspond to individual countries
 such as <i>United States</i>, <i>Canada</i>, and <i>Great Britain</i>.
 The <b>Portfolio Management Application Layer</b> pre-defines a number 
 of countries using the 2-character ISO standard identifiers and names.  
-To display the code and name for each defined country use:<pre><tt><b>
+To display the code and name for each defined country use:
+<pre>
      Country masterList
         sortUp: [ name ] .
      do: [ code print: 15 ; name printNL ] ;
 
-</b></tt></pre>
+</pre>
 <p>
 For general descriptions of all the <b>Country</b> messages see the document
 <a href="mpmaClassify.htm">
@@ -677,106 +699,107 @@ For general descriptions of all the <b>Country</b> messages see the document
 The <a href="pma_CountryMaster.htm"><b>CountryMaster</b></a>
 data feed class can be used to create and refresh <b>Country</b> instances.
 The following tab-delimited feed could be used to create <b>Country</b>
-instances and refresh basic information:<pre><tt><b>
-     Interface ExternalFeedManager upload: "CountryMaster" using:
-   #-- make sure this is tab-delimited
-     "EntityId  Name            Currency
-      AT        Austria         ATS
-      AU        Australia       AUD
-      CA        Canada          CAD
-      CH        Switzerland     CHF
-      US        United States   USD
-     " ;
-
-</b></tt></pre>
+instances and refresh basic information:
+<pre>
+  Interface ExternalFeedManager upload: "CountryMaster" using:
+#-- make sure this is tab-delimited
+  "EntityId  Name            Currency
+   AT        Austria         ATS
+   AU        Australia       AUD
+   CA        Canada          CAD
+   CH        Switzerland     CHF
+   US        United States   USD
+  " ;
+</pre>
 <p>
 The fixed property <i>country</i> is used to assign a <b>Country</b>
 instance to a <b>Company</b>.  
-To display the number of companies in each country, use:<pre><tt><b>
-     Company masterList  
-         groupedBy: [ country ]  .     #- group into countries
-         sortUp: [ code  ] .           #- sort by country code
-    do: [ code print: 10 ;             #- country code
-          name print: 25 ;             #- country name
-          groupList count printNL ;    #- number of company instances
-        ] ;
-
-</b></tt></pre>
-To display the first 100 non-US companies by country, use:<pre><tt><b>
-     Company masterList
-        select: [ country isUS not ] . #-  non-US companies
-        first: 100 .                   #-  restrict to 100 companies  
-        groupedBy: [ country ]  .      #- group into countries
-        sortUp: [ code ] .             #- sort by country code
-    do: [                              #- for each country do the following:
-          code print: 10 ;             #- print country code
-          name print: 25 ;             #- print country name
-          groupList count printNL ;    #- print number of companies in subset
-          groupList                    #- for each company in country subset
-          do: [                           #- do the following:
-              code print: 10 ;            #-  print company code
-              name printNL ;              #-  print company name
-              ] ;                      #- end of groupList for country
-        ] ;
-
-</b></tt></pre>
-You can reassign a country explicitly using:<pre><tt><b>
-     Named Company IBM :country <- Named Country US ;
-
-</b></tt></pre>
+To display the number of companies in each country, use:
+<pre>
+  Company masterList  
+      groupedBy: [ country ]  .     #- group into countries
+      sortUp: [ code  ] .           #- sort by country code
+ do: [ code print: 10 ;             #- country code
+       name print: 25 ;             #- country name
+       groupList count printNL ;    #- number of company instances
+     ] ;
+</pre>
+To display the first 100 non-US companies by country, use:
+<pre>
+  Company masterList
+     select: [ country isUS not ] . #-  non-US companies
+     first: 100 .                   #-  restrict to 100 companies  
+     groupedBy: [ country ]  .      #- group into countries
+     sortUp: [ code ] .             #- sort by country code
+ do: [                              #- for each country do the following:
+       code print: 10 ;             #- print country code
+       name print: 25 ;             #- print country name
+       groupList count printNL ;    #- print number of companies in subset
+       groupList                    #- for each company in country subset
+       do: [                           #- do the following:
+           code print: 10 ;            #-  print company code
+           name printNL ;              #-  print company name
+           ] ;                      #- end of groupList for country
+     ] ;
+</pre>
+You can reassign a country explicitly using:
+<pre>
+  Named Company IBM :country <- Named Country US ;
+</pre>
 <p>
 You can also use
 the <a href="pma_CompanyMaster.htm"><b>CompanyMaster</b></a>
 data feed class to initialize and reassign country 
-values:<pre><tt><b>
-     Interface ExternalFeedManager upload: "CompanyMaster" using:
-   #-- make sure this is tab-delimited
-     "EntityId    country
-      00036110    US
-      00194110    CA    
-      461669      CH
-      000445      GB    
-      002826      GB    
-      003175      GB    
-     " ;
-
-</b></tt></pre>
+values:
+<pre>
+  Interface ExternalFeedManager upload: "CompanyMaster" using:
+#-- make sure this is tab-delimited
+  "EntityId    country
+   00036110    US
+   00194110    CA    
+   461669      CH
+   000445      GB    
+   002826      GB    
+   003175      GB    
+  " ;
+</pre>
 <p>
 The property <i>memberList</i> has been defined at <b>Country</b> to
 store the list of <b>Company</b> instances associated with each
 <b>Country</b> instance.  You can manually update the member cross
-reference using:<pre><tt><b>
-     #--  clear current memberships
-     Country masterList
-     do: [ :memberList <- defaultInstance memberList ] ;
+reference using:
+<pre>
+  #--  clear current memberships
+  Country masterList
+  do: [ :memberList <- defaultInstance memberList ] ;
 
-     #--  update lists using current companies
-     Company masterList
-        groupedBy: [ country ] .
-     do: [ :memberList <- groupList ] ;
-
-</b></tt></pre>
+  #--  update lists using current companies
+  Company masterList
+     groupedBy: [ country ] .
+  do: [ :memberList <- groupList ] ;
+</pre>
 Alternatively, you can use the
 <a href="pma_CompanyToCountry.htm"><b>CompanyToCountry</b></a>
 data feed which automatically updates the <i>country</i> property
 at <b>Company</b> and cross references the <i>memberList</i> property
-at <b>Country</b>:<pre><tt><b>
-     Interface ExternalFeedManager upload: "CompanyToCountry" using:
-   #-- make sure this is tab-delimited
-     "memberId    groupId
-      00036110    US
-      00194110    CA    
-      461669      CH
-      000445      GB    
-      002826      GB    
-      003175      GB    
-     " ;
-
-</b></tt></pre>
-If you assign the countries using this feed, the expression:<pre><tt><b>
-     Named Country GB memberList
-     do: [ displayInfo ] ;
-</b></tt></pre>
+at <b>Country</b>:
+<pre>
+  Interface ExternalFeedManager upload: "CompanyToCountry" using:
+#-- make sure this is tab-delimited
+  "memberId    groupId
+   00036110    US
+   00194110    CA    
+   461669      CH
+   000445      GB    
+   002826      GB    
+   003175      GB    
+  " ;
+</pre>
+If you assign the countries using this feed, the expression:
+<pre>
+  Named Country GB memberList
+  do: [ displayInfo ] ;
+</pre>
 displays all the companies with a <i>country</i> value of <i>Great Britain</i>.
 <p>
 Note that you should use this feed instead of the <b>CompanyMaster</b> if you
@@ -788,7 +811,7 @@ manually or using the <b>CompanyMaster</b> feed, these companies
 will not be reflected in the country's <i>memberList</i>.
 
 <p>
-<h4><a name= "industry">The Industry and Sector Classes</a></h4>
+<h3 id="industry">The Industry and Sector Classes</h3>
 <p>
 Instances of the <b>Industry</b> class correspond to user-defined industry
 classifications such as <i>Beverages</i>, <i>Automotive</i>, and 
@@ -796,104 +819,112 @@ classifications such as <i>Beverages</i>, <i>Automotive</i>, and
 user-defined sectors such as <i>Consumer Durables</i> and <i>Technology</i>.
 Sectors consist of one or more industries.  
 <p>
-To access a specific industry use:<pre><tt><b>
-     Named Industry at: "110" . name printNL ;
-
-</b></tt></pre>
-To display the code and name for currently defined industries use:<pre><tt><b>
-     Industry masterList
-        sortUp: [ name ] .
-     do: [ code print: 15 ; name printNL ] ;
-
-</b></tt></pre>
+To access a specific industry use:
+<pre>
+  Named Industry at: "110" . name printNL ;
+</pre>
+To display the code and name for currently defined industries use:
+<pre>
+  Industry masterList
+     sortUp: [ name ] .
+  do: [ code print: 15 ; name printNL ] ;
+</pre>
 <p>
-To access a specific sector use:<pre><tt><b>
-     Named Sector at: "TECH" . name printNL ;
-</b></tt></pre>
-To display the code and name for currently defined sectors use:<pre><tt><b>
-     Sector masterList
-        sortUp: [ name ] .
-     do: [ code print: 15 ; name printNL ] ;
-</b></tt></pre>
+To access a specific sector use:
+<pre>
+  Named Sector at: "TECH" . name printNL ;
+</pre>
+To display the code and name for currently defined sectors use:
+<pre>
+  Sector masterList
+     sortUp: [ name ] .
+  do: [ code print: 15 ; name printNL ] ;
+</pre>
 <p>
 The property <i>sector</i>
 is defined for the class <b>Industry</b> and is used to store the
 <b>Sector</b> instance associated with the industry.
 To display the current list of industries grouped into their sectors
-use:<pre><tt><b>
-     Industry masterList
-        groupedBy: [ sector ] .         #- group into sectors
-        sortUp: [ code ] .              #- sort by sector code
-     do: [                              #- for each sector do:
-           displayInfo ;                #-     display sector code/name
-           groupList                    #-     for each industry in sector
-           do: [                        #-     do the following:
-                 " " print: 5 ;         #-         indent 5 spaces
-                 displayInfo ;          #-         display industry code/name
-               ] ;                      #-     end of industries in sector
-         ] ;                            #-  end of sector
-
-</b></tt></pre>
+use:
+<pre>
+  Industry masterList
+     groupedBy: [ sector ] .         #- group into sectors
+     sortUp: [ code ] .              #- sort by sector code
+  do: [                              #- for each sector do:
+        displayInfo ;                #-     display sector code/name
+        groupList                    #-     for each industry in sector
+        do: [                        #-     do the following:
+              " " print: 5 ;         #-         indent 5 spaces
+              displayInfo ;          #-         display industry code/name
+            ] ;                      #-     end of industries in sector
+      ] ;                            #-  end of sector
+</pre>
 <p>
 The time series property <i>industry</i> is used to track a company's
 <b>Industry</b> over time.  
-For example, to view the latest industry for a company use:<pre><tt><b>
-     Named Company GM industry name printNL ;
-</b></tt></pre>
-To view the industry as of a different date use:<pre><tt><b>
-     95 evaluate: [ Named Company GM industry name printNL  ] 
-</b>or<b>
-      Named Company GM :industry asOf: 95 .  name printNL ;
-</b></tt></pre>
-To look at industry history use:<pre><tt><b>
-     Named Company GM 
-        :industry              #-  leading : retrieves the time series
-     do: [ ^date print: 15 ;   #-  date of entry
-           code print: 10 ;    #-  industry code on date
-           name printNL ;      #-  industry name on date
-         ] ;
-</b></tt></pre>
+For example, to view the latest industry for a company use:
+<pre>
+  Named Company GM industry name printNL ;
+</pre>
+To view the industry as of a different date use:
+<pre>
+  95 evaluate: [ Named Company GM industry name printNL  ] 
+</pre>or<pre>
+  Named Company GM :industry asOf: 95 .  name printNL ;
+</pre>
+To look at industry history use:
+<pre>
+  Named Company GM 
+     :industry              #-  leading : retrieves the time series
+  do: [ ^date print: 15 ;   #-  date of entry
+        code print: 10 ;    #-  industry code on date
+        name printNL ;      #-  industry name on date
+      ] ;
+</pre>
 <p>
 The message <i>sector</i> is defined at <b>Company</b> to return
 the sector associated with the company's industry.
 For example, to view the sector associated with the current
-industry for a company use:<pre><tt><b>
-     Named Company GM sector name printNL ;
-</b></tt></pre>
-To view the sector as of a different date use:<pre><tt><b>
-     95 evaluate: [ Named Company GM sector name printNL  ] 
-</b>or<b>
-      Named Company GM :sector asOf: 95 .  name printNL ;
-</b></tt></pre>
+industry for a company use:
+<pre>
+  Named Company GM sector name printNL ;
+</pre>
+To view the sector as of a different date use:
+<pre>
+  95 evaluate: [ Named Company GM sector name printNL  ] 
+</pre>or<pre>
+  Named Company GM :sector asOf: 95 .  name printNL ;
+</pre>
 <p>
-The prior expressions are identical to:<pre><tt><b>
-     Named Company GM industry sector name printNL ;
+The prior expressions are identical to:
+<pre>
+  Named Company GM industry sector name printNL ;
 
-     95 evaluate: [ Named Company GM industry sector name printNL  ] 
-</b>and<b>
-      Named Company GM :industry asOf: 95 .  sector name printNL ;
-</b></tt></pre>
+  95 evaluate: [ Named Company GM industry sector name printNL  ] 
+</pre>and<pre>
+   Named Company GM :industry asOf: 95 .  sector name printNL ;
+</pre>
 <p>
-To display the first 100 companies by sector, by industry, use:<pre><tt><b>
-     Company masterList
-        first: 100 .                   #-  restrict to 100 companies  
-        groupedBy: [ sector ] .        #-  group into sectors
-        do: [ code print: 10 ;         #-  sector code
-              name printNL ;           #-  sector name
-              groupList                #-  for companies in sector
-              groupedBy: [industry ] . #-  group into industry
-              do: [                    #-  and do the following:
-                    code print: 10 ;       #- industry code
-                    name printNL ;         #- industry name
-                    groupList              #- for companies in industry
-                    do: [                  #- do the following:
-                          displayInfo ;    #-    display company information
-                        ] ;                #- end of companies in industry
-                  ] ;                  #-  end of industries in sector
-              newLine print ;          #-  skip a line after each sector
-            ] ; 
-
-</b></tt></pre>
+To display the first 100 companies by sector, by industry, use:
+<pre>
+  Company masterList
+     first: 100 .                   #-  restrict to 100 companies  
+     groupedBy: [ sector ] .        #-  group into sectors
+     do: [ code print: 10 ;         #-  sector code
+           name printNL ;           #-  sector name
+           groupList                #-  for companies in sector
+           groupedBy: [industry ] . #-  group into industry
+           do: [                    #-  and do the following:
+                 code print: 10 ;       #- industry code
+                 name printNL ;         #- industry name
+                 groupList              #- for companies in industry
+                 do: [                  #- do the following:
+                       displayInfo ;    #-    display company information
+                     ] ;                #- end of companies in industry
+               ] ;                  #-  end of industries in sector
+           newLine print ;          #-  skip a line after each sector
+         ] ; 
+</pre>
 <p>
 For general descriptions of all the 
 <b>Industry</b> and <b>Sector</b> messages, see the document
@@ -913,69 +944,71 @@ For a general discussion of classification hierarchies, see the document
 The <a href="pma_IndustryMaster.htm"><b>IndustryMaster</b></a>
 data feed class can be used to create and refresh <b>Industry</b> instances.
 The following tab-delimited feed could be used to create <b>Industry</b>
-instances and refresh basic information:<pre><tt><b>
-     Interface ExternalFeedManager upload: "IndustryMaster" using:
-   #-- make sure this is tab-delimited
-     "EntityId   Name                     
-      110        Beverages    
-      120        Cosmetics    
-      130        Grocery Products    
-      140        Apparel    
-      150        Other Consumer Non-durables    
-     " ;
-
-</b></tt></pre>
+instances and refresh basic information:
+<pre>
+  Interface ExternalFeedManager upload: "IndustryMaster" using:
+#-- make sure this is tab-delimited
+  "EntityId   Name                     
+   110        Beverages    
+   120        Cosmetics    
+   130        Grocery Products    
+   140        Apparel    
+   150        Other Consumer Non-durables    
+  " ;
+</pre>
 <p>
 The <a href="pma_SectorMaster.htm"><b>SectorMaster</b></a>
 data feed class can be used to create and refresh <b>Sector</b> instances.
 The following tab-delimited feed could be used to create <b>Sector</b>
-instances and refresh basic information:<pre><tt><b>
-     Interface ExternalFeedManager upload: "SectorMaster" using:
-   #-- make sure this is tab-delimited
-     "EntityId   Name                     
-      NOND       Consumer non-durables    
-      DURB       Consumer durables    
-      SERV       Consumer services    
-      RETL       Retail trade    
-      TECH       Technology    
-     " ;
-</b></tt></pre>
+instances and refresh basic information:
+<pre>
+  Interface ExternalFeedManager upload: "SectorMaster" using:
+#-- make sure this is tab-delimited
+  "EntityId   Name                     
+   NOND       Consumer non-durables    
+   DURB       Consumer durables    
+   SERV       Consumer services    
+   RETL       Retail trade    
+   TECH       Technology    
+  " ;
+</pre>
 <p>
 The property <i>memberList</i> has been defined at <b>Sector</b> to
 store the list of <b>Industry</b> instances associated with each
 <b>Sector</b> instance.  You can manually update the member cross
-reference using:<pre><tt><b>
-     #--  clear current memberships
-     Sector masterList
-     do: [ :memberList <- defaultInstance memberList ] ;
+reference using:
+<pre>
+  #--  clear current memberships
+  Sector masterList
+  do: [ :memberList <- defaultInstance memberList ] ;
 
-     #--  update lists using current companies
-     Industry masterList
-        groupedBy: [ sector ] .
-     do: [ :memberList <- groupList ] ;
-
-</b></tt></pre>
+  #--  update lists using current companies
+  Industry masterList
+     groupedBy: [ sector ] .
+  do: [ :memberList <- groupList ] ;
+</pre>
 Alternatively, you can use the
 <a href="pma_IndustryToSector.htm"><b>IndustryToSector</b></a>
 data feed which automatically updates the <i>sector</i> property
 at <b>Industry</b> and cross references the <i>memberList</i> property
-at <b>Sector</b>:<pre><tt><b>
-     Interface ExternalFeedManager upload: "IndustryToSector" using:
-   #-- make sure this is tab-delimited
-     "groupId   memberId
-      NOND      110
-      NOND      120
-      NOND      130
-      DURB      210
-      DURB      220
-      DURB      230
-     " ;
-
-</b></tt></pre>
-If you assign the sectors using this feed, the expression:<pre><tt><b>
-     Named Sector TECH memberList
-     do: [ displayInfo ] ;
-</b></tt></pre>
+at <b>Sector</b>:
+<pre>
+  Interface ExternalFeedManager upload: "IndustryToSector" using:
+#-- make sure this is tab-delimited
+  "groupId   memberId
+   NOND      110
+   NOND      120
+   NOND      130
+   DURB      210
+   DURB      220
+   DURB      230
+  " ;
+</pre>
+If you assign the sectors using this feed, the expression:
+<pre>
+  Named Sector TECH memberList
+  do: [ displayInfo ] ;
+</pre>
 displays all the industries with a <i>sector</i> value of <i>Technology</i>.
 <p>
 Note that you should use this feed if you
@@ -994,38 +1027,40 @@ industry and the new industry must be updated.  At any point in
 time, a company will belong to one industry.  At any point in
 time, an industry will have zero or more companies associated with it.
 <p>
-To view an industry's members as of a specific date use:<pre><tt><b>
-     #-- latest
-     Named Industry at: "540" .     #- get industry 540
-       memberList                   #- get latest member list (companies)
-     do: [                          #- for each member do:
+To view an industry's members as of a specific date use:
+<pre>
+  #-- latest
+  Named Industry at: "540" .     #- get industry 540
+    memberList                   #- get latest member list (companies)
+  do: [                          #- for each member do:
+        code print: 10 ;             #- print company code
+        name printNL ;               #- print company name
+      ] ;
+
+  #-- as of last month
+  ^today - 1 monthEnds evaluate:
+    [ Named Industry at: "540" .     #- get industry 540
+        memberList                   #- get eom member list (companies)
+      do: [                          #- for each member do:
            code print: 10 ;             #- print company code
            name printNL ;               #- print company name
-         ] ;
+          ] ;
+    ] ;
 
-     #-- as of last month
-     ^today - 1 monthEnds evaluate:
-       [ Named Industry at: "540" .     #- get industry 540
-           memberList                   #- get eom member list (companies)
-         do: [                          #- for each member do:
-              code print: 10 ;             #- print company code
-              name printNL ;               #- print company name
-             ] ;
-       ] ;
-
-     #-- all periods
-     Named Industry at: "540" . 
-        :memberList                  #- leading : returns time series of lists
-     do: [ ^date print ;             #- for each date membership changed
-           count printNL ;              #-  print number of members
-           ^self do: [ displayInfo ] ;  #-  and display them one per line
-         ] ;
-</b></tt></pre>
+  #-- all periods
+  Named Industry at: "540" . 
+     :memberList                  #- leading : returns time series of lists
+  do: [ ^date print ;             #- for each date membership changed
+        count printNL ;              #-  print number of members
+        ^self do: [ displayInfo ] ;  #-  and display them one per line
+      ] ;
+</pre>
 <p>
 The <i>displayMemberHistory</i> report shows changes in the industry
-membership over time.  For example:<pre><tt><b>
-     Named Industry at: "540" . displayMemberHistory ;
-</b></tt></pre>
+membership over time.  For example:
+<pre>
+  Named Industry at: "540" . displayMemberHistory ;
+</pre>
 
 <p>
 If you want to utilize the <i>company-industry</i>
@@ -1034,18 +1069,19 @@ membership cross reference, you should use
 data feed to update the <i>industry</i> property at <b>Company</b>.
 This feed automatically updates the <i>industry</i> property
 and cross references the <i>memberList</i> property 
-at <b>Industry</b> by date:<pre><tt><b>
-     Interface ExternalFeedManager upload: "CompanyToIndustry" using:
-   #-- make sure this is tab-delimited
-     "memberId    groupId    date
-      00036110    560        Default
-      00036110    120        951231
-      00079410    740        Default
-      00079410    120        931231
-      00079410    Default    960115
-      00163T10    140        Default
-     " ;
-</b></tt></pre>
+at <b>Industry</b> by date:
+<pre>
+  Interface ExternalFeedManager upload: "CompanyToIndustry" using:
+#-- make sure this is tab-delimited
+  "memberId    groupId    date
+   00036110    560        Default
+   00036110    120        951231
+   00079410    740        Default
+   00079410    120        931231
+   00079410    Default    960115
+   00163T10    140        Default
+  " ;
+</pre>
 <p>
 The message <i>comanyList</i> is defined at <b>Sector</b> to return
 the list of companies associated with any of the industries in the
@@ -1056,7 +1092,7 @@ updated.
 <p>
 
 <p>
-<h4><a name= "type">The SecurityType and AssetCategory Classes</a></h4>
+<h3 id="type">The SecurityType and AssetCategory Classes</h3>
 <p>
 
 <p>
@@ -1070,14 +1106,14 @@ Each <b>SecurityType</b> instance is assigned to an <b>AssetCategory</b>
 via the <i>assetCategory</i> property.
 <p>
 To display the currently defined security types, grouped into asset
-category use:<pre><tt><b>
-     SecurityType masterList
-        groupedBy: [ assetCategory ] .
-     do: [ "===>  AssetCategory: " print ; code printNL ; 
-           groupList do: [ displayInfo ] ;
-         ] ;
-
-</b></tt></pre>
+category use:
+<pre>
+  SecurityType masterList
+     groupedBy: [ assetCategory ] .
+  do: [ "===>  AssetCategory: " print ; code printNL ; 
+        groupList do: [ displayInfo ] ;
+      ] ;
+</pre>
 <p>
 The <i>unitCalc</i> property is defined at the <b>SecurityType</b> class
 to store a multiplier used to adjust units held in market value calculations.
@@ -1091,73 +1127,65 @@ The <a href="pma_SecurityTypeMaster.htm"><b>SecurityTypeMaster</b></a>
 data feed class can be used to create and refresh <b>SecurityType</b> 
 instances.
 The following tab-delimited feed could be used to create <b>SecurityType</b>
-instances and refresh basic information:<pre><tt><b>
-     Interface ExternalFeedManager upload: "SecurityTypeMaster" using:
-   #-- make sure this is tab-delimited
-     "Id    Name           UnitCalc    AssetCategory
-      0    Cash & Equiv    1.00        Cash
-      1    Common Stock    1.00        Equity
-      2    Corporate Bond  10.00       Fixed
-      3    Gvt Bond        10.00       Fixed
-      4    Option          100.00      Other
-     " ;
-
-</b></tt></pre>
+instances and refresh basic information:
+<pre>
+  Interface ExternalFeedManager upload: "SecurityTypeMaster" using:
+#-- make sure this is tab-delimited
+  "Id    Name           UnitCalc    AssetCategory
+   0    Cash & Equiv    1.00        Cash
+   1    Common Stock    1.00        Equity
+   2    Corporate Bond  10.00       Fixed
+   3    Gvt Bond        10.00       Fixed
+   4    Option          100.00      Other
+  " ;
+</pre>
 <p>
 The <a href="pma_AssetCatMaster.htm"><b>AssetCatMaster</b></a>
 data feed class can be used to create and refresh <b>AssetCategory</b> 
 instances.
 The following tab-delimited feed could be used to create <b>AssetCategory</b>
-instances and refresh basic information:<pre><tt><b>
-     Interface ExternalFeedManager upload: "AssetCatMaster" using:
-   #-- make sure this is tab-delimited
-     "EntityId    Name                     
-      Equity      Equity
-      Fixed       Fixed Income
-      Cash        Cash & Equivalents
-      Other       Other Assets
-     " ;
-
-</b></tt></pre>
+instances and refresh basic information:
+<pre>
+  Interface ExternalFeedManager upload: "AssetCatMaster" using:
+#-- make sure this is tab-delimited
+  "EntityId    Name                     
+   Equity      Equity
+   Fixed       Fixed Income
+   Cash        Cash & Equivalents
+   Other       Other Assets
+  " ;
+</pre>
 
 <p>
 The fixed property <i>type</i> is used to assign a <b>SecurityType</b>
 instance to a <b>Security</b>.  
-To display the number of securities in each security type, use:<pre><tt><b>
-     Security masterList  
-         groupedBy: [ type ]  .        #- group into security types
-    do: [ code print: 10 ;             #- security type code
-          name print: 25 ;             #- security type name
-          groupList count printNL ;    #- number of security instances
-        ] ;
-
-</b></tt></pre>
+To display the number of securities in each security type, use:
+<pre>
+  Security masterList  
+      groupedBy: [ type ]  .        #- group into security types
+ do: [ code print: 10 ;             #- security type code
+       name print: 25 ;             #- security type name
+       groupList count printNL ;    #- number of security instances
+     ] ;
+</pre>
 <p>
-You can reassign a security type explicitly using:<pre><tt><b>
-     Named Security IBM :type <- Named SecurityType US ;
-</b></tt></pre>
+You can reassign a security type explicitly using:
+<pre>
+  Named Security IBM :type <- Named SecurityType US ;
+</pre>
 You can also use
 the <a href="pma_SecurityMaster.htm"><b>SecurityMaster</b></a>
-data feed class to initialize and reassign security type values:<pre><tt><b>
-     Interface ExternalFeedManager upload: "SecurityMaster" using:
-   #-- make sure this is tab-delimited
-     "EntityId    type
-      00036110    1
-      00194110    1
-      123456AB    2
-      456789BC    2
-      CashUS      0
-     " ;
+data feed class to initialize and reassign security type values:
+<pre>
+  Interface ExternalFeedManager upload: "SecurityMaster" using:
+#-- make sure this is tab-delimited
+  "EntityId    type
+   00036110    1
+   00194110    1
+   123456AB    2
+   456789BC    2
+   CashUS      0
+  " ;
+</pre>
 
-</b></tt></pre>
-
-<p>
-<hr>
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated December 15, 2000</font>
-</table>
-
-</body>
-</html>
+{% include doc-footer.htm copydates="2000" %}

@@ -1,29 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Design Methodology: Application Classes </title>
-</head>
-<body bgcolor=white>
-<h2>Vision Design Methodology: Core Application Classes</h2>
+---
+title: "Vision Design Methodology: Application Classes "
 
-<p>
-| <a href="FHome.htm">Home</a>
-| <a href="vapps.htm">Applications</a> 
-| <a href="clXRef.htm">Class XRef</a> |
-<p>
-<hr>
-<h3>Topics Covered:</h3>
-<ul type=square>
-<li><a href="#overview">Overview</a>
-<li><a href="#entity">Entity Classes</a>
-<li><a href="#data">Data Records</a>
-<li><a href="#link">Link Records </a>
-<li><a href="#bridge">Bridge Classes </a>
-<li><a href="#feeds">External Data Sets</a>
-<li><a href="#dbentity">DBEntity Classes</a>
-</ul>
-<hr>
-<h3><a name="overview">Overview</a></h3>
+related_topics:
+  - url: "clXRef.htm"
+    title: "Class XRef"
+
+sidebar:
+  nav: "sb_ClassXRef"
+---
+
+<h2 id="overview">Overview</h2>
 <p>
 A number of <b>Abstract Classes</b> have been defined to organize different
 components of your Vision class hierarchy.  Abstract classes are not
@@ -56,21 +42,22 @@ These classes are all defined in Vision and can
 therefore be modified and expanded as needed by the database
 designer. 
 <p>
-<blockquote><hr><center><a name="missingDefs"> <b>Note:</b></a></center>
+<blockquote><hr><center id="missingDefs"> <b>Note:</b></center>
 Some of the classes referenced in this document were added to the Vision
 bootstrap database as part of release 5.9.4.  If your installation
 was bootstrapped prior to this, you may need to define the
-following:<pre><tt><b>
-     Entity createSubclass: "Support" ;
-     Entity createSubclass: "Table" ;
-     Object createSubclass: "Bridge" ;
-     IncorporatorPrototype createSubclass: "DataFeed" ;
-</b></tt></pre>
+following:
+<pre>
+  Entity createSubclass: "Support" ;
+  Entity createSubclass: "Table" ;
+  Object createSubclass: "Bridge" ;
+  IncorporatorPrototype createSubclass: "DataFeed" ;
+</pre>
 <hr></blockquote><p>
 
 <p>
 <hr>
-<h3><a href="clEntity.htm" name="entity">Entity Classes</a></h3>
+<h2 id="EntityClasses"><a href="clEntity.htm">Entity Classes</a></h2>
 <p>
 The <b>Entity</b> class is a superclass of the
 classes whose instances represent
@@ -98,7 +85,7 @@ identifiers.  The properties <i>name</i>, <i>shortName</i>,
 Initially these properties are all set to the value of <i>code</i>;
 you can modify any or all of these values as needed.
 <p>
-<h4><a name="classify" href="clClassify.htm">The Classification Class</a></h4>
+<h3 id="classify" href="clClassify.htm">The Classification Class</h3>
 <p>
 The class <b>Classification</b>
 has been defined as an abstract subclass of <b>Entity</b> to
@@ -121,7 +108,7 @@ class provides protocol to link these instances into a hierarchical
 structure.
 
 <p>
-<h4><a name="miscEntity">Support and Table Classes</a></h4>
+<h3 id="miscEntity">Support and Table Classes</h3>
 <p>
 Two additional abstract subclasses, <b>Support</b> and
 <b>Table</b> are recommended for organizing classes that require
@@ -130,15 +117,16 @@ entities in the application.  Note that these classes may need to
 be <a href="#missingDefs">added to your database</a> if you want
 to use them.  There is no special protocol that needs to be defined
 for these classes.  They simply provide a way of organizing the
-entity subclasses so that the expression:<pre><tt><b>
-     Entity showInheritance
-</b></tt></pre>
+entity subclasses so that the expression:
+<pre>
+  Entity showInheritance
+</pre>
 neatly separates the core entity classes from miscellaneous support
 classes.  For example, you could create a subclass of <b>Table</b>
 when you need a place to store descriptions for coded information.
 
 <p>
-<h4><a name="currency" href="clCurrency.htm">The Currency Class</a></h4>
+<h3 id="currency" href="clCurrency.htm">The Currency Class</h3>
 <p>
 The class <b>Currency</b>
 is a subclass of <b>Entity</b> that is included as part of all Vision
@@ -149,7 +137,7 @@ in which monetary transactions are performed such as "US Dollars" or
 "British Pounds".  
 
 <p>
-<h4><a name="universe" href="clUniverse.htm">The Universe Class</a></h4>
+<h3 id="universe" href="clUniverse.htm">The Universe Class</h3>
 <p>
 The class <b>Universe</b>
 is a subclass of <b>Entity</b> that is included as part of all
@@ -161,7 +149,7 @@ instances comprising the <i>Standard & Poors 500</i> each month.
 
 <p>
 <hr>
-<h3><a name="data">Data Records</a></h3>
+<h2 id="data">Data Records</h2>
 <p>
 The subclasses of <b>DataRecord</b> are used to
 manage sets of related information about a specific entity.
@@ -184,36 +172,37 @@ a property defined at the entity instance with which it is associated.
 The <i>createInstance:</i> message for this class assumes you are supplying
 four values: the entity, a date, a value, and a base currency if applicable.
 <p>
-For example:<pre><tt><b>
-     #-- Create price time series for Security class
-     Entity createSubclass: "Security"
-     Security define: 'price' ;
+For example:
+<pre>
+  #-- Create price time series for Security class
+  Entity createSubclass: "Security"
+  Security define: 'price' ;
 
-     #-- Create PriceRecord which tracks high, low, and close for a security
-     DataRecord createSubclass: "PriceRecord" ;
-     PriceRecord defineFixedProperty: 'high' ;
-     PriceRecord defineFixedProperty: 'low' ;
-     PriceRecord defineFixedProperty: 'close' ;
+  #-- Create PriceRecord which tracks high, low, and close for a security
+  DataRecord createSubclass: "PriceRecord" ;
+  PriceRecord defineFixedProperty: 'high' ;
+  PriceRecord defineFixedProperty: 'low' ;
+  PriceRecord defineFixedProperty: 'close' ;
 
-     #--  Update IBM's prices for several dates
-     Security createInstance: "IBM" ;
-     Named Security IBM 
-     do: [ !newPrice <- ^global PriceRecord createInstance: ^self, 9601 .
-               do: [ :high <- 101.25 ; :low <- 100.75 ; :close <- 101.00 ] ;
-           :prices asOf: 9601 put: newPrice;
-           !newPrice <- ^global PriceRecord createInstance: ^self, 9602 .
-               do: [ :high <- 102.25 ; :low <- 100.75 ; :close <- 101.75 ] ;
-           :prices asOf: 9602 put: newPrice;
-         ] ;
+  #--  Update IBM's prices for several dates
+  Security createInstance: "IBM" ;
+  Named Security IBM 
+  do: [ !newPrice <- ^global PriceRecord createInstance: ^self, 9601 .
+            do: [ :high <- 101.25 ; :low <- 100.75 ; :close <- 101.00 ] ;
+        :prices asOf: 9601 put: newPrice;
+        !newPrice <- ^global PriceRecord createInstance: ^self, 9602 .
+            do: [ :high <- 102.25 ; :low <- 100.75 ; :close <- 101.75 ] ;
+        :prices asOf: 9602 put: newPrice;
+      ] ;
 
-    #-- Display the data
-    Named Security IBM :prices
-       do: [ ^date print: 15 ; high print ; close print ; low printNL ] ;
-</b></tt></pre>
+ #-- Display the data
+ Named Security IBM :prices
+    do: [ ^date print: 15 ; high print ; close print ; low printNL ] ;
+</pre>
 
 <p>
 <hr>
-<h3><a name="link">Link Records</a></h3>
+<h2 id="link">Link Records</h2>
 <p>
 The subclasses of <b>LinkRecord</b> are used to manage
 information that symmetrically relates two or more entities.  
@@ -245,7 +234,7 @@ customer instance.
 
 <p>
 <hr>
-<h3><a name="bridge">Bridge Classes</a></h3>
+<h2 id="bridge">Bridge Classes</h2>
 <p>
 The subclasses of the <b>Bridge</b> class are used to manage
 the protocol for connecting an entity to one more <b>DataRecord</b>
@@ -258,7 +247,7 @@ referenced via the entity instance with which it is associated.
 
 <p>
 <hr>
-<h3><a name="feeds">External Data Sets</a></h3>
+<h2 id="feeds">External Data Sets</h2>
 <p>
 The classes <b>Data Feed</b> and <b>DataSet</b> are subclasses of
 the abstract class <b>IncorporatorPrototype</b> with subclasses that
@@ -286,7 +275,7 @@ logical difference between a <b>DataSet</b> and a <b>DataRecord</b>.
 
 <p>
 <hr>
-<h3><a name="dbentity">DBEntity Classes</a></h3>
+<h2 id="dbentity"><a href="clDBEntity.htm">DBEntity Classes</a></h2>
 <p>
 Data from multiple sources is often managed within a single Vision
 database.  This data is normally associated with instances of
@@ -314,16 +303,4 @@ class since it links a single <b>Entity</b> to one or more
 More information about the <b>DBEntity</b> model 
 <a href="clDBEntity.htm">is available</a>.
 
-<p>
-<hr>
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated August 28, 1998</font>
-</table>
-
-</body>
-</html>
-
-
-
+{% include doc-footer.htm copydates="1998" %}

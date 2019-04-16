@@ -1,23 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Investment Classes: Special Issues</title>
-</head>
-<body bgcolor = white>
+---
+title: "Vision Investment Classes: Special Issues"
 
-<h2>Vision Investment Classes: Special Issues</h2>
-<p>
-| <a href="FHome.htm">Home</a> | <a href="invRef.htm">Investment Reference</a> | <a href="invHolding.htm">The Holding Class</a> |
-<hr>
-<h3>Topics Covered:</h3>
-<ul type=square>
-<li><a href="#overview">Overview</a>
-<li><a href="#divs">Dividends</a>
-<li><a href="#prices">Prices</a>
-<li><a href="#splits">Split Adjustments</a>
-</ul>
-<hr>
-<h3><a name="overview">Overview</a></h3>
+related_topics:
+  - url: "invRef.htm"
+    title: "Investment Reference"
+  - url: "invHolding.htm"
+    title: "The Holding Class"
+
+---
+
+<h2 id="overview">Overview</h2>
 <p>
 Special structures have been designed to manage dividend,
 price, and adjustment data in the Vision database.
@@ -39,37 +31,42 @@ actual shares outstanding value as of a specific date.  The message
 occurred since that date.
 <p>
 <hr>
-<h3><a name="divs">Dividends</a></h3>
+<h2 id="divs">Dividends</h2>
 <p>
 The message <i>dividend</i> returns the split-adjusted, currency-adjusted
 dividend value for a specific security.  The dividend value is
 accessed as of the current date by default.  The data is adjusted
 through the current date in the base currency of the security by
-default.  For example:  <pre><tt><b>
-     Named Security GM dividend
-</b></tt></pre>
-returns GM's latest dividend value in US dollars,<pre><tt><b>
-     Named Security GM :dividend asOf: 9502 .
-</b>or<b>
-     9502 evaluate: [ Named Security GM dividend ] 
-</b></tt></pre>
+default.  For example:
+<pre>
+  Named Security GM dividend
+</pre>
+returns GM's latest dividend value in US dollars,
+<pre>
+  Named Security GM :dividend asOf: 9502 .
+</pre>or<pre>
+  9502 evaluate: [ Named Security GM dividend ] 
+</pre>
 returns GM's latest dividend value as of Feb 1995 in US dollars, 
-and<pre><tt><b>
-     "CAN" asCurrency evaluate: [ Named Security GM dividend ] 
-</b></tt></pre>
+and
+<pre>
+  "CAN" asCurrency evaluate: [ Named Security GM dividend ] 
+</pre>
 returns GM's latest dividend value in Canadian dollars.  All values
 are split-adjusted through the current date.  
 The message <i>getDivsFrom:to:</i>
 returns the total dividends paid by the security between the two
-dates supplied.  For example:<pre><tt><b>
-     Named Security GM getDivsFrom: 950201 to: 950331
-</b></tt></pre>
+dates supplied.  For example:
+<pre>
+  Named Security GM getDivsFrom: 950201 to: 950331
+</pre>
 returns the total dividends paid between the two dates.
 The message <i>totalReturnFrom:to:</i> returns the total
 return between the two dates supplied.  For example, 
-to access the total return for the same period use:<pre><tt><b>
-     Named Security GM totalReturnFrom: 950201 to: 950331
-</b></tt></pre>
+to access the total return for the same period use:
+<pre>
+  Named Security GM totalReturnFrom: 950201 to: 950331
+</pre>
 The actual time series of dividend values is stored in the time
 series property <i>dividendSeries</i>.  The values in this time series
 are instances of the class <i>DivRecord</i>, which has been created to
@@ -181,16 +178,17 @@ code will be immune to any changes that may be made to the
 underlying data structure that manages the actual time series.
 <p>
 For example, to display the adjusted and unadjusted dividend values
-for each of GM's dividends, you could use:<pre><tt><b>
-     Named Security GM dividends
-     do: [ ^date print: 12 ;       #-- date in time series
-           date print: 12 ;        #-- date in record - should match
-           div print ;             #-- adjusted value
-           _div print ;            #-- unadjusted value
-           currencyFactor print ;  #-- should be 1
-           newLine print ;
-         ] ;
-</b></tt></pre>
+for each of GM's dividends, you could use:
+<pre>
+  Named Security GM dividends
+  do: [ ^date print: 12 ;       #-- date in time series
+        date print: 12 ;        #-- date in record - should match
+        div print ;             #-- adjusted value
+        _div print ;            #-- unadjusted value
+        currencyFactor print ;  #-- should be 1
+        newLine print ;
+      ] ;
+</pre>
 Note that the <i>dividends</i> message returns an actual time series
 object so you need not prepend the ":"  to the message name.  
 <p>
@@ -207,30 +205,34 @@ following messages:
 </ul>
 where <i>divValue</i> is a number, the date is a date (or integer
 equivalent), and the currency is a currency object or a string
-containing a valid currency code.    For example:<pre><tt><b>
-     Named Security GM setDivTo: 1.23 asOf: 950513 inCurrency: "US" ;
-</b></tt></pre>
+containing a valid currency code.    For example:
+<pre>
+  Named Security GM setDivTo: 1.23 asOf: 950513 inCurrency: "US" ;
+</pre>
 adds a new <i>GM</i> dividend of <i>1.23</i> on <i>May 13</i> in 
 <i>US Dollars</i>.
 <p>
 <hr>
-<h3><a name="prices">Prices</a></h3>
+<h2 id="prices">Prices</h2>
 <p>
 The message <i>price</i> returns the split-adjusted, currency-adjusted
 price for a specific security.  The price is
 accessed as of the current date by default.  The value is split adjusted
 through the current date and is in the base currency of the security by
-default.  For example:  <pre><tt><b>
-     Named Security GM price
-</b></tt></pre>
-returns GM's latest price value in GM's base currency,<pre><tt><b>
-     Named Security GM :price asOf: 9502 .
-</b>or<b>
-     9502 evaluate: [ Named Security GM price ] 
-</b></tt></pre>
-returns the latest price as of Feb 1995 in the base currency , and<pre><tt><b>
-    "CAN" asCurrency evaluate: [ Named Security GM  price ]
-</b></tt></pre>
+default.  For example:
+<pre>
+  Named Security GM price
+</pre>
+returns GM's latest price value in GM's base currency,
+<pre>
+  Named Security GM :price asOf: 9502 .
+</pre>or<pre>
+  9502 evaluate: [ Named Security GM price ] 
+</pre>
+returns the latest price as of Feb 1995 in the base currency , and
+<pre>
+  CAN" asCurrency evaluate: [ Named Security GM  price ]
+</pre>
 returns the latest price in Canadian dollars.  All values
 are split-adjusted through the current date.  The message <i>_price</i>
 returns the unadjusted price as of the current evaluation date.
@@ -243,9 +245,10 @@ The message <i>volume</i> returns the split-adjusted
 volume for a specific security.  The message <i>_volume</i> 
 returns the unadjusted volume as of the current evaluation date.
 The message <i>priceChangeFrom:to:</i> returns the price percentage change
-value between two dates.  For example:<pre><tt><b>
-     Named Security GM priceChangeFrom: 950201 to: 950331
-</b></tt></pre>
+value between two dates.  For example:
+<pre>
+  Named Security GM priceChangeFrom: 950201 to: 950331
+</pre>
 returns the percentage change in price between these two dates.
 <p>
 The actual time series of prices and volumes is stored in the time
@@ -441,31 +444,34 @@ code will be immune to any changes that may be made to the
 underlying data structure that manages the actual time series.
 <p>
 For example, to display the adjusted and unadjusted prices
-and volumes for all points in GM's time series, you could use:<pre><tt><b>
-     Named Security GM prices
-     do: [ ^date print: 12 ;       #-- date in time series
-           recordDate print: 12 ;  #-- date in record - should match
-           price print ;           #-- adjusted value
-           _price print ;          #-- unadjusted value
-           volume print ;          #-- adjusted value
-           _volume print ;         #-- unadjusted value
-           currencyFactor print ;  #-- should be 1
-           newLine print ;
-         ] ;
-</b></tt></pre>
+and volumes for all points in GM's time series, you could use:
+<pre>
+  Named Security GM prices
+  do: [ ^date print: 12 ;       #-- date in time series
+        recordDate print: 12 ;  #-- date in record - should match
+        price print ;           #-- adjusted value
+        _price print ;          #-- unadjusted value
+        volume print ;          #-- adjusted value
+        _volume print ;         #-- unadjusted value
+        currencyFactor print ;  #-- should be 1
+        newLine print ;
+      ] ;
+</pre>
 Note that the <i>prices</i> message returns an actual time series
 object so you need not prepend the ":"  to the message name.  
 To access a full price record as of a specific date, use the message
-<i>getPriceRecord</i>.  For example, the expressions:<pre><tt><b>
-     Named Security GM :getPriceRecord asOf: 9511 .
-       do: [ price print ; _price print ] ;
-</b></tt></pre>
-and<pre><tt><b>
-     9511 evaluate: 
-       [ Named Security GM getPriceRecord
-             do: [ price print ; _price print ] ;
-       ] ;
-</b></tt></pre>
+<i>getPriceRecord</i>.  For example, the expressions:
+<pre>
+  Named Security GM :getPriceRecord asOf: 9511 .
+    do: [ price print ; _price print ] ;
+</pre>
+and
+<pre>
+  9511 evaluate: 
+    [ Named Security GM getPriceRecord
+          do: [ price print ; _price print ] ;
+    ] ;
+</pre>
 both return the full price record as of Nov 30, 1995 from which you
 can access the adjusted and unadjusted prices.
 <p>
@@ -490,14 +496,15 @@ containing a valid currency code.  The first message is used to add
 a new price date to the time series; the next two messages are
 used to change the price or currency value for an existing
 price record; the remaining messages are used to create or update
-high, low, open, and volume values.  For example:<pre><tt><b>
-     Named Security GM addPrice: 34.56 asOf: 950513 inCurrency: "US" ;
-</b></tt></pre>
+high, low, open, and volume values.  For example:
+<pre>
+  Named Security GM addPrice: 34.56 asOf: 950513 inCurrency: "US" ;
+</pre>
 will add a new <i>GM</i> price of <i>34.56</i> on 
 <i>May 13</i> in <i>US Dollars</i>.
 <p>
 <hr>
-<h3><a name="splits">Split Adjustments</a></h3>
+<h2 id="splits">Split Adjustments</h2>
 <p>
 All per share and shares outstanding data in Vision is implicitly
 adjusted through some date.  To analyze per share data as of any date
@@ -536,48 +543,53 @@ represents the running product of these raw factors.  This variable has
 an initial value of 1.  Each time a split occurs, a new point
 representing the product of the new raw factor and the last
 adjustment factor is stored in the adjustment factor as of the
-ex-date.  The data from the previous example is illustrated below:<pre><tt><b>
-                          0       1/15/95     3/15/95
+ex-date.  The data from the previous example is illustrated below:
+<pre>
+                       0       1/15/95     3/15/95
 <hr width="40%" align=center>
-     rawSplitFactor                  2          3
-     adjustmentFactor     1          2          6
-</b></tt></pre>
+  rawSplitFactor                  2          3
+  adjustmentFactor     1          2          6
+</pre>
 <p>
 To properly use the adjustment factor data, you actually need to
 access values as of the two dates involved, the adjustment
 date and the current date.  The ratio of these factors gives you
 the correct adjustment.  Therefore the correct way to adjust per share
 data that has been adjusted through January 31 for analysis on May
-31 is:<pre><tt><b>
-     adjustment factor ratio =   adjustment factor on May 31
-                              --------------------------------
-                              adjustment factor on January 31
+31 is:
+<pre>
+  adjustment factor ratio =   adjustment factor on May 31
+                           --------------------------------
+                           adjustment factor on January 31
 
-    adjusted value =         unadjusted value / adjustment factor ratio
-</b></tt></pre>
+ adjusted value =         unadjusted value / adjustment factor ratio
+</pre>
 <p>
 The message <i>adjustmentRelativeTo: </i> is used to access the 
 current adjustment
 factor relative to the date that your data item is known to be
 adjusted through.  If you know that GM's <i>eps</i> is adjusted through
-January 31, then the expression:<pre><tt><b>
-     Named Security GM adjustmentRelativeTo: 9501
-</b></tt></pre>
+January 31, then the expression:
+<pre>
+  Named Security GM adjustmentRelativeTo: 9501
+</pre>
 accesses the value needed to adjust the <i>eps</i> value relative to the
 current analysis date.  To adjust the <i>eps</i>, divide the unadjusted
-value by this adjustment value:<pre><tt><b>
-     Named Security GM send: [ _eps  / # unadjusted
-                                (^self adjustmentRelativeTo: 9501)
-                             ] 
-</b></tt></pre>
+value by this adjustment value:
+<pre>
+  Named Security GM send: [ _eps  / # unadjusted
+                             (^self adjustmentRelativeTo: 9501)
+                          ] 
+</pre>
 The previous example assumes that you know the exact date the data
 has been adjusted through.  You may not always know this explicitly;
 however, many data items are adjusted as of the date they become
 effective (i.e., the "as of" date).
 In this case, the following methodology can be used to access
-the adjusted value:<pre><tt><b>
-     Named Security GM getAdjustedDataFor: Named Security GM :_eps
-</b></tt></pre>
+the adjusted value:
+<pre>
+  Named Security GM getAdjustedDataFor: Named Security GM :_eps
+</pre>
 <p>
 In general, methods have been created that automatically return
 adjusted values by default.  For example, the pricing and dividend
@@ -601,9 +613,10 @@ stores the value of the factor into <i>rawSplitFactor</i> as of the ex-date
 provided.  The new value of <i>adjustmentFactor</i> is then computed and
 stored on this date as well.
 For example, if GM has a 2-for-1 split on April 15, 1995 the
-procedure to add this factor is:<pre><tt><b>
-     Named Security GM addSplitFactorOf: 2 onExDate: 950415 asDate
-</b></tt></pre>
+procedure to add this factor is:
+<pre>
+  Named Security GM addSplitFactorOf: 2 onExDate: 950415 asDate
+</pre>
 Raw split information is normally updated during the nightly
 production cycle.  It should never be necessary to use this message
 directly; however, it can be used to update splits that have not
@@ -611,16 +624,5 @@ been included in the daily updates or to correct problems during your
 session.  If you insert new dates into the time series, you should
 also execute the message <i>rebuildAdjustmentFactor</i> to recompute all
 the adjustment factors for the security.
-</b></tt></pre>
-<p>
-<hr>
 
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated June 2, 1997</font>
-</tr>
-</table>
-
-</body>
-</html>
+{% include doc-footer.htm copydates="1997" %}

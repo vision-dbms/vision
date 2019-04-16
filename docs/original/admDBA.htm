@@ -1,27 +1,16 @@
-<!DOCTYPE html>
-<html>
-<head>
-   <title>Database Administration</title>
-</head>
-<body>
-<body bgcolor=white>
+---
+title: Database Administration
 
-<h2>Database Administration</h2>
+related_topics:
+  - url: "Running.htm"
+    title: "Running Vision"
 
-| <a href="FHome.htm">Home</a> 
-| <a href="Running.htm">Running Vision</a> |
-<hr>
+sidebar:
+  nav: "sb_UsingVision"
+---
 
+<h2 id="DeletingUnneededReferences">Deleting Unneeded References</h2>
 <p>
-<h3>Topics Covered:</h3>
-<ul type="square">
-<li><a href="#Deleting Unneeded References">Deleting Unneeded References</a>
-<li><a href="#deletions">Deletions</a>
-<li><a href="#Schema Message Management">Schema Message Management</a>
-</ul>
-<hr>
-
-<a name = "Deleting Unneeded References"><h3>Deleting Unneeded References</h3></a>
 The <a href="admTools.htm#Garbage Collection"><i>garbage collection</i></a>
 and <a href="admTools.htm#compaction"><i>compaction</i></a> tools 
 can be used to eliminate structures from your Vision database network that 
@@ -57,17 +46,17 @@ The <i>cleanStore</i> message should also be explicitly sent to any properties
 that reference collections to align these structures as well.  
 For example, if Security defines a fixed property <i>heldList</i> that contains 
 a list of <i>Holding</i> instances, you would use:
-<pre><b>
-	mySecurity heldList cleanStore
-</b></pre>
+<pre>
+  mySecurity heldList cleanStore
+</pre>
 
 to align the list as well as to purge old, non-referenced 
 structures.  If values of <i>heldList</i> are clustered for all securities, 
 you only need to run <i>cleanStore</i> for one element.  If the values of 
 <i>heldList</i> are not clustered, you could use:
-<pre><b>
-	Security instanceList do: [ heldList cleanStore ] ;
-</b></pre>
+<pre>
+  Security instanceList do: [ heldList cleanStore ] ;
+</pre>
 
 The message <i>cleanDictionary</i> is the class level analog of <i>cleanStore</i>.  
 It aligns the class dictionary and purges unneeded <i>define:toBe:</i> and 
@@ -89,21 +78,21 @@ on the recipient and display a confirmation if the recipient required cleaning.
 This message can be redefined for any class that requires additional steps.  
 For example, to redefine this message to also clean the <i>heldList</i> property 
 at <i>Security</i>, use:
-<pre><b>
-	Security
-	defineMethod:
-	[ | cleanupClassStructures |
-	  ^super cleanupClassStructures ;      #-- runs the general version
-	  heldList cleanStore
-	      ifTrue: [ "-- cleaned Security heldList" printNL ] ;
-	  ^self
-	] ;
-</b></pre>
+<pre>
+  Security
+  defineMethod:
+  [ | cleanupClassStructures |
+    ^super cleanupClassStructures ;      #-- runs the general version
+    heldList cleanStore
+        ifTrue: [ "-- cleaned Security heldList" printNL ] ;
+    ^self
+  ] ;
+</pre>
 <hr>
 
-<a name="deletions"><h3>Deletions</h3></a>
+<h2 id="deletions">Deletions</h2>
 
-<a name="Object Deletion"><h4>Object Deletion</h4></a>
+<h3 id="ObjectDeletion">Object Deletion</h3>
 
 Instances can be flagged for deletion without actually removing the 
 object from the database.  This is the recommended approach for most 
@@ -111,20 +100,21 @@ applications, giving you an opportunity to undelete an accidental
 deletion if necessary.  Several properties have been defined at <i>Object</i> 
 to aid in tracking deletion information.  Undeleted objects have values 
 of NA for all of these properties:
-<pre><b>
-     Property	      Definition</pre>
+<pre>
+  Property         Definition</pre>
 <ul><hr width=450 align=middle></ul>
-<pre>     deletionFlag     TRUE if flagged for deletion
-     deletionDate     Date object was flagged for deletion
-     deletionReason   String explaining deletion reason
-</pre></b>
+<pre>
+  deletionFlag     TRUE if flagged for deletion
+  deletionDate     Date object was flagged for deletion
+  deletionReason   String explaining deletion reason
+</pre>
 The expression:
-<pre><b>
-	object flagForDeletionWithReason: string
+<pre>
+  object flagForDeletionWithReason: string
 
-        where object	is the object to be flagged for deletion
-	string	        is the reason for deletion
-</pre></b>
+     where object    is the object to be flagged for deletion
+	string          is the reason for deletion
+</pre>
 
 is used to flag an object for deletion.  It is defined to perform 
 the following operations:
@@ -154,14 +144,16 @@ classes as needed.
 
 Several messages have been defined to utilize the <i>deletionFlag</i> property:
 
-<pre><b>
-     Message	  Definition</b></pre>	
+<pre>
+  Message      Definition
+</pre>	
 <ul><hr width=380 align=middle></ul>
-<pre><b>     isActive     TRUE if object's deletionFlag isNA
-     isntActive   TRUE if object isActive != TRUE
-     isDeleted	  Same as isntActive
-     isntDeleted  Same as isActive
-</b></pre>
+<pre>
+  isActive     TRUE if object's deletionFlag isNA
+  isntActive   TRUE if object isActive != TRUE
+  isDeleted    Same as isntActive
+  isntDeleted  Same as isActive
+</pre>
 
 The message <i>activeList</i> is used to return all instances 
 of a class (as base objects) that are active and not default.
@@ -182,43 +174,44 @@ will contain NA values.  You cannot assign values into the properties of the
 <i>Shadow</i> instance.  To determine if an object is the Shadow instance,
 you can send it the <i>isInternalDefault</i> message.
 
-<a name="Message Deletion"><h4>Message Deletion</h4></a>
+<h3 id="MessageDeletion">Message Deletion</h3>
 
 Messages should be deleted using the <i>deleteMessage:</i> message.  
 The general form for message deletion is:
-<pre><b>
-	object deleteMessage: "message"
-</b></pre>
+<pre>
+  object deleteMessage: "message"
+</pre>
 
-<a name="Other Deletions"><h4>Other Deletions</h4></a>
+<h3 id="OtherDeletions">Other Deletions</h3>
 
 The <i>delete:</i> message can be used to remove a point from a time series, 
 an indexed list, or a dictionary object.  For example:
-<pre><b>
-	Named Security delete: "IBM"
-</b></pre>
+<pre>
+  Named Security delete: "IBM"
+</pre>
 
 deletes the name IBM from the <i>Security</i> class' naming dictionary.  
 The general forms of this message are:
 
-<pre><b>        dictionary delete: string
+<pre>
+  dictionary delete: string
 
 	where	<i>dictionary</i> is an instance of the <i>Dictionary</i> class
 	and	<i>string</i> is an instance of the <i>String</i> class
 
-	ts delete: date
+  ts delete: date
 
 	where	<i>ts</i> is an instance of the <i>TimeSeries</i> class
 	and	<i>date</i> is an instance of the <i>Date class</i>
 
-	ilist delete: object
+  ilist delete: object
 
 	where	<i>ilist</i> is an instance of the <i>IndexedList</i> class
 	and	<i>object</i> is an object that was used as an index in this list
-</b></pre>
+</pre>
 <hr>
 
-<a name="Schema Message Management"><h3>Schema Message Management</h3></a>
+<h2 id="SchemaMessageManagement">Schema Message Management</h2>
 
 The class <i>Schema MessageImplementationDescriptor</i> maintains information 
 about the messages in your Vision database.  Each message defined for any class 
@@ -234,40 +227,40 @@ created automatically.  Each time you use one of the <i>define</i> messages,
 the class is flagged to indicate that new messages are pending.  To process 
 and refresh all messages, execute the expression:
 
-<pre><b>
-	Schema processAllMessages
-</b></pre>
+<pre>
+  Schema processAllMessages
+</pre>
 
 This process creates and refreshes message descriptors in the 
 schema database as needed.  It will generate a report similar 
 to the one illustrated below:
 
-<pre><b>
-	Schema Message Cross Reference Last Updated: Fri Oct 30 11:59:17 EST 1992
-	---  Current Counts  ---
-	CD:             172
-	MD:            1968
-	MID:           4133
+<pre>
+  Schema Message Cross Reference Last Updated: Fri Oct 30 11:59:17 EST 1992
+  ---  Current Counts  ---
+  CD:             172
+  MD:            1968
+  MID:           4133
 
-	---  Classes To Update  ---
-	BuiltInWorkspace
-	CoreWorkspace
-	Environment DBA Schema
-	Environment DBA DDMS
+  ---  Classes To Update  ---
+  BuiltInWorkspace
+  CoreWorkspace
+  Environment DBA Schema
+  Environment DBA DDMS
 
-	...  Creating New Messages
-	...  Refreshing Messages
-	...  Cleanup
+  ...  Creating New Messages
+  ...  Refreshing Messages
+  ...  Cleanup
 
-	Schema Message Cross Reference Last Updated: Tue Nov 10 15:57:02 EST 1992
-	---  Current Counts  ---
-	CD:             172
-	MD:            1970
-	MID:           4151
+  Schema Message Cross Reference Last Updated: Tue Nov 10 15:57:02 EST 1992
+  ---  Current Counts  ---
+  CD:             172
+  MD:            1970
+  MID:           4151
 
-	18 Created.
-	25 Refreshed.
-</b></pre>
+  18 Created.
+  25 Refreshed.
+</pre>
 
 This report displays the status of the schema database prior 
 to processing, the list of classes processed, the status after 
@@ -275,21 +268,5 @@ processing, and the number of messages created and refreshed.
 Depending on the number of classes to process, the update time 
 will range from a few seconds to a few minutes.  Most installations 
 incorporate this procedure into a standard nightly update.
-<p>
-<hr>
 
-
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy; 1998 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated December 23, 1998</font>
-</tr>
-</table>
-
-</body>
-</html>
-
-
-
-
-
+{% include doc-footer.htm copydates="1998" %}

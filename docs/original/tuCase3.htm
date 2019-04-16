@@ -1,25 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
-   <title>Case Study 3: Cross Tabular Reporting</title>
-</head>
-<body>
-<body bgcolor=white>
+---
+title: "Case Study 3: Cross Tabular Reporting"
 
-<h2>Case Study 3: Cross Tabular Reporting</h2>
+toc: false
 
-<p>| <a href="FHome.htm">Home</a> 
-   | <a href="vtutor.htm">Tutorials</a> | 
-<hr>
+sidebar:
+  nav: "sb_UsingVision"
+---
 
 <blockquote><hr>
-<center><b><font size+1>Reminder!</font></b> </a></center><p>
+<center><b><font size+1>Reminder!</font></b></center><p>
 To run these examples, you should first start a new session and then load the sample database using:
-<pre><tt><b>     "/localvision/samples/general/sample.load" asFileContents evaluate ;</b></tt></pre>
+<pre>
+  "/localvision/samples/general/sample.load" asFileContents evaluate ;
+</pre>
 and load <i>testList</i> using:
-<ul type=disc><pre><b>!testList <- Company masterList 
+<ul type=disc>
+<pre>
+!testList <- Company masterList 
     rankDown: [ sales ] . 
-    select: [ rank <= 20 ] ; </b></pre></ul>
+    select: [ rank <= 20 ] ;
+</pre>
+</ul>
 
 Any other files referenced can be read from the <i>/localvision/samples/general/</i>
 directory.
@@ -40,7 +41,7 @@ summary information by aggregate.
 
 Read the file <i>example3.a</i>.  You should see:
 <ul>
-<pre><b>
+<pre>
  #---  Build a List that is extended by 2 quintile values 
  !quintileList <- testList 
     quintileUp: [ netIncome ] . 
@@ -57,20 +58,20 @@ Read the file <i>example3.a</i>.  You should see:
        sales print: 10 ; 
        newLine print ; 
      ] ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 
 <ul>
-<pre><b>
+<pre>
 AET	920.60	2	7.48	5	22114.11
 T      2044.00	4	1.88	1	51209.02
 AN     1360.00	3	2.65	2	20174.00
 ARC    1224.00	2	6.68	4	16282.00
 CI	728.30	1	7.25	5	16909.30
 ...
-</b></pre>
+</pre>
 </ul>
 
 The first step creates a list named <i>quintileList</i> which is extended
@@ -87,7 +88,7 @@ quintiles, the report displays the distribution of <i>earningsPerShare</i>
 quintiles.  Read in the file <i>example3.b:</i>
 
 <ul>
-<pre><b>
+<pre>
  #---  group by netIncome quintiles (quintile1) 
  quintileList groupedBy: [ quintile1 ] . 
     sortUp: [ ^self ] . 
@@ -106,13 +107,13 @@ quintiles.  Read in the file <i>example3.b:</i>
           ] ; 
       newLine print ; 
     ] ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 
 <ul>
-<pre><b>
+<pre>
 netIncome Quintile   1
   earningsPerShare Quintile	1 Includes:	2 Elements
   earningsPerShare Quintile	3 Includes:	1 Elements
@@ -137,7 +138,7 @@ netIncome Quintile   5
   earningsPerShare Quintile	3 Includes:	1 Elements
   earningsPerShare Quintile	4 Includes:	1 Elements
   earningsPerShare Quintile	5 Includes:	2 Elements
-</b></pre>
+</pre>
 </ul>
 
 This report groups the original list by <i>quintile1</i>.  In other 
@@ -163,7 +164,7 @@ companies with these characteristics.
 The program in <i>example3.c</i> displays an entry for every combination:
 
 <ul>
-<pre><b>
+<pre>
  quintileList groupedBy: [ quintile1 ] . 
     sortUp: [ ^self ] . 
  do: [ "netIncome Quintile " print ; 
@@ -181,13 +182,13 @@ The program in <i>example3.c</i> displays an entry for every combination:
            ] ; 
        newLine print ; 
      ] ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 
 <ul>
-<pre><b>
+<pre>
 netIncome Quintile   1
    earningsPerShare Quintile	1 Includes:	2 Elements
    earningsPerShare Quintile	2 Includes:	0 Elements
@@ -201,7 +202,7 @@ netIncome Quintile   2
    earningsPerShare Quintile	3 Includes:	1 Elements
    earningsPerShare Quintile	4 Includes:	1 Elements
    earningsPerShare Quintile	5 Includes:	1 Elements
-</b></pre>
+</pre>
 </ul>
 
 This report displays a summary line for each <i>earningsPerShare</i>
@@ -224,7 +225,7 @@ program in <i>example3.d</i> is parameterized to make it easy to
 change the quintile rules:
 
 <ul>
-<pre><b>
+<pre>
  #---  Create variables for the 2 blocks and the list 
  !block1 <- [ netIncome ] ; 
  !block2 <- [ earningsPerShare ] ; 
@@ -256,13 +257,13 @@ change the quintile rules:
            ] ; 
        newLine print ; 
      ] ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 
 <ul>
-<pre><b>
+<pre>
 [netIncome] Quintile   1
 [earningsPerShare] Quintile	1 Includes:	2 Elements
 [earningsPerShare] Quintile	2 Includes:	0 Elements
@@ -277,7 +278,7 @@ Execute this program.  You should see:
 [earningsPerShare] Quintile	4 Includes:	1 Elements
 [earningsPerShare] Quintile	5 Includes:	1 Elements
 ...
-</b></pre>
+</pre>
 </ul>
 
 The variables <i>block1</i> and <i>block2</i> are used to define the 
@@ -291,7 +292,7 @@ accessed by the innermost <i>do:</i> message.
 The file <i>example3.e</i> changes the quintile blocks and the list 
 and executes the same report:
 <ul>
-<pre><b>
+<pre>
  !block1 <- [ sales ] ; 
  !block2 <- [ netIncome ] ; 
  !list <- Company masterList ; 
@@ -321,12 +322,12 @@ and executes the same report:
            ] ; 
        newLine print ; 
      ] ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 <ul>
-<pre><b>
+<pre>
 [sales] Quintile   1
 [netIncome] Quintile	1 Includes:	3 Elements
 [netIncome] Quintile	2 Includes:	4 Elements
@@ -341,7 +342,7 @@ Execute this program.  You should see:
 [netIncome] Quintile	4 Includes:	3 Elements
 [netIncome] Quintile	5 Includes:	0 Elements
 ...
-</b></pre>
+</pre>
 </ul>
 
 <b>Note:</b> This report shows the quintile distribution for <i>sales</i> and <i>netIncome</i>
@@ -357,7 +358,7 @@ Presumably, the supplied blocks will be appropriate for the type of
 elements contained in the list:
 
 <ul>
-<pre><b>
+<pre>
  List defineMethod:                                    #--  define a method 
  [ | quintile: block1 by: block2 |                     #--  needing two blocks  
 
@@ -390,7 +391,7 @@ elements contained in the list:
 
  #--  Run the Method 
  Company masterList quintile: [sales] by: [ netIncome ] ; 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  Your output should be identical to the 
@@ -403,7 +404,7 @@ The <i>quintile1</i> values form the rows and the <i>quintile2</i>
 values form the columns.  Read in the file <i>example3.g</i>:
 
 <ul>
-<pre><b>
+<pre>
  List defineMethod: 
  [ | quintile: block1 by: block2 | 
 
@@ -442,12 +443,12 @@ values form the columns.  Read in the file <i>example3.g</i>:
  ###  And Run It 
  Company masterList
  quintile: [ sales ] by: [ price / earningsPerShare ] 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 <ul>
-<pre><b>
+<pre>
                       Cross Tabular Quintile Distribution
 
 [sales]	      |      [price / earningsPerShare] Quintiles
@@ -458,7 +459,7 @@ Quintiles     |         1	2	3	4	5
      3	      |         1	1	1	2	2
      4	      |         3	0	2	1	2
      5	      |         1	3	1	2	0
-</b></pre>
+</pre>
 </ul>
 The cross tabular report format shows <i>sales</i> quintiles as rows 
 and <i>price-earnings</i> quintiles as columns.  The number of companies
@@ -470,7 +471,7 @@ Suppose you wanted to display more than just the count.  The version
 <i>example3.h</i> adds an additional block as a third parameter.  The 
 average value for this block is printed for each cell:
 <ul>
-<pre><b>
+<pre>
  List defineMethod: 
  [ | quintile: block1 by: block2 for: block3 | 	 #--  add block3 
 
@@ -527,12 +528,12 @@ average value for this block is printed for each cell:
    quintile: [ sales ] 
          by: [ price / earningsPerShare ] 
         for: [ netIncome] 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 <ul>
-<pre><b>
+<pre>
 
                       Cross Tabular Quintile Distribution
 For: [netIncome]
@@ -549,7 +550,7 @@ Quintiles	|	1	2	3	 4	 5
    Average	|  1116.10      NA 1184.00  1007.00  2378.50
 5  Count	|	1	3	1    	 2	 0
    Average	|  4625.20 3486.10 4840.00  1651.00      NA 
-</b></pre>
+</pre>
 </ul>
 
 This method requires 3 blocks as parameters.  The first two are used to
@@ -563,7 +564,7 @@ Notice that the section of code that generates the averages duplicates
 much of the code used to generate the counts.  The file <i>example3.i</i> 
 streamlines this:
 <ul>
-<pre><b>
+<pre>
 
  List defineMethod: 
  [ | quintile: block1 by: block2 for: block3 | 
@@ -622,12 +623,12 @@ streamlines this:
    quintile: [ sales ] 
         by: [ price / earningsPerShare ] 
         for: [ netIncome] 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 <ul>
-<b><pre>
+<pre>
                       Cross Tabular Quintile Distribution
                                 For: [netIncome]
 
@@ -653,20 +654,20 @@ Quintiles		1	2	3	4	5
 5  Count		1	3	1	2	0
    Average	  4625.20 3486.10 4840.00 1651.00    0.00
    Std Dev	     0.00 1473.92    0.00  393.00	NA
-</b></pre>
+</pre>
 </ul>
 <hr>
 Suppose you wanted to eliminate the <i>NA</i>s from printing in the standard 
 deviation lines.  You could test each value using the expression:
 
 <ul>
-<pre><b>
+<pre>
  quintileList 
  do: [ !ave <- ^self average: [ block3Value ] ; 
        ave isntNA 
           ifTrue: [ ave print: 9 ] ifFalse: [ " " print: 9 ] ; 
       ] ; 
-</b></pre>
+</pre>
 </ul>
 
 Alternatively, you could define a new version of the print message 
@@ -676,7 +677,7 @@ The file <i>example3.j</i> defines several versions of a message named
 by default.  The <i>quintile:by:for:</i> method has been modified 
 to use this new message:
 <ul>
-<pre><b>
+<pre>
  #--  Define write: at Object to do standard print: 
  Object 
  defineMethod: 
@@ -748,12 +749,12 @@ to use this new message:
  ###  And Run It 
  Company masterList 
    quintile: [ sales ] by: [ price / earningsPerShare ] for: [ netIncome] 
-</b></pre>
+</pre>
 </ul>
 
 Execute this program.  You should see:
 <ul>
-<pre><b>
+<pre>
                       Cross Tabular Quintile Distribution
                                 For: [netIncome]
 
@@ -779,7 +780,7 @@ Quintiles		1	 2	  3	   4	    5
 5  Count		1	 3	  1	   2	    0
    Average	 4,625.20 3,486.10 4,840.00 1,651.00	 0.00
    Std Dev	     0.00 1,473.92     0.00   393.00
-</b></pre>
+</pre>
 </ul>
 
 Notice that the numbers now contain commas and the NA values have been
@@ -790,7 +791,7 @@ The final version of this report adds a total column for each quintile
 row.  Read the file <i>example3.k</i>:
 
 <ul>
-<pre><b>
+<pre>
  List defineMethod: 
  [ | quintile: block1 by: block2 for: block3 | 
 
@@ -835,12 +836,12 @@ row.  Read the file <i>example3.k</i>:
  Company masterList 
    quintile: [ sales ] by: [ price / earningsPerShare ] for: [ netIncome] 
 </ul>
-</b></pre>
+</pre>
 
 Execute this program.  You should see:
 
 <ul>
-<b><pre>
+<pre>
                       Cross Tabular Quintile Distribution
                                 For: [netIncome]
 
@@ -866,7 +867,7 @@ Quintiles	 	  1	   2	    3	     4	      5	 Totals
 5  Count		  1	   3	    1	     2	      0	      7
    Average	   4,625.20 3,486.10 4,840.00 1,651.00	   0.00	3317.93
    Std Dev	       0.00 1,473.92	 0.00	393.00	
-</b></pre>
+</pre>
 </ul>
 <hr> 
 | <a href="tuBasic.htm">Vision Basics</a> 
@@ -874,14 +875,6 @@ Quintiles	 	  1	   2	    3	     4	      5	 Totals
 | <a href="tuSingle.htm">Single Object Access</a> 
 | <a href="tuList.htm">Using Lists</a> 
 | <a href="tuTS.htm">Using Dates and TimeSeries</a> | 
-<hr>
 
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated January 25, 1999</font>
-</tr>
-</table>
 
-</body>
-</html>
+{% include doc-footer.htm copydates="1999" %}

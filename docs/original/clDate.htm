@@ -1,28 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Class: Date </title>
-</head>
-<body bgcolor=white>
+---
+title: "Vision Class: Date "
 
-<h2>Vision Class: Date</h2>
+sidebar:
+  nav: "sb_ClassXRef"
+---
 <p>
-     | <a href="FHome.htm">Home</a> | <a href="mDate.htm">Messages</a> | <a href="clTS.htm">TimeSeries</a> | <a href="clXRef.htm">Class XRef</a> |
-<hr> 
-<h3>Topics Covered:</h3> 
-<ul type=square> 
-<li><a href="#overview">Overview</a>
-<li><a href="#creation">Creating Dates and DateOffsets</a>
-<li><a href="#usage">Basic Usage</a>
-<li><a href="#ts">Dates and TimeSeries Data</a>
-<li><a href="#internal">Date Arithmetic and Internal Dates</a>
-<li><a href="#other">Other Date Messages</a>
-<li><a href="#dr">DateRanges</a>
-<li><a href="#more">Additional Information</a>
-</ul>
-<p>
-<hr>
-<h3><a name="overview">Overview</a></h3> 
+<h2 id="overview">Overview</h2> 
 <p> 
 <b>Dates</b> are objects that represent a specific day in the calendar.  
 Any historical or future date can be represented in Vision.  It is not
@@ -44,7 +27,7 @@ class to define specific intervals of dates for evaluation.
 The <i>Date</i> and <i>DateOffset</i>
 classes are direct subclasses of the class <i>Ordinal</i>.
 The <i>DateRange</i> class is a subclass of <i>Object</i>:
-<font size=+1><pre>
+<pre>
           <a href="clObject.htm">Object</a>
              |
              |-- <b>DateRange</b>
@@ -65,12 +48,11 @@ The <i>DateRange</i> class is a subclass of <i>Object</i>:
                          |-- YearBeginnings
                          |-- YearEnds
                          |-- Years
-
-</pre></font>
+</pre>
 
 <p>
 <hr>
-<h3><a name="creation">Creating Dates and DateOffsets</a></h3>
+<h2 id="creation">Creating Dates and DateOffsets</h2>
 <p>
 The instances of the class <b>Date</b> represent a specific day in
 the calendar.  
@@ -109,15 +91,16 @@ The message <i>earliestPossibleDate</i> has been defined at the
 class <i>Object</i> to return the <i>Date</i> object representing the first
 valid date that can be represented in Vision.  This date corresponds to
 the first of January in the year 1.
-<p>
-<a name="offset"> </a>
+<p id="offset">
 You can add and subtract <i>DateOffsets</i> from a <i>Date</i> to
-create new date objects.  For example:<pre><tt><b>
+create new date objects.  For example:
+<pre>
      95 asDate + 5 days
-</b></tt></pre>
-returns the date object representing Jan 5, 1996 and:<pre><tt><b>
+</pre>
+returns the date object representing Jan 5, 1996 and:
+<pre>
      ^today - 1 months
-</b></tt></pre>
+</pre>
 returns the object representing the date one month prior to the
 current date.
 <p>
@@ -187,9 +170,10 @@ messages to an <i>Integer</i>:
 When a <i>DateOffset</i> is added to or subtracted from a <i>Date</i>,
 another <i>Date</i> object is returned.  Since the returned object
 is a <i>Date</i> you can add or subtract an offset from it as well.
-For example:<pre><tt><b>
+For example:
+<pre>
      ^today - 1 yearEnds + 3 days
-</b></tt></pre>
+</pre>
 returns the third day of the current year.
 <p>
 Calculations that involve <i>BusinessDays</i> will only return
@@ -204,12 +188,14 @@ or year.
 Calculations that involve
 <i>Months</i>, <i>Quarters</i>, or <i>Years</i>,
 will return dates that are on the same day in the month, as long as
-the date is valid.  For example, the expression:<pre><tt><b>
+the date is valid.  For example, the expression:
+<pre>
      960430 asDate - 1 months
-</b></tt></pre>
-returns the date <i>March 30, 1996</i>.  The expression:<pre><tt><b>
+</pre>
+returns the date <i>March 30, 1996</i>.  The expression:
+<pre>
      960331 asDate - 1 months
-</b></tt></pre>
+</pre>
 returns the date <i>February 29, 1996</i> since February 31 is not
 a valid date.
 <p>
@@ -257,36 +243,37 @@ defines these boundaries:
 
 <p>
 <hr>
-<h3><a name="usage">Basic Usage</a></h3>
+<h2 id="usage">Basic Usage</h2>
 <p>
 All dates respond to the messages <i>month</i>, <i>day</i>, and <i>year</i>,
-returning integer values.  For example:<pre><tt><b>
+returning integer values.  For example:
+<pre>
      960615 asDate month
-
-</b>returns <i>6</i><b>,
-
+</pre>
+returns <i>6</i>,
+<pre>
      960615 asDate day
-
-</b>returns <i>15</i><b>, and
-
+</pre>
+returns <i>15</i>, and
+<pre>
      960615 asDate year
-</b></tt></pre>
+</pre>
 returns <i>1996</i>.  
 <p>
 By default, dates print in the format <i>month/day/year</i>.  For 
-example:<pre><tt><b>
+example:
+<pre>
      96 asDate print ;
-
-</b>displays:<b>
-
+</pre>
+displays:
+<pre>
      12/31/1996
-</b></tt></pre>
+</pre>
 The <i>print:</i> message prints dates in different formats, depending
 on the value of the supplied parameter.  More information about
-<a name="print" href="Output.htm#printDate">printing dates</a>
+<a id="print" href="Output.htm#printDate">printing dates</a>
 is available.  
-<p>
-<a name="format"> </a>
+<p id="format">
 The <i>asInteger</i> message can be used to convert
 a date to an eight-digit integer in the form <i>YYYYMMDD</i>.
 The following additional messages can be used
@@ -328,9 +315,10 @@ class <i>Date MonthDescriptor</i>.  This class has 12 instances, one
 for each month.  Instances of this class respond to the messages
 <i>shortName</i> and <i>longName</i>.
 The <i>getMonthDescriptor</i> message returns the instance corresponding
-to the recipient date's month.  For example:<pre><tt><b>
+to the recipient date's month.  For example:
+<pre>
      960615 asDate getMonthDescriptor shortName
-</b></tt></pre>
+</pre>
 returns the string <i>"Jun"</i>.  The <i>MonthDescriptor</i> class
 was created using the 
 <a href="Classes.htm#subclass"><i>createSubclass:at:</i></a>
@@ -340,9 +328,10 @@ visible to <i>Date</i> objects.
 The message <i>getDayOfWeekDescriptor</i> returns an instance of the
 class <i>Date DayOfWeekDescriptor</i>.  This class has 7 instances, one
 for each day of the week.  The message <i>code</i> returns the name
-of the day of the week.  For example:<pre><tt><b>
+of the day of the week.  For example:
+<pre>
      960615 asDate getDayOfWeekDescriptor code
-</b></tt></pre>
+</pre>
 returns the string <i>"Saturday"</i>.  The message <i>dayOfWeek</i>
 has been defined at the <i>Date</i> class to return this value as well.
 The <i>DayOfWeekDescriptor</i> class
@@ -350,8 +339,7 @@ was created using the
 <a href="Classes.htm#subclass"><i>createSubclass:at:</i></a>
 variation of the <i>createSubclass:</i> message so the class is only
 visible to <i>Date</i> objects.
-<p>
-<a name="convert"> </a>
+<p id="convert">
 In addition to the <i>asDate</i> message, 
 the following messages can be used to <b>convert</b> <i>Integer</i>
 instances to <i>Date</i> instances:
@@ -452,7 +440,7 @@ or before the <i>recipient</i>
 
 <p>
 <hr>
-<h3><a name="ts">Dates and TimeSeries Data</a></h3>
+<h2 id="ts">Dates and TimeSeries Data</h2>
 <p>
 <i>Date</i> objects play an important role in 
 <a href="clTS.htm">accessing and updating time-series data</a>.
@@ -460,21 +448,24 @@ Dates (or integer equivalents) are the parameters for the
 <a href="mTS.htm#asOf:"><i>asOf:</i></a> and
 <a href="mTS.htm#asOf:put:"><i>asOf:put:</i></a> 
 messages define for the <i>TimeSeries</i> class.
-For example:<pre><tt><b>
+For example:
+<pre>
      Named Currency CAD :usExchange asOf: 950315 asDate
-</b></tt></pre>
+</pre>
 returns the Canadian Dollar exchange rate as of March 15, 1995.
-The expression:<pre><tt><b>
+The expression:
+<pre>
      Named Currency CAD :usExchange asOf: 951315 put: 1.23 ;
-</b></tt></pre>
+</pre>
 sets the <i>March 15th</i> value to <i>1.23</i>.
 <p>
 When a message retrieves data stored in a
 <a href="Fund.htm#ts">time-varying property</a>, it 
 accesses the data as of a specific date.  By default, this
-date is the current date.  For example:<pre><tt><b>
+date is the current date.  For example:
+<pre>
      Named Currency CAD usExchange
-</b></tt></pre>
+</pre>
 returns the most recent exchange rate for the Canadian Dollar.
 <p>
 The <i>evaluate:</i> message is sent to a <i>Date</i> or an
@@ -482,35 +473,38 @@ The <i>evaluate:</i> message is sent to a <i>Date</i> or an
 change the default date.  The parameter to this message is
 a block.  All messages within the block that access time series
 properties will access the values as of this date by default.
-For example:<pre><tt><b>
+For example:
+<pre>
      950315 evaluate:
        [ Named Currency CAD usExchange printNL ] ;
-</b></tt></pre>
+</pre>
 In this case, the exchange rate is accessed as of March 15, 1995.
 The <a href="Execution.htm#date">magic word <i>^date</i></a> refers
-to the default date.  For example:<pre><tt><b>
+to the default date.  For example:
+<pre>
      950315 evaluate:
        [ ^date print: 15 ;
          Named Currency CAD usExchange printNL ;
        ] ;
-</b></tt></pre>
-<a name="nested"> </a>
+</pre>
+<p id="nested">
 This example displays the date <i>3/15/1995</i> followed by the exchange
 rate.  You can change the default date within the <i>evaluate:</i> block.
-For example:<pre><tt><b>
+For example:
+<pre>
      950315 evaluate:
        [ ^date print: 15 ;
          Named Currency CAD usExchange printNL ;
          ^date + 5 businessDays evaluate:
              [ ^date print: 15 ; Named Currency CAD usExchange printNL ] ;
        ] ;
-</b></tt></pre>
+</pre>
 This examples displays the date <i>3/15/1995</i> followed by the exchange
 rate for that date.  It then displays the date and exchange rate for
 the date 5 business days later than the original date.
 <p>
 <blockquote><hr><center>
-<a href="Execution.htm" name="evaluateScope.note"><b>Note: </b> </a></center>
+<a href="Execution.htm" id="evaluateScope.note"><b>Note: </b> </a></center>
 The <i>evaluate:</i> message changes the time context of the
 block but does not change the recipient object like the <i>do:</i>
 message.  In other words, the magic word <i>^date</i> is rebound
@@ -519,7 +513,8 @@ not.
 If you send the <i>do:</i> message to a <i>Date</i>, messages within
 the block will be sent to the recipient date object (i.e., <i>^self</i>
 is rebound).  The magic word <i>^date</i> will not use this date.
-For example:<pre><tt><b>
+For example:
+<pre>
      960315 asDate
      do: [ ^date print ;        #- will be ^today
            month print ; year printNL ;
@@ -531,12 +526,12 @@ For example:<pre><tt><b>
            ^date month print ; ^date year printNL ;
          ] ;
 
-</b></tt></pre>
+</pre>
 <hr></blockquote>
 
 <p>
 <hr>
-<h3><a name="internal">Date Arithmetic and Internal Dates</a></h3>
+<h2 id="internal">Date Arithmetic and Internal Dates</h2>
 <p>
 The <i>+ offset</i> and <i>- offset </i> messages are used
 to compute a date based on another date.  Several messages
@@ -548,28 +543,31 @@ the date objects.
 Internally, dates are stored as integers numbered consecutively
 from 1.  This value can be accessed by sending the <i>asIDate7</i>
 (integer form using 7-day weeks) message to a <i>Date</i>.
-For example:<pre><tt><b>
+For example:
+<pre>
      95 asDate asIDate7
-</b></tt></pre>
+</pre>
 returns the integer value <i>728,658</i>.
 Since dates are number consecutively,
 internal dates can be used to compute the number of days between
-two dates.  For example:<pre><tt><b>
+two dates.  For example:
+<pre>
      !date1 <- 950315 asDate; 
      !date2 <- 950322 asDate ; 
      (date2 asIDate7 - date1 asIDate7 ) asInteger print ;
-</b></tt></pre>
+</pre>
 prints the value <i>7</i>.  
 The message <a href="mDate.htm#countDaysTo:"><i>countDaysTo:</i></a>
-performs this same function.  For example:<pre><tt><b>
+performs this same function.  For example:
+<pre>
      !date1 <- 950315 asDate; 
      !date2 <- 950322 asDate ; 
      date1 countDaysTo: date . asInteger print ;
-</b></tt></pre>
+</pre>
 
 <p>
 <hr>
-<h3><a name="other">Other Date Messages</a></h3>
+<h2 id="other">Other Date Messages</h2>
 <p>
 The following messages perform basic <b>comparison</b> operations
 between the <i>recipient Date</i> and <i>parameter Date</i>.
@@ -682,23 +680,25 @@ the <i>recipient</i>.  These messages return an instance of the
 
 <p>
 <hr>
-<h3><a name="dr">Date Ranges</a></h3> 
+<h2 id="dr">Date Ranges</h2> 
 <p> 
 A <b>DateRange</b> is defined by specifying a starting date, and
 ending date, and a date offset.  Starting and ending dates can be any
 date or an integer that can be converted
 to a valid date.
 <p>
-The general form for creating a date range is:<pre><tt>
+The general form for creating a date range is:
+<pre>
      !dr <- date1 to: date2 by: offset ;
-</tt></pre>
-For example:<pre><tt><b>
+</pre>
+For example:
+<pre>
      #--  define date range of month-end dates in 1995
      !dr1 <- 9501 to: 9512 by: 1 monthEnds ;
 
      #--  define weekly dates back one year
      !dr2 <- ^today to: ^today - 1 years by: 5 businessDays ;
-</b></tt></pre>
+</pre>
 <p>
 <i>DateRange</i> objects respond to the <i>date1</i>, <i>date2</i>,
 and <i>increment</i> messages by returning the starting date,
@@ -706,12 +706,13 @@ the ending date, and the date offset used to define the date range.
 <p>
 <i>DateRanges</i> respond to the <i>evaluate:</i> message by executing
 the block supplied as a parameter, once for each point in the date
-range.  For example:<pre><tt><b>
+range.  For example:
+<pre>
      9501 to: 9512 by: 1 monthEnds .
      evaluate: [ ^date print: 15 ; 
                  Named Currency CAD usExchange printNL ;
                ] ;
-</b></tt></pre>
+</pre>
 In this example, the US exchange rate for the Canadian currency
 is printed for each month-end date in 1995.  The supplied block
 prints the evaluation date and the exchange rate.  
@@ -732,15 +733,14 @@ by: 1 monthEnds</i>, the exchange rates would be displayed starting
 with December 1995 and ending with January 1995.  
 <p>
 <blockquote><hr><center>
-<a href="Execution.htm" name="evaluateScopeDR.note"><b>Note: </b> </a></center>
+<a href="Execution.htm" id="evaluateScopeDR.note"><b>Note: </b> </a></center>
 The <i>evaluate:</i> message changes the time context of the
 block but does not change the recipient object like the <i>do:</i>
 message.  In other words, the magic word <i>^date</i> is rebound
 by the <i>evaluate:</i> message but the magic word <i>^self</i> is
 not.
 <hr></blockquote>
-<p>
-<a name="iterate"> </a>
+<p id="iterate">
 The <i>evaluate:</i> message is defined to evaluate its block parameter
 for each element in the date range.  Although this operation
 may appear to operate a date at a time, 
@@ -748,7 +748,7 @@ it is actually optimized internally
 and does not execute by sequential evaluation.  
 <p>
 <blockquote><hr><center><font size=+1>
-<a name="iterate.warn"><b>Warning!! </b></a>
+<span id="iterate.warn"><b>Warning!! </b></span>
 </font></center>
 Because date ranges are not evaluated sequentially,
 you do not have control over the order in which the date range is
@@ -758,40 +758,43 @@ equal to the number of elements in the range.
 <p>
 The <a href="mDRange.htm#iterate:"><i>iterate:</i></a> message can
 be used instead of <i>evaluate:</i> when you want to evaluate the
-date range an element at a time.  For example:<pre><tt><b>
+date range an element at a time.  For example:
+<pre>
      9501 to: 9512 by: 1 monthEnds .
       iterate: [ ^date print: 15 ; 
                  Named Currency CAD usExchange printNL ;
                ] ;
-</b></tt></pre>
-<p>
-<a name="dateList"> </a>
+</pre>
+<p id="dateList">
 You can convert a <i>DateRange</i> into a <i>List</i> of <i>Date</i>
-objects using the <i>asDateList</i> message.  For example:<pre><tt><b>
+objects using the <i>asDateList</i> message.  For example:
+<pre>
      !drange <- 9501 to: 9512 by: 1 monthEnds ;
      !dlist <- drange asDateList ;
      dlist count print ;
-</b></tt></pre>
+</pre>
 The variable <i>dlist</i> returns a <i>List</i> of 12 date objects.
 Note that the magic word <i>^date</i> will not be associated with
-these objects.  For example:<pre><tt><b>
+these objects.  For example:
+<pre>
      dlist do: [ ^date print: 15 ; printNL ; ] ;
-</b></tt></pre>
+</pre>
 In this example, the same value will print for <i>^date</i> for
 each element in <i>dlist</i>.  The actual value of the <i>Date</i>
 will print as the second item in the line.
 <p>
 The message <a href="mDRange.htm#extract:for:"><i>extract:for:</i></a>
 is used to execute a program for an object over a date range, returning
-a <i>TimeSeries</i>.  For example:<pre><tt><b>
+a <i>TimeSeries</i>.  For example:
+<pre>
      9501 to: 9512 by: 1 monthEnds .
         extract: [ usExchange ] for: Named Currency CAD
-</b></tt></pre>
+</pre>
 returns a time series of twelve month-end exchange rates for the
 Canadian currency.
 <p>
 <hr>
-<h3><a name="more">Additional Information</a></h3>
+<h2 id="more">Additional Information</h2>
 <p>
 For additional information see:
 <p>
@@ -803,14 +806,5 @@ For additional information see:
 <li><a href="Navigate.htm#message">General Message Information</a>
 <li><a href="tuTS.htm">Vision Tutorial: Using Dates and TimeSeries</a>
 </ul>
-<p>
-<hr>
 
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated June 19, 1997</font>
-</table>
-
-</body>
-</html>
+{% include doc-footer.htm copydates="1997" %}

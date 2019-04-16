@@ -1,36 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Administration: Production Processing</title>
-</head>
-<body bgcolor=white>
-<h2>Vision Administration: Production Processing</h2>
+---
+title: "Vision Administration: Production Processing"
 
-<p>
-| <a href="vadmin.htm">General Vision Administration</a> 
-| <a href="admSysAdmin.htm">System Administration Issues</a>
-| <a href="FHome.htm">Home</a>
-|
-<hr>
-<h3>Topics Covered:</h3>
-<ul type=square>
-<li><a href="#overview">Overview</a>
-<li><a href="#process">The Production Process</a>
-<li><a href="#install">Installation</a>
-<li><a href="#directories">The Production Directory Structure</a>
-<li><a href="#daily">Daily Production Cycle</a>
-<li><a href="#updates">Update Jobs</a>
-<li><a href="#reports">Report Jobs</a>
-<li><a href="#pma">Sample Production Environment</a>
-<li><a href="#submits">Submitting Ad-Hoc Updates</a>
-<li><a href="#faqs">Frequently Asked Questions</a>
-<li><a href="#variables">Production Environment Variable Summary</a>
-<li><a href="#vadmin">The <i>VAdmin</i> Module and Production Processing</a>
-<li><a href="#custom">Designing Your Own Production Processing</a>
-</ul>
+sidebar:
+  nav: "sb_UsingVision"
+---
 
-<p><hr>
-<h3><a name="overview">Overview</a></h3>
+<h2 id="overview">Overview</h2>
 <p>
 Many Vision installations expect to receive various data feeds on a 
 regular basis.  Once the data is saved in the Vision database, other
@@ -61,7 +36,7 @@ describes the building blocks you will need if you design your
 own production processing.
 
 <p><hr>
-<h3><a name="process">Overview of the Production Process</a></h3>
+<h2 id="process">Overview of the Production Process</h2>
 <p>
 
 A <b>job</b> can be thought of as any task that needs to be executed.  For
@@ -101,7 +76,7 @@ suits your organization's needs.
 <p>
 
 <p><hr>
-<h3><a name="install">Installation</a></h3>
+<h2 id="install">Installation</h2>
 <p>
 The Vision Server Installation for Unix servers
 includes a comprehensive set of scripts that can be used to
@@ -113,21 +88,23 @@ to submit data feeds and Vision script updates, you should modify the
 <i>.cshrc</i>
 and the <i>.login</i> files for the Vision Administrator user code
 (e.g., <i>dbadmin</i>) to include
-the following:<ul><pre><b>#---  in .cshrc
+the following:<ul>
+<pre>#---  in .cshrc
 source /localvision/include/dba.cshrc.inc
 
 #---  in .login
-source /localvision/include/dba.login.inc</b></pre></ul>
+source /localvision/include/dba.login.inc</pre></ul>
 This will set a number of environment variables, including 
 some that are used by the <i>VAdmin</i> Module, to control
 updates in a production environment.
 <p>
 You will probably want to use <b>cron</b> (or an equivalent
 facility) to start a new production cycle each business night using an
-entry similar to:<ul type=disc><pre><b>00 22 * * 1-5   csh -f /localvision/production/admin/daily.daemon</b></pre></ul> 
+entry similar to:<ul type=disc>
+<pre>00 22 * * 1-5   csh -f /localvision/production/admin/daily.daemon</pre></ul> 
 
 <p><hr>
-<h3><a name="directories">The Production Directory Structure (Unix)</a></h3>
+<h2 id="directories">The Production Directory Structure (Unix)</h2>
 <p>
 The Vision Server Installation supplies two directories:
 <i>/vision/</i> and <i>/localvision/</i>.  The <i>/localvision</i>
@@ -170,14 +147,15 @@ update completed during the current cycle.
 </table></center>
 
 <p><hr>
-<h3><a name="daily">Daily Production Cycle</a></h3>
+<h2 id="daily">Daily Production Cycle</h2>
 <p>
 
 The script <i>daily.daemon</i>, located in the directory 
 <i>/localvision/production/admin</i>,
 controls the nightly production cycle.  It is usually started by <b>cron</b>
 every Monday through Friday evening using a <b>crontab</b> entry similar 
-to:<ul type=disc><pre><b>00 22 * * 1-5   csh -f /localvision/production/admin/daily.daemon</b></pre></ul> 
+to:<ul type=disc>
+<pre>00 22 * * 1-5   csh -f /localvision/production/admin/daily.daemon</pre></ul> 
 which would start the daemon at 10:00 pm on weeknights.  This entry
 is included for the Vision Administrator user code, referred to as
 <i>dbadmin</i> in this document.
@@ -233,7 +211,7 @@ will run until terminated or until the next night's cycle begins.
 
 
 <p>
-<h4><a name="dailyMaint">Daily Setup and Maintenance Activities</a></h4>
+<h3 id="dailyMaint">Daily Setup and Maintenance Activities</h3>
 <p>
 When it starts, the <i>daily.daemon</i> loads a command file defined
 for the current day of the week.  The files <i>setup.Mon</i>,
@@ -272,7 +250,7 @@ extension to the file name.
 For more information about the maintenance procedures, see the document
 <a href="admTools.htm"><i>Vision Network Administration Tools</i></a>.
 <p>
-<h4><a name="dailyStatus">The Status Directory</a></h4>
+<h3 id="dailyStatus">The Status Directory</h3>
 <p>
 The <i>/localvision/production/status</i> directory provides 
 a snapshot of the current production cycle's activities.  
@@ -316,10 +294,12 @@ the Database Administrator when they are no longer needed.
 </table></ul>
 <p>
 For example, to see pending jobs use:  
-<ul type=disc><pre><b>cd /localvision/production/status
-ls pending</pre></b></ul>
-and to see the status of completed and in progress jobs use: <ul type=disc><pre><b>cd /localvision/production/status
-ls active tokens</pre></b></ul>
+<ul type=disc>
+<pre>cd /localvision/production/status
+ls pending</pre></ul>
+and to see the status of completed and in progress jobs use: <ul type=disc>
+<pre>cd /localvision/production/status
+ls active tokens</pre></ul>
 Many tokens are in the form  <i>prefix.jobName</i> where <i>prefix</i>
 is one of:
 <p><center><table border=1 cellpadding=4 cellspacing=2 width=80%>
@@ -342,21 +322,24 @@ The <i>logs</i> directory contains the
 log files associated with each update completed during the current
 cycle as well as a number of summary files.  To see all the logs
 created during the current cycle use:  
-<ul type=disc><pre><b>cd /localvision/production/status
-ls logs</pre></b></ul>
+<ul type=disc>
+<pre>cd /localvision/production/status
+ls logs</pre></ul>
 To look at the overall process summary for updates run during the current 
 cycle use:    
-<ul type=disc><pre><b>cd /localvision/production/status
-more logs/update.log</pre></b></ul>
+<ul type=disc>
+<pre>cd /localvision/production/status
+more logs/update.log</pre></ul>
 which shows the start/stop time for each job that has run.  To look
 at the errors generated by any job in the current cycle use:   
-<ul type=disc><pre><b>cd /localvision/production/status
-more logs/errors.log</pre></b></ul>
+<ul type=disc>
+<pre>cd /localvision/production/status
+more logs/errors.log</pre></ul>
 For each job that has run there should be a corresponding log file in
 the <i>logs</i> directory named <i>logs/jobName.log</i>
 containing details for that specific job for the current date's processing.  
 <p>
-<h4><a name="dailyScheduling">Scheduling Update and Report Jobs</a></h4>
+<h3 id="dailyScheduling">Scheduling Update and Report Jobs</h3>
 <p>
 Update jobs are scheduled by placing the job name in the
 <i>status/pending</i> directory.  For example, to schedule a job
@@ -397,7 +380,7 @@ be saved in the directory <i>/localvision/production/Reports/output</i>.
 The specific steps needed to create report <b>job</b> and <b>okay</b>
 scripts are <a href="#reports">described later in this document</a>.
 <p>
-<h4><a name="dailyTerminate">Production Cycle Termination and Restart</a></h4>
+<h3 id="dailyTerminate">Production Cycle Termination and Restart</h3>
 <p>
 If the new production cycle is ready to start while a cycle is
 in progress, the new process creates the token
@@ -421,16 +404,18 @@ is created in the <i>status/todo</i> directory.<p>
 By default, the update daemon runs until a new cycle is ready to
 begin.  You can manually stop the update and/or report daemons
 using: 
-<ul type=disc><pre><b>cd /localvision/production/status
+<ul type=disc>
+<pre>cd /localvision/production/status
 touch pending/updates.Stop 
-touch pending/reports.Stop</b></pre></ul>
+touch pending/reports.Stop</pre></ul>
 The same cycle wrap-up procedures described above are executed when
 the cycle is manually terminated.  
 <p>
 To restart the processing daemon after it has been stopped manually
 or as the result of a hardware reboot, use:  
-<ul type=disc><pre><b>cd /localvision/production/admin
-restart.daemon </b></pre></ul>
+<ul type=disc>
+<pre>cd /localvision/production/admin
+restart.daemon </pre></ul>
 The update and/or report processing will be restarted if they are
 not currently running.  
 <p>
@@ -438,38 +423,43 @@ If the <i>daily.daemon</i> never started (e.g., because the machine was
 unavailable or <b>cron</b> was not running), you can manually start it.  To
 ensure the correct process date, you should create a file containing
 the following environment variables:  
-<ul type=disc><pre><b>setenv processDate 19981105 # date cron should have started 
-setenv dayOfWeek   Thu      # day cron should have started</pre></b></ul>
+<ul type=disc>
+<pre>setenv processDate 19981105 # date cron should have started 
+setenv dayOfWeek   Thu      # day cron should have started</pre></ul>
 
 This file should be supplied as an argument to the <i>daily.daemon</i>.  For
 example, if you saved your environment variables in the file
 <i>/localvision/production/admin/helpers/sample.env</i> use: 
-<ul type=disc><pre><b>cd /localvision/production/admin
-daily.daemon helpers/sample.env >& logs/nocron.yyyymmdd & </b></pre></ul>
+<ul type=disc>
+<pre>cd /localvision/production/admin
+daily.daemon helpers/sample.env >& logs/nocron.yyyymmdd & </pre></ul>
 <p>
-<h4><a name="dailyHoliday">Holiday Processing and Job Cancellation</a></h4>
+<h3 id="dailyHoliday">Holiday Processing and Job Cancellation</h3>
 <p>
 To cancel the normal daily processing for holidays that occur during
 the business week, you can store holiday dates in the directory
 <i>/localvision/production/admin/holidays</i>.
 For example, to prevent the normal daily processing from
 running on 11/26/1998 use:   
-<ul type=disc><pre><b>cd /localvision/production/admin
-touch holidays/19981126 </b></pre></ul>
+<ul type=disc>
+<pre>cd /localvision/production/admin
+touch holidays/19981126 </pre></ul>
 This technique can be used to set up holiday processing in advance of
 the actual holiday.  
 <p>
 To cancel a specific job in advance of the current processing date,
 create a token in the form:  
-<ul type=disc><pre><b>yyyymmdd.Cancel.jobName</b></pre></ul>
+<ul type=disc>
+<pre>yyyymmdd.Cancel.jobName</pre></ul>
 in the <i>status/tokens</i> directory.  For example, if you receive a daily
 file of Canadian prices and want to cancel this required job on a day
 that is not a US holiday but is a Canadian holiday, you could use the
 form:  
-<ul type=disc><pre><b>cd /localvision/production/status
-touch tokens/19980523.Cancel.PriceCanada </b></pre></ul>
+<ul type=disc>
+<pre>cd /localvision/production/status
+touch tokens/19980523.Cancel.PriceCanada </pre></ul>
 <p><hr>
-<h3><a name="updates">Update Jobs</a></h3>
+<h2 id="updates">Update Jobs</h2>
 <p>
 You will need to create an update job for each task that updates the
 Vision database on a production basis.  For example, you would create
@@ -483,7 +473,7 @@ other update jobs.
 </ul>
 <p>
 
-<h4><a name="updatesCreate">Creating Update Jobs </a></h4>
+<h3 id="updatesCreate">Creating Update Jobs </h3>
 <p>
 Update jobs are defined in the directory
 <i>/localvision/production/Updates/jobs</i>.
@@ -512,7 +502,8 @@ status of 1 if the update failed.
 For example, the file
 <i>/localvision/production/Updates/jobs/Prices.job</i> could look
 something like:  
-<ul type=disc><pre><b>#!/bin/csh
+<ul type=disc>
+<pre>#!/bin/csh
 #--  File: /localvision/production/Updates/jobs/Prices.job 
 set jobName = Prices
 
@@ -542,7 +533,7 @@ if ($okay != 0) set okay = 1
 cp $processLog $globalLogs/$jobName.log
 
 #--  end exit with status
-exit $okay</pre></b></ul>
+exit $okay</pre></ul>
 <p>
 Update jobs can be scheduled to run on a required or as needed basis.
 If a job is scheduled, you may want it to wait until specific
@@ -559,20 +550,22 @@ this script should return a value of 2.
 <p>
 For example, the file <i>/localvision/production/Updates/jobs/Prices.okay</i>
 could look something like:  
-<ul type=disc><pre><b>#!/bin/csh
+<ul type=disc>
+<pre>#!/bin/csh
 #--  File: /localvision/production/Updates/jobs/Prices.okay 
 if (-f /localvision/upload/feeds/prices.dat ) exit 0
 
-exit 1</b></pre></ul>
+exit 1</pre></ul>
 
 <p>
-<h4><a name="updatesSched">Scheduling Update Jobs</a></h4>
+<h3 id="updatesSched">Scheduling Update Jobs</h3>
 <p>
 To schedule an update job, you create a token containing the job name in
 the <i>status/pending</i> directory.  For example, to manually schedule the
 <i>Prices</i> job:  
-<ul type=disc><pre><b>cd /localvision/production/status
-touch pending/Prices </b></pre></ul>
+<ul type=disc>
+<pre>cd /localvision/production/status
+touch pending/Prices </pre></ul>
 While the production cycle is active, the <i>pending</i> directory is
 checked every five minutes to see if any jobs are waiting.  If a job
 is pending and its <b>okay script</b> returns the value 0 (or no <b>okay
@@ -596,8 +589,9 @@ when the production cycle begins.  The job tokens defined in the
 <i>status/pending</i> directory at the start of the cycle.  
 For example, to schedule the <i>Prices</i> job to run automatically each
 day:  
-<ul type=disc><pre><b>cd /localvision/production/Updates
-touch required/Prices </b></pre></ul>
+<ul type=disc>
+<pre>cd /localvision/production/Updates
+touch required/Prices </pre></ul>
 When jobs are automatically scheduled this way, your <b>okay
 script</b> would supply the rules to indicate when processing conditions are
 ready.  Alternatively, an independent process could place the job
@@ -611,15 +605,16 @@ you could manually remove it from the
 completion, this approach will not produce the appropriate tokens. Alternatively, you could leave the token in <i>pending</i> and create the
 token <i>Cancel.jobName</i> in the <i>status/tokens</i> directory.  
 For example: 
-<ul type=disc><pre><b>cd /localvision/production/status
-touch tokens/Cancel.Prices </b></pre></ul>
+<ul type=disc>
+<pre>cd /localvision/production/status
+touch tokens/Cancel.Prices </pre></ul>
 When the daemon next cycles through the pending jobs, it will remove
 the <i>Prices</i> token from pending and create the <i>Done.Prices</i>
 token.  The <i>Cancel.Prices</i> token will remain in the 
 <i>status/tokens</i> directory for the remainder of the cycle.
 
 <p>
-<h4><a name="updatesPredefined">Pre-defined Update Jobs</a></h4>
+<h3 id="updatesPredefined">Pre-defined Update Jobs</h3>
 <p>
 Your installation includes several pre-defined update jobs in the
 <i>/localvision/production/Updates/jobs</i> directory:
@@ -654,16 +649,18 @@ with web-based access that are currently running.
 <ul>This job is used to temporarily prevent any other updates from
 running.  It will continue to run until you remove it from
 <i>pending</i>.  To temporarily suspend updates, use: 
-<ul type=disc><pre><b>cd /localvision/production/status
-touch pending/Suspend </pre></b></ul>
+<ul type=disc>
+<pre>cd /localvision/production/status
+touch pending/Suspend </pre></ul>
 To continue the updates, use: 
-<ul type=disc><pre><b>cd /localvision/production/status
-"rm" pending/Suspend </pre></b>
+<ul type=disc>
+<pre>cd /localvision/production/status
+"rm" pending/Suspend </pre>
 </ul></ul></ul>
 
 </pre>
 <p><hr>
-<h3><a name="reports">Report Jobs</a></h3>
+<h2 id="reports">Report Jobs</h2>
 <p>
 Production report jobs are managed in the 
 <i>/localvision/production/Reports</i> directory.
@@ -688,7 +685,7 @@ executed:
 </ul>
 
 <p>
-<h4><a name="reportsCreate">Creating Report Jobs </a></h4>
+<h3 id="reportsCreate">Creating Report Jobs </h3>
 <p>
 You will need to create a report job for each production report you wish
 to run.  Report jobs are defined in the directory
@@ -719,7 +716,8 @@ any conditions that must be satisfied prior to starting the job,
 such as successful completion of the <i>Prices</i> update job.
 <p>
 The <i>PriceChanges</i> job could look something like: 
-<ul type=disc><pre><b>
+<ul type=disc>
+<pre>
 #--  File: /localvision/production/Reports/jobs/PriceChanges.job
 #--  Note - this is a Vision script
 
@@ -735,29 +733,31 @@ do: [ !current <- price ;
         [ code print: 10 ; name print ; 
           current print ; prior print ; pch printNL ;
         ]
-    ] t;</b></pre></ul>
+    ] t;</pre></ul>
 <p>
 The <i>PriceChanges.okay</i> file could look something like: 
-<ul type=disc><pre><b>#!/bin/csh
+<ul type=disc>
+<pre>#!/bin/csh
 #--  File: /localvision/production/Reports/jobs/PriceChanges.okay
 #--  Note - this is a Unix script
 
 #-- wait for Prices update to finish
 if (-f /localvision/production/status/tokens/Done.Prices ) exit 0
 
-exit 1</b></pre></ul>
+exit 1</pre></ul>
 <p>
 The <i>PriceChanges.wrapup</i> file could look something like: 
-<ul type=disc><pre><b>#!/bin/csh
+<ul type=disc>
+<pre>#!/bin/csh
 #--  File: /localvision/production/Reports/jobs/PriceChanges.wrapup
 #--  Note - this is a Unix script
 
 mailx dbadmin << @@@EOF
 The Price Changes Report is Done
 @@@EOF
-</b></pre></ul>
+</pre></ul>
 <p>
-<h4><a name="reportsSched">Scheduling Report Jobs</a></h4>
+<h3 id="reportsSched">Scheduling Report Jobs</h3>
 <p>
 To schedule a report job, you create a token containing the job name 
 prefixed by <i>report.</i> in the directory
@@ -767,8 +767,9 @@ are automatically scheduled to run at the start of each cycle,
 unless the day has been <a href="#dailyHoliday">flagged as a holiday</a>.  To rerun a job or
 to schedule a new job that has been added after the current cycle
 began, you can manually create the appropriate token: 
-<ul type=disc><pre><b>cd /localvision/production/status
-touch pending/report.PriceChanges</b></pre></ul>
+<ul type=disc>
+<pre>cd /localvision/production/status
+touch pending/report.PriceChanges</pre></ul>
 While the production cycle is active, the <i>pending</i> directory is
 checked every six minutes to see if any jobs are waiting.  If a job
 is pending and its <b>okay script</b> returns the value 0 (or no <b>okay
@@ -786,7 +787,7 @@ To cancel a report, remove its token from the <i>status/pending</i>
 directory.
 
 <p>
-<h4><a name="reportsPredefined">Pre-defined Report Jobs</a></h4>
+<h3 id="reportsPredefined">Pre-defined Report Jobs</h3>
 <p>
 Your installation includes several pre-defined report jobs in the
 <i>/localvision/production/Reports/jobs</i> directory:
@@ -807,7 +808,7 @@ has finished successfully.
 
 
 <p><hr>
-<h3><a name="pma">Sample Production Environment</a></h3>
+<h2 id="pma">Sample Production Environment</h2>
 <p>
 
 Sample jobs that can be used in a typical portfolio management
@@ -824,7 +825,7 @@ in the document
 <a href="pmaProduction.htm"><i>Sample Production Environment</i></a>.
 
 <p><hr>
-<h3><a name="submits">Submitting Ad-Hoc Updates</a></h3>
+<h2 id="submits">Submitting Ad-Hoc Updates</h2>
 <br>
 The <b>visionSubmit</b> utility is a Unix script that allows a
 user to submit ad-hoc Vision code and data feeds to the update
@@ -850,7 +851,7 @@ an alias for the script
 <i>/localvision/production/admin/scripts/submitUpdate</i>.
 
 <p>
-<h4><a name="submitsCode">Submitting Ad-Hoc Vision Code Updates</a></h4>
+<h3 id="submitsCode">Submitting Ad-Hoc Vision Code Updates</h3>
 <p>
 You may need to load and save new Vision scripts into 
 your database for several reasons such as report modifications,
@@ -859,15 +860,18 @@ data feed files.  You may receive Vision files from
 your Insyte consultant and/or develop your own code.
 <p>
 Although you can submit a file from any directory, by convention, files containing Vision code to submit are placed in the directory <i>/localvision/upload/vscripts</i> .  To submit the Vision code
-for update, type: <ul type=disc><pre><b>visionSubmit -C</b></pre></ul>at the Unix prompt.  You will be prompted as follows:
-<ul type=disc><pre><b>Vision Input Code File:           #- name of code file
+for update, type: <ul type=disc>
+<pre>visionSubmit -C</pre></ul>at the Unix prompt.  You will be prompted as follows:
+<ul type=disc>
+<pre>Vision Input Code File:           #- name of code file
 
 Run in Space [3]:                 #- carriage return or alternate space 
 
-Test File Before Submitting?      #- Yes or No</b></pre></ul>
+Test File Before Submitting?      #- Yes or No</pre></ul>
 
 If the supplied file is okay, you will see a message of the form:
-<ul type=disc><pre><b>***  Vision Code File Update Pending. File: submitCode.dbadmin.32</b></pre></ul>
+<ul type=disc>
+<pre>***  Vision Code File Update Pending. File: submitCode.dbadmin.32</pre></ul>
 This indicates that this is the 32nd submit for user code
 <i>dbadmin</i>.  You will see the pending token
 <i>submitCode.dbadmin.32</i> in the
@@ -875,19 +879,21 @@ This indicates that this is the 32nd submit for user code
 <p>
 You can avoid the prompts by supplying the inputs on one line.
 For example: 
-<ul type=disc><pre><b>visionSubmit -C myfile</pre></b></ul>
+<ul type=disc>
+<pre>visionSubmit -C myfile</pre></ul>
 
 You will not be prompted for the file name in this case, but you
 will be prompted for the object space and testing option.  To avoid
 the prompting, supply all inputs or use the <b>-n</b> option:
-<ul type=disc><pre><b>visionSubmit -C myfile 3 no
+<ul type=disc>
+<pre>visionSubmit -C myfile 3 no
 </b>
 or
 <b>
 visionSubmit -C -n myfile</b>
 
 </pre></ul>
-<h4><a name="submitsFeed">Submitting Ad-Hoc DataFeed Updates</a></h4>
+<h3 id="submitsFeed">Submitting Ad-Hoc DataFeed Updates</h3>
 <p>
 
 It is sometimes useful to load data using a <b>DataFeed</b> format
@@ -896,16 +902,19 @@ can use <b>visionSubmit</b> to load these feeds.
 By convention, feed files are placed in the 
 directory <i>/localvision/upload/feeds</i>, although
 you can submit a feed file from any directory.  To submit the feed
-for update, type: <ul type=disc><pre><b>visionSubmit -F</b></pre></ul>at the Unix prompt.  You will be prompted as follows:
+for update, type: <ul type=disc>
+<pre>visionSubmit -F</pre></ul>at the Unix prompt.  You will be prompted as follows:
 
-<ul type=disc><pre><b>Vision Input Feed File:              #- name of feed file
+<ul type=disc>
+<pre>Vision Input Feed File:              #- name of feed file
 
 Data Feed Name:                      #- name of DataFeed format
 
-Optional Configuration File Name:    #- name of optional config file </b></pre></ul>
+Optional Configuration File Name:    #- name of optional config file </pre></ul>
 
 If the supplied file is okay, you will see a message of the form:
-<ul type=disc><pre><b>***  Vision Feed File Update Pending. File: submitFeed.dbadmin.33</b></pre></ul>
+<ul type=disc>
+<pre>***  Vision Feed File Update Pending. File: submitFeed.dbadmin.33</pre></ul>
 This indicates that this is the 33rd submit for user code
 <i>dbadmin</i>.  You will see the pending token
 <i>submitFeed.dbadmin.33</i> in the
@@ -913,17 +922,17 @@ This indicates that this is the 33rd submit for user code
 <p>
 You can avoid the prompts by supplying the inputs on one line.
 For example: 
-<ul type=disc><pre><b>visionSubmit -F currency.dat CurrencyMaster currency.cfg
-</b> 
+<ul type=disc>
+<pre>
+visionSubmit -F currency.dat CurrencyMaster currency.cfg
+</pre>
 or
-<b>
-visionSubmit -F -n currency.dat CurrencyMaster</b></pre></ul>
-
-
-
+<pre>
+visionSubmit -F -n currency.dat CurrencyMaster
+</pre></ul>
 
 <p><hr>
-<h3><a name="faqs">Frequently Asked Questions</a></h3>
+<h2 id="faqs">Frequently Asked Questions</h2>
 
 <p>
 <b>Question: </b>
@@ -958,8 +967,7 @@ encountered errors are also saved in this directory.  Once you
 have taken the appropriate action (which may be doing nothing),
 you can remove these files.
 </ul>
-<p>
-<a name="reallyrunning"><b>Question:</b></a> 
+<p id="reallyrunning"><b>Question:</b>
 <ul>
 <i>How can I tell if the update and report daemons are really running?</i>
 </ul>
@@ -967,14 +975,17 @@ you can remove these files.
 <ul>In Unix, you can use variations of the <i>ps</i> commands to see
 the process status for a user code.  If the production process is
 running under the user code <i>dbadmin</i>, you can type: 
-<ul type=disc><pre><b>ps -fu dbadmin</b></pre></ul>
+<ul type=disc>
+<pre>ps -fu dbadmin</pre></ul>
 
 at the Unix prompt.  If the update daemon is running, you should see
 entries similar to:
-<ul type=disc><pre><b>dbadmin 10251  1        0   Nov 3   ?   0:00 scripts/runUpdates
-dbadmin 10262 10251     0   Nov 3   ?   1:54 scripts/processUpdates </b></pre></ul>
-If the report daemon is running, you should see entries similar to:<ul type=disc><pre><b>dbadmin 10252  1        0   Nov 3   ?   0:00 scripts/runReports
-dbadmin 10266 10252     0   Nov 3   ?   1:54 scripts/processReports</b></pre></ul>
+<ul type=disc>
+<pre>dbadmin 10251  1        0   Nov 3   ?   0:00 scripts/runUpdates
+dbadmin 10262 10251     0   Nov 3   ?   1:54 scripts/processUpdates </pre></ul>
+If the report daemon is running, you should see entries similar to:<ul type=disc>
+<pre>dbadmin 10252  1        0   Nov 3   ?   0:00 scripts/runReports
+dbadmin 10266 10252     0   Nov 3   ?   1:54 scripts/processReports</pre></ul>
 </ul>
 
 <p>
@@ -988,15 +999,19 @@ directory is checked again?</i>
 run the <i>sleep 300</i> and <i>sleep 360</i> commands each time they
 are done processing the current jobs in the pending queue.  You can
 "kill the sleeps" to force either of these tasks to re-examine the
-pending queue.  For example:<ul type=disc><pre><b>ps -fu dbadmin | grep sleep           #- show the sleep tasks
-</b>
+pending queue.  For example:<ul type=disc>
+<pre>
+ps -fu dbadmin | grep sleep           #- show the sleep tasks
+</pre>
 displays:
-<b>
+<pre>
 dbadmin 22183 10262  0 13:39:37 ?         0:00 sleep 300
-dbadmin 22160 10266  0 13:36:54 ?         0:00 sleep 360</b></pre></ul>
+dbadmin 22160 10266  0 13:36:54 ?         0:00 sleep 360
+</pre></ul>
 To force the update daemon to re-examine the pending queue, use
-the Unix <i>kill</i> command to remove the <i>sleep 300</i> task:<ul type=disc><pre><b>kill 22183
-</b></pre></ul>
+the Unix <i>kill</i> command to remove the <i>sleep 300</i> task:<ul type=disc>
+<pre>kill 22183
+</pre></ul>
 The next update job in the <i>status/pending</i> directory will begin
 processing immediately.
 </ul>
@@ -1010,9 +1025,10 @@ is rebooted?</i>
 <b>Answer:</b>
 <ul>Unless your hardware administrator has arranged to automatically
 start these processes, they will not be running after a reboot.
-You can manually restart them using:<ul type=disc><pre><b>cd /localvision/production/admin
+You can manually restart them using:<ul type=disc>
+<pre>cd /localvision/production/admin
 restart.daemon
-</b></pre></ul>
+</pre></ul>
 Your system administrator can add this step to an appropriate script
 that is automatically run after a reboot.  Note that this step should
 be started by the <i>dbadmin</i> user (or the user code defined as
@@ -1025,7 +1041,7 @@ the Vision Administrator for your environment).
 
 
 <p><hr>
-<h3><a name="variables">Production Environment Variable Summary</a></h3>
+<h2 id="variables">Production Environment Variable Summary</h2>
 <p>
 Production jobs can utilize a number of environment variables that
 are defined at the start of the <i>daily.daemon</i> including:  
@@ -1055,20 +1071,4 @@ changes
 <tr><td><i>listenerLog</i> <td>/localvision/production/status/logs/listener.log
 </table></center>
 
-<p><hr><h3>
-<a name="vadmin">The <i>VAdmin</i> Module and Production Processing</a></h3>
-<p>
-
-<p><hr>
-<h3><a name="custom">Designing Your Own Production Processing</a></h3>
-<p>
-
-<hr>
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy; 1998 Innovative Systems Techniques, Inc.</font>
-<td align="right"><font size="-1">Updated June 21, 1999</font>
-</table>
-
-</body>
-</html>
+{% include doc-footer.htm copydates="1998-1999" %}

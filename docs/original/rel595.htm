@@ -1,37 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head><title>Vision Release Notes 5.9.5</title></head>
-<body bgcolor=white>
-<h2>Vision Release Notes 5.9.5</h2>
-<hr>
-<h3>Topics Covered:</h3><ul type=square>
-<li><a href="#description">Description</a>
-<br><li><a href="#genaccesstoGRM">Generalized Access to Global Reclamation Manager</a> 
-<br><li><a href="#addofRSp">Addition of RestartSession primitive</a> 
-<br><li><a href="#addtoOVC">Addition of <i>TCP_NODELAY</i> option t</a>
-<br><li><a href="#bugfix">Bug Fix</a> 
-<br><li><a href="#resolveBusError">Resolve Bus Error occurring at OpenDialog startup</a> 
-<br><li><a href="#reimplRebuild">Reimplementation of the Rebuild function</a> 
-<br><li><a href="#segVerification">Segment Verification</a> 
-<br><li><a href="#cleanupAA">Cleanup / Alignment Augmentation</a> 
-<br><li><a href="#comp2Updates">Compustat2 updates</a> 
-<br><li><a href="#NDFMapping">NDF Mapping Coherency on HP (<i>dbconvert</i>)</a> 
-<br><li><a href="#removalofObsolete">Removal of Obsolete Tools</a> 
-<br><li><a href="#onck">Onck/onprof updates</a> 
-<br><li><a href="#aixPlatform">The AIX platform has been built using the C++ compiler</a> 
-<br><li><a href="#vqueryupdate">vquery update</a> 
-<br><li><a href="#containerTableOverflow">Container Table Overflow checking</a> 
-<br><li><a href="#internalgarbage">Internal transient garbage collection modified.</a> 
-<br><li><a href="#solarisonly">Solaris only: Segmentation Faults and Bus Error Signals generate a stack dump.</a> 
-<br><li><a href="#visionAddressThreshold">VisionAddressThreshold environment variable</a> 
-<br><li><a href="#environVariables">Environmental Variables that accept Octal Input</a> 
-<br><li><a href="#persistentGarbageCollector">Persistent Garbage Collector</a> 
-<br><li><a href="#newmessages">New Messages</a> 
-</ul>
-<hr>
-<p>
+---
+title: "Vision Release Notes 5.9.5"
+---
 
-<h3><a name=description>Description</a></h3><p>
+<p>
+<h2 id=description>Description</h2><p>
 
 This document outlines the changes made in Vision release 5.9.5.  This
 release contains a number of miscellaneous cleanups to various executables
@@ -50,7 +22,8 @@ other files may have been changed or deleted.  It is left to the Administrator
 to make the site-specific <i>/vision</i> directory compatible with the latest version.
 You should expect to find changes to the following executables:<br><br>
 
-<ul type=disc><pre><b>/vision/bin/batchvision
+<ul type=disc>
+<pre>/vision/bin/batchvision
 /vision/bin/format
 /vision/bin/loadtape
 /vision/bin/paginate
@@ -73,7 +46,7 @@ You should expect to find changes to the following executables:<br><br>
 /vision/tools/viewndf
 /vision/tools/viewseg
 /vision/tools/vquery
-/vision/tools/xndfosds</b></pre></ul>
+/vision/tools/xndfosds</pre></ul>
 
 The <i>rel.5.9.5</i> directory contains Vision protocol that is specific to this
 release and modifications or additions to existing administrative procedures.
@@ -95,8 +68,8 @@ The <i>EXTcore</i>, <i>CHadmin</i>, and <i>CHov</i> scripts include protocol tha
 </ul>
 </ul>
 
-<b><hr><a name=genaccesstoGRM>Generalized access to Global Reclamation Manager (GRM) -- 
-    HPUX only.</a></b>
+<b><hr id=genaccesstoGRM>Generalized access to Global Reclamation Manager (GRM) -- 
+    HPUX only.</b>
 
 <ol type=1>
 <li>Moved GRM implementation from the <i>ps</i> module in batchvision into
@@ -142,7 +115,7 @@ The <i>EXTcore</i>, <i>CHadmin</i>, and <i>CHov</i> scripts include protocol tha
 GRM traces previously enabled by the environment variable <i>VisionNetOpenTrace</i> and by the debugger expression, '<i>#M segmentScanTrace on</i>' are now enabled by this new variable only.<p>
 
 </ol>
-<b><hr><a name=addofRSp>Addition of RestartSession primitive</a><p> </b>
+<b><hr id=addofRSp>Addition of RestartSession primitive<p> </b>
 
     Utility define:'<i>restartSession</i>'<i> toBe: 3 asPrimitive</i>;<p>
 
@@ -158,8 +131,8 @@ GRM traces previously enabled by the environment variable <i>VisionNetOpenTrace<
     This definition is included as part of the <i>CHcore.5.9.5</i> script.<p>
 
 
-<b><hr><a name=addtoOVC>Addition of <i>TCP_NODELAY</i> option to OpenVision Channels
-</a></b><p>
+<b><hr id=addtoOVC>Addition of <i>TCP_NODELAY</i> option to OpenVision Channels
+</b><p>
 
     This release exposes the <i>TCP_NODELAY</i> flag for OpenVision socket
     channels. In previous releases <i>TCP_NODELAY</i> was hardcoded to be
@@ -175,24 +148,28 @@ GRM traces previously enabled by the environment variable <i>VisionNetOpenTrace<
     specification string, a service or stream channel can be created
     with <i>TCP_NODELAY</i> turned on. For other types of open vision
     channels (e.g. files), the '<i>n</i>' option is silently ignored.
-<ul type=disc><b><pre>!nd_spec    <- "inet/stream,pn:9004";
-!nd_service <- nd_spec asOpenVisionChannel; </pre></b></ul>
+<ul type=disc>
+<pre>!nd_spec    <- "inet/stream,pn:9004";
+!nd_service <- nd_spec asOpenVisionChannel; </pre></ul>
     Alternatively, the channel could be created in the usual way, and
     the 'turnTCPNoDelayOn' message can be used to set the <i>TCP_NODELAY</i>
     flag. 
-<ul type=disc><b><pre>!nd_spec    <- "inet/stream,p:9004";
+<ul type=disc>
+<pre>!nd_spec    <- "inet/stream,p:9004";
 !nd_service <- nd_spec asOpenVisionChannel;
-nd_service turnTCPNoDelayOn; </pre></b></ul>
+nd_service turnTCPNoDelayOn; </pre></ul>
     To turn <i>TCP_NODELAY</i> off,
-<ul type=disc><b><pre> nd_service turnTCPNoDelayOff; </pre></b></ul>
+<ul type=disc>
+<pre> nd_service turnTCPNoDelayOff; </pre></ul>
     Or to query the setting (zero indicates off; non-zero, on):
-<ul type=disc><b><pre> !noDelaySetting <- nd_service tcpNoDelay;
-</pre></b></ul>
+<ul type=disc>
+<pre> !noDelaySetting <- nd_service tcpNoDelay;
+</pre></ul>
     Message definitions and changes are included as part of the
     <i>CHov.5.9.5</i> script.
 <p>
 <b>
-<hr><a name=bugfix>Bug Fix: (Identity vs. Scalar)</a></b><p>
+<hr id=bugfix>Bug Fix: (Identity vs. Scalar)</b><p>
       [] send:[^self = asSelf]<p><p>
 
 
@@ -201,20 +178,21 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
 <pre>>>>  Error Trapped By Read-Eval-Print  <<<
 *       Utility Primitive Function Services [1246]
 *       Unknown UVector RType
-*       TestForIdentity: Unrecognized Reference Pointer R-Type RTYPE_C_RefUV</pre></pre></b></ul>
+*       TestForIdentity: Unrecognized Reference Pointer R-Type RTYPE_C_RefUV</pre></pre></ul>
 
 
     5.9.5 result:
 
-<ul type=disc><b><pre>TRUE</pre></b></ul>
+<ul type=disc>
+<pre>TRUE</pre></ul>
 
 
-<b><hr><a name=resolveBusError>Resolve Bus Error occurring at OpenDialog startup.</a> <p> 
+<b><hr id=resolveBusError>Resolve Bus Error occurring at OpenDialog startup. <p> 
 </b>
     The 5.9.4 build for the HPUX9 platform could not run the
     OpenDialog package   ...    5.9.5 can.<p>
 
-<b><hr><a name=reimplRebuild>Reimplementation of the Rebuild function</a></b><p>
+<b><hr id=reimplRebuild>Reimplementation of the Rebuild function</b><p>
 	
 
     The old Rebuild feature of batchvision would create an NDF from an
@@ -255,8 +233,9 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
     Valid values are <i>fromOSD</i> and <i>fromNDF</i>.  To invoke the Rebuilder in
     the first mode, use the following command line:<p>
 
-<ul type=disc><b><pre>batchvision -R fromOSD -o &lt;OSD Path Name&gt; -n &lt;NDF Path Name&gt;
-</b></pre></ul>
+<ul type=disc>
+<pre>batchvision -R fromOSD -o &lt;OSD Path Name&gt; -n &lt;NDF Path Name&gt;
+</pre></ul>
 
     The -o option can be omitted if the environment variable,
     <i>OSDPathName</i>, has been set. The -n option can be omitted if the
@@ -271,7 +250,8 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
     To invoke the Rebuilder in the second mode, use the following
     command line:
 
-       <ul type=disc><pre><b>batchvision -R fromNDF -n &lt;NDF Path Name&gt;</b></pre></ul>
+       <ul type=disc>
+<pre>batchvision -R fromNDF -n &lt;NDF Path Name&gt;</pre></ul>
 
     The -n option can be omitted if the environment variable,
     <i>NDFPathName</i>, has been set, or if the default value,
@@ -287,7 +267,7 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
     the rollback utility.<p>
 
 
-<b><hr><a name=segVerification>Segment Verification</a><p></b>
+<b><hr id=segVerification>Segment Verification<p></b>
 
     Beginning with this release, batchvision and <i>onprof/onck</i> will
     verify that a segment belongs to the NDF which is pointing to
@@ -300,7 +280,7 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
     and identify it via an explicit error message.<p>
 
 
-<b><hr><a name=cleanupAA>Cleanup / Alignment augmentation</a><p></b>
+<b><hr id=cleanupAA>Cleanup / Alignment augmentation<p></b>
 
     This release builds on the container table based cleanup strategy
     introduced in release 5.9.4.<p>
@@ -321,7 +301,7 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
     <i>CHadmin.5.9.5</i> script.<p>
 
 
-<b><hr><a name=comp2Updates>Compustat2 updates</a><p></b>
+<b><hr id=comp2Updates>Compustat2 updates<p></b>
 
     The <i>compustat2</i> data base update utility has been modified to use
     the EBCDIC flag in the layout file header (line 1, field 4). If the
@@ -333,7 +313,7 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
     <i>compustat2</i> also has been modified to deal correctly with industrial
     annual tapes that contain header records. <p>
 
-<b><hr><a name=NDFMapping>NDF Mapping Coherency on HP (<i>dbconvert</i>)</a></b><p>
+<b><hr id=NDFMapping>NDF Mapping Coherency on HP (<i>dbconvert</i>)</b><p>
 
     A problem was noticed under HPUX where <i>dbconvert</i> would attempt to
     use an out-of-date version of the NDF which was mapped into
@@ -344,16 +324,17 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
     General documentation about the <i>dbconvert</i> utility has been added
     to the insytenet web site under the <a href=admTools.htm>Administration/Tools</a> section.
 <p>
-<b><hr><a name=removalofObsolete>Removal of obsolete tools.</a>
+<b><hr id=removalofObsolete>Removal of obsolete tools.
 </b><p>
     Starting with the 5.9.5 Release, the following tools are no longer
     included in the build.
-<ul type=disc><b><pre>- checkseg5.7 / fixseg5.7
+<ul type=disc>
+<pre>- checkseg5.7 / fixseg5.7
 - copyndf
 - makeomitlist
-- xndfvts</pre></b></ul>
+- xndfvts</pre></ul>
 <p>
-<b><hr><a name=onck>Onck/onprof updates</a>
+<b><hr id=onck>Onck/onprof updates
 </b><p>
     <i>onck</i> and <i>onprof</i> are now links to the same executable, the
     difference between them being that <i>onprof</i> presents RTYPE
@@ -363,10 +344,10 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
     volume of output, these programs now print an explicit <i>pass/fail</i>
     message upon exit.
 <p>
-<b><hr><a name=aixPlatform>The AIX platform has been built using the C++ compiler.
-</a></b><p>
-<b><hr><a name=vqueryupdate>vquery update
-</a></b><p>
+<b><hr id=aixPlatform>The AIX platform has been built using the C++ compiler.
+</b><p>
+<b><hr id=vqueryupdate>vquery update
+</b><p>
     A number of changes have been made to the vquery program.  Some of
     these were released in the web site version prior to 5.9.5 but are
     redocumented here for completeness.
@@ -384,11 +365,12 @@ nd_service turnTCPNoDelayOn; </pre></b></ul>
 
        The default class and message now executed by vquery is:
     
-<ul type=disc><pre><b>Interface HtmlAccess
+<ul type=disc>
+<pre>Interface HtmlAccess
 get: "url-path"
 usingQuery: "url-query"
 for: "client-host-name"
-at: "client-host-address" ;</b></pre>
+at: "client-host-address" ;</pre>
 </ul>
        Earlier versions were defined to use the UserInterface HyperWS class.
        You have the ability to override the default class in the <i>vquery.cfg</i>
@@ -398,13 +380,14 @@ at: "client-host-address" ;</b></pre>
        specific destination using the <i>class <dest></i> directive.  The 
        following example illustrates both:
 
-<ul type=disc><pre><b>default class   UserInterface HyperWS
+<ul type=disc>
+<pre>default class   UserInterface HyperWS
 
 server default  pugsley:7001
 server test     pugsley:8010
 
 server demo     pugsley:7200
-class  demo     Interface HtmlAccess</b></pre>
+class  demo     Interface HtmlAccess</pre>
 </ul>
        As expected, when both a class <i><dest></i> directive and a <i>default class</i>
        directive are present in the same file, the <i>class <dest></i> directive
@@ -413,9 +396,10 @@ class  demo     Interface HtmlAccess</b></pre>
        same class specification applies to all of the them.  For example, the
        <i>class analyzer</i> statement in the following example:
 
-<ul type=disc><pre><b>server analyzer pugsley:7010
+<ul type=disc>
+<pre>server analyzer pugsley:7010
 server analyzer lurch:7010
-class  analyzer UserInterface HyperWS</b></pre>
+class  analyzer UserInterface HyperWS</pre>
 </ul>
        applies to both <i>analyzer</i> servers.
 
@@ -423,7 +407,7 @@ class  analyzer UserInterface HyperWS</b></pre>
 <li>vquery source code is available on Web.
 <p>
        The entire source for the vquery program resides in a single file
-       which is available on our web site under the <a href=ifDownload.htm>Interface/Downloads</a>
+       which is available on our web site under the
        section for users who wish to modify it for their own purposes.
        Instructions for compiling it on different systems are supplied at
        the top of <i>vquery.cpp</i>.
@@ -439,14 +423,16 @@ class  analyzer UserInterface HyperWS</b></pre>
        Two new commands have been added to the set of commands recognized in a
        <i>vquery.cfg</i> file.  The command:
 
-<ul type=disc><pre><b>default expression aVisionExpressionSpecification</b></pre>
+<ul type=disc>
+<pre>default expression aVisionExpressionSpecification</pre>
 </ul>
        establishes a Vision expression to use by default for any service
        destination that does not supply its own specification.  Any service
        that requires a different expression can override the default expression
        using the directive:
 
-<ul type=disc><pre><b>expression aServiceName aVisionExpressionSpecification</b></pre>
+<ul type=disc>
+<pre>expression aServiceName aVisionExpressionSpecification</pre>
 </ul>
        Both the <i>default expression</i> and <i>expression</i> directives must be
        included on a single input line.  THERE IS NO PROVISION FOR ESCAPING 
@@ -456,8 +442,9 @@ class  analyzer UserInterface HyperWS</b></pre>
        file, vquery behaves as if the following default expression were
        supplied:
 
-<ul type=disc><b><pre>default expression $$class get: $$path usingQuery: $$query for:
-$REMOTE_HOST at: $REMOTE_ADDR</b></pre>
+<ul type=disc>
+<pre>default expression $$class get: $$path usingQuery: $$query for:
+$REMOTE_HOST at: $REMOTE_ADDR</pre>
 </ul>
        This default <i>default expression</i> specifies the expression that vquery
        has historically generated.  In particular, it specifies that the
@@ -467,7 +454,7 @@ $REMOTE_HOST at: $REMOTE_ADDR</b></pre>
 <p>
        The substitution rules are straightforward.  Except for the <i>$$class</i>
        substitution, all substitutions are formatted as Vision strings with
-       embedded <i>"</i> and <i>\</i> characters suitably quoted to keep Vision happy.  All
+       embedded <i>&quot;</i> and <i>\</i> characters suitably quoted to keep Vision happy.  All
        substitutions begin with a <i>$</i> followed by a symbol that names an
        environment variable or special substitution.   A substitution that
        begins with a single <i>$</i> is assumed to name an environment variable.  
@@ -504,7 +491,7 @@ $REMOTE_HOST at: $REMOTE_ADDR</b></pre>
 
 
 
-<b><hr><a name=containerTableOverflow>Container Table Overflow checking</a></b>
+<b><hr id=containerTableOverflow>Container Table Overflow checking</b>
 <p>
     An infinitely recursive Vision method can result in filling up
     all available slots in the container table for the scratch pad space.
@@ -515,15 +502,15 @@ $REMOTE_HOST at: $REMOTE_ADDR</b></pre>
     the infinitely recursive Vision method would run into a malloc error
     before container table overflow would occur.
 <p>
-<b><hr><a name=internalgarbage>Internal transient garbage collection modified.</a></b>
+<b><hr id=internalgarbage>Internal transient garbage collection modified.</b>
 <p>
     The algorithm to reclaim unreferenced <i>PToken</i> chains was changed
     from recursive to iterative. The same change was applied to the
     reclamation of virtual machine fragments. If either chain was long
     enough, an internal run-time stack overflow could occur.
 <p>
-<b><hr><a name=solarisonly>Solaris only:  Segmentation Faults and Bus Error Signals generate
-    a stack dump.</a></b>
+<b><hr id=solarisonly>Solaris only:  Segmentation Faults and Bus Error Signals generate
+    a stack dump.</b>
 <p>
     A stack dump is generated in the current working directory with a
     name of the form:  <i>pstack.ppp.n</i>  where <i>ppp</i> is the process id of the
@@ -533,14 +520,16 @@ $REMOTE_HOST at: $REMOTE_ADDR</b></pre>
 <p>    This behavior can be disabled by setting an environment variable prior
     to starting the vision session:
 
-<ul type=disc><pre><b>setenv VisionStackDump 0</b></pre>
+<ul type=disc>
+<pre>setenv VisionStackDump 0</pre>
 </ul>
     Setting this variable to any non-zero numeric value, or 
-<ul type=disc><pre><b>unsetenv VisionStackDump</b></pre>
+<ul type=disc>
+<pre>unsetenv VisionStackDump</pre>
 </ul>
     will turn stack dumping back on for subsequent invocations of batchvision.
 <p>
-<b><hr><a name=visionAddressThreshold>VisionAddressThreshold environment variable</a></b>
+<b><hr id=visionAddressThreshold>VisionAddressThreshold environment variable</b>
 <p>
     This variable is used to influence when a segment reclamation scan
     is done. If a map segment operation returns a process address less
@@ -558,12 +547,13 @@ $REMOTE_HOST at: $REMOTE_ADDR</b></pre>
     access since, under Solaris, no segment can be mapped at an
     address higher than <i>0xf0000000</i>.<p>
 
-<b><hr><a name=environVariables>Environmental Variables that accept Octal Input</a></b><p>The following environment variables now accept octal or hexadecimal
+<b><hr id=environVariables>Environmental Variables that accept Octal Input</b><p>The following environment variables now accept octal or hexadecimal
     input. In earlier releases, only decimal input was valid. Octal
     values are denoted with a leading '0'. Hexadecimal values are
     denoted with a leading <i>0x</i> or <i>0X</i>.
 
-<ul type=disc><pre><b>VisionLargeContainerSize
+<ul type=disc>
+<pre>VisionLargeContainerSize
 VisionMappingLimit
 VisionAddressThreshold
 VisionNSyncRetries
@@ -575,9 +565,9 @@ VisionSORetryDelay
 VisionNetOpenTrace
 VisionCheckCheckSM
 VisionStackDump
-LargeTaskSize</b></pre></ul>
+LargeTaskSize</pre></ul>
 
-<b><hr><a name=persistentGarbageCollector>Persistent Garbage Collector</a></b><p>The persistent garbage collector (<i>Utility collectGarbage</i>) now
+<b><hr id=persistentGarbageCollector>Persistent Garbage Collector</b><p>The persistent garbage collector (<i>Utility collectGarbage</i>) now
     rebuilds the container table free list in the opposite direction
     so that lower table indices are allocated first. This anticipates
     a feature in a future release that will allow container tables to
@@ -586,78 +576,88 @@ LargeTaskSize</b></pre></ul>
 
 
 <p><p>
-<b><hr><a name=newmessages>New Messages</a></b>
+<b><hr id=newmessages>New Messages</b>
 
-<b><pre>********************
+<pre>********************
    FIXcore.5.9.5
-********************</pre></b>
+********************</pre>
 
 This script contains messages that have been modified in the core classes as 
 part of release 5.9.5.
 
-<b><pre>Class     Number
-Message   pctChangeTo:</pre></b><ul type=disc>
+<pre>Class     Number
+Message   pctChangeTo:</pre><ul type=disc>
 
 This message has been modified to correctly deal with negative values.
 When the recipient and the parameter are of different signs, the value
 <i>NA</i> is returned by this method.
 
-</ul><b><pre>Class     Collection
-Message   collectListElementsFrom: block</pre></b><ul type=disc>
+</ul>
+<pre>Class     Collection
+Message   collectListElementsFrom: block</pre><ul type=disc>
 
 This message has been modified to correctly deal with parameters that
 return lists when evaluated.
 
-</ul><b><pre>Class     Object
-Message   createIncorporatorClass:</pre></b><ul type=disc>
+</ul>
+<pre>Class     Object
+Message   createIncorporatorClass:</pre><ul type=disc>
 
 This message has been modified to explicitly define the <i>currentStore</i>
 constant to refer to the new class.
 
 </ul>
-<b><pre>********************
+<pre>********************
    EXTcore.5.9.5
-********************</pre></b>
+********************</pre>
 This script contains messages that have been added to the core classes as 
 part of release 5.9.5.
 
-<pre><b>Class     Object
-Message   ifDefault: object</b></pre><ul type=disc>
+<pre>Class     Object
+Message   ifDefault: object</pre><ul type=disc>
 
 If the recipient is the default object, this message returns the parameter,
 otherwise the recipient is returned.  If the parameter is a block, it is
 evaluated.
 
-</ul><pre><b>Class     Object
-Message   ifDefault: block1 else: block2</b></pre><ul type=disc>
+</ul>
+<pre>Class     Object
+Message   ifDefault: block1 else: block2</pre><ul type=disc>
 
 If the recipient is the default object, block1 is sent to it; otherwise,
 block2 is sent to it.  This can be used to eliminate some conditional
 testing.  For example:
  
-    <ul type=disc><b><pre>date ifDefault: [ "initial" ] else: [ formatUsingShortName ]</pre></b></ul> 
+    <ul type=disc>
+<pre>date ifDefault: [ "initial" ] else: [ formatUsingShortName ]</pre></ul> 
 
 replaces:
 
-<ul type=disc><b><pre>date isDefault
-ifTrue: [ "initial" ] ifFalse: [ date formatUsingShortName ] </pre></b></ul>
+<ul type=disc>
+<pre>date isDefault
+ifTrue: [ "initial" ] ifFalse: [ date formatUsingShortName ] </pre></ul>
 
-</ul><b><pre>
+</ul>
+<pre>
 Class     String
-Message   convertToCaseInsensitiveRegEx</pre></b><ul type=disc>
+Message   convertToCaseInsensitiveRegEx</pre><ul type=disc>
 
 This message converts the recipient into a string that can be used
 for case insensitive string matches with messages such as <i>contains:</i>.
 For example:
-     <ul type=disc><b><pre>"app" convertToCaseInsensitiveRegEx</pre></b></ul>
+     <ul type=disc>
+<pre>"app" convertToCaseInsensitiveRegEx</pre></ul>
 returns the string <i>[Aa][Pp][Pp]</i>.  The expression:
-     <ul type=disc><b><pre>"Apple" contains: "app"</pre></b></ul>
+     <ul type=disc>
+<pre>"Apple" contains: "app"</pre></ul>
 returns FALSE.  The expression:
-     <ul type=disc><b><pre>"Apple" contains: "app" convertToCaseInsensitiveRegEx</pre></b></ul>
+     <ul type=disc>
+<pre>"Apple" contains: "app" convertToCaseInsensitiveRegEx</pre></ul>
 returns TRUE.
 
-</ul><b><pre>Class     Utility
-Message   restartSession</pre></b>
+</ul>
+<pre>Class     Utility
+Message   restartSession</pre>
 <ul type=disc> Running this primitive will replace the current session with a
 fresh session started with the same options as the original. The
 process id will be the same. The input and output channels will be the
@@ -671,61 +671,67 @@ Note that this message will not work with releases prior to 5.9.5.
 
 
 </ul>
-<b><pre>********************
+<pre>********************
    CHadmin.5.9.5
-********************</b></pre>
+********************</pre>
 This script contains modifications and additions related to the <i>AdminTools</i>
 ToolKit and cannot be installed in releases prior to release 5.9.5.
 
-<b><pre>Class     AdminTools _POP
+<pre>Class     AdminTools _POP
 Message   cleanDictionaryViaPOP
-          cleanDescriptorViaPOP</pre></b><ul type=disc>
+          cleanDescriptorViaPOP</pre><ul type=disc>
 
 These POP based cleaners have been added because not all descriptors
 and dictionaries are accessible for cleanup via Vision objects.  
 
-</ul><b><pre>Class     AdminTools ClusterType
+</ul>
+<pre>Class     AdminTools ClusterType
 Message   isDictionary
-          isDescriptor</pre></b><ul type=disc>
+          isDescriptor</pre><ul type=disc>
 
 These messages have been added as new inquiries for ClusterType
 objects.
 
-</ul><b><pre>Class     AdminTools ObjectSpace
-Message   cleanDictionaries</pre></b><ul type=disc>
+</ul>
+<pre>Class     AdminTools ObjectSpace
+Message   cleanDictionaries</pre><ul type=disc>
 
 This new method cleans up dictionary objects as part of the <i>cleanSpace
 </i> method.
 
-</ul><b><pre>Class     AdminTools ObjectSpace
-Message   cleanDescriptors</pre></b><ul type=disc>
+</ul>
+<pre>Class     AdminTools ObjectSpace
+Message   cleanDescriptors</pre><ul type=disc>
 
 This new method cleans up descriptors as part of the <i>cleanSpace</i>
 method.
 
-</ul><b><pre>Class     AdminTools ObjectSpace
-Message   cleanSpace</pre></b><ul type=disc>
+</ul>
+<pre>Class     AdminTools ObjectSpace
+Message   cleanSpace</pre><ul type=disc>
 
 This method has been modified to include dictionary and descriptor
 cleanups.
 
-</ul><b><pre>Class     AdminTools ObjectSpace
-Message   cleanTables</pre></b><ul type=disc>
+</ul>
+<pre>Class     AdminTools ObjectSpace
+Message   cleanTables</pre><ul type=disc>
 
 This method has been modified so that it no longer cleans dictionaries.
 
 
 
 
-</ul><pre><b>********************
+</ul>
+<pre>********************
    CHov.5.9.5
-********************</b></pre>
+********************</pre>
 
 This script contains modifications and additions related to the OpenVision
 ToolKit and requires release 5.9.5.
 
-<b><pre>Class     OpenVisionConstant
-Message   nameInstances:</pre></b><ul type=disc>
+<pre>Class     OpenVisionConstant
+Message   nameInstances:</pre><ul type=disc>
 
 This method has been modified so that it uses <i>\\?</i> instead of <i>?</i>
 as the parameter to the <i>contains:</i> method so it works correctly
@@ -734,69 +740,78 @@ on NT and Unix.  The old version does not work correctly with NT.
 
 
 
-</ul><pre><b>********************
+</ul>
+<pre>********************
    CHschema.5.9.5
-********************</b></pre>
+********************</pre>
 
 This script contains modifications and additions related to the <i>Schema</i>
 ToolKit added as a supplement to release 5.9.5.  These changes assume that
 this ToolKit has been installed.  
 
-<b><pre>Class     Schema MID
-Message   cleanupDeletedObject</pre></b><ul type=disc>
+<pre>Class     Schema MID
+Message   cleanupDeletedObject</pre><ul type=disc>
 
 A step was added to clear the default value from an MID flagged for
 deletion so that it is removed from the initialization list for the
 class.
 
-</ul><b><pre>Class     Schema CD
-Message   clearDefaultValueUsing: mid</pre></b><ul type=disc>
+</ul>
+<pre>Class     Schema CD
+Message   clearDefaultValueUsing: mid</pre><ul type=disc>
 
 This method has been modified so the recursive call correctly walks
 through <i>childList;</i> it had been skipping the <i>childList</i> step.
 
-</ul><b><pre>Class     Schema
-Message   setDefaultValueOf:at:to: </pre></b><ul type=disc>
+</ul>
+<pre>Class     Schema
+Message   setDefaultValueOf:at:to: </pre><ul type=disc>
 
 This message has been modified to use the correct property type when
 installing a default for the first time; it had been hard-coded to
 <i>FixedProperty</i>.
 
-</ul><b><pre>Class     Schema MID
-Message   setDefaultValueTo:</pre></b><ul type=disc>
+</ul>
+<pre>Class     Schema MID
+Message   setDefaultValueTo:</pre><ul type=disc>
 
 This message has been modified to use the correct property type;
 it had been hard-coded to <i>FixedProperty</i>.
 
-</ul><b><pre>Class     Object
-Message   initializeDefaults</pre></b><ul type=disc>
+</ul>
+<pre>Class     Object
+Message   initializeDefaults</pre><ul type=disc>
 
 This method has been modified so that it no longer initializes
 properties that already have a non-NA value.  Prior to this,
 properties initialized by <i>initializeKeys:</i> would be reset by
 this message if the property was in the default initialization list.
 
-</ul><b><pre>Class     Object
-Message   showMessageSummaryFor:</pre></b><ul type=disc>
+</ul>
+<pre>Class     Object
+Message   showMessageSummaryFor:</pre><ul type=disc>
 
 This message has been modified to expand the message display width 
 to the size of the largest message so that long message names are
 not truncated.
 
-</ul><b><pre>Class     Schema CD
-Message   showInheritance</pre></b><ul type=disc>
+</ul>
+<pre>Class     Schema CD
+Message   showInheritance</pre><ul type=disc>
 
 This message has been modified to show a single hierarchy instead
 of dividing the output across different class descriptor types.
 
-</ul><b><pre>Class     Schema CD
-Message   getMessagesReturningClass</pre></b><ul type=disc>
+</ul>
+<pre>Class     Schema CD
+Message   getMessagesReturningClass</pre><ul type=disc>
 
 This is a new message that returns the list of active MIDs defined
 to return this class or any of its subclasses.
 
-</ul><b><pre>Class     Schema CD
-Message   getMessagesReturningSuperClass</pre></b><ul type=disc>
+</ul>
+<pre>Class     Schema CD
+Message   getMessagesReturningSuperClass</pre><ul type=disc>
 
 This is a new message that returns the list of active MIDs defined
 to return a superclass of this class.  Messages that return the recipient
@@ -805,9 +820,11 @@ class or the Object class are excluded from this list.
 
 
 
-</ul><pre><b>********************
+</ul>
+<pre>
+********************
    CHiface.5.9.5
-********************</b></pre>
+********************</pre>
 
 This script contains modifications and additions related to the
 <i>Interface</i> and <i>FormatTools</i> ToolKits added as a supplement to release
@@ -894,7 +911,5 @@ has been modified to allow the default to imply the local currency, instead
 of <i>Named Currency Default</i>.
 </ol>
 </ul></ul></ul></ul>
-<p><hr><table width=100%>
-  <tr>
-    <td align=left><font size=-1>Copyright &copy; 1998 Innovative Systems Techniques, Inc.</font>
-    <td align=right><font size=-1>Updated December 23, 1998</font></table> </body></html>
+
+{% include doc-footer.htm copydates="1998" %}

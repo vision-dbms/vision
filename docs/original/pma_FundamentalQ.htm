@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Upload Format: FundamentalQ</title>
+---
+title: "Vision Upload Format: FundamentalQ"
 
-</head>
-<body>
-<body bgcolor=white>
+sidebar:
+  nav: "sb_InvestmentManagers"
+---
 <h2>Vision Portfolio Management Application Layer: Data Feeds</h2>
 <p>
 | <a href="pmaFeeds.htm">Application Feeds</a> |
@@ -13,7 +11,7 @@
 <font size=+2><b>Data Feed: </b><i>FundamentalQ</i></font><p>
 <font size=+1><b>Category: </b><i>EntityExtenderFeed</i></font><p>
 
-<h3>Summary:</h3>
+<h2>Summary:</h2>
 <p>
 <ul>
  The <i>FundamentalQ</i> feed is used to create and update 
@@ -34,7 +32,7 @@
 </ul>
 <p>
 
-<h3>Available Fields:</h3>
+<h2>Available Fields:</h2>
 <p>
 <center><table border=1 width=80% cellpadding=4 cellspacing=2>
 <tr><th>Field<th>FundamentalDataQ<br>Property<th>Type<th>Description
@@ -228,7 +226,7 @@
 <td>taxes payable
 </table></center>
 <p>
-<h3>Special Processing Rules:</h3>
+<h2>Special Processing Rules:</h2>
 <p>
 <ul type=disc>
 <li>
@@ -277,7 +275,7 @@ The <i>entityId</i> must correspond to an existing <b>Company</b>
 
 <p>
 <a name="related">
-<h3>Related Feeds:</h3>
+<h2>Related Feeds:</h2>
 <p>
 <ul type=disc>
 <li><a href="pma_CompanyMaster.htm"><i>CompanyMaster</i></a>:
@@ -288,11 +286,11 @@ loads annual company fundamentals
 loads monthly company fundamentals
 </ul>
 <p>
-<h3>Sample Upload:</h3>
+<h2>Sample Upload:</h2>
 <p>
 The following tab-delimited feed could be used to create and
 refresh <b>FundamentalDataQ</b> instances:
-<pre><tt><b>
+<pre>
  Interface ExternalFeedManager upload: "FundamentalQ" using:
      "entity     date     currency     adjustmentDate     sales     cogs
       45920010   19961231 USD          19971217             23143.00  12868.00
@@ -308,16 +306,6 @@ refresh <b>FundamentalDataQ</b> instances:
       00512510   19970630 USD          19971217               100.33     80.58
       00512510   19970930 USD          19971217               109.97     86.15
      " ;
-</b></tt></pre>
+</pre>
 
-<p>
-<hr>
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy; 1998 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated October 31, 1999</font>
-</tr>
-</table>
-
-</body>
-</html>
+{% include doc-footer.htm copydates="1998-1999" %}

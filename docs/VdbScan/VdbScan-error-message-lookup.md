@@ -1,8 +1,9 @@
 ---
-layout: default
----
+title: "VdbScan Error Message Lookup"
 
-# VdbScan Error Message Lookup
+sidebar:
+  nav: "sb_Troubleshooting"
+---
 
 Scan for your error messages here.  Try not to clutter this up with things other than the error message.
 
@@ -59,7 +60,8 @@ More information about Cartesian Space Exceeded problems: [Cartesian Space Excee
 
 More information: [Requested Alteration Count Exceeds Maximum](VdbScan-alteration-count-exceeds-maximum.html)
 
-## [NDF Too Big](VdbScan-ndf-too-big.html)
+## NDF Too Big
+[comment]: # (## [NDF Too Big](VdbScan-ndf-too-big.html))
 
 ### From `VdbScan.vis`:
 
@@ -67,9 +69,10 @@ More information: [Requested Alteration Count Exceeds Maximum](VdbScan-alteratio
 --> NDF is getting dangerously large.  Size:     822,750,236
 ```
 
-More Information: [NDF Too Big](VdbScan-ndf-too-big.html)
+[comment]: # (More Information: [NDF Too Big](VdbScan-ndf-too-big.html))
 
-## [Huge Containers Found](VdbScan-container-too-large.html)
+## Huge Containers Found
+[comment]: # (## [Huge Containers Found](VdbScan-container-too-large.html))
 
 ### From `VdbScan.vis`:
 
@@ -81,9 +84,10 @@ More Information: [NDF Too Big](VdbScan-ndf-too-big.html)
      1040010468  [  7:   5654]
 ```
 
-More Information: [Huge Containers Found](VdbScan-container-too-large.html)
+[comment]: # (More Information: [Huge Containers Found](VdbScan-container-too-large.html))
 
-## [Container Table Out of Space](VdbScan-container-table-out-of-space.html)
+## Container Table Out of Space
+[comment]: # ([Container Table Out of Space](VdbScan-container-table-out-of-space.html))
 
 ### From `VdbScan.vis`:
 
@@ -92,7 +96,7 @@ More Information: [Huge Containers Found](VdbScan-container-too-large.html)
  3,569,572 ObjectSpace   3: CoreWorkspace
 ```
 
-More Information: [Container Table Out of Space](VdbScan-container-table-out-of-space.html)
+[comment]: # (More Information: [Container Table Out of Space](VdbScan-container-table-out-of-space.html))
 
 ## "malloc Landmines" in read queries - [Clean has FAILED for spaces](VdbScan-clean-has-failed.html)
 

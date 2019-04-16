@@ -1,13 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Portfolio Management FAQ: Alternative Industries </title>
-</head>
-<body>
-<body bgcolor=white>
-<h2>Vision Portfolio Management FAQ:  Alternative Industries</h2>
-<hr><p>
-<h4>Goal:</h4>
+---
+title: "Vision Portfolio Management FAQ: Alternative Industries "
+
+sidebar:
+  nav: "sb_InvestmentManagers"
+---
+
+<h4 id="goal">Goal</h4>
 <ul>
 To create an alternative industry scheme that can be accessed via
 the primary industry scheme
@@ -17,7 +15,7 @@ by using <a href="#excel"><i>Excel</i></a> or the
 </ul>
 
 <p>
-<h4>Description:</h4>
+<h4 id="description">Description</h4>
 <ul>
 An alternative table of industry codes and names is available.  Each of
 the primary <b>Industry</b> instances can be associated with one of these
@@ -26,7 +24,7 @@ from <b>Company</b>, via its <i>industry</i>.
 </ul>
 
 <p>
-<h4>DataFeed Assumptions:</h4>
+<h4 id="assumptions">DataFeed Assumptions</h4>
 <p>
 <center><table border=1 width=80% cellpadding=4 cellspacing=2>
 <tr><th>DataFeed<th>Fields
@@ -39,10 +37,8 @@ from <b>Company</b>, via its <i>industry</i>.
 </table></center>
 <p>
 
-<a name="excel"><h4>Using Excel to load alternative industries</h4></a>
+<h4 id="excel">Using Excel to load alternative industries</h4>
 
-<p>
-<h4>Steps:</h4>
 <p>
 <ol type="A">
 
@@ -65,13 +61,13 @@ will be created.
 <li>Set up the spreadsheet to look like the following.  Note that the feed name
 is in the top left of the range.
 <pre>
-        AltIndustryMaster		
+  AltIndustryMaster
 
-	<b>id	name</b>	
-	Alt110	Alt Beverages	
-	Alt210	Alt Automobiles	
-	Alt310	Alt Broadcasting	
-	Alt410	Alt Food Chains	
+  <u>id      name</u>
+  Alt110  Alt Beverages
+  Alt210  Alt Automobiles
+  Alt310  Alt Broadcasting
+  Alt410  Alt Food Chains
 </pre>
 
 <li>Select the entire range, including the feed name.
@@ -90,10 +86,10 @@ The <i>AltIndustry</i> instances have been created.
 Note that the feed name is in the top left of the range.
 
 <pre>
-	PropertySetup				
+  PropertySetup
 
-	<b>classId	   property	tsflag	defaultValue</b>	
-	Industry   altIndustry	N	AltIndustry	
+  <u>classId    property     tsflag  defaultValue</u>
+  Industry   altIndustry  N       AltIndustry
 </pre>
 
 <li>Select the range, including the feed name.
@@ -109,13 +105,14 @@ The <i>altIndustry</i> property has been created.
 <ol type="1">
 <li>Set up the spreadsheet to look like the following example:
 
-<pre>	IndustryMaster		
+<pre>
+  IndustryMaster
 
-	<b>id	name	        altIndustry</b>
-	110	Beverages	Alt110
-	210	Automobiles	Alt210
-	310	Broadcasting	Alt310
-	410	Food Chains	Alt410
+  <u>id      name            altIndustry</u>
+  110     Beverages       Alt110
+  210     Automobiles     Alt210
+  310     Broadcasting    Alt310
+  410     Food Chains     Alt410
 </pre>
 
 <li>Select the range.
@@ -134,11 +131,11 @@ The <i>altIndustry</i> property of <i>Industry</i> has been created.
 set up the spreadsheet to look like the following example:
 
 <pre>
-<b>		industry name	industry altIndustry name</b>
-	ibm	
-	gm	
-	msft	
-	f	
+  <u>        industry name   industry altIndustry name</u>
+  ibm
+  gm
+  msft
+  f
 </pre>
 
 <li>Select the range.
@@ -149,9 +146,9 @@ set up the spreadsheet to look like the following example:
 The output will look similar to the following example:
 
 <pre>
-<b>		industry name	industry altIndustry name</b>
-	ibm	Software	Alt Software		
-	gm	Automobiles	Alt Automobiles
+  <u>        industry name   industry altIndustry name</u>
+  ibm     Software        Alt Software
+  gm      Automobiles     Alt Automobiles
 </pre>
 
 Your Extraction is complete.
@@ -160,10 +157,8 @@ Your Extraction is complete.
 </ol>
 <hr>
 
-<a name="vadmin"><h4>Using VAdmin to load alternative industries</h4></a>
+<h4 id="vadmin">Using VAdmin to load alternative industries</h4>
 
-<p>
-<h4>Steps:</h4>
 <p>
 <ol type="A">
 
@@ -185,13 +180,13 @@ will be created.
 <p>
 <li>Set up a tab delimited text file to look like the following example.  
 <pre>
-	AltIndustryMaster		
+  AltIndustryMaster
 
-	<b>id	name</b>	
-	Alt110	Alt Beverages	
-	Alt210	Alt Automobiles	
-	Alt310	Alt Broadcasting	
-	Alt410	Alt Food Chains	
+  <u>id      name</u>
+  Alt110  Alt Beverages
+  Alt210  Alt Automobiles
+  Alt310  Alt Broadcasting
+  Alt410  Alt Food Chains
 </pre>
 Save the file and put it in the <i>localvision/upload/feeds</i> directory.
 <p>
@@ -212,10 +207,10 @@ The <i>AltIndustry</i> instances have been created.
 <li>Set up a tab delimited file to look like the following example.  
 
 <pre>
-	PropertySetup				
+  PropertySetup
 
-	<b>classId	   property	tsflag	defaultValue</b>	
-	Industry   altIndustry	N	AltIndustry	
+  <u>classId    property     tsflag  defaultValue</u>
+  Industry   altIndustry  N       AltIndustry
 </pre>
 Save the file and put it in the <i>localvision/upload/feeds</i> directory.
 <p>
@@ -234,13 +229,14 @@ The <i>altIndustry</i> property has been created.
 <ol type="1">
 <li>Set up a tab delimited file to look like the following example:
 
-<pre>	IndustryMaster		
+<pre>
+  IndustryMaster
 
-	<b>id	name	        altIndustry</b>
-	110	Beverages	Alt110
-	210	Automobiles	Alt210
-	310	Broadcasting	Alt310
-	410	Food Chains	Alt410
+  <u>id      name            altIndustry</u>
+  110     Beverages       Alt110
+  210     Automobiles     Alt210
+  310     Broadcasting    Alt310
+  410     Food Chains     Alt410
 </pre>
 <p>
 Save the file and put it in the <i>localvision/upload/feeds</i> directory.
@@ -264,11 +260,11 @@ The <i>altIndustry</i> property of <i>Industry</i> has been created.
 set up the spreadsheet to look like the following example:
 
 <pre>
-<b>		industry name	industry altIndustry name</b>
-	ibm	
-	gm	
-	msft	
-	f	
+  <u>        industry name   industry altIndustry name</u>
+  ibm
+  gm
+  msft
+  f
 </pre>
 
 <li>Select the range.
@@ -279,9 +275,9 @@ set up the spreadsheet to look like the following example:
 The output will look similar to the following example:
 
 <pre>
-<b>		industry name	industry altIndustry name</b>
-	ibm	Software	Alt Software		
-	gm	Automobiles	Alt Automobiles
+  <u>        industry name   industry altIndustry name</u>
+  ibm     Software        Alt Software
+  gm      Automobiles     Alt Automobiles
 </pre>
 
 Your Extraction is complete.
@@ -289,12 +285,5 @@ Your Extraction is complete.
 </ol>
 
 </ol></ul></ul>
-<hr>
-<table border="0" width="100%">
-<tr>
-<td align="left"><font size="-1">Copyright &copy; 1998 Innovative Systems Techniques, Inc.</font>
-<td align="right"><font size="-1">Updated December 23, 1998</font>
-</table>
-</body>
-</html>
 
+{% include doc-footer.htm copydates="1998" %}

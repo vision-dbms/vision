@@ -1,32 +1,20 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Portfolio Management Application Administration</title>
-</head>
-<body bgcolor=white>
-<h2>Vision Portfolio Management Application Administration</h2>
+---
+title: Vision Portfolio Management Application Administration
 
-<p>
-| <a href="vpma.htm">Application Overview</a> 
-| <a href="pmaFeeds.htm">Data Feeds</a>
-| <a href="pmaXRef.htm">Application Cross Reference</a>
-|
-<hr>
-<h3>Topics Covered:</h3>
-<ul type=square>
-<li><a href="#overview">Overview</a>
-<li><a href="#data">Uploading Data From Files</a>
-<li><a href="#scripts">Loading New Vision Scripts</a>
-<li><a href="#schema">Defining New Database Schema</a>
-<li><a href="#versions">Reviewing Version History</a>
-<li><a href="#web">Controlling the Web Reporter</a>
-<li><a href="#maintain">Database Maintenance Functions</a>
-<li><a href="#production">Production Processing</a>
-</ul>
+related_topics:
+  - url: "vpma.htm"
+    title: "Application Overview"
+  - url: "pmaFeeds.htm"
+    title: "Data Feeds"
+  - url: "pmaXRef.htm"
+    title: "Application Cross Reference"
 
-<p>
+sidebar:
+  nav: "sb_InvestmentManagers"
+---
+
 <hr>
-<h3><a name="overview">Overview</a></h3>
+<h2 id="overview">Overview</h2>
 <p>
 Your Vision database is designed to store portfolio, security, holding,
 and related information over time.  Although you can load this data
@@ -68,7 +56,7 @@ other functions.
 
 <p>
 <hr>
-<h3><a name="data">Uploading Data From Files</a></h3>
+<h2 id="data">Uploading Data From Files</h2>
 <p>
 The list box on the left of the main form shows the data files 
 that are currently available for update.  A data file contains
@@ -116,7 +104,7 @@ list box.
 
 <p>
 <hr>
-<h3><a name="scripts">Loading New Vision Scripts</a></h3>
+<h2 id="scripts">Loading New Vision Scripts</h2>
 <p>
 You may need to load and save new Vision scripts into 
 your database for several reasons such as report modifications,
@@ -157,7 +145,7 @@ list box.
 
 <p>
 <hr>
-<h3><a name="schema">Defining New Database Schema</a></h3>
+<h2 id="schema">Defining New Database Schema</h2>
 <p>
 Options are available that streamline the creation of
 new database structures. Selecting the <i>Schema</i> choice from
@@ -176,7 +164,7 @@ document <a href="clDataFeed.htm"><i>The <b>DataFeed</b> Class</i></a>.  This do
 
 <p>
 <hr>
-<h3><a name="versions">Reviewing Version History</a></h3>
+<h2 id="versions">Reviewing Version History</h2>
 <p>
 Each time you commit information to the Vision database, Vision
 creates a new version or view of the database.  Note that analysts accessing
@@ -207,7 +195,7 @@ and notify analysts that they can reconnect to the database.
 
 <p>
 <hr>
-<h3><a name="web">Controlling the Web Reporter</a></h3>
+<h2 id="web">Controlling the Web Reporter</h2>
 <p>
 To use Vision's web-based applications, there needs to be at least
 one running Vision session waiting for browser requests.  These Vision
@@ -242,7 +230,7 @@ about private listeners <a href="pmaAnalyst.htm#browser">is available</a>.
 
 <p>
 <hr>
-<h3><a name="maintain">Database Maintenance Functions</a></h3>
+<h2 id="maintain">Database Maintenance Functions</h2>
 <p>
 A set of database maintenance functions needs to be performed 
 periodically to reclaim space and compress structures that
@@ -297,7 +285,7 @@ understand when and how to use these tools.
 
 <p>
 <hr>
-<h3><a name="production">Production Processing</a></h3>
+<h2 id="production">Production Processing</h2>
 <p>
 It is useful to automate the production cycle so that standard
 updates and report generation can be scheduled to run each night.
@@ -315,16 +303,4 @@ a menu choice, <i>Production</i>, that contains options for
 looking at the state of the current production cycle, scheduling and
 removing updates and reports, and viewing production logs.
 
-<p>
-<hr>
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated December 15, 2000</font>
-</table>
-
-</body>
-</html>
-
-
-
+{% include doc-footer.htm copydates="2000" %}

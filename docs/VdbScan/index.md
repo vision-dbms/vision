@@ -1,8 +1,9 @@
 ---
-layout: default
----
+title: "Vision Database Scan Start Page"
 
-# Vision Database Scan Start Page
+sidebar:
+  nav: "sb_Troubleshooting"
+---
 
 The main goal of `VdbScan.vis` is to alert teams using vision to problems in their databases before they become critical. The goal of this package is to raise alarm about issues in a database so that there is a week or more to work on implementing a solution BEFORE production is impacted.
 

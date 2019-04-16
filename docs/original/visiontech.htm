@@ -1,23 +1,16 @@
-<!DOCTYPE html>
-<HTML>
-<HEAD>
-   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
-   <META NAME="Author" CONTENT="Michael J. Caruso">
-   <META NAME="GENERATOR" CONTENT="Mozilla/4.04 [en] (WinNT; I) [Netscape]">
-   <TITLE>So You Think Objects Are Records With Byte Codes On The Side?</TITLE>
-</HEAD>
-<BODY>
+---
+title: "The Vision Technology"
 
-<CENTER>
-<H1>
-The Vision Technology</H1></CENTER>
+sidebar:
+   nav: "sb_TheVisionStory"
+---
+<p>
 
-<DL>
-<H2>
-Business Entity Applications</H2>
-Once upon a time, most people assumed that business entities were simple
+<h2 id="BusinessEntityApplications">Business Entity Applications</h2>
+
+<P>Once upon a time, most people assumed that business entities were simple
 things easily handled using existing techniques and technologies.&nbsp;
-That was before most people gave much thought to the matter.&nbsp; Our
+That was before most people gave much thought to the matter. Our
 experience working with financial, economic, and market research data,
 entities and applications, particularly ad hoc, analytic, decision support
 applications, has taught us otherwise.
@@ -25,213 +18,159 @@ applications, has taught us otherwise.
 <P>Business entity applications involve the integration of substantial
 amounts of internal and external data. That data is almost universally
 time varying and governed by non-trivial rules regarding its interrelationships
-and use.&nbsp; While temporal dependencies are one source of those rules,
+and use. While temporal dependencies are one source of those rules,
 they are not the only source.
 
-<P>Applications cannot be partitioned neatly into 'the bulk part the database does' and everything else.&nbsp; Applications are collection and query
+<P>Applications cannot be partitioned neatly into 'the bulk part the database does' and everything else. Applications are collection and query
 intensive with collection and query operations interspersed throughout
 an application and across levels of encapsulation and abstraction.
 
 <P>Transactions are long running and ad hoc, with ad hoc explorations often
-leading to new rules and building blocks.&nbsp; Explorations are conducted
+leading to new rules and building blocks. Explorations are conducted
 and new applications developed by business knowledgeable users, not programmers
-and 'database gurus'.&nbsp; Those rules and building blocks must be reusable
-at all appropriate places in new applications.&nbsp; It is unreasonable
+and 'database gurus'. Those rules and building blocks must be reusable
+at all appropriate places in new applications. It is unreasonable
 and undesirable to encumber the productivity of those users or the reuse
 of their explorations simply because of technological limitations.
 
-<P>At this point, the world has caught up, at least partially, by recognizing
-that these issues are worth solving.
-<BR>&nbsp;
-<H2>
-Not An Incremental Technology</H2>
-The analytic decision support, data acquisition, and data distribution
-applications we build for firms in the financial and other information
-intensive industries are mission critical in their organizations. We built
-Vision, a temporal, object-oriented, database management system, as a
-vehicle for delivering those systems.&nbsp; Vision has been doing that
+<P>When we first wrote this in the early 1990's, the world was beginning
+  to recognize the importance of addressing these issues.  Today, these
+  issues are front and center as people work to model and analyze large
+  and growing collections of complex data.
+
+<h2>Not An Incremental Technology</h2>
+
+<P>The analytic decision support, data acquisition, and data distribution
+applications supported by Vision in the financial and other information
+intensive industries are mission critical in their organizations.  Vision,
+a temporal, object-oriented, database management system, has been doing that
 job successfully, reliably, and with no fundamental change to its architecture
 or information model since its initial release in 1986.
 
 <P>When we built Vision, we had three significant advantages -- a technological
 concept based on our experience building data intensive applications and
-analysis tools, real clients and their applications, and a clean slate.&nbsp;
+analysis tools, real clients and their applications, and a clean slate.
 The benefits of a clean slate are obvious. Our clients and their applications
-provide a built-in validation suite for the technology.&nbsp; That validation
+provide a built-in validation suite for the technology. That validation
 is multifaceted: immediate success of the technology's original applications;
 low development and deployment costs for new applications; low maintenance
 costs for existing applications; scalable exploitation of the hardware
 improvements we've all seen over the past decade.
 
 <P>There is no brief way to describe the scope and details of the Vision
-technology.&nbsp; Vision borrows in many key ways from its database and
-object-oriented heritage; however, Vision is not an incremental technology.&nbsp;
+technology. Vision borrows in many key ways from its database and
+object-oriented heritage; however, Vision is not an incremental technology.
 Vision is a database programming language hybrid that implements object-oriented
 constructs and operations, defined naturally in terms of classes and individuals,
-in a completely collection centric way.&nbsp;&nbsp; Objects, updates, and
+in a completely collection centric way. Objects, updates, and
 computation structures are all represented using a common unifying infrastructure
 of stateless, abstract objects connected by state and structure bearing
-morphisms.&nbsp; Both collections of objects and collections of collections
+morphisms. Both collections of objects and collections of collections
 are naturally represented and transformed within Vision. Because all operations
 are implemented as algebraic transformations of underlying object structures
-and execution state, they are implicitly parallel.&nbsp; This includes
+and execution state, they are implicitly parallel. This includes
 all collection operations -- not just selection operations.
 
-<P>Vision's temporal data model is a grouped temporal model, influenced
-by Clifford and Warren's 1983 'Formal Semantics for Time In Databases'&nbsp;
-TODS article (remember, Vision has been doing this stuff since 1986).&nbsp;
-In Vision, temporal dependencies are modeled at the level of object properties.&nbsp;
-Temporal properties can be used explicitly as the time series that they
-are; however, they exhibit their modeling power when used to select, on
-the basis of the temporal context of an expression, the property values
-applicable in that temporal context.&nbsp; Temporal context can be freely
-bound, rebound, nested, and multiply bound within an expression.&nbsp;
-The algebra of the Vision execution engine easily parallelizes concurrent
-temporal contexts so that it is common for one expression to be evaluated
-for multiple individuals and temporal contexts simultaneously and without
-restriction.&nbsp; Underlying this model are time series structures with
-no intrinsic limits on their granularity or regularity and an extensive,
-extensible collection of date and time classes and operations.
+<P>
+  Vision's temporal data model is based on early temporal database research
+  such Clifford and Warren's 1983 <i>Formal Semantics for Time In Databases</i>
+  (Vision has been doing this stuff since 1986). In Vision, temporal dependencies
+  are modeled at the level of object properties. Temporal properties can be used
+  explicitly as the time series that they are; however, they exhibit their modeling
+  power when used to select, on the basis of the temporal context of an expression,
+  the property values applicable in that temporal context. Temporal context can be
+  freely bound, rebound, nested, and multiply bound within an expression.  The
+  algebra of the Vision execution engine easily parallelizes concurrent temporal
+  contexts so that it is common for one expression to be evaluated for multiple
+  individuals and temporal contexts simultaneously and without restriction. Underlying
+  this model are time series structures with no intrinsic limits on their granularity
+  or regularity and an extensive, extensible collection of date and time classes and
+  operations.
 
-<P>In planting its flag at a new point in the technological spectrum, Vision
-has questioned a number of assumptions and implemented some traditional
-ideas in non-traditional ways.&nbsp; Physically, Vision objects are not
+<P>Vision has questioned a number of assumptions and implemented some traditional
+ideas in non-traditional ways. Physically, Vision objects are not
 records, and Vision computation does not proceed an individual object at
-a time.&nbsp; In the examples that follow, if you think you see concrete
+a time.  In the examples that follow, if you think you see concrete
 structures like records and element at a time execution orders, it's all
 in your mind.
-<BR>&nbsp;
-<H2>
-A Modest Example</H2>
-&nbsp;&nbsp;&nbsp; <I>Account defineMethod: [ | correlatedAccounts |</I>
-<BR><I>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; !lowerPct &lt;- pctEq
-* 0.8; !upperPct &lt;- ...;</I>
-<BR><I>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; holdings</I>
-<BR><I>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-select: [security type isEquity].</I>
-<BR><I>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-collectListElementsFrom: [security holdings].</I>
-<BR><I>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-groupedBy: [account].</I>
-<BR><I>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-select: [pctEq >= ^my lowerPct &amp;&amp; pctEq &lt;= ^my upperPct].</I>
-<BR><I>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-extendBy: [ !correlation &lt;- groupList correlate: [...] ... ].</I>
-<BR><I>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-sortDown: [correlation]</I>
-<BR><I>&nbsp;&nbsp;&nbsp;&nbsp; ];</I>
+
+<h2 id="AModestExample">A Modest Example</h2>
+
+<pre><i>
+   Account defineMethod: [ | correlatedAccounts |
+      !lowerPct <- pctEq * 0.8; !upperPct <- ...;
+      holdings
+         select: [security type isEquity].
+         collectListElementsFrom: [security holdings].
+         groupedBy: [account].
+         select: [pctEq between: ^my lowerPct and: ^my upperPct].
+         extendBy: [ !correlation <- groupList correlate: [...] ... ].
+         sortDown: [correlation]
+    ];
+</i></pre>
 
 <P>This modest, but typical example, is taken from a mutual fund/portfolio
-analysis system powered by Vision.&nbsp; It is a skeleton of a method used
+analysis system powered by Vision. It is a skeleton of a method used
 to order the funds/portfolios in the database based on the degree their
 holdings correlate with a specific mutual fund (the recipient of <i>correlatedAccounts</i>
-message).&nbsp; It is typical of the sort of thing that an analyst might
+message). It is typical of the sort of thing that an analyst might
 need to do at 9 AM for an 11 AM presentation.
 
 <P>While the specific details of the method do not matter, there are a number
 of key features worth noting:
 <OL>
 <LI>
-query and collection operations are embedded throughout the logic of this
-method.&nbsp; Some of those operations are traditional database operations
-like selection and grouping, others are non-traditional and user defined.</LI>
+Query and collection operations are embedded throughout the logic of this
+method. Some of those operations are traditional database operations
+like selection and grouping, others are non-traditional and user defined,
+such as <i>collectListElementsFrom:</i> and <i>correlate:</i>.
+</LI>
 
 <LI>
 New collections of information, complete with new properties, need to be
-created, used, and returned dynamically.&nbsp; This method delivers a collection
-of results to its caller.&nbsp; It is reasonable to expect that caller
+created, used, and returned dynamically. This method delivers a collection
+of results to its caller. It is reasonable to expect that caller
 to perform more collection operations on the result; it is unreasonable
 to materialize that collection into an 'outside the database' world that
 implements those operations in an ad hoc way.</LI>
 
-<BR>&nbsp;
-<UL>
-<LI>
-<I>TRoweFunds do: [correlatedAccounts first: 5 . do:&nbsp; [ ... ] ]</I></LI>
+<pre><i>
+MyFunds do: [correlatedAccounts first: 5 . do: [ ... ] ]
 
-<LI>
-<I>^today to: ^today - 1 yearEnds by: 1 quarterEnds. evaluate: [</I></LI>
+^today to: ^today - 1 yearEnds by: 1 quarterEnds. evaluate: [
+   MyFunds do: [correlatedAccounts first: 5. do: [...]]
+]
 
-<BR><I>&nbsp;&nbsp;&nbsp; TRoweFunds do: [correlatedAccounts first: 5.
-do: [...]]</I>
-<BR><I>]</I>
-<LI>
-<I>Account defineMethod: [ | displayCorrelatedAccounts |</I></LI>
+Account defineMethod: [ | displayCorrelatedAccounts |
+   ...
+   correlatedAccounts select: [correlation >= ...] ...;
+   ...
+];
 
-<BR><I>&nbsp;&nbsp;&nbsp; ...</I>
-<BR><I>&nbsp;&nbsp;&nbsp; correlatedAccounts select: [correlation >= ...]
-...;</I>
-<BR><I>&nbsp;&nbsp;&nbsp; ...</I>
-<BR><I>];</I>
-<BR><I>TRoweFunds do: [displayCorrelatedAccounts]</I></UL>
-&nbsp;
+MyFunds do: [displayCorrelatedAccounts]</I>
+</i></pre>
 <LI>
-collection level detail is just as important as summary information.&nbsp;
+Collection level detail is just as important as summary information.
 This is true  for both stored database state and dynamically derived
-information.&nbsp; Here, for example, the <I>Account</I> class has a collection
+information. Here, for example, the <I>Account</I> class has a collection
 valued <I>holdings</I> property and non-collection valued <I>pctEq</I>
-property;&nbsp; the <I>groupedBy:</I> operation returns a collection of
+property; the <I>groupedBy:</I> operation returns a collection of
 new objects, each with a single valued reference to an <I>account</I> object
 and a multi-valued <I>groupList</I> property referencing the elements of
 the group.</LI>
 
 <LI>
-much complexity is encapsulated beneath this method.&nbsp; For example,
+Much complexity is encapsulated beneath this method. For example,
 at the level of abstraction of this method, the time variability of both
 the <I>holdings</I> and <I>pctEq</I> properties has already been properly
 handled.</LI>
 </OL>
-&nbsp;
-<H2>
-Applications Like These Work</H2>
-Vision applications like these are commonplace.&nbsp; They are routinely
+
+<h2 id="ApplicationsLikeThisWork">Applications Like These Work</h2>
+Vision applications like these are commonplace. They are routinely
 developed by business knowledgeable users, not programmers or database
-tuning experts.&nbsp; Vision's users take for granted their ability to
-do so.&nbsp; They can because of Vision's underlying architecture and theory
+tuning experts. Vision's users take for granted their ability to
+do so. They can because of Vision's underlying architecture and theory
 of operation.
 
-<P>Our white papers:
-<BR>&nbsp;
-<CENTER><TABLE>
-<TR>
-<TD><IMG SRC="instdot.gif" ALT="" HEIGHT=14 WIDTH=14> <B><A HREF="tinats.htm">Time
-Is Not A Time-Series</A></B>&nbsp;</TD>
-</TR>
-
-<TR>
-<TD><IMG SRC="instdot.gif" ALT="" HEIGHT=14 WIDTH=14> <B><A HREF="sdmts.htm">Sets
-Do More Than <I>Select</I></A></B>&nbsp;</TD>
-</TR>
-
-<TR>
-<TD><IMG SRC="instdot.gif" ALT="" HEIGHT=14 WIDTH=14> <B><A HREF="download/vldb98.ppt.gz">1998
-<I>VLDB</I> Time Series Presentation</A></B>&nbsp;</TD>
-</TR>
-</TABLE></CENTER>
-
-
-<P>and <I><A HREF="vonline.htm">Vision Online</A></I> describes the Vision
-technology and its applications extensively.</DL>
-<hr>
-<table border="0" width="100%">
-<tr>
-<td align="left"><font size="-1">Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
-<td align="right"><font size="-1">Created January 21, 2000</font>
-</table>
-
-<hr>
-
-<font size=-1><Center> 
-| <a href="index.htm">Home</a> 
-| <a href="abtinsyt.htm">About Insyte</a> |
-<br>
-| <a href="vonline.htm">Vision On-line</a> 
-| <a href="vpma.htm">Investment Managers</a>  
-| <a href="trowestory.htm">Client Spotlight</a>
-| <a href="euro.htm">Euro</a> |
-<br>
-| <a href="toc.htm">Table of Contents</a> |
-
-</center></font>
-
-</body></html>
+{% include doc-footer.htm copydates="2000" %}

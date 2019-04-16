@@ -1,30 +1,17 @@
-<!DOCTYPE html>
-<html>
-<head>
-   <title>The Vision Network</title>
-</head>
-<body>
-<body bgcolor=white>
+---
+title: The Vision Network
 
-<h2>The Vision Network</h2>
+related_topics:
+  - url: "Running.htm"
+    title: "Running Vision"
+  - url: "admDBA.htm"
+    title: "General Administration"
 
-| <a href="FHome.htm">Home</a> 
-| <a href="Running.htm">Running Vision</a> 
-| <a href="admDBA.htm">General Administration</a> |
-<hr>
+sidebar:
+  nav: "sb_UsingVision"
+---
 
-<p>
-<h3>Topics Covered:</h3>
-<ul type="square">
-<li><a href="#overview">Overview</a>
-<li><a href="#The Network Structure">The Network Structure</a>
-<li><a href="#Creating New Object Spaces">Creating New Object Spaces</a>
-<li><a href="#Distributing Object Spaces">Distributing Object Spaces</a>
-<li><a href="#Creating Multiple Vision Networks">Creating Multiple Vision Networks</a>
-</ul>
-<hr>
-
-<a name = "overview"><h3>Overview</h3></a>
+<h2 id="overview">Overview</h2>
 
 Most database management systems only store the raw data 
 associated with manual inputs and various data feeds.  
@@ -109,7 +96,7 @@ stamps of specific files, it is not necessary to back up the entire network
 a "full" backup once a week and daily incremental backup during the week.
 <hr>
 
-<a name = "The Network Structure"><h3>The Network Structure</h3></a>
+<h2 id="TheNetworkStructure">The Network Structure</h2></a>
 
 The Vision Network is initially configured to contain three object spaces 
 in the directory  <i>/localvision/network: 1, 2 and 3</i>.   
@@ -139,9 +126,9 @@ specific information using messages defined at the class Company.  The message
 instances that are accessible to all users with the data that is stored in the 
 <i>CompanyDemo</i> object space.  The entire process of object space navigation
 is invisible to the user.  The expression:
-<pre><b>
+<pre>
 	Named Company IBM DemoData
-</b></pre>
+</pre>
 
 would retrieve the correct object for IBM for any user,  independent  
 of the actual object spaces involved.
@@ -154,13 +141,13 @@ When you start Vision normally, you are accessing a temporary work space.
 To use a specific object space as your top level space, you start Vision with 
 the <i>-U#</i> option where # refers to a specific object space.  
 For example:
-<pre><b>
+<pre>
 	batchvision -U8
-</b></pre>
+</pre>
 or
-<pre><b>
+<pre>
 	vision -U8
-</b></pre>
+</pre>
 
 starts Vision with object space 8 as its top level.
 
@@ -171,50 +158,50 @@ searches the user's top-level space first, followed by <i>object space 3</i>,
 then <i>object space 2</i> to locate any top-level messages that have been sent.  
 The message is resolved at the first place it is found.  The message 
 search path is illustrated below:
-<pre><b>        top level space	         (temporary or private user space)
+<pre>        top level space	         (temporary or private user space)
 	      |
               |
 	object space 3	         (shared application core)
 	      |	 
 	      |		
         object space 2	         (shared built-in core)
-</b></pre>
+</pre>
 
 For example, the selector <i>Company</i> could be defined as a  
 message in <i>object space 3</i> that returns the default instance 
 of the class <i>Company</i>.  When the Vision expression: 	
 <ul>
-<pre><b>
+<pre>
 Company
-</b></pre>
+</pre>
 </ul>
 
 is executed, the default company is returned.  If the Vision expression:
-<pre><b>
+<pre>
 	!Company <- 10 ;
-</b></pre>
+</pre>
 
 is executed, the selector <i>Company</i> is temporarily created  
 in the user's top-level space.  When the expression:
-<pre><b>
+<pre>
 	Company
-</b></pre>
+</pre>
 
 is executed at this time, it will return the number 10, since 
 Vision finds this first definition in the user's top-level space.  
 To access the original, "shared" definition of <i>Company</i>, 
 type the expression:
-<pre><b>
+<pre>
 	super Company
-</b></pre>
+</pre>
 
 The default company will be returned.
 <p>
 
 To display all the messages defined in the top-level space,  type the expression:
-<pre><b>
+<pre>
 	displayMessages
-</b></pre>
+</pre>
 
 If you started your session with an explicit object space number, 
 this request displays all the messages that have been defined for 
@@ -224,9 +211,9 @@ defined in this session.
 
 To display all the messages that are defined in <i>object space 3</i>,  
 type the expression:
-<pre><b>
+<pre>
 	super displayMessages
-</b></pre>
+</pre>
 
 <blockquote><hr>
 <center><b><font size+1>Note:</font></b></center>
@@ -239,37 +226,37 @@ message would actually return the top level of <i>object space 2</i>.
 To display all the messages that are defined in <i>object space 2</i>, 
 type the expression:
 <ul>
-<pre><b>
+<pre>
 super super displayMessages
-</b></pre>
+</pre>
 </ul>
 
 The magic word <i>^global</i> is used to access your top level 
 from within a Vision program.  For example:
 
-<pre><b>
+<pre>
         object
         do: [ #---  misc messages to object
              ^global displayMessages;
             ] ;
-</b></pre>
+</pre>
 
 displays all the messages defined for your top level space, independent  
 of the object with which you are working.  The message 
 <i>CoreWorkspace</i> will always return the top level of 
 <i>object space 3</i> independent of your top level starting point.  
 For example:
-<pre><b>
+<pre>
 	object
 	do: [ #---  misc messages to object
 	      ^global CoreWorkspace displayMessages;
 	    ] ;
-</b></pre>
+</pre>
 
 displays all the messages defined for the top level of <i>object space 3</i>.
 <hr>
 
-<a name="Creating New Object Spaces"><h3>Creating New Object Spaces</h3></a>
+<h2 id="CreatingNewObjectSpaces">Creating New Object Spaces</h2>
 
 New object spaces must be created by the <i>dbadmin</i> user code.   
 The safest way to create a new object space is to use the <i>installSpace</i> 
@@ -291,32 +278,32 @@ automatically runs after space creation.
 <p>
 
 Type the expression:
-<pre><b>
+<pre>
 	$transArea/scripts/installSpace
-</b></pre>
+</pre>
 
 You will see the prompt:
-<pre><b>
+<pre>
  	Setup for Private User [Yes]?
-</b></pre>
+</pre>
 
 If you are not setting up a private user space type <i>No</i>, <i>NO</i>, or <i>no</i>.  
 In that case, you will see the prompt:
-<pre><b>
+<pre>
 	Setup for New Data Source [Yes]?
-</b></pre>
+</pre>
 
 If you are not setting up an external data source space type <i>No</i>.  
 In that case, you will see the prompt:
-<pre><b>
+<pre>
 	Setup for General Admin [Yes]?
-</b></pre>
+</pre>
 
 If you are not setting up a general administration space type <i>No</i>.  
 In that case, you will see the message:
-<pre><b>
+<pre>
 	No Other Choices Available.  Abort [No]?
-</b></pre>
+</pre>
 
 If you type <i>Yes</i>, the space installation will abort, 
 otherwise you will be prompted for each choice again.
@@ -324,7 +311,7 @@ otherwise you will be prompted for each choice again.
 
 Depending on the type of space you have requested you will be 
 prompted for additional pieces of information:
-<pre><b>
+<pre>
 	Private Space
 	User:	# Unique identifier for the space
 	Description:	# Full name of user or other useful description
@@ -336,7 +323,7 @@ prompted for additional pieces of information:
                  General Admin
 	Code: 	# Unique identifier for the space
 	Description:	# Description of the space's function
-</b></pre>
+</pre>
 
 If there are any problems creating the space, the errors will  
 be displayed and the session will abort.  Otherwise, you will see 
@@ -346,19 +333,19 @@ a confirmation message indicating the number of the object space created.
 Note that if you run this script while the production cycle is  
 active it will prevent any conflicts from occurring between the 
 new space creation and the current updates.  If you see the message:
-<pre><b>
+<pre>
 	... Daemon Not Sleeping.  Waiting 15 seconds.
 	Remove /localvision/status/tokens/spaceInstall.inProgress if you abort.
-</b></pre>
+</pre>
 
 your space creation may conflict with a current update so the process will wait
 and try again in 15 seconds.  If your abort the <i>installSpace</i> process while 
 it is waiting, you should also remove the file <i>spaceInstall.inProgress</i> as 
 indicated.  If you see the message:
-<pre><b>
+<pre>
 	 >>> Space Install Already In Progress.  Try Later or Remove File
 	--> /localvision/status/tokens/spaceInstall.inProgress
-</b></pre>
+</pre>
 and you know that no one is currently creating a new space,  just remove the 
 file indicated and try again.  Note that if you exit the <i>installSpace</i> 
 script ungracefully, it will not clean up this token file correctly.
@@ -377,36 +364,36 @@ to create new files in the object space.
 
 To access your new space as the top-level space, start Vision with the 
 <i>-U</i> option.  For example, if you just created space 9, use:
-<pre><b>
+<pre>
 	batchvision -U9
-</b></pre>
+</pre>
  or
-<pre><b>
+<pre>
 	vision -U9
-</b></pre>
+</pre>
 
 The message <i>displayInfo</i> is defined for each object space to describe 
 the space.  For example, if you are running with <i>object space 9</i> as your top 
 level and you defined this to be a private user space for the id <i>xyz</i> 
 with a description xyz's <i>stuff</i>, the expression:
-<pre><b>
+<pre>
 	displayInfo
-</b></pre>
+</pre>
 
 generates the output:
-<pre><b>
+<pre>
 	Object Space Number: 	9
 	This Space Contains: xyz's stuff
 	Shared Access Via: Environment User xyz
-</b></pre>
+</pre>
 The messages <i>code</i>, <i>name</i>, <i>number</i>, <i>type</i>, and 
 <i>whatAmI</i> are defined for each space.  For example, if you are running 
 in space 9,  the expression:
-<pre><b>
+<pre>
 	"Space: " print ; number print ;
 	"  Id: " print ; code print ;
 	" Type: " print ; type print ;
-</b></pre>
+</pre>
 
 displays the object space number (9), the space id (xyz), and 
 the space type (User).
@@ -414,12 +401,12 @@ the space type (User).
 
 You can access data stored in another object space independent 
 of your top level.  The expressions:
-<pre><b>
-	Environment User id	#  Environment User at: "id" .</b></pre>
+<pre>
+	Environment User id	#  Environment User at: "id" .</pre>
 or
-<pre><b>        Environment DBA id	#  Environment DBA at: "id"  .</b></pre>
+<pre>        Environment DBA id	#  Environment DBA at: "id"  .</pre>
 or
-<pre><b>        Environment DB id	#  Environment DB at: "id" .</b></pre>
+<pre>        Environment DB id	#  Environment DB at: "id" .</pre>
 
 can be used to navigate to the top level of a private user, general 
 administration or database space.  The supplied id can be the  
@@ -427,42 +414,42 @@ identifier used to create the space or the space number.
 The object returned is the top-level of that space.  As a result, 
 any messages defined for that space can be accessed.  
 For example, the expression:
-<pre><b>
+<pre>
 	Environment DBA at: "5" . displayInfo
-</b></pre>
+</pre>
 displays:
 
-<pre><b>
+<pre>
 	Object Space Number:	5
 	This Space Contains: Schema Management Tools
 	Shared Access Via: Environment DBA Schema
-</b></pre>
+</pre>
 
 To display a list of all spaces for a specific type, send  
 the <i>displayMessages</i> message to it.  For example, to get a 
 list of all DBA type spaces use:
-<pre><b>
+<pre>
 	Environment DBA displayMessages
-</b></pre>
+</pre>
 
 To access a list of all the top level spaces created after  
 object space 3, use the expression:
-<pre><b>
+<pre>
 	Environment MaintenanceTools spaceList
-</b></pre>
+</pre>
 
 This returns a list of all the top level environments.  
 You can use this list to generate a report describing all 
 spaces.  For example:
-<pre><b>
+<pre>
 	Environment MaintenanceTools spaceList
 	do: [ number print: -5 ;	#- object space number
 	      whatAmI printNL ;	        #- full access path
 	    ] ;
-</b></pre>
+</pre>
 <hr>
 
-<a name="Distributing Object Spaces"><h3>Distributing Object Spaces</h3></a>
+<h2 id="DistributingObjectSpaces">Distributing Object Spaces</h2>
 
 Object spaces can be physically distributed across multiple disks or workstations.  
 Operating system symbolic links are used to manage this distribution.  As a result, 
@@ -497,7 +484,7 @@ the full path name to the new directory.
 For example, suppose you want to move object space 5 to the directory 
 <i>/disk2/localvisionSupp/network/</i>:
 
-<pre><b>
+<pre>
 	cd /disk2/localvisionSupp/network
 	cp -Rp /localvision/network/5 5
 	cd /localvision/network
@@ -505,7 +492,7 @@ For example, suppose you want to move object space 5 to the directory
 	ln -s /disk2/localvisionSupp/network/5 5
 	#-     execute any tests to confirm availability
 	rm -r old5
-</b></pre>
+</pre>
 
 The old version of the object space should not be removed until  
 you have confirmed that the copy worked correctly.  Minimally, you 
@@ -521,7 +508,7 @@ directory so that future disk reorganization can be streamlined.
 By convention, the <i>/localvision/sites</i> directory is used to store 
 these indirect links.  For example, the previous relocation could have 
 been executed using the following steps:
-<pre><b>
+<pre>
 	cd /localvision/sites
 	ln -s /disk2/localvisionSupp site1
 	cd /disk2/localvisionSupp/network
@@ -531,7 +518,7 @@ been executed using the following steps:
 	ln -s /localvision/sites/site1/network/5 5
 	#- execute any tests to confirm availability
 	rm -r old5
-</b></pre>
+</pre>
 
 The major advantage of this approach is that no <i>/localvision</i> file or 
 directory needs to have any knowledge of the hardware's disk structure except 
@@ -548,18 +535,18 @@ locations housing parts of the Vision system.
 If you use the external database driver tools, be aware that the 
 update directory for a driver must be located on the same logical 
 disk as its associated object space.  If you get the error message:
-<pre><b>
+<pre>
 	>>>  Error Default Error Handler Exit  <<<
 	*    The Persistent Storage Manager [###]
 	*    A System Fault
 	* External Segment Link [xyz0.date> ./network/#/#]:"Cross-device link"
-</b></pre>
+</pre>
 
 during the database update process, your update and object space directories 
 are on different disks and the segments cannot be installed.
 <hr>
 
-<a name="Creating Multiple Vision Networks"><h3>Creating Multiple Vision Networks</h3></a>
+<h2 id="CreatingMultipleVisionNetworks">Creating Multiple Vision Networks</h2>
 
 You will normally have one production version of a Vision database on
 a machine.  However, there are times when it is useful to have more
@@ -576,34 +563,34 @@ Two starting points are available for creating a new network:
 <li><a href="#bootstrap">Bootstrap a new Vision network containing only the core classes and messages.</a>
 </ul>
 
-<a name="copy"><h4>Copying an Existing Network</h4></a>
+<h3 id="copy">Copying an Existing Network</h3>
            
 To copy an existing network you can create a new directory and copy the <i>/localvision/network</i> tree to it.  
 For example:
-<pre><b>
+<pre>
 	cd /localvision
 	cp -rp network newnetwork
-</b></pre>
+</pre>
 
 You now have a complete copy of the original network in the
 <i>/localvision/newnetwork</i> directory.  However, the NDF
 controller in this directory will still refer to the original
 network.  You can confirm this using the viewndf tool:  
 
-<pre><b>
+<pre>
 	/vision/tools/viewndf /localvision/newnetwork/NDF  |more
-</b></pre>
+</pre>
 
 A new NDF needs to be created to match the location of the new object spaces.  
 Essentially, the NDF needs to know the full name of its top-level directory.  
 To establish this for the new network,  execute the following:
 
-<pre><b>
+<pre>
 	setenv VisionAdm 1
 	setenv OSDPathName /localvision/newnetwork     # object space location
 	setenv NDFPathName $OSDPathName/NDF            # new NDF location
 	/vision/bin/batchvision -R fromOSD             # create using OSD
-</b></pre>
+</pre>
 
 When the V> prompt appears type QUIT or Ctrl D to exit Vision.  
 Your new NDF will be created in the <i>/localvision/newnetwork</i> directory.
@@ -618,9 +605,9 @@ the rebuild.
 
 To confirm that the NDF now references the new network use:
 
-<pre><b>
+<pre>
 	/vision/tools/viewndf /localvision/newnetwork/NDF  |more
-</b></pre>
+</pre>
 
 All Vision sessions that reference this NDF (via the <i>NDFPathName</i> variable or the <i>-n</i> option) 
 will access information from the new database.  
@@ -631,13 +618,13 @@ By default, the user code that created the <i>NDF</i> for the new network will h
 If you want to change this, edit the file <i>NDF.GURL</i> in the directory <i>/localvision/newnetwork</i>.
 <p>
 
-<a name="bootstrap"><h4>Bootstrapping a New Network</h4></a>
+<h3 id="bootstrap">Bootstrapping a New Network</h3>
 
 You may want to create a new database network that just contains the core Vision classes and messages.  
 The Vision scripts needed to create the bootstrap database are supplied in the directory <i>/localvision/bootstrap</i>.  
 To create a new database network in the <i>/localvision/bootnetwork</i> directory, execute the following in Unix:
 
-<pre><b>
+<pre>
 	cd /localvision
 	mkdir bootnetwork
 	setenv VisionAdm 1	                        # update permission
@@ -646,14 +633,14 @@ To create a new database network in the <i>/localvision/bootnetwork</i> director
 
 	cd /localvision/bootstrap
 	SETUPboot.core /vision/bin/batchvision . >& $OSDPathName/boot.log
-</b></pre>
+</pre>
 
 When this job has completed, your new bootstrap network will be created in the directory <i>/localvision/bootnetwork</i> directory.  
 To confirm that the NDF now references the bootstrap network use:
 
-<pre><b>
+<pre>
 	/vision/tools/viewndf /localvision/bootnetwork/NDF  |more
-</b></pre>
+</pre>
 <p>
 All Vision sessions that reference this NDF (via the
 <i>NDFPathName</i> variable or the <i>-n</i> option) will access
@@ -665,7 +652,7 @@ change this, edit the file <i>NDF.GURL</i> in the directory
 <i>/localvision/bootnetwork</i>. 
  <p> 
 
-<h4>Rebuilding the NDF</h4> <p>
+<h3 id="Rebuilding">Rebuilding the NDF</h3> <p>
 The NDF contains version information about every update that has ever
 been performed since the database network was created.  As a result,
 this file can get large over time.  Since the segments associated
@@ -686,10 +673,10 @@ To invoke the rebuilder, you use the -R option with <i>batchvision</i>.
 The value following the -R option refers to the rebuild mode.
 Valid values are <i>fromOSD</i> and <i>fromNDF</i>.  
 To invoke the Rebuilder in the first mode, use the following command 
-line:<pre><tt><b>
-	batchvision -R fromOSD -o {OSD Path Name} -n {NDF Path Name}
-
-</b></tt></pre>
+line:
+<pre>
+  batchvision -R fromOSD -o {OSD Path Name} -n {NDF Path Name}
+</pre>
 The -o option can be omitted if the environment variable,
 OSDPathName, has been set. The -n option can be omitted if the
 environment variable, NDFPathName, has been set, or if the default
@@ -701,10 +688,10 @@ If a file by the same name as <i>NDF Path Name</i> exists, it is first
 removed and the replaced by the rebuilt NDF.
 <p>
 To invoke the Rebuilder in the second mode, use the following
-command line:<pre><tt><b>
-        batchvision -R fromNDF -n {NDF Path Name}
-
-</b></tt></pre>
+command line:
+<pre>
+  batchvision -R fromNDF -n {NDF Path Name}
+</pre>
 The -n option can be omitted if the environment variable,
 NDFPathName, has been set, or if the default value,
 /vision/network/NDF is desired.
@@ -720,14 +707,14 @@ the rollback utility.
 You may want to make a copy of the existing NDF prior to the rebuild so
 that you can reinstall it if there is a problem.  For example:  
 
-<pre><b>
+<pre>
 	cd /localvision/network
 	cp NDF NDF.preRebuild	                # make a backup
 	setenv VisionAdm 1
 	setenv OSDPathName /localvision/network	# object space location
 	setenv NDFPathName $OSDPathName/NDF	# new NDF location
 	/vision/bin/batchvision -R fromOSD      # use OSD to rebuild
-</b></pre>
+</pre>
 
 When the V> prompt appears type <b>QUIT</b> or <b>Ctrl D</b> to exit Vision.  
 The size of the new <i>NDF</i> should be smaller than the <i>NDF.preRebuild</i> file.
@@ -744,12 +731,5 @@ mode.  To
 confirm the spaces and segments that the current NDF references, use
 the <i>viewndf</i> tool prior to executing the rebuild command.  
 
-<hr>
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated September 20, 1997</font>
-</table>
 
-</body>
-</html>
+{% include doc-footer.htm copydates="1997" %}

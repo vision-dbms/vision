@@ -1,32 +1,17 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Portfolio Management Application: Sample Production Environment
-</title>
-</head>
-<body bgcolor=white>
-<h2>Vision Portfolio Management Application: Sample Production Environment</h2>
+---
+title: "Vision Portfolio Management Application: Sample Production Environment"
 
-<p>
-| <a href="admProduction.htm">Production Processing</a> 
-| <a href="pmaDBA.htm">Portfolio Management Application Administration</a>
-| <a href="vpma.htm">Application Overview</a>
-|
-<hr>
-<h3>Topics Covered:</h3>
-<ul type=square>
-<li><a href="#overview">Overview of the Sample Production Environment </a>
-<li><a href="#requirements">Daily Processing Requirements</a>
-<li><a href="#assumptions">Assumptions</a>
-<li><a href="#typical">A Typical Daily Cycle</a>
-<li><a href="#MiscMasters">The <i>MiscMasters</i> Job</a>
-<li><a href="#SecurityPlus">The <i>SecurityPlus</i> Job</a>
-<li><a href="#HoldingsPlus">The <i>HoldingsPlus</i> Job</a>
-<li><a href="#PricePlus">The <i>PricePlus</i> Job</a>
-</ul>
+related_topics:
+  - url: "admProduction.htm"
+    title: "Production Processing"
+  - url: "pmaDBA.htm"
+    title: "Portfolio Management Application Administration"
+  - url: "vpma.htm"
+    title: "Application Overview"
 
-<p><hr>
-<h3><a name="overview">Overview of the Sample Production Environment</a></h3>
+---
+
+<h2 id="overview">Overview of the Sample Production Environment</h2>
 <p>
 Sample jobs that can be used in a typical portfolio management
 environment are provided with all installations that include the
@@ -40,7 +25,7 @@ specific needs of your production environment.
 <p>
 
 <p><hr>
-<h3><a name="requirements">Daily Processing Requirements</a></h3>
+<h2 id="requirements">Daily Processing Requirements</h2>
 <p>
 Each day, new security, portfolio, pricing, and holdings information
 is available.  Data may be available throughout the evening from
@@ -98,7 +83,7 @@ been updated.
 
 
 <p><hr>
-<h3><a name="assumptions">Assumptions</a></h3>
+<h2 id="assumptions">Assumptions</h2>
 <p>
 To use the supplied jobs as is, you will need to create extract
 files with the following names:
@@ -131,8 +116,9 @@ When the current day's <a href="#miscFeeds">miscellaneous
 master files</a> are available, the update job <i>MiscMasters</i>
 should be scheduled.  The contents of the token file should be
 the date used as a file extension for these files.  
-For example:<ul><pre><b>cd /localvision/production/status
-echo 19981115 > pending/MiscMasters</b></pre></ul>
+For example:<ul>
+<pre>cd /localvision/production/status
+echo 19981115 > pending/MiscMasters</pre></ul>
 This job should begin within five minutes.  When completed,
 the <i>pending</i> token will automatically be removed and
 the token <i>Done.MiscMasters</i> or <i>Error.MiscMasters</i>
@@ -143,8 +129,9 @@ When the current day's <a href="#secFeeds">security and
 related files</a> are available, the update job <i>SecurityPlus</i>
 should be scheduled.  The contents of the token file should be
 the date used as a file extension for these files.  
-For example:<ul><pre><b>cd /localvision/production/status
-echo 19981115 > pending/SecurityPlus</b></pre></ul>
+For example:<ul>
+<pre>cd /localvision/production/status
+echo 19981115 > pending/SecurityPlus</pre></ul>
 This job should begin within five minutes.  When completed,
 the <i>pending</i> token will automatically be removed and
 the token <i>Done.SecurityPlus</i> or <i>Error.SecurityPlus</i>
@@ -156,8 +143,9 @@ When the current day's <a href="#acctFeeds">account and
 holdings files</a> are available, the update job <i>HoldingsPlus</i>
 should be scheduled.  The contents of the token file should be
 the date used as a file extension for these files.  
-For example:<ul><pre><b>cd /localvision/production/status
-echo 19981115 > pending/HoldingsPlus</b></pre></ul>
+For example:<ul>
+<pre>cd /localvision/production/status
+echo 19981115 > pending/HoldingsPlus</pre></ul>
 This job should begin within five minutes.  When completed,
 the <i>pending</i> token will automatically be removed and
 the token <i>Done.HoldingsPlus</i> or <i>Error.HoldingsPlus</i>
@@ -169,8 +157,9 @@ When the current day's <a href="#priceFeeds">price and related
 files</a> are available, the update job <i>PricePlus</i>
 should be scheduled.  The contents of the token file should be
 the date used as a file extension for these files.  
-For example:<ul><pre><b>cd /localvision/production/status
-echo 19981115 > pending/PricePlus</b></pre></ul>
+For example:<ul>
+<pre>cd /localvision/production/status
+echo 19981115 > pending/PricePlus</pre></ul>
 This job should begin within five minutes.  When completed,
 the <i>pending</i> token will automatically be removed and
 the token <i>Done.PricePlus</i> or <i>Error.PricePlus</i>
@@ -179,7 +168,7 @@ directory.  Note that you should not schedule this job to
 run prior to scheduling the <i>SecurityPlus</i> job for the day.
 
 <p><hr>
-<h3><a name="typical">A Typical Daily Cycle</a></h3>
+<h2 id="typical">A Typical Daily Cycle</h2>
 <p>
 <ol>
 <li>Each weekday night, <b>cron</b> starts a new production cycle.
@@ -210,19 +199,22 @@ scheduled in this order.
 <p>
 <li>
 To see which jobs are active and which are still pending, 
-use:<ul><pre><b>cd /localvision/production/status
-ls active pending</ul></pre></b>
+use:<ul>
+<pre>cd /localvision/production/status
+ls active pending</ul></pre>
 <p>     
 To see the status of completed jobs use:
-<ul><pre><b>cd /localvision/production/status
-ls tokens</ul></pre></b>
+<ul>
+<pre>cd /localvision/production/status
+ls tokens</ul></pre>
 <p>     
-To view a log file use:<ul><pre><b>cd /localvision/production/status
-more logs/HoldingsPlus.log</ul></pre></b>
+To view a log file use:<ul>
+<pre>cd /localvision/production/status
+more logs/HoldingsPlus.log</ul></pre>
 </ol>
 
 <p><hr>
-<h3><a name="MiscMasters">The <i>MiscMasters</i> Job</a></h3>
+<h2 id="MiscMasters">The <i>MiscMasters</i> Job</h2>
 <p>
 The sample job <i>MiscMasters.job</i> is located in the directory
 <i>/localvision/production/Updates/jobs</i>.  It will update the
@@ -263,7 +255,7 @@ directory.
 <p>
 
 <p><hr>
-<h3><a name="SecurityPlus">The <i>SecurityPlus</i> Job</a></h3>
+<h2 id="SecurityPlus">The <i>SecurityPlus</i> Job</h2>
 <p>
 
 <p>
@@ -306,7 +298,7 @@ directory.
 
 
 <p><hr>
-<h3><a name="HoldingsPlus">The <i>HoldingsPlus</i> Job</a></h3>
+<h2 id="HoldingsPlus">The <i>HoldingsPlus</i> Job</h2>
 <p>
 
 The sample job <i>HoldingsPlus.job</i> is located in the directory
@@ -352,7 +344,7 @@ directory.
 
 
 <p><hr>
-<h3><a name="PricePlus">The <i>PricePlus</i> Job</a></h3>
+<h2 id="PricePlus">The <i>PricePlus</i> Job</h2>
 <p>
 
 <p>
@@ -392,15 +384,5 @@ directory.
 directory.
 <li> Return <i>0</i> if the job succeeded, <i>1</i> if there was an error.
 </ol>
-<p>
 
-
-<hr>
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy; 1998 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated December 23, 1998</font>
-</table>
-
-</body>
-</html>
+{% include doc-footer.htm copydates="1998" %}

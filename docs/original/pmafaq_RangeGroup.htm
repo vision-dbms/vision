@@ -1,18 +1,16 @@
-<!DOCTYPE html>
-<html>
-<body>
-<title>Vision Portfolio Management FAQ: Range Groups </title>
+---
+title: "Vision Portfolio Management FAQ: Range Groups "
 
-<body>
-<body bgcolor=white>
-<h2>Vision Portfolio Management FAQ:  Range Groups</h2>
-<hr><p>
-<h4>Goal:</h4>
+sidebar:
+  nav: "sb_InvestmentManagers"
+---
+
+<h4 id="goal">Goal</h4>
 <ul>To define a classification scheme that uses value ranges to group related instances.
 </ul>
 <p>
 
-<h4>Description:</h4>
+<h4 id="description">Description</h4>
 <ul>
 Three RangeGroup feeds are pre-defined with the Portfolio Management
 Application Layer: <a href="pma_McapGroups.htm"><i>MCapGroups</i></a>, 
@@ -32,7 +30,7 @@ This FAQ illustrates how to define your own ranges for each of these groups.
 
 
 <p>
-<h4>DataFeed Assumptions:</h4>
+<h4 id="assumptions">DataFeed Assumptions</h4>
 <p>
 <center><table border=1 width=80% cellpadding=4 cellspacing=2>
 <tr><th>DataFeed<th>Fields
@@ -58,13 +56,9 @@ This FAQ illustrates how to define your own ranges for each of these groups.
 </table></center>
 <p>
 
-<h4>
-Topic 1:
-
-Using the <i>McapGroups</i> range group to define market capitalization ranges.
+<h4 id="topic_UsingMcapGroups">
+Topic 1: Using the <i>McapGroups</i> range group to define market capitalization ranges.
 </h4>
-
-<h4>Steps:</h4>
 
 <ol type="A">
 
@@ -75,7 +69,7 @@ Using the <i>McapGroups</i> range group to define market capitalization ranges.
 Note that the feed name <i>MCapGroups</i> is in the top left of the range.
   
 <ul>
-<b><pre>
+<pre>
 MCapGroups
 
 startValue	endValue	label
@@ -86,7 +80,7 @@ NA        	250     	less than $250M
 2500        	5000      	$2.5B - $5B
 5000        	10000      	$5B - $10B
 10000        	NA      	greater than $10B
-</pre></b>
+</pre>
 </ul>
 
 <li>Select the entire range.
@@ -108,12 +102,12 @@ The <i>McapGroups</i> instances have been created.
 Note that the feed name <i>DataItemFeed</i> is in the top left of the range.
 
 <ul>
-<b><pre>
+<pre>
 DataItemFeed
 
 id         shortName    baseClass    accessPath       isGroup
 mcapGroup  MCap Group   Security     marketCapGroup   Y
-</pre></b>
+</pre>
 </ul>
 
 <li>Select the entire range.
@@ -143,7 +137,7 @@ mcapGroup  MCap Group   Security     marketCapGroup   Y
 </ol>
 <hr>
 
-<h4>Topic 2: Creating New RangeGroups</h4>
+<h4 id="topic_CreatingNewRangeGroups">Topic 2: Creating New RangeGroups</h4>
 
 <p>
 
@@ -159,12 +153,12 @@ Note that the feed name <i>ClassSetup</i> is in the top left of the range.
 
 
 <ul>
-<pre><b>
+<pre>
 ClassSetup
 
 ClassId     ParentId              Description
 PriceGroup  RangeClassification   This class tracks security price range.
-</b></pre>
+</pre>
 </ul>
 
 <li>Select the entire range.
@@ -184,12 +178,12 @@ The RangeGroup class <b>PriceGroup</b> has been created.
 Note that the feed name <i>PropertySetup</i> is in the top left of the range.
 
 <ul>
-<pre><b>
+<pre>
 PropertySetup
 
 classId  property       defaultValue     description
 Security priceGroup     PriceGroup       price group
-</b></pre>
+</pre>
 </ul>
 
 <li>Select the entire range.
@@ -211,12 +205,12 @@ The <i>priceGroup</i> property has been created for Security.
 Note that the feed name <i>RangeGroupFeedSetup</i> is in the top left of the range.
 
 <ul>
-<b><pre>
+<pre>
 RangeGroupFeedSetup
 
 feedId	      rangeClassId	updateClassId	updatePath	accessRule
 PriceGroups   PriceGroup	Security	priceGroup	price
-</pre></b>
+</pre>
 </ul>
 
 <p>
@@ -240,7 +234,7 @@ grouped into the correct range.
 Note that the feed name <i>PriceGroups</i> is in the top left of the range.
 
 <ul>
-<b><pre>
+<pre>
 PriceGroups
 
 startValue        endValue        label
@@ -248,7 +242,7 @@ NA                8               less than 8
 8                 25              8 - 25
 25                100             25 - 100
 100               NA              greater than 100
-</pre></b>
+</pre>
 </ul>     
 
 <li>Select the entire range.
@@ -270,12 +264,12 @@ Note that the feed name <i>DataItemFeed</i> is in the top left of the range.
 
 
 <ul>
-<pre><b>
+<pre>
 DataItemFeed
 
 id          shortName    baseClass    accessPath       isGroup
 priceGroup  Price Group  Security     priceGroup       Y
-</b></pre>
+</pre>
 </ul>
 
 
@@ -304,11 +298,4 @@ priceGroup  Price Group  Security     priceGroup       Y
 report.
 </ol>
 
-<hr>
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated January 28, 1999</font>
-</tr>
-</table>
-</body></html>
+{% include doc-footer.htm copydates="1999" %}

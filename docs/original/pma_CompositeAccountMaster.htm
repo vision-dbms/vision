@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Vision Upload Format: CompositeAccountMaster </title>
+---
+title: "Vision Upload Format: CompositeAccountMaster "
 
-</head>
-<body>
-<body bgcolor=white>
+sidebar:
+  nav: "sb_InvestmentManagers"
+---
 <h2>Vision Portfolio Management Application Layer: Data Feeds</h2>
 <p>
 | <a href="pmaFeeds.htm">Application Feeds</a> |
@@ -13,7 +11,7 @@
 <font size=+2><b>Data Feed: </b><i>CompositeAccountMaster</i></font><p>
 <font size=+1><b>Category: </b><i>MasterFeed</i></font><p>
 
-<h3>Summary:</h3>
+<h2>Summary:</h2>
 <p>
 <ul>
 The <i>CompositeAccountMaster</i> feed is used to create
@@ -30,7 +28,7 @@ The <i>CompositeAccountMaster</i> feed is used to create
      and to update other account-based information.
 </ul>
 <p>
-<h3>Available Fields:</h3>
+<h2>Available Fields:</h2>
 <p>
 <center><table border=1 width=80% cellpadding=4 cellspacing=2>
 <tr><th>Field<th>Vision<br>Property<th>Type<th>Description
@@ -75,7 +73,7 @@ The <i>CompositeAccountMaster</i> feed is used to create
 
 </table></center>
 <p>
-<h3>Special Processing Rules:</h3>
+<h2>Special Processing Rules:</h2>
 <p>
 <ul type=disc>
 <li>The <i>entityId</i> is the unique id that permanently identifies the
@@ -105,7 +103,7 @@ The <i>CompositeAccountMaster</i> feed is used to create
 </ul>
 
 <p>
-<a name="related feeds"><h3>Related Feeds:</h3></a>
+<a name="related feeds"><h2>Related Feeds:</h2></a>
 <p>
 <ul type=disc>
 <li><a href="pma_CompositeAccountMembers.htm"><i>CompsiteAccountMembers</i></a>:
@@ -128,26 +126,16 @@ existing Security Universe instances and a weighting rule
 </ul>
 <p>
 
-<h3>Sample Upload:</h3>
+<h2>Sample Upload:</h2>
 <p>
 The following tab-delimited feed could be used to create <b>CompositeAccount</b> instances
 and refresh basic information:
-<pre><tt><b>
-   Interface ExternalFeedManager upload: "CompositeAccountMaster" using:
+<pre>
+  Interface ExternalFeedManager upload: "CompositeAccountMaster" using:
    "entityId   	name           		ShortName
     COMP1	Composite Account 1	Composite Acct 1
     COMP2	Composite Account 2	Composite Acct 2
     "  ;
-</b></tt></pre>
+</pre>
 
-<p>
-<hr>
-<table border=0 width="100%">
-<tr>
-<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated August 27, 1998</font>
-</tr>
-</table>
-
-</body>
-</html>
+{% include doc-footer.htm copydates="1998" %}

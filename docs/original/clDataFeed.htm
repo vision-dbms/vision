@@ -1,30 +1,11 @@
-<!DOCTYPE html>
-<HTML><HEAD><TITLE>Vision Class: DataFeed</TITLE>
-<META content="text/html; charset=windows-1252" http-equiv=Content-Type>
-<META content="MSHTML 5.00.3103.1000" name=GENERATOR></HEAD>
-<BODY bgColor=white>
-<H2>Vision Class: DataFeed</H2>
-<P>| <A href="FHome.htm">Home</A> | <A 
-href="clDataFeedAdv.htm">More on Data 
-Feeds</A> | 
-<HR>
+---
+title: "Vision Class: DataFeed"
 
-<H3>Topics Covered:</H3>
-<UL type=square>
-  <LI><A href="clDataFeed.htm#overview">DataFeed Overview</A> 
-  <LI><A href="clDataFeed.htm#basic">Basic Interactions</A> <LI><A href="clDataFeed.htm#master">The MasterFeed Class</A> 
-  <LI><A href="clDataFeed.htm#eext">The EntityExtenderFeed Class</A> 
-  <LI><A href="clDataFeed.htm#trans">The TransactionFeed Class</A> 
-  <LI><A href="clDataFeed.htm#members">The MembershipFeed Class</A> 
-  <LI><A href="clDataFeed.htm#alias">The AliasFeed and XRefFeed Classes</A> 
-  <LI><A href="clDataFeed.htm#rgroup">The RangeGroupFeed Class</A> 
-  <LI><A href="clDataFeed.htm#schema">The SchemaFeeds Class: Creating New Classes and Properties</A> 
-  <LI><A href="clDataFeed.htm#globals">The GlobalsFeed Class</A> 
-  <LI><A href="clDataFeed.htm#purges">Purging Data Using DataFeeds</A> </LI></UL>
-<P>
-<HR>
+sidebar:
+  nav: "sb_ClassXRef"
+---
 
-<H3><A name=overview>DataFeed Overview</A></H3>
+<h2 id="overview">DataFeed Overview</h2>
 <P>The <B>DataFeed</B> class is an abstract class that is used to organize the 
 classes that translate data from sources external to Vision into Vision objects. 
 An external feed corresponds to a flat, tabular structure. It may be loaded into 
@@ -70,7 +51,9 @@ include:
     <TD><B>SchemaFeeds</B> 
     <TD>used to define new core classes, properties, and data feed classes. 
   </TR></TBODY></TABLE></CENTER>
-<P>The initial <B>DataFeed</B> class hierarchy is illustrated below: <PRE>           Object
+<P>The initial <B>DataFeed</B> class hierarchy is illustrated below:
+<pre>
+           Object
              |
              IncorporatorPrototype
                 |
@@ -101,8 +84,8 @@ include:
                    |   |-- DataFeedSetup
                    |
                    |-- <A href="clDataFeed.htm#globals">GlobalsFeed</A>
-
-</PRE></FONT>A separate subclass is defined for each format of external data you 
+</pre>
+A separate subclass is defined for each format of external data you 
 wish to load into your Vision database. For example, subclasses of the 
 <B>MasterFeed</B> class are defined to create and update instances of a specific 
 <B>Entity</B>, such as <B>Currency</B> or <B>Security</B>. Subclasses of the 
@@ -113,7 +96,7 @@ a security.
 <HR>
 
 <P>
-<H3><A name=basic>Basic Interactions</A></H3>
+<h2 id="basic">Basic Interactions</h2>
 <P>Each <B>DataFeed</B> subclass defines one or more data items that you can 
 update. Some feeds create new instances of <B>Entity</B>, <B>Bridge</B>, 
 <B>DataRecord</B>, and/or <B>LinkRecord</B> subclasses; other feeds only refresh 
@@ -121,14 +104,15 @@ properties in existing objects. Some feeds support updates for multiple time
 periods; other feeds only refresh properties as of the current date. 
 <P>At its simplest, a feed is a tab or vertical bar delimited string containing 
 one or more columns of information for one or more rows. For example, to create 
-and update <B>Currency</B> instances, you could use: <PRE><B>
+and update <B>Currency</B> instances, you could use:
+<pre>
      CurrencyMaster updateFromString: 
      "entityId | name                 | shortName
       USD      | United States Dollar | US Dollar
       CAD      | Canadian Dollar      | CA Dollar
       GBP      | Great British Pound  | GB Pound
      " ;
-</B></PRE>
+</pre>
 <P>This example loads data using the <B>CurrencyMaster</B> feed. This feed will 
 create <B>Currency</B> instances for any <I>entityId</I> not already defined and 
 will update the <I>name</I> and <I>shortName</I> properties for the three 
@@ -163,11 +147,13 @@ href="clDataFeed.htm#globals"><B>GlobalsFeed</B></A>
 can be used to temporarily set or alter the field delimiter, header location, 
 and other characteristics of your feed. 
 <P>The message <I>getUploadProperties</I> returns the list of properties that 
-can be updated via a specific feed. For example:<PRE><B>
+can be updated via a specific feed. For example:
+<pre>
      CurrencyMaster getUploadProperties
      do: [ code printNL ] ;
 
-</B></PRE>Any of these property identifiers can be included in your header 
+</pre>
+Any of these property identifiers can be included in your header 
 record. Properties can be included in the header record in any order. The 
 message <I>describeFeed</I> can also be sent to any <B>DataFeed</B> subclass and 
 displays a description of the subclass, including these properties. The message 
@@ -194,7 +180,7 @@ scripts</A>.
 <HR>
 
 <P>
-<H3><A name=master>The MasterFeed Class</A></H3>
+<h2 id="master">The MasterFeed Class</h2>
 <P>Subclasses of <B>MasterFeed</B> are used to create new instances in an 
 <B>Entity</B> subclass and refresh key properties for instances of that class. 
 The properties updated by these feeds usually store basic descriptive 
@@ -219,13 +205,15 @@ can be included in the header for any <B>MasterFeed</B> upload:
 <I>entityId</I> must be included. The field identifier <I>id</I> or 
 <I>entity</I> can be used interchangeably with <I>entityId</I>. 
 <P>For example, if the <B>CountryMaster</B> class has been defined, the 
-expression: <PRE><B>
+expression:
+<pre>
      CountryMaster updateFromString:
      "id |   name
       US |   United States
       CA |   Canada
      " ;
-</B></PRE>can be used to create country objects and/or update their names. 
+</pre>
+can be used to create country objects and/or update their names. 
 <P>This expression will perform the following steps: 
 <P>
 <OL>
@@ -255,7 +243,8 @@ data for instances of an entity subclass. If you want to use a feed to refresh
 data without creating any instances, you can set the 
 <I>disableEntityCreation</I> flag prior to executing the feed. This will prevent 
 any new instances from being created but will update any existing instances with 
-the information supplied in the feed. For example:<PRE><B>
+the information supplied in the feed. For example:
+<pre>
      CurrencyMaster disableEntityCreation ;
      CurrencyMaster updateFromString: 
      "entityId | name                 | shortName
@@ -263,7 +252,8 @@ the information supplied in the feed. For example:<PRE><B>
       CAD      | Canadian Dollar      | CA Dollar
       XYZ      | Dummy Currency       | Dummy
      " ;
-</B></PRE>This feed will refresh the name and short name for the existing 
+</pre>
+This feed will refresh the name and short name for the existing 
 currencies but will not create the new currency <I>XYZ</I>. Note that the 
 <I>disableEntityCreation</I> only applies to the next execution of this feed. 
 Once executed, entity creation is re-enabled. 
@@ -273,8 +263,11 @@ instances in the underlying entity class. By default, these identifiers are not
 created. When enabled, the <B>XRef</B> dictionary named <I>Internal</I> is 
 established for the entity class and the property <I>internalId</I> is created 
 to track the permanent identifier. For example, to enable the feed for the 
-<B>CurrencyMaster</B> use:<B><PRE>     CurrencyMaster enableInternalIds ;
-</B></PRE>Once enabled, internal identifiers will automatically get generated 
+<B>CurrencyMaster</B> use:
+<pre>
+     CurrencyMaster enableInternalIds ;
+</pre>
+Once enabled, internal identifiers will automatically get generated 
 every time this feed is executed, unless this option is explicitly disabled 
 using the <I>disableInternalIds</I> flag. 
 
@@ -306,14 +299,16 @@ appropriate entities. The <I>baseClassId</I> names the entity class to associate
 with this feed. The fields must be supplied in this order. You should include a 
 header line in this feed, but the header values are ignored. Both fields must be 
 supplied. For example, to define <B>MasterFeed</B> classes to update countries 
-and industries, you could use: <PRE><B>
+and industries, you could use:
+<pre>
      MasterFeedSetup updateFromString:
      "feedId         |  baseClassId
       CountryMaster  |  Country
       IndustryMaster |  Industry
      " ;
 
-</B></PRE>This upload will create <B>CountryMaster</B> and <B>IndustryMaster</B> 
+</pre>
+This upload will create <B>CountryMaster</B> and <B>IndustryMaster</B> 
 as subclasses of <B>MasterFeed</B> (if they do not already exist) and link them 
 to the entity classes <B>Country</B> and <B>Industry</B>. 
 <P>Note that if the <B>Country</B> and/or <B>Industry</B> class does not exist, 
@@ -325,7 +320,7 @@ class to create new <B>Entity</B> subclasses.
 <HR>
 
 <P>
-<H3><A name=eext>The EntityExtenderFeed Class</A></H3>
+<h2 id="eext">The EntityExtenderFeed Class</h2>
 <P>Subclasses of <B>EntityExtenderFeed</B> are used to update properties for an 
 <B>Entity</B> that are directly defined at the entity's class or linked to the 
 entity via a property returning a subclass of <B>DataRecord</B>. An 
@@ -356,7 +351,8 @@ representing monetary values.
 defined directly for an <B>Entity</B> subclass. For example, if the time series 
 property <I>usExchange</I> is defined for the <B>Currency</B> class to track the 
 rate of exchange into US dollars over time, then the <B>ExchangeRateFeed</B> 
-class could be used to update this property using: <PRE><B>
+class could be used to update this property using:
+<pre>
      ExchangeRateFeed updateFromString:
      "id   |   date     |  usExchange
       CAD  |  19970930  |    1.3828	
@@ -365,7 +361,7 @@ class could be used to update this property using: <PRE><B>
       DEM  |  19971031  |    1.7212	
       DEM  |  19971128  |    1.7638	
      " ;
-</B></PRE>
+</pre>
 <P>This expression will perform the following steps: 
 <P>
 <OL>
@@ -393,7 +389,8 @@ closing prices for a security over time. The time series property
 separate <B>PriceRecord</B> instance for each date the security is priced. If 
 <B>PricingFeed</B> is defined as an <B>EntityExtenderFeed</B> subclass that 
 establishes this relationship, then it could be used to update pricing data 
-using: <PRE><B>
+using:
+<pre>
      PricingFeed updateFromString:
      "id   |  date   |  high   |    low   |   close
       GM   |  971215 |  65.125 |  62.75   |   64.00
@@ -403,7 +400,7 @@ using: <PRE><B>
       IBM  |  971216 | 106.5   | 103.75   |  105.25
       IBM  |  971217 | 105.25  |  102.5   |  104.75
      " ;
-</B></PRE>
+</pre>
 <P>This expression will perform the following steps: 
 <P>
 <OL>
@@ -474,7 +471,8 @@ this feed, but the header values are ignored. The <I>feedId</I> and
 <I>baseClassId</I> must be supplied. The <I>baseEntityId</I> should be supplied 
 for feeds that update <B>DataRecord</B> instances. 
 <P>For example, to define the <B>ExchangeRateFeed</B> and <B>PricingFeed</B> 
-described above, you could use:<PRE><B>
+described above, you could use:
+<pre>
      EntityExtenderFeedSetup updateFromString:
      "
      feedId            |  baseClassId  |     baseEntityId | frequency
@@ -482,7 +480,8 @@ described above, you could use:<PRE><B>
      PricingFeed       |  PriceRecord  |     Security | 3 businessDays
      " ;
 
-</B></PRE>This upload will create <B>ExchangeRateFeed</B> as a subclass of 
+</pre>
+This upload will create <B>ExchangeRateFeed</B> as a subclass of 
 <B>EntityExtenderFeed</B> if it does not already exist. This feed will be linked 
 directly to the <B>Entity</B> subclass <B>Currency</B>. This feed can be used to 
 update any properties defined directly for the <B>Currency</B> class. You can 
@@ -517,7 +516,8 @@ check for expiration is based on the criteria:
 <P>The <I>frequency</I>, if set, should be supplied as a <B>DateOffset</B> such 
 as <I>3 businessDays</I> or <I>18 monthEnds</I>. The frequency can be optionally 
 defined in the feed setup as shown or can be set prior to an update using the 
-<I>setFrequencyTo:</I> message:<PRE><B>
+<I>setFrequencyTo:</I> message:
+<pre>
      PricingFeed setFrequencyTo: 3 businessDays ;
 
      GlobalsFeed updateFromString: 
@@ -531,7 +531,8 @@ defined in the feed setup as shown or can be set prior to an update using the
       #--   data goes here
      " ;
 
-</B></PRE>This example will add a default <B>PriceRecord</B> instance to any 
+</pre>
+This example will add a default <B>PriceRecord</B> instance to any 
 security that was last priced at least 3 business days prior to 6/30/99. The 
 default instance will be added to these time series 1 business day after the 
 last date priced. 
@@ -539,7 +540,7 @@ last date priced.
 <HR>
 
 <P>
-<H3><A name=trans>The TransactionFeed Class</A></H3>
+<h2 id="trans">The TransactionFeed Class</h2>
 <P>Subclasses of <B>TransactionFeed</B> are used to create and cross reference 
 instances of a <B>LinkRecord</B> subclass, classes that associate two or more 
 entities. 
@@ -553,7 +554,7 @@ feeds</A>, to define protocol for these subclasses.
 <HR>
 
 <P>
-<H3><A name=members>The MembershipFeed Class</A></H3>
+<h2 id="members">The MembershipFeed Class</h2>
 <P>Subclasses of <B>MembershipFeed</B> are used to update and cross reference 
 one-to-many relationships between a group and its members over time. For 
 example, one or more companies can be members of the same industry. Over time, a 
@@ -596,7 +597,8 @@ upload:
 <P>These fields can be supplied in any order. The <I>memberId</I> and 
 <I>groupId</I> are required; the <I>date</I> is optional. 
 <P>For example, if the <B>CompanyToIndustry</B> feed has been defined, the 
-expression: <PRE><B>
+expression:
+<pre>
      CompanyToIndustry updateFromString:
      "groupId  |   memberId  |   date
       HARDWARE |   IBM       |   Default
@@ -608,7 +610,8 @@ expression: <PRE><B>
 
       HARDWARE |   XYZ       |   12/31/97
      " ;
-</B></PRE>can be used to setup the initial relationship between the industries 
+</pre>
+can be used to setup the initial relationship between the industries 
 and their members and to indicate that company XYZ was reassigned from the AUTO 
 industry to the HARDWARE industry on 12/31/97. 
 <P>This expression will perform the following steps: 
@@ -664,10 +667,14 @@ the <I>mode</I> field is not supplied, it will default to append. The
 <B>Property Setup</B> feed.
 <P>For example, to define the <I>CompanyToIndustry</I> feed from the previous 
 example, use: 
-<UL><B><PRE>MembershipFeedSetup updateFromString:
+<UL>
+<pre>
+MembershipFeedSetup updateFromString:
 "feedId	| groupId | groupPath | memberId | memberPath
 CompanyToIndustry | industry |companyList | Company |Industry	
-";</PRE></B></UL>
+";
+</pre>
+</UL>
 <P>Membership feeds can also be set up to store the <A 
 href="clDataFeedAdv.htm#bridges">relationship 
 information at a <B>Bridge</B></A> instance associated with the member or group 
@@ -676,17 +683,21 @@ entity.
 <HR>
 
 <P>
-<H3><A name=alias>The AliasFeed and XRefFeed Classes</A></H3>
+<h2 id="alias">The AliasFeed and XRefFeed Classes</h2>
 <P>Subclasses of <B>AliasFeed</B> are used to establish multiple aliases for 
 existing <B>Entity</B> instances. For example, <B>PortfolioAliases</B> may be 
 defined as a subclass of <B>AliasFeed</B> to establish multiple aliases for 
 accessing your portfolios: 
-<UL><B><PRE>PortfolioAliases updateFromString:
+<UL>
+<pre>
+PortfolioAliases updateFromString:
 "oldId   |	newId
 PORT001	 |      IndexAccount  | TopFund
 PORT002	 |      G&amp;IAccount
 PORT003	 |      BondFund	
-";</PRE></B></UL>Note that you can provide more that one alias in the data 
+";
+</pre>
+</UL>Note that you can provide more that one alias in the data 
 record. 
 <P>You can define new <B>AliasFeed</B> subclasses using the 
 <B>AliasFeedSetup</B> class. This feed must include the following fields: 
@@ -698,10 +709,14 @@ record.
 <P>The fields must be supplied in this order. You can include a header line in 
 this feed, but the header values are ignored.
 <P>For example, to define the alias feed for the <B>Portfolio</B> class, use: 
-<UL><B><PRE>AliasFeedSetup updateFromString:
+<UL>
+<pre>
+AliasFeedSetup updateFromString:
 "feedId  |   baseClassId
 PortfolioAliases  |  Portfolio
-";</PRE></B></UL>
+";
+</pre>
+</UL>
 <P>Subclasses of XRefFeed are used to load alternative identifiers for an 
 entity. These alternative identifiers are stored in <A 
 href="clDict.htm#xref">Cross Reference 
@@ -710,11 +725,15 @@ that are uniquely assigned by a specific source but may overlap with identifiers
 assigned by other sources. For example, suppose you want to establish the MSCI 
 code as a alternative identifier for <B>Security</B>. You can use a 
 <B>SecurityXRef</B> feed to do the following: 
-<UL><B><PRE>SecurityXRef updateFromString;
+<UL>
+<pre>
+SecurityXRef updateFromString;
 "entityId | sourceId | symbol
 00000001  | MSCI     | M0000001
 00000002  | MSCI     | M0000002
-";</PRE></B></UL>The <I>sourceId</I> must first be defined through the <A 
+";
+</pre>
+</UL>The <I>sourceId</I> must first be defined through the <A 
 href="pma_IdSourceMaster.htm">IdSourceMaster</A> 
 Feed. 
 <P>You can define new <B>XRefFeed</B> subclasses using the <B>XRefFeedSetup</B> 
@@ -723,15 +742,19 @@ class. The following fields must be provided for any <B>XRefFeedSetup</B>:
   <LI><I>feedId</I> - name of feed 
   <LI><I>baseClassId</I> - name of the associated class</LI></UL>For example, to 
 define the <B>XRefFeed</B> for the <B>Security</B> Class, you can use: 
-<UL><B><PRE>XRefFeedSetup updateFromString:
+<UL>
+<pre>
+XRefFeedSetup updateFromString:
 "feedId      |  baseClassId
 SecurityXRef |  Security
-";</PRE></B></UL>
+";
+</pre>
+</UL>
 <P>
 <HR>
 
 <P>
-<H3><A name=rgroup>The RangeGroupFeed Class</A></H3>
+<h2 id="rgroup">The RangeGroupFeed Class</h2>
 <P>Subclasses of <B>RangeGroupFeed</B> are used to define and update numeric 
 ranges and categorize <B>Entity</B> instances into the appropriate range group. 
 <P>You can define new <B>RangeGroupFeed</B> subclasses using the 
@@ -740,10 +763,12 @@ ranges and categorize <B>Entity</B> instances into the appropriate range group.
 <HR>
 
 <P>
-<H3><A name=schema>The SchemaFeeds Class: Creating New Classes and 
-Properties</A></H3>
+<h2 id="schema">The SchemaFeeds Class: Creating New Classes and 
+Properties</h2>
 <P>Subclasses of <B>SchemaFeeds</B> are used to define new core classes, 
-properties, and data feed classes. The class hierarchy is illustrated below: <PRE>          Object
+properties, and data feed classes. The class hierarchy is illustrated below:
+<pre>
+          Object
              |
              IncorporatorPrototype
                 |
@@ -766,7 +791,7 @@ properties, and data feed classes. The class hierarchy is illustrated below: <PR
                            |-- <A href="clDataFeed.htm#rgroup">RangeGroupFeedSetup</A>
 			   |-- <A href="clDataFeed.htm#xref">XRefFeedSetup</A>
 
-</PRE></FONT>
+</pre>
 <P>
 <H4><A name=core>The ClassSetup Class</A></H4>
 <P>This feed is used to define subclasses of <B>Entity</B>, <B>Bridge</B>, 
@@ -791,7 +816,8 @@ optional and can be used to supply an initial description for a new class or to
 update the description of an existing class. 
 <P>For example, to define the <B>Entity</B> subclasses <B>Security</B> and 
 <B>Country</B> and the <B>DataRecord</B> subclass <B>PriceRecord</B>, you could 
-use:<PRE><B>
+use:
+<pre>
     ClassSetup updateFromString:
      "
      classId    |    parentId
@@ -800,7 +826,8 @@ use:<PRE><B>
      PriceRecord|    DataRecord
      " ;
 
-</B></PRE>This upload will create classes for any <I>classId</I> values that do 
+</pre>
+This upload will create classes for any <I>classId</I> values that do 
 not already exist. 
 <P>By default, new classes created with the <B>ClassSetup</B> feed are stored in 
 object space 3 except for new subclasses of <B>DataRecord</B> which are stored 
@@ -867,12 +894,14 @@ keywords have been defined:
       (investment applications only) </TR></TBODY></TABLE></CENTER>
 <P>Any number of keywords can be included for a property. This value is normally 
 blank, indicating that no special adjustments are needed. This field is only 
-used during new property creation. For example: <PRE><B>     PropertySetup updateFromString:
+used during new property creation. For example:
+<pre>
+     PropertySetup updateFromString:
      "classId   property     dataType     adjustments
       GVData    price        Double       CURRENCY PERSHARE
       GVData    sharesOut    Double       SHARES
      " ;
-</B></PRE>
+</pre>
 <P>The <I>defaultValue</I> field indicates the default value to set for the 
 property when a new instance of its class is created. If this field is omitted, 
 the new instances will have the value <I>NA</I> for this property. For time 
@@ -948,7 +977,8 @@ that class. For example:
   created, the initial value of this property will be an empty 
   <B>IndexedList</B>. Note that if the <I>tsFlag</I> indicates time series, this 
   relationship is tracked over time.</LI></UL>
-<P>For example:<PRE><B>
+<P>For example:
+<pre>
     PropertySetup updateFromString:
      "
      classId   |     property  |   tsFlag  |   defaultValue
@@ -957,7 +987,8 @@ that class. For example:
      Currency  |     z         |   Y       |   Country        
      " ;
 
-</B></PRE>This update defines two properties <I>x</I> and <I>y</I> for the class 
+</pre>
+This update defines two properties <I>x</I> and <I>y</I> for the class 
 <B>Country</B> if they do not already exist. Property <I>x</I> is defined to be 
 a fixed property and <I>y</I> is time varying. Property <I>x</I> will initially 
 be set to 0 when new instances of <B>Country</B> are created. Property <I>z</I> 
@@ -1023,23 +1054,27 @@ set the index type for a message that return an IndexedList.
 <HR>
 
 <P>
-<H3><A name=globals>The GlobalsFeed Class</A></H3>
+<h2 id="globals">The GlobalsFeed Class</h2>
 <P>The <B>GlobalsFeed</B> class is used to override the default settings for 
 loading a data feed file. The overrides only apply to the next feed run. The 
 <I>loadFromFile:</I> and <I>updateFromString:</I> messages can be used to load global values with this feed. The first line of the feed may contain the header line record however it is ignored as the fields are assumed to be in the following order:
 
-<B><PRE>     option   | setting   | settingType</PRE></B>
+<pre>
+     option   | setting   | settingType
+</pre>
 
 where <I>option</I> is a configuration option such as 
 <I>delimiter</I>, <I>fieldOrderList</I>, or <I>autoExpire</I> and <I>setting</I> 
 is the value you wish to use as an override. The <I>settingType</I> is optional 
 and is used to indicate the type of data supplied in the <I>setting</I> field 
 such as <I>Date</I> or <I>DateOffset</I>. For example:
-<PRE><B>     GlobalsFeed updateFromString: 
+<pre>
+     GlobalsFeed updateFromString: 
      "option      | setting        | settingType
       asofDate    | 9906           | Date
       autoExpire  | 1 businessDays | DateOffset
-     " ; </B></PRE>
+     " ; 
+</pre>
 
 <p>Note: the data must be supplied in this order. 
 <P>The <B>GlobalsFeed</B> is used by <A href="pmaFeeds.htm#config">configuration files</A>. The Global options used in the built-in feeds are <A href="pmaFeeds.htm#config">described elsewhere</A>. 
@@ -1047,19 +1082,22 @@ such as <I>Date</I> or <I>DateOffset</I>. For example:
 <HR>
 
 <P>
-<H3><A name=purges>Purging Data Using DataFeeds</A></H3>
+<h2 id="purges">Purging Data Using DataFeeds</h2>
 <P><B>DataFeed</B> classes can be used to flag entities as inactive 
 (<B>MasterFeed</B> subclasses) and to purge actual <B>DataRecords</B> and points in time series properties (<B>EntityExtenderFeed</B> subclasses). To indicate 
 that you want to use a feed to purge data, you can set the <I>enablePurge</I> 
 flag prior to executing the feed. The next time the flagged feed is executed, it 
 will be run in "purge" mode. After it executes, the purge flag is automatically 
 disabled. 
-<P>For example:<B><PRE>     CurrencyMaster enablePurge ;
+<P>For example:
+<pre>
+     CurrencyMaster enablePurge ;
      CurrencyMaster updateFromString: 
      "id |
       CAD
      " ;
-</PRE></B>flags the Canadian currency as inactive. 
+</pre>
+flags the Canadian currency as inactive. 
 <P>
 <H4>MasterFeed Purges</H4>
 <P>You cannot purge the entity instances associated with a master feed but you 
@@ -1098,7 +1136,8 @@ specified as a *, indicating that you wish to purge all dates for the supplied
 entity. Alternatively, the date can be specified as a range in the form: <I>
 <BLOCKQUOTE>date1:date2 (all dates between date1 and date2) <BR>date1: (all 
   dates from date1 on)<BR>:date2 (all dates through date2)<BR></BLOCKQUOTE></I>
-<P>For example:<PRE><B>
+<P>For example:
+<pre>
      #--  Purge specific date for specific entity
      PricingFeed enablePurge;
      PricingFeed updateFromString: "id | date
@@ -1129,13 +1168,6 @@ entity. Alternatively, the date can be specified as a range in the form: <I>
      IBM | *
      " ;
 
-</B></PRE>
-<P>
-<HR>
+</pre>
 
-<TABLE border=0 width="100%">
-  <TBODY>
-  <TR>
-<td align=left><font size=-1>Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
-<td align=right><font size=-1>Updated December 15, 2000</font>
-</TR></TBODY></TABLE></BODY></HTML>
+{% include doc-footer.htm copydates="2000" %}
