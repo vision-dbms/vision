@@ -135,6 +135,10 @@ namespace V {
             return m_xState != State_Started;
         }
 
+        int isSingleCoreExecution () const {
+            return m_VSingleCoreExecution;
+        }
+
     /**
      * @name Control
      */
@@ -187,6 +191,11 @@ namespace V {
             return m_pReaper.clearIf (pReaper);
         }
 
+    //  Multi-Core Execution Control
+    public:
+        static int SetSingleCoreExecution ();
+        static void CheckSingleCoreExecution (); 
+
     //  Thread Attachment
     protected:
         /**
@@ -203,6 +212,10 @@ namespace V {
         pthread_t       m_hThread;
         pthread_id_t    m_xThread;
         Reaper::Pointer m_pReaper;
+
+        /** state of all threads **/
+        static int const m_VSingleCoreExecution;
+        static int m_VSingleCoreExecutionChecked;
     };
 }
 
