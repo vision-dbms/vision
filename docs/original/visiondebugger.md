@@ -175,7 +175,7 @@ If we look at the result of the
 <i>displayCallers</i> stack above, we can see that the suspension was called
 from within the <i>initializeLocalAttributes</i> method.  This level
 was in turn called from within an execution that knows about the value
-of <i>^my keys</i>.  We can look at this value from with the
+of <i>^my keys</i>.  We can look at this value from the
 suspension using:
 
 ```
