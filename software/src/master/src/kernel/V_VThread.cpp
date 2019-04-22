@@ -24,6 +24,7 @@
 
 #include "V_VString.h"
 #include "V_VUnmanagedThread.h"
+#include "V_VRandom.h"
 
 
 /************************
@@ -198,16 +199,17 @@ bool V::VThread::stop () {
 #endif
 }
 
-int const V::VThread::m_VSingleCoreExecution = V::GetEnvironmentInteger ("VSingleCoreExecution", 0);
-int       V::VThread::m_VSingleCoreExecutionChecked = 0;
+bool const V::VThread::m_VSingleCoreExecution = V::GetEnvironmentBoolean ("VSingleCoreExecution");
+bool       V::VThread::m_VSingleCoreExecutionChecked = false;
 
 void V::VThread::CheckSingleCoreExecution () {
-    if (m_VSingleCoreExecutionChecked == 0) {
-        if (m_VSingleCoreExecution != 0)
+    if (!m_VSingleCoreExecutionChecked) {
+        if (m_VSingleCoreExecution) {
             SetSingleCoreExecution();
+        }
     }
 
-    m_VSingleCoreExecutionChecked = 1;
+    m_VSingleCoreExecutionChecked = true;
 }
 
 int V::VThread::SetSingleCoreExecution () {
@@ -216,11 +218,10 @@ int V::VThread::SetSingleCoreExecution () {
 #if defined(V_THREAD_ENABLED) && defined (__linux__)
 
     // Determine how many CPUs exist in order to randomly assign appropriately
-    const int cpu_count = sysconf(_SC_NPROCESSORS_ONLN);
+    unsigned int cpu_count = sysconf(_SC_NPROCESSORS_ONLN);
     
     // get our random-ish CPU index
-    srand(time(0));
-    int cpu = rand() / (RAND_MAX / cpu_count + 1); // range(0, cpu_count - 1)
+    int cpu = V::VRandom::BoundedValue(cpu_count);
 
     // Configure a CPU mask that only includes the specified CPU.
     cpu_set_t cpu_mask;

@@ -214,8 +214,8 @@ namespace V {
         Reaper::Pointer m_pReaper;
 
         /** state of all threads **/
-        static int const m_VSingleCoreExecution;
-        static int m_VSingleCoreExecutionChecked;
+        static bool const m_VSingleCoreExecution;
+        static bool m_VSingleCoreExecutionChecked;
     };
 }
 

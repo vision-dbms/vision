@@ -237,7 +237,7 @@ static char const *const g_pNullDeviceName = "NUL:";
 static char const *const g_pNullDeviceName = "/dev/null";
 
 namespace {
-    int const VcaEnableBlockingSockets = V::GetEnvironmentInteger ("VcaEnableBlockingSockets", 0);
+    bool const VcaEnableBlockingSockets = V::GetEnvironmentBoolean ("VcaEnableBlockingSockets");
 }
 
 #endif
@@ -7218,10 +7218,10 @@ namespace Vca {
 	    SocketDevice (
 		VReferenceable *pContainer, Manager *pManager, Handle &rhSocket
 	    ) : BaseClass (pContainer, pManager, rhSocket) {
-		if (VcaEnableBlockingSockets == 0) makeNonblocking();
+		if (!VcaEnableBlockingSockets) makeNonblocking();
 	    }
 	    SocketDevice (VReferenceable *pContainer, ThisClass &rOther) : BaseClass (pContainer, rOther) {
-		if (VcaEnableBlockingSockets == 0) makeNonblocking();
+		if (!VcaEnableBlockingSockets) makeNonblocking();
 	    }
 
 	//  Destruction
