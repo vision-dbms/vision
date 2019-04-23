@@ -8,8 +8,6 @@ related_topics:
     title: "Uploading Data"
   - url: "pmaStarting.htm"
     title: "Getting Started"
-  - url: "vpma.htm"
-    title: "Application Overview"
   - url: "pmaXRef.htm"
     title: "Application Cross Reference"
 
@@ -47,7 +45,6 @@ involves end users, IT, and support personnel, it encourages
 basic knowledge transfer as part of the implementation, which
 plays a big role in creating a successful environment.
 <p>
-<hr>
 <h2 id="runtime">The Vision Run-Time Environment</h2>
 <p>
 The <i>Vision Run-Time Environment</i> provides the tools needed to
@@ -86,230 +83,6 @@ has the ability to commit permanent changes to the database including
 data modifications and database extensions that are seen by all users.
 
 <p>
-<hr>
-<h2 id="software">Software Components</h2>
-<p>
-The <i>Vision Run-Time Environment</i> includes the Vision Application
-Server, one or more Vision Application Clients, and a Vision Administrator
-Client.  Since applications are delivered via a user's web browser,
-components need to be installed on your internal Web Server as well.
-Your Vision Server can be installed on a 
-Unix or NT platform.  Your Vision Clients can be installed on an
-NT or Windows platform.  A single user environment can be created
-using NT as the server and the client.
-<p>
-The Vision software is available for a number of different 
-client/server configurations.  The minimal requirements for each 
-configuration are outlined below:
-<p>
-<b>Server Configuration Requirements</b>
-<p>
-<ul type=disc>
-<li><i>Hardware/Operating System:</i>
-<ul>
-<li>HP/PA-RISC --- HP-UX 10.x
-<li>Sun/Sparc --- Solaris 5.5.1
-<li>IBM/RS-6000 --- AIX 4.2
-<li>Intel Pentium or Pentium/Pro --- 
-Windows/NT 4.0 Service Pack 3 (Workstation or Server)
-</ul>
-
-<li><i>Minimum Main Memory (RAM):</i>
-64MB Minimum / 128MB Recommended, more may be required based on user or
-application load
-
-<li><i>Minimum Disk Space (exclusive of swap space):</i>
-2.5 times average data base size (NTFS formatted disks recommended for
-Windows/NT installations); Recommend starting with 1 GB
-
-<li><i>Minimum Swap Space:</i>
-2-3 times the installed main memory, more may be required based on user
-or application load
-
-<li><i>Other Requirements:</i>
-<p>
-The following components should be operational prior to installation of
-your Vision system:
-<ul>
-<li><a href="#tcpip">TCP/IP</a>
-must be installed and operational in environments where its use
-is optional (Windows/NT).
-<li><a href="#web">Web server</a>
-supporting the Common Gateway Interface (CGI) protocol standard.
-</ul>
-</ul>
-
-
-<p>
-<b>Client Configuration Requirements</b>
-<ul type=disc>
-<li>Web Browser (with Java support for graphics) 
-<li>Microsoft Excel 95 or 97
-</ul
-
-<p>
-<b id="tcpip">Remote Execution Service on Windows NT</b>
-<p>
-TCP/IP must be installed and operational.  In Unix environments,
-this service is standard.  You may need to install remote execution
-service software if you are using an NT server.
-<p>
-The only remote execution service software for NT that we have found and
-tested at this time is Ataman Software's ATRLS. 
-They can be reached at http://www.ataman.com.
-Version 2.4 of Ataman's ATRLS will need the switch set that tells the
-rexecd service to leave child processes running after the parent
-process logs out. This feature can be found in section 9.3.4 of the
-<i>userman.doc</i> file they provide.
-Version 1.5 (which is no longer supported by Ataman) works as is with no
-additional settings required.
-
-<p>
-<b id="web">Web Server Information</b>
-<p><table width=90%><tr><td><ul type=disc><li>Web documents provided in the installation are HTML <i>version 3.2 compliant</i>.  Components utilized include <i>HTML Forms</i>,
-<i>HTML Tables</i>, and <i>Java Applets</i>.
-<tr><td><ul type=disc><li>The CGI application provided in the installation is
-<i>CGI version 1.1</i> compliant.
-<tr><td><ul type=disc><li>Known Web servers that have hosted these components in the past include:<p>
-<ul>
-NCSA HTTPd server<br>
-Microsoft Peer-Web-Services 2.0 & 3.0<br>
-Microsoft IIS 2.0 & 3.0<br>
-Oracle Web Server<br>
-Netscape SuiteSpot 3.5 Web Server<br>
-</ul><p><tr>
-<tr><td><ul type=disc><li>Any Web browser capable of HTML 3.2 should be compatible with the
-supplied applications and documents including:
-Netscape Navigator 3.1 & 4.0 and Microsoft Explorer 3.x & 4.0.
-<tr><td><ul type=disc><li>Some applications utilize Java class libraries from Visual Mining Inc. 
-Prior to the applet running in your browser window you will receive a
-reminder to purchase the NetCharts server license. The license can be 
-obtained from <a href="http://www.netcharts.com">Visual Mining</a>.
-
-</table></ul>
-<p>
-<p>
-<hr>
-<h2 id="install">Software Installation</h2>
-<p>
-The Vision software installation is fairly straightforward.  Prior to
-sending you a release, you will be contacted by an Insyte technical
-consultant who will review your hardware configuration and answer
-any specific installation questions you may have.  You will then
-receive a release on the medium you requested including basic installation
-notes.  Your technical consultant will be available to assist you
-over the phone as you install the software and will help you to confirm
-that the various components are operating as expected.
-Applications are delivered to users via an internal intranet.  If
-you do not currently have an intranet running, Insyte can assist
-you in installing this software as well.  
-<p>
-Wherever possible, the installation process has been automated.
-A <i>ReadMe</i> file is included at the root level of your distribution
-providing instructions for installing the components on different
-hardware configurations.  You will need to install:
-<p>
-<ul type=disc>
-<li>The <a href="#serverInstall">Vision Application Server</a>
-<li>One or more <a href="#clientInstall">Vision Application Clients</a>
-<li>One <a href="#admClientInstall">Vision Administrator Client</a>
-<li><a href="#webInstall">Miscellaneous Web Server Components</a>
-</ul>
-<p>
-All users must have user codes defined on the Vision Server machine.
-One user should be designated as the <i>Vision Administrator</i>.
-You will need to know this user code to install the 
-<a href="#serverInstall">Vision Server</a> and the
-<a href="#admClientInstall">Vision Administrator Client</a>.
-<p>
-A number of <a href="pmaInstallTests.htm">installation tests</a>
-have been designed to help you confirm that all the pieces are
-working and integrated correctly.
-<p>
-<h3 id="serverInstall">Vision Server Installation</h3>
-<p>
-
-Your Vision Server can be installed on Unix or NT
-hardware.  The installation instructions differ based on the target hardware.
-If possible, you should install the Vision Server while logged in as the
-Vision Administrator User.  In this way, the file ownership
-and permissions will be established correctly.
-<p>
-When you have completed the Vision Server installation, you will have
-two new directories on your server machine:  <i>vision/</i> and
-<i>localvision/</i>.  The <i>vision/</i> directory requires less than
-10MB of space and should not grow much larger over time.  The
-<i>localvision/</i> directory includes the database itself and should
-be located on a disk with sufficient space for growth over time.  
-<p>
-You will need to contact Insyte to get a valid license file entry
-for your server in order to commit updates to the database.
-You will need to provide the IP address or host ID for each
-server being licensed.  
-<p>
-Please refer to the document
-<a href="admInstUServer.htm"><i>Vision Installation: Unix Server</i></a>
-for Unix server installation instructions.
-Please refer to the document
-<a href="admInstNServer.htm"><i>Vision Installation: NT Server</i></a>
-for NT server installation instructions.
-
-<p>
-<h3 id="clientInstall">Vision Application Clients</h3>
-<p>
-
-Vision Clients can be installed on NT or Windows platforms.  
-A single user environment can be created using NT as the server and the client.
-Users who access Vision entirely via the web-based applications do
-not need the Client software installed on their machine.  However, analysts
-that want to extract and/or temporarily modify Vision data from Excel 
-must have the Vision Application Client software installed on their machines. Please refer to the document <a href="admInstClient.htm"><i>Vision Installation: Client</i></a>
-for Vision client installation instructions.
-
-<p>
-<h3 id="admClientInstall">Vision Administrator Client</h3>
-<p>
-
-One client should be designated as the Vision Administrator.
-The Vision Administrator can be installed on an NT or Windows machine
-and connects to the administrator's user code on the Vision Server
-machine.  Please refer to the document
-<a href="admInstAdmClient.htm"><i>Vision Installation: Administrator 
-Client</i></a>
-for Vision administrator installation instructions.
-<p>
-After a client installation is complete, you will want to install the MS Excel
-Add-ins for clients that wish to access the Vision Application Server 
-via Excel.  Please refer to the document
-<a href="admInstExcel.htm"><i>Vision Installation: Excel Add-Ins</i></a>
-for installation instructions.
-<p>
-You may optionally want to install the Windows-based Vision editor for
-Vision developers.  A separate setup program is included in the directory
-<i>{fill in the blank}/Session</i>.
-<p>
-<h3 id="webInstall">Web Browser Interface Setup</h3>
-<p>
-
-Vision Applications can be delivered to users via a Web-based browser
-running on an internal intranet.  
-Please refer to the document
-<a href="admInstWebConfig.htm"><i>Vision Installation: Web Configuration</i></a>
-for instructions.
-<p>
-To use Vision's web-based applications, there needs to be at least
-one running Vision session waiting for browser requests.  These Vision
-sessions are known as <i>listeners</i>.  Two types of listener can
-be started.  The Vision Administrator can start one or more master
-listeners which are available for all browser users.  Master listeners
-are started using the <a href="pmaDBA.htm#web">Vision Administrator</a>
-module.  Analysts using the Excel add-ins automatically start a
-private listener.  When a private listener is running, that user's
-browser requests communication with that private session and reflect
-any temporary modifications made.  More information
-about private listeners <a href="pmaAnalyst.htm#browser">is available</a>.
-<p>
-<hr>
 <h2 id="methodology">Tailoring the Product</h2>
 <p>
 Once your software has been installed, you are ready to start
@@ -355,7 +128,6 @@ By the end of this month, we should have procedures in place that
 enable you to manage the day-to-day operation of your Vision system.
 
 <p>
-<hr>
 <h2 id="nextsteps">Next Steps</h2>
 <p>
 Congratulations, you now have a system in production and many happy
@@ -375,7 +147,6 @@ about "next steps" <a href="pmaNextSteps.htm">is available</a>.
 
 
 <p>
-<hr>
 <h2 id="feeds">Starter Feeds</h2>
 <p>
 
@@ -419,7 +190,7 @@ be included.
 for both feeds.
 </ul>
 <p><hr align=center width=70%><p>
-<h3>Consideration: Multiple Asset Types</h3>
+<h3 id="Consideration_Multiple_Asset_Types">Consideration: Multiple Asset Types</h3>
 <p>
 <b>Question:</b>
 <ul>
@@ -461,7 +232,7 @@ correspond to the security types you have defined.
 </ul>
 
 <p><hr align=center width=70%><p>
-<h3>Considerations: International Security Universe</h3>
+<h3 id="Consideration_International_Security_Universe">Considerations: International Security Universe</h3>
 <p>
 <b>Question:</b>
 <ul>
@@ -493,7 +264,7 @@ to map your companies to their countries.
 </ul></ul>
 
 <p><hr align=center width=70%><p>
-<h3>Considerations: Industry Scheme</h3>
+<h3 id="Consideration_Industry_Scheme">Considerations: Industry Scheme</h3>
 <p>
 <b>Question:</b>
 <ul>
@@ -518,7 +289,6 @@ feed to map companies into industries.
 </ul></ul>
 <p>
 
-<hr>
 <p>
 <h2 id="feeds-summary">Starter Feeds - Summary</h2>
 <p>
