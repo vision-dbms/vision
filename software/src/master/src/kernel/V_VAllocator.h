@@ -1,6 +1,10 @@
 #ifndef V_VAllocator_Interface
 #define V_VAllocator_Interface
 
+#ifndef V_VAllocator
+#define V_VAllocator extern
+#endif
+
 /************************
  *****  Components  *****
  ************************/
@@ -37,96 +41,92 @@ namespace V {
 	static counter_t	g_cFreePoolAdaptations;
 	static counter_t	g_cFreeListOverflows;
 
-    /****************************
-     *----  SingleThreaded  ----*
-     ****************************/
+    /******************
+     *----  Node  ----*
+     ******************/
     public:
-	class V_API SingleThreaded : public VTransient {
-	    DECLARE_FAMILY_MEMBERS (SingleThreaded, VTransient);
-
-	//  Aliases
+	class Node {
+	    DECLARE_NUCLEAR_FAMILY (Node);
 	public:
-	    typedef ThisClass Link;
+	    Pointer m_pNext;
+	};
+
+    /**************************
+     *----  ThreadScoped  ----*
+     **************************/
+    public:
+	class V_API ThreadScoped : public VTransient {
+	    DECLARE_FAMILY_MEMBERS (ThreadScoped, VTransient);
 
 	//  Construction
 	public:
-	    SingleThreaded () {
-	    }
+	    ThreadScoped ();
 
 	//  Destruction
 	public:
-	    ~SingleThreaded () {
-	    }
+	    ~ThreadScoped ();
 
 	//  Update
 	private:
-	    void push (ThisClass *pNew) {
-		m_pNextFree.push (pNew, &ThisClass::m_pNextFree);
+	    void push (Node *pNew) {
+		m_pFreeList.push (pNew, &Node::m_pNext);
 	    }
-	    bool pop (Pointer &rpFirst) {
-		return m_pNextFree.pop (rpFirst, &ThisClass::m_pNextFree);
+	    bool pop (Node::Pointer &rpFirst) {
+		return m_pFreeList.pop (rpFirst, &Node::m_pNext);
 	    }
-	    void *grow (size_t sCell);
+	    template <class hazard_pointer_t> void *grow (size_t sCell, hazard_pointer_t &rpHazard);
 	public:
-	    void *allocate (size_t sCell) {
-		Pointer pFirst;
-		return pop (pFirst) ? pFirst.referent () : grow (sCell);
+	    template <class hazard_pointer_t> void *allocate (size_t sCell, hazard_pointer_t &rpHazard) {
+		Node::Pointer pFirst;
+		return pop (pFirst) ? pFirst.referent () : grow (sCell, rpHazard);
 	    }
-	    void deallocate (void *pCell) {
-		push (reinterpret_cast<ThisClass*>(pCell));
-	    }
+	    void deallocate (void *pCell);
+	    void flush (size_t sCell);
 
 	//  State
 	private:
-	    Pointer m_pNextFree;
+	    Node::Pointer m_pFreeList;
 	};
-	friend class SingleThreaded;
+	friend class ThreadScoped;
 
 
-    /****************************
-     *----  MultiThreaded  ----*
-     ****************************/
+    /***************************
+     *----  ProcessScoped  ----*
+     ***************************/
     public:
-	class V_API MultiThreaded : public VTransient {
-	    DECLARE_FAMILY_MEMBERS (MultiThreaded, VTransient);
-
-	//  Aliases
-	public:
-	    typedef ThisClass Link;
+	class V_API ProcessScoped : public VTransient {
+	    DECLARE_FAMILY_MEMBERS (ProcessScoped, VTransient);
 
 	//  Construction
 	public:
-	    MultiThreaded () {
-	    }
+	    ProcessScoped ();
 
 	//  Destruction
 	public:
-	    ~MultiThreaded () {
-	    }
+	    ~ProcessScoped ();
 
 	//  Update
 	private:
-	    void push (ThisClass *pNew) {
-		m_pNextFree.interlockedPush (pNew, &ThisClass::m_pNextFree);
+	    void push (Node *pNew) {
+		m_pFreeList.interlockedPush (pNew, &Node::m_pNext);
 	    }
-	    bool pop (Pointer &rpFirst) {
-		return m_pNextFree.interlockedPop (rpFirst, &ThisClass::m_pNextFree);
+	    template <class hazard_pointer_t> bool pop (Node::Pointer &rpFirst, hazard_pointer_t &rpHazard) {
+		return m_pFreeList.interlockedPop (rpFirst, &Node::m_pNext, rpHazard);
 	    }
 	    void *grow (size_t sCell);
 	public:
-	    void *allocate (size_t sCell) {
-		Pointer pFirst;
-		return pop (pFirst) ? pFirst.referent () : grow (sCell);
+	    template <class hazard_pointer_t> void *allocate (size_t sCell, hazard_pointer_t &rpHazard) {
+		Node::Pointer pFirst;
+		return pop (pFirst, rpHazard) ? pFirst.referent () : grow (sCell);
 	    }
-	    void deallocate (void *pCell) {
-		push (reinterpret_cast<ThisClass*>(pCell));
-	    }
+	    void deallocate (void *pCell);
+	    void flush (size_t sCell);
 
 	//  State
 	private:
-	    Pointer m_pNextFree;
+	    VAtomicallyLinkablePointer<Node> m_pFreeList;
 	};
-	friend class MultiThreaded;
+	friend class ProcessScoped;
 
 
     /***************************************
@@ -166,25 +166,28 @@ namespace V {
 
     //  Aliases
     public:
-	typedef typename Model::Link Link;
+	typedef Model model_t;
 
     //  Construction
     public:
-	VAllocatorGranule_() {
-	}
+	VAllocatorGranule_();
+
+    //  Destruction
+    public:
+	~VAllocatorGranule_();
 
     //  Allocation
     public:
-	void *allocate (size_t sObject) {
+	template <class hazard_pointer_t> void *allocate (size_t sObject, hazard_pointer_t &rpHazard) {
 	    m_iACount.increment ();
-	    return m_pNextFree.allocate (sObject);
+	    return m_iModel.allocate (sObject, rpHazard);
 	}
 
     //  Deallocation
     public:
 	void deallocate (void *pObject) {
 	    m_iDCount.increment ();
-	    m_pNextFree.deallocate (pObject);
+	    m_iModel.deallocate (pObject);
 	}
 
     //  Access
@@ -208,6 +211,7 @@ namespace V {
 	    m_iACount = m_iACount - m_iDCount;
 	    m_iDCount = 0;
 	}
+	void flush (size_t sCell);
 
     //  Display
     public:
@@ -217,17 +221,18 @@ namespace V {
 
     //  State
     private:
-	Link		m_pNextFree;
+	Model		m_iModel;
 	counter_t	m_iACount;
 	counter_t	m_iDCount;
     };
 
+
      /********************************
       *----  VAllocatorFreeList  ----*
       ********************************/
 
-    class VAllocatorFreeList : public VAllocatorGranule_<VAllocatorGranule::SingleThreaded> {
-	DECLARE_FAMILY_MEMBERS (VAllocatorFreeList, VAllocatorGranule_<VAllocatorGranule::SingleThreaded>);
+    class VAllocatorFreeList : public VAllocatorGranule_<VAllocatorGranule::ThreadScoped> {
+	DECLARE_FAMILY_MEMBERS (VAllocatorFreeList, VAllocatorGranule_<VAllocatorGranule::ThreadScoped>);
 
     //  Construction
     public:
@@ -237,7 +242,8 @@ namespace V {
     //  Use
     public:
 	void *allocate () {
-	    return BaseClass::allocate (m_sAllocation);
+	    NoHazardPointer pHazard;
+	    return BaseClass::allocate (m_sAllocation, pHazard);
 	}
 
     //  State
@@ -260,13 +266,11 @@ namespace V {
 
     //  Construction
     protected:
-	VAllocatorBase () {
-	}
+	VAllocatorBase ();
 
     //  Destruction
     protected:
-	~VAllocatorBase () {
-	}
+	~VAllocatorBase ();
 
     //  Allocation
     protected:
@@ -299,27 +303,24 @@ namespace V {
      *----  VAllocator  ----*
      ************************/
 
-    template<
-	unsigned int CellCount, size_t CellGrain, size_t CellFloor, class Model = VAllocatorGranule::SingleThreaded
-    > class VAllocator : public VAllocatorBase {
-    //  Aliases
+    template <unsigned int CellCount, size_t CellGrain, size_t CellFloor, class Model = VAllocatorGranule::ThreadScoped>
+	class VAllocator : public VAllocatorBase
+    {
     public:
 	typedef VAllocatorGranule_<Model> Cell;
 
     //  Construction
     public:
-	VAllocator () {
-	}
+	VAllocator ();
 
     //  Destruction
     public:
-	~VAllocator () {
-	}
+	~VAllocator ();
 
     //  Grain and Counter Indices
     protected:
 	static unsigned int cellIndex (size_t sObject) {
-	    return sObject <= CellFloor ? 0 : static_cast<unsigned int>((sObject - CellFloor + CellGrain - 1) / CellGrain);
+	    return sObject <= CellFloor ? 0 : (sObject - CellFloor + CellGrain - 1) / CellGrain;
 	}
 	static size_t cellSize (unsigned int xGrain) {
 	    return CellGrain * (xGrain + 1) + CellFloor;
@@ -327,31 +328,34 @@ namespace V {
 
     //  Allocation
     public:
-	void *allocate (size_t sObject) {
-	    unsigned int xGrain = cellIndex (sObject);
+	template <class hazard_pointer_t> void *allocate (size_t sObject, hazard_pointer_t &rpHazard) {
+	    unsigned int const xGrain = cellIndex (sObject);
 	    return xGrain < CellCount
-		? m_iCell[xGrain].allocate (cellSize (xGrain))
+		? m_iCell[xGrain].allocate (cellSize (xGrain), rpHazard)
 		: allocateOversizedObject (sObject);
+	}
+	void *allocate (size_t sObject) {
+	    NoHazardPointer pHazard;
+	    return allocate (sObject, pHazard);
 	}
 
     //  Deallocation
     public:
 	void deallocate (void *pObject, size_t sObject) {
-	    unsigned int xGrain = cellIndex (sObject);
+	    unsigned int const xGrain = cellIndex (sObject);
 	    if (xGrain < CellCount)
 		m_iCell[xGrain].deallocate (pObject);
 	    else
 		deallocateOversizedObject (pObject);
 	}
 
+    //  Cleanup
+    public:
+	void flush ();
+
     //  Display
     public:
-	void displayCounts () const {
-	    displayCountHeadings ();
-	    for (unsigned int i = 0; i < CellCount; i++)
-		m_iCell[i].displayCounts (cellSize (i));
-	    displayOversizedObjectCounts (CellCount * CellGrain + CellFloor);
-	}
+	void displayCounts () const;
 
     //  State
     private:
@@ -359,19 +363,78 @@ namespace V {
     };
 
 
-    /*****************************************
-     *----  VAllocatorInstance__<Model>  ----*
-     *****************************************/
+    /**********************************************************
+     *----  VAllocatorGranule_<Model> Member Definitions  ----*
+     **********************************************************/
 
-    template <class Model> class VAllocatorInstance_ {
-    public:
-	static VAllocator<(unsigned int)64, (size_t)8, (size_t)0, Model> Data;
+    template <class Model> VAllocatorGranule_<Model>::VAllocatorGranule_() {
+    }
+    template <class Model> VAllocatorGranule_<Model>::~VAllocatorGranule_() {
+    }
+    template <class Model> void VAllocatorGranule_<Model>::flush (size_t sCell) {
+	m_iModel.flush (sCell);
+    }
+
+    /**************************************************
+     *----  VAllocator<Model> Member Definitions  ----*
+     **************************************************/
+
+    template <unsigned int CellCount, size_t CellGrain, size_t CellFloor, class Model>
+	VAllocator<CellCount,CellGrain,CellFloor,Model>::VAllocator ()
+    {
+    }
+
+    template <unsigned int CellCount, size_t CellGrain, size_t CellFloor, class Model>
+	VAllocator<CellCount,CellGrain,CellFloor,Model>::~VAllocator ()
+    {
+	flush ();
+    }
+
+    template <unsigned int CellCount, size_t CellGrain, size_t CellFloor, class Model>
+	void VAllocator<CellCount,CellGrain,CellFloor,Model>::flush ()
+    {
+	for (unsigned int xGrain = 0; xGrain < CellCount; xGrain++)
+	    m_iCell[xGrain].flush (cellSize (xGrain));
+    }
+
+    template <unsigned int CellCount, size_t CellGrain, size_t CellFloor, class Model>
+	void VAllocator<CellCount,CellGrain,CellFloor,Model>::displayCounts () const
+    {
+	displayCountHeadings ();
+	for (unsigned int xGrain = 0; xGrain < CellCount; xGrain++)
+	    m_iCell[xGrain].displayCounts (cellSize (xGrain));
+	displayOversizedObjectCounts (CellCount * CellGrain + CellFloor);
+    }
+
+    /****************************************
+     *----  VAllocatorInstance_<Model>  ----*
+     ****************************************/
+
+    template <class Model> class VAllocatorInstance_ : public VAllocator<(unsigned int)64, (size_t)8, (size_t)0, Model> {
     };
-    template <class Model> VAllocator<(unsigned int)64, (size_t)8, (size_t)0, Model> VAllocatorInstance_<Model>::Data;
 
-    typedef VAllocatorInstance_<VAllocatorGranule::SingleThreaded>	VThreadDumbAllocator;
-    typedef VAllocatorInstance_<VAllocatorGranule::MultiThreaded>	VThreadSafeAllocator;
-}
+    /*********************
+     *----  Aliases  ----*
+     *********************/
+
+    typedef VAllocatorInstance_<VAllocatorGranule::ThreadScoped>	VThreadDumbAllocator;
+    typedef VAllocatorInstance_<VAllocatorGranule::ProcessScoped>	VThreadSafeAllocator;
+
+    /****************************
+     *----  Instantiations  ----*
+     ****************************/
+
+#if defined(USING_HIDDEN_DEFAULT_VISIBILITY) || defined(V_VAllocator_Instantiations)
+    V_VAllocator template V_API void *VAllocatorGranule::ThreadScoped::grow (size_t,HazardPointer&);
+    V_VAllocator template V_API void *VAllocatorGranule::ThreadScoped::grow (size_t,NoHazardPointer&);
+
+    V_VAllocator template class V_API VAllocatorGranule_<VAllocatorGranule::ThreadScoped>;
+    V_VAllocator template class V_API VAllocatorGranule_<VAllocatorGranule::ProcessScoped>;
+
+    V_VAllocator template class V_API VAllocator<(unsigned int)64, (size_t)8, (size_t)0, VAllocatorGranule::ThreadScoped>;
+    V_VAllocator template class V_API VAllocator<(unsigned int)64, (size_t)8, (size_t)0, VAllocatorGranule::ProcessScoped>;
+#endif
+} // namespace V
 
 
 #endif

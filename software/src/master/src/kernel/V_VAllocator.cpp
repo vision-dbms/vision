@@ -1,4 +1,5 @@
 /*****  V_VAllocator Implementation  *****/
+#define V_VAllocator_Instantiations
 
 /************************
  ************************
@@ -18,6 +19,7 @@ typedef unsigned __int64 size64_t;
  *****  Self  *****
  ******************/
 
+#define   V_VAllocator
 #include "V_VAllocator.h"
 
 /************************
@@ -25,6 +27,8 @@ typedef unsigned __int64 size64_t;
  ************************/
 
 #include "V_VSpinlock.h"
+#include "V_VThread.h"
+
 #include "VkStatus.h"
 
 #include "Vos_VMSMemoryRegion.h"
@@ -35,13 +39,13 @@ typedef unsigned __int64 size64_t;
 #endif
 
 
-/***********************************
- ***********************************
- *****                         *****
- *****  V::VAllocatorFreeList  *****
- *****                         *****
- ***********************************
- ***********************************/
+/**********************************
+ **********************************
+ *****                        *****
+ *****  V::VAllocatorGranule  *****
+ *****                        *****
+ **********************************
+ **********************************/
 
 /*********************
  *****  Globals  *****
@@ -50,9 +54,9 @@ typedef unsigned __int64 size64_t;
 typedef V::VAllocatorGranule::counter_t aflcounter_t;
 
 #ifdef __VMS
-bool V::VAllocatorGranule::g_bFreePoolDisabled	= getenv ("VDisableAllocPool");
+bool V::VAllocatorGranule::g_bFreePoolDisabled = getenv ("VDisableAllocPool");
 #else
-bool V::VAllocatorGranule::g_bFreePoolDisabled	= !getenv ("VUseAllocPool");
+bool V::VAllocatorGranule::g_bFreePoolDisabled = !getenv ("VUseAllocPool");
 #endif
 
 unsigned int	V::VAllocatorGranule::g_sFreeListTotal		= 0;
@@ -100,15 +104,16 @@ static size_t const	sInitialScaleFactor = 1;
 
 #endif
 
+using V::pointer_t;
 static size_t const	sInitialAllocation = 2 * 1024 * 1024 / sInitialScaleFactor;
 static size_t const	sMaximumAllocation = 64 * sInitialAllocation * sInitialScaleFactor;
 static size_t		sNextAllocation = sInitialAllocation;
 static size_t		sThisAdaptiveInterval = 4;
 static size_t		sNextAdaptiveInterval = sThisAdaptiveInterval;
 static size_t		sPool = 0;
-static V::pointer_t	pPool = 0;
+static pointer_t	pPool = 0;
 
-V::pointer_t V::VAllocatorGranule::getSpace (size_t sSpace) {
+pointer_t V::VAllocatorGranule::getSpace (size_t sSpace) {
     pointer_t pSpace;
     if (g_bFreePoolDisabled)
 	pSpace = static_cast<pointer_t>(BaseClass::allocate (sSpace));
@@ -175,8 +180,57 @@ V::pointer_t V::VAllocatorGranule::getSpace (size_t sSpace) {
 
     return pSpace;
 }
+
 
-void *V::VAllocatorGranule::SingleThreaded::grow (size_t sCell) {
+/************************************************
+ ************************************************
+ *****                                      *****
+ *****  V::VAllocatorGranule::ThreadScoped  *****
+ *****                                      *****
+ ************************************************
+ ************************************************/
+
+V::VAllocatorGranule::ThreadScoped::ThreadScoped () {
+}
+
+V::VAllocatorGranule::ThreadScoped::~ThreadScoped () {
+}
+
+void V::VAllocatorGranule::ThreadScoped::deallocate (void *pCell) {
+    push (reinterpret_cast<Node*>(pCell));
+}
+
+template <class hazard_pointer_t> void *V::VAllocatorGranule::ThreadScoped::grow (size_t sCell, hazard_pointer_t &rpHazard) {
+//    fprintf (stderr, "%p: grow[%u]\n", this, sCell);
+    return VThread::AllocateGlobal (sCell, rpHazard);
+}
+
+void V::VAllocatorGranule::ThreadScoped::flush (size_t sCell) {
+//    fprintf (stderr, "%p: flush[%u]\n", this, sCell);
+    Node::Pointer pElement;
+    while (pop (pElement))
+	VThread::DeallocateGlobal (pElement, sCell);
+}
+
+/*************************************************
+ *************************************************
+ *****                                       *****
+ *****  V::VAllocatorGranule::ProcessScoped  *****
+ *****                                       *****
+ *************************************************
+ *************************************************/
+
+V::VAllocatorGranule::ProcessScoped::ProcessScoped () {
+}
+
+V::VAllocatorGranule::ProcessScoped::~ProcessScoped () {
+}
+
+void V::VAllocatorGranule::ProcessScoped::deallocate (void *pCell) {
+    push (reinterpret_cast<Node*>(pCell));
+}
+
+void *V::VAllocatorGranule::ProcessScoped::grow (size_t sCell) {
     size_t sSpace = allocationSize (sCell);
     pointer_t const pSpace = getSpace (sSpace);
     for (pointer_t pCell = pSpace + sSpace - sCell; pCell > pSpace; pCell -= sCell)
@@ -184,12 +238,7 @@ void *V::VAllocatorGranule::SingleThreaded::grow (size_t sCell) {
     return pSpace;
 }
 
-void *V::VAllocatorGranule::MultiThreaded::grow (size_t sCell) {
-    size_t sSpace = allocationSize (sCell);
-    pointer_t const pSpace = getSpace (sSpace);
-    for (pointer_t pCell = pSpace + sSpace - sCell; pCell > pSpace; pCell -= sCell)
-	deallocate (pCell);
-    return pSpace;
+void V::VAllocatorGranule::ProcessScoped::flush (size_t sCell) {
 }
 
 
@@ -200,6 +249,20 @@ void *V::VAllocatorGranule::MultiThreaded::grow (size_t sCell) {
  *****                  *****
  ****************************
  ****************************/
+
+/**************************
+ *****  Construction  *****
+ **************************/
+
+V::VAllocatorBase::VAllocatorBase () {
+}
+
+/*************************
+ *****  Destruction  *****
+ *************************/
+
+V::VAllocatorBase::~VAllocatorBase () {
+}
 
 /*********************
  *****  Display  *****
@@ -217,21 +280,3 @@ void V::VAllocatorBase::displayOversizedObjectCounts (size_t sSmallestOversizeOb
 	m_iOversizedACount.operator count_t () - m_iOversizedDCount.operator count_t ()
     );
 }
-
-
-/***************************
- ***************************
- *****                 *****
- *****  V::VAllocator  *****
- *****                 *****
- ***************************
- ***************************/
-
-/****************************
- ****************************
- *****  Instantiations  *****
- ****************************
- ****************************/
-
-template class V_API V::VAllocatorInstance_<V::VAllocatorGranule::SingleThreaded>;
-template class V_API V::VAllocatorInstance_<V::VAllocatorGranule::MultiThreaded>;

@@ -49,7 +49,7 @@ DEFINE_ABSTRACT_RTT (V::VThread);
  *************************
  *************************/
 
-V::VThread::EternalKey V::VThread::g_iTLSKey;
+V::VThreadSpecific::Key const V::VThread::g_iTLSKey;
 
 /**************************
  **************************
@@ -59,10 +59,10 @@ V::VThread::EternalKey V::VThread::g_iTLSKey;
 
 V::VThread::VThread (
     pthread_t hThread, pthread_id_t xThread
-) : m_xState (State_Set), m_hThread (hThread), m_xThread (xThread) {
+) : m_xState (State_Set), m_hThread (hThread), m_xThread (xThread), m_bAllocatorFlushed (true) {
 }
 
-V::VThread::VThread () : m_xState (State_Startable) {
+V::VThread::VThread () : m_xState (State_Startable), m_bAllocatorFlushed (true) {
 }
 
 /*************************
@@ -127,14 +127,20 @@ pthread_id_t V::VThread::CurrentThreadId () {
 #endif
 }
 
-V::VThread::Reference V::VThread::Here () {
-    BaseClass::Reference pSpecific; Reference pThisInstance;
-    if (g_iTLSKey->getSpecific (pSpecific) && pSpecific.isntNil ())
-	pThisInstance.setTo (static_cast<ThisClass*>(pSpecific.referent ()));
-    else
-	pThisInstance.setTo (new VUnmanagedThread ());
+bool V::VThread::GetHere (Reference &rpHere) {
+    BaseClass::Reference pSpecific;
+    if (g_iTLSKey.getSpecific (pSpecific) && pSpecific) {
+	rpHere.setTo (static_cast<ThisClass*>(pSpecific.referent ()));
+	return true;
+    }
+    return false;
+}
 
-    return pThisInstance;
+V::VThread::Reference V::VThread::Here () {
+    Reference pHere;
+    if (!GetHere (pHere))
+	pHere.setTo (new VUnmanagedThread ());
+    return pHere;
 }
 
 /*********************
@@ -201,6 +207,61 @@ bool V::VThread::stop () {
 
 bool const V::VThread::m_VSingleCoreExecution = V::GetEnvironmentBoolean ("VSingleCoreExecution");
 bool       V::VThread::m_VSingleCoreExecutionChecked = false;
+
+
+
+/*******************************
+ *******************************
+ *****  Memory Management  *****
+ *******************************
+ *******************************/
+
+V::VThreadSafeAllocator V::VThread::GlobalAllocator;
+
+void *V::VThread::Allocate (size_t sObject) {
+    Reference pHere;
+    return GetHere (pHere) ? pHere->allocateLocal (sObject) : AllocateGlobal (sObject);
+}
+
+void *V::VThread::AllocateGlobal (size_t sObject) {
+    NoHazardPointer pNoHazard;
+    return AllocateGlobal (sObject, pNoHazard);
+}
+
+void V::VThread::Deallocate (void *pObject, size_t sObject) {
+    Reference pHere;
+    if (GetHere (pHere))
+	pHere->deallocateLocal (pObject, sObject);
+    else {
+	DeallocateGlobal (pObject, sObject);
+    }
+}
+
+void V::VThread::FlushAllocator () {
+    Reference pHere;
+    if (GetHere (pHere))
+	pHere->flushAllocator ();
+}
+
+void V::VThread::flushAllocator () {
+    m_bAllocatorFlushed = true;
+    m_iTLA.flush ();
+}
+
+void V::VThread::DisplayAllocationStatistics () {
+    display ("\n====  Thread Local Allocator:"); {
+	Reference pHere;
+	if (GetHere (pHere))
+	    pHere->displayAllocationStatistics ();
+    }
+    display ("\n====  Process Global Allocator:");
+    GlobalAllocator.displayCounts ();
+}
+
+void V::VThread::displayAllocationStatistics () const {
+    m_iTLA.displayCounts ();
+}
+
 
 void V::VThread::CheckSingleCoreExecution () {
     if (!m_VSingleCoreExecutionChecked) {

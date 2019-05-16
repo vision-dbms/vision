@@ -1,11 +1,21 @@
 #ifndef V_VAggregatePointer_NRK
 #define V_VAggregatePointer_NRK
 
+/**************************
+ *****  Declarations  *****
+ **************************/
+
+#include "V_VAtomicLink.h"
+
 /***********************
  *****  Templates  *****
  ***********************/
 
 namespace V {
+    /*******************************************************************
+     *----  template <class Referenced_T> class VAggregatePointer  ----*
+     *******************************************************************/
+
     /**
      * VPointer subclassed enhanced with stack operations.
      * VAggregatePointer instances can be treated like a stack using their push() and pop() methods (or interlockedPush() and interlockedPop() for thread safety).
@@ -17,13 +27,18 @@ namespace V {
      * @see interolockedPush()
      * @see interlockedPop()
      */
-    template <class ReferencedClass> class VAggregatePointer : public VPointer<ReferencedClass> {
-    //  Family
-	DECLARE_FAMILY_MEMBERS (VAggregatePointer<ReferencedClass>, VPointer<ReferencedClass>);
+    template <class Referenced_T> class VAggregatePointer : public VPointer<Referenced_T> {
+	DECLARE_FAMILY_MEMBERS (VAggregatePointer<Referenced_T>, VPointer<Referenced_T>);
+
+	friend class VAtomicLink<ThisClass>;
+
+    //  Aliases
+    public:
+	typedef Referenced_T ReferencedClass;
 
     //  Link Member
     public:
-	typedef ThisClass ReferencedClass::*LinkMember;
+	typedef ThisClass Referenced_T::*LinkMember;
 
     //  Construction
     public:
@@ -57,38 +72,20 @@ namespace V {
 
     public:
         /**
-         * Thread-safe stack push operation.
+         * Thread-safe stack push operation:
+	 *
+	 *    void interlockedPush (ReferencedClass *pFirst, LinkMember pLinkMember);
+	 *
+	 *  moved to V::VAtomicallyLinkablePointer.
          */
-	void interlockedPush (ReferencedClass *pFirst, LinkMember pLinkMember) {
-	    VAtomicMemoryOperations::MemoryBarrierProduce ();
 
-	    ReferencedClass *&rpFirstLink = (pFirst->*pLinkMember).m_pReferent;
-	    do {
-		rpFirstLink = m_pReferent;
-	    } while (!interlockedSetIf (pFirst, rpFirstLink));
-	}
         /**
-         * Thread-safe stack pop operation.
-         * 
-         * @todo solve ABA vulnerability.
+         * Thread-safe stack pop operation:
+         *
+	 *    bool interlockedPop (ReferencedClass *&rpFirst, LinkMember pLinkMember);
+	 *
+	 *  moved to V::VAtomicallyLinkablePointer.
          */
-	bool interlockedPop (ReferencedClass *&rpFirst, LinkMember pLinkMember) {
-	    ReferencedClass *pFirst;
-	    do {
-		pFirst = m_pReferent;
-	    } while (pFirst && !interlockedSetIf ((pFirst->*pLinkMember).m_pReferent, pFirst));
-	    rpFirst = pFirst;
-	    if (!pFirst)
-		return false;
-
-	    VAtomicMemoryOperations::MemoryBarrierConsume ();
-	    (pFirst->*pLinkMember).m_pReferent = 0;
-
-	    return true;
-	}
-	bool interlockedPop (ThisClass &rpFirst, LinkMember pLinkMember) {
-	    return interlockedPop (rpFirst.m_pReferent, pLinkMember);
-	}
 
     //  Non-Interlocked Update
     public:
@@ -116,6 +113,29 @@ namespace V {
     //  State
     protected:
 	USING (BaseClass::m_pReferent)
+    };
+
+
+    /****************************************************************************
+     *----  template <class Referenced_T> class VAtomicallyLinkablePointer  ----*
+     ****************************************************************************/
+
+    template <class Referenced_T> class VAtomicallyLinkablePointer : public VAtomicLink<VAggregatePointer<Referenced_T> > {
+	DECLARE_FAMILY_MEMBERS (VAtomicallyLinkablePointer<Referenced_T>,VAtomicLink<VAggregatePointer<Referenced_T> >);
+
+    //  Construction
+    public:
+	explicit VAtomicallyLinkablePointer (Referenced_T *pReferent) : BaseClass (pReferent) {
+	}
+	VAtomicallyLinkablePointer (ThisClass const &rOther) : BaseClass (rOther) {
+	}
+	VAtomicallyLinkablePointer () {
+	}
+
+    //  Destruction
+    public:
+	~VAtomicallyLinkablePointer () {
+	}
     };
 }
 
