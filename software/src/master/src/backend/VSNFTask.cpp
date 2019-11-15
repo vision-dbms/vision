@@ -208,7 +208,7 @@ bool VSNFTask::getParameter (unsigned int xParameter, VDescriptor& rDatum) {
 bool VSNFTask::getSelfReference (object_reference_t &rSelfReference) {
     bool bGood = false;
 
-    DSC_Descriptor &rSelf = getSelf ();
+    DSC_Descriptor &rSelf = getCurrent ();
     if (rSelf.isScalar ()) {
 	rtREFUV_AlignReference (&DSC_Descriptor_Scalar (rSelf));
 	rSelfReference = DSC_Descriptor_Scalar_Int (rSelf);
@@ -226,7 +226,7 @@ bool VSNFTask::getSelfReference (object_reference_array_t &rSelfReferences) {
 
     rSelfReferences.DeleteAll ();
 
-    DSC_Descriptor &rSelf = getSelf ();
+    DSC_Descriptor &rSelf = getCurrent ();
     if (rSelf.isScalar ()) {
 	rtREFUV_AlignReference (&DSC_Descriptor_Scalar (rSelf));
 	rSelfReferences.Append (DSC_Descriptor_Scalar_Int (rSelf));
