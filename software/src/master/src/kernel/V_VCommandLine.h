@@ -110,6 +110,9 @@ namespace V {
 	    void reset () {
 		m_xCommandWord = 0;
 	    }
+	    
+	private:
+	    static char const *consumeTag (char const *pWord);
 
 	//  State
 	private:

@@ -65,8 +65,9 @@ bool V::VCommandLine::Cursor::nextSwitch (char const *pTag, char const *pVariabl
 // -xyz(etc.)
 char const *V::VCommandLine::Cursor::nextTag () {
     while (char const *pWord = nextWord ()) {
-	if ('-' == pWord[0])
-	    return pWord + 1;
+        char const *pTagPart = consumeTag (pWord);
+	if (pWord != pTagPart)
+            return pTagPart;
     }
     return 0;
 }
@@ -74,10 +75,19 @@ char const *V::VCommandLine::Cursor::nextTag () {
 // xyz NOT -xyz(etc.)
 char const *V::VCommandLine::Cursor::nextToken () {
     while (char const *pWord = nextWord ()) {
-	if ('-' != pWord[0])
+        char const *pTagPart = consumeTag (pWord);
+	if (pWord == pTagPart)
 	    return pWord;
     }
     return 0;
+}
+
+char const *V::VCommandLine::Cursor::consumeTag (char const *pWord) {
+    return '-' != pWord[0]
+         ? pWord
+         : '-' != pWord[1]
+         ? pWord + 1
+         : pWord + 2;
 }
 
 
