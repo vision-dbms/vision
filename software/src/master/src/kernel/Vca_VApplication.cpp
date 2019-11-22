@@ -700,10 +700,10 @@ bool Vca::VApplication::start () {
 
 bool Vca::VApplication::stop (bool bHardStop) {
     if (bHardStop && isntStopped ()) {
-	m_xRunState = RunState_Stopping;
+	m_xRunState = RunState_Stopping; // setRunStateIf (m_xRunState, RunState_Stopping); ???
 	stop_(true);
     } else if (isntStopping () && isntAwaitingStop () && isntStopped ()) {
-	m_xRunState  = RunState_Stopping;
+	m_xRunState = RunState_Stopping; // setRunStateIf (m_xRunState, RunState_Stopping); ???
 	stop_(bHardStop);
     }
     return setRunStateIf (RunState_Stopping, RunState_Stopped);
@@ -739,20 +739,24 @@ bool Vca::VApplication::setRunStateIf (RunState xOldState, RunState xNewState) {
 	return false;
 
     if (xOldState != xNewState) {
-	onEvent (new StateTransition (this, xNewState));
-	if (m_pRunStateReceiver)
-	    m_pRunStateReceiver->OnData (m_xRunState);
-	if (isStopped ()) {
-	    onSuccess ();
-	    if (m_pContext)
-		m_pContext->decrementApplicationCount ();
-	}
+        onRunStateChange_(xOldState, xNewState);
     }
     return true;
 }
 
 bool Vca::VApplication::setRunStateToStopped () {
     return isntStopped () && setRunStateIf (m_xRunState, RunState_Stopped);
+}
+
+void Vca::VApplication::onRunStateChange_(RunState xOldState, RunState xNewState) {
+    onEvent (new StateTransition (this, xNewState));
+    if (m_pRunStateReceiver)
+        m_pRunStateReceiver->OnData (m_xRunState);
+    if (isStopped ()) {
+        onSuccess ();
+        if (m_pContext)
+            m_pContext->decrementApplicationCount ();
+    }
 }
 
 bool Vca::VApplication::start_() {

@@ -839,6 +839,12 @@ namespace Vca {
         bool setRunStateToStopped ();
 
         /**
+         * Called whenever the run state changes.  Derived class overrides MUST
+         * call the BaseClass version of this routine as the FIRST thing they do.
+         */
+        virtual void onRunStateChange_(RunState xOldState, RunState xNewState);
+
+        /**
          * Handles application startup; must be implemented by concrete subclasses.
          * Stock implementation does nothing, so this application will exit unless this method is overridden.
          *
