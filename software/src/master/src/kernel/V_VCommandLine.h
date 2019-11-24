@@ -111,6 +111,9 @@ namespace V {
 		m_xCommandWord = 0;
 	    }
 
+	private:
+	    static char const *consumeTag (char const *pWord);
+
 	//  State
 	private:
 	    VCommandLine const *m_pCommandLine;
