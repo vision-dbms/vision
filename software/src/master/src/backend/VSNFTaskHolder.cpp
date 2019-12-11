@@ -662,7 +662,7 @@ void VSNFTaskHolder::ReturnNASegment (ICaller *pRole, object_reference_array_t c
     if (m_pSNFTask) {
 	if (g_iLogger.isActive ())
 	    g_iLogger.log (taskId (), "NA", "Segment");
-	if (m_pSNFTask->ReturnNA (rInjector))
+	if (m_pSNFTask->ReturnNASegment (rInjector))
 	    wrapup ();
     }
 }
@@ -761,8 +761,10 @@ void VSNFTaskHolder::Suspend (ICaller2 *pRole) {
 }
 
 void VSNFTaskHolder::Resume (ICaller2 *pRole) {
-    if (m_pSNFTask)
+    if (m_pSNFTask) {
         m_pSNFTask->resume ();
+        wrapup ();
+    }
 }
 
 
@@ -886,6 +888,9 @@ void VSNFTaskHolder::onSent () {
 }
 
 void VSNFTaskHolder::wrapup () {
+    if (m_pSNFTask && m_pSNFTask->blocked ())
+        return;
+
     if (m_pNoRouteToPeerTriggerTicket) {
 	m_pNoRouteToPeerTriggerTicket->cancel ();
 	m_pNoRouteToPeerTriggerTicket.clear ();
@@ -894,7 +899,7 @@ void VSNFTaskHolder::wrapup () {
 	onSuccess ();
 
 	g_iScheduler.decrementTaskCount ();
-    //	m_pSNFTask.clear ();
+	m_pSNFTask.clear ();
     }
 }
 
