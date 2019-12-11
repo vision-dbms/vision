@@ -86,6 +86,67 @@ private:
 template class Vxa_API V::VThreadedProcessor_<Vxa::VTask::LaunchRequest>;
 
 
+/***************************************
+ ***************************************
+ *****                             *****
+ *****  Vxa::VTask::RemoteControl  *****
+ *****                             *****
+ ***************************************
+ ***************************************/
+
+/**************************
+ **************************
+ *****  Construction  *****
+ **************************
+ **************************/
+
+Vxa::VTask::RemoteControl::RemoteControl (
+    ICaller2 *pRemoteInterface
+) : m_pRemoteInterface (pRemoteInterface), m_cSuspensions (0) {
+}
+
+/*************************
+ *************************
+ *****  Destruction  *****
+ *************************
+ *************************/
+
+Vxa::VTask::RemoteControl::~RemoteControl () {
+}
+
+/****************************
+ ****************************
+ *****  Remote Control  *****
+ ****************************
+ ****************************/
+
+bool Vxa::VTask::RemoteControl::suspend () {
+    return 0 == m_cSuspensions++ && sendRemoteSuspend ();
+}
+
+bool Vxa::VTask::RemoteControl::resume () {
+    return m_cSuspensions > 0 && 0 == --m_cSuspensions && sendRemoteResume ();
+}
+
+bool Vxa::VTask::RemoteControl::sendRemoteSuspend () const {
+    Vca::VCohortClaim iCohortClaim;
+
+    if (m_pRemoteInterface.isNil ())
+        return false;
+    m_pRemoteInterface->Suspend ();
+    return true;
+}
+
+bool Vxa::VTask::RemoteControl::sendRemoteResume () const {
+    Vca::VCohortClaim iCohortClaim;
+
+    if (m_pRemoteInterface.isNil ())
+        return false;
+    m_pRemoteInterface->Resume ();
+    return true;
+}
+
+
 /************************
  ************************
  *****              *****
@@ -112,6 +173,7 @@ Vxa::VTask::VTask (
  *************************/
 
 Vxa::VTask::~VTask () {
+    wrapupRemoteControl ();
 }
 
 /***********************
@@ -151,12 +213,19 @@ bool Vxa::VTask::runWithMonitor () {
         iCC.clear ();  //  ... clear the claim so that it's free to create a new cohort if necessary.
 
     bool const bSuccessful = run ();
+
+/*****
+ *  Remove the protective remote suspension set during remote control creation...
+ *****/
+    wrapupRemoteControl ();
+
 /*
     if (bSuccessful)
 	onSuccess ();
     else
 	onFailure (0, "Vxa task run error!");
 */
+
     return bSuccessful;
 }
 
@@ -183,4 +252,35 @@ bool Vxa::VTask::launchInThreadPool () {
 //    LaunchRequest iLR (this);
     g_pRequestProcessor->process (LaunchRequest (this));
     return true;
+}
+
+
+/****************************
+ ****************************
+ *****  Remote Control  *****
+ ****************************
+ ****************************/
+
+Vxa::VTask::RemoteControl *Vxa::VTask::getRemoteControl (
+    Vxa::ICaller2 *pRemoteInterface
+) {
+    if (m_pRemoteControl.isNil ()) {
+        RemoteControl::Reference const pRemoteControl (
+            new RemoteControl (pRemoteInterface)
+        );
+        if (m_pRemoteControl.interlockedSetIfNil (pRemoteControl))
+        /*****
+         *  Tasks send a protective remote suspension on newly minted remote controls
+         *  which they remove on task completion/finalization...
+         *****/
+            m_pRemoteControl->suspend ();
+    }
+    return m_pRemoteControl;
+}
+
+void Vxa::VTask::wrapupRemoteControl () {
+    if (m_pRemoteControl) {
+        m_pRemoteControl->resume ();
+        m_pRemoteControl.clear ();
+    }
 }

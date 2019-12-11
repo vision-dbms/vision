@@ -19,6 +19,7 @@
  *****  Declarations  *****
  **************************/
 
+#include "Vxa_ICaller2.h"
 #include "Vxa_VExportableDatum.h"
 
 /*************************
@@ -28,6 +29,11 @@
 namespace Vxa {
     class Vxa_API VResultBuilder {
 	DECLARE_NUCLEAR_FAMILY (VResultBuilder);
+
+    //****************************************************************
+    //  RemoteControl
+    public:
+        typedef VTask::RemoteControl RemoteControl;
 
     //****************************************************************
     //  TailHints
@@ -88,6 +94,15 @@ namespace Vxa {
         }
         cardinality_t taskCardinality () const {
             return m_pTask->cardinality ();
+        }
+
+    //  Remote Control
+    public:
+        RemoteControl *getRemoteControl () const;
+
+    private:
+        virtual ICaller2 *getRemoteControlInterface () const {
+            return 0;
         }
 
     //  Query
@@ -155,7 +170,7 @@ namespace Vxa {
 
     //  State
     private:
-        VTask::Reference const m_pTask;
+        VTask::Reference       const m_pTask;
 	TailHints::Reference mutable m_pTailHints;
     };
 }

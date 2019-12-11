@@ -15,6 +15,8 @@
  *****  Declarations  *****
  **************************/
 
+#include "Vxa_ICaller2.h"
+
 /*************************
  *****  Definitions  *****
  *************************/
@@ -30,7 +32,16 @@ namespace Vxa {
 
     class VError;
 
-    class Vxa_API VTask : public VRolePlayer, public Vca::VActivity {
+/*****************
+ *----
+ *
+ *  Why two inheritance paths to VRolePlayer? (mjc)
+ *
+ *    class Vxa_API VTask : public VRolePlayer, public Vca::VActivity {
+ *
+ *----
+ *****************/
+    class Vxa_API VTask : public Vca::VActivity {
 	DECLARE_ABSTRACT_RTTLITE (VTask, VRolePlayer);
 
 	friend class VCallType1;
@@ -41,6 +52,45 @@ namespace Vxa {
     public:
 	class LaunchRequest;
 	friend class LaunchRequest;
+
+    //****************************************************************
+    //  VTask::RemoteControl
+    public:
+        class Vxa_API RemoteControl : public VRolePlayer {
+            DECLARE_CONCRETE_RTTLITE (RemoteControl, VRolePlayer);
+
+            friend class VResultBuilder;
+
+        //  Construction
+        public:
+            RemoteControl (ICaller2 *pRemoteInterface);
+
+        //  Destruction
+        private:
+            ~RemoteControl ();
+
+        //  Access
+        public:
+            cardinality_t suspendCount () const {
+                return m_cSuspensions;
+            }
+
+        //  Control
+        public:
+            bool suspend ();
+            bool resume  ();
+        private:
+            bool sendRemoteSuspend () const;
+            bool sendRemoteResume  () const;
+
+        //  State
+        private:
+            ICaller2::Reference const m_pRemoteInterface;
+            cardinality_t             m_cSuspensions;
+        };
+
+    //****************************************************************
+    //  VTask
 
     //  Construction
     protected:
@@ -137,11 +187,17 @@ namespace Vxa {
 	    m_pCursor->next ();
 	}
 
+    //  Remote Control
+    public:
+        RemoteControl *getRemoteControl (Vxa::ICaller2 *pRemoteInterface);
+        void wrapupRemoteControl ();
+
     //  State
     private:
 	VCallData const m_iCallData;
 	VTaskCursor::Reference m_pCursor;
 	unsigned int m_cSuspensions;
+        RemoteControl::Reference m_pRemoteControl;
     };
 }
 

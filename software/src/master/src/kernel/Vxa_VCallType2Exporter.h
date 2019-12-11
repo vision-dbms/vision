@@ -77,6 +77,12 @@ namespace Vxa {
             }
 	}
 
+    //  Remote Control
+    private:
+        virtual Vxa::ICaller2 *getRemoteControlInterface () const override {
+            return VCallType2::getRemoteControlInterface ();
+        }
+
     //  Map Making
     private:
 	/**********************************************************************************

@@ -56,6 +56,16 @@ Vxa::VResultBuilder::VResultBuilder (VTask *pTask) : m_pTask (pTask) {
 
 Vxa::VResultBuilder::~VResultBuilder () {
 }
+
+/****************************
+ ****************************
+ *****  Remote Control  *****
+ ****************************
+ ****************************/
+
+Vxa::VTask::RemoteControl *Vxa::VResultBuilder::getRemoteControl () const {
+    return m_pTask->getRemoteControl (getRemoteControlInterface ());
+}
 
 
 /************************

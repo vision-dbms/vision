@@ -142,12 +142,14 @@ void Vxa::VCallType2::SelfProvider::OnError_(Vca::IError *pInterface, VString co
 
 Vxa::VCallType2::VCallType2 (
     VCollection *pCluster, VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask, ICaller *pCaller, bool bIntensional
-) :  BaseClass (pCluster, rMethodName, cParameters, cTask, bIntensional), m_pCaller (pCaller) {
+) : BaseClass (
+    pCluster, rMethodName, cParameters, cTask, bIntensional
+), m_pCaller (pCaller), m_pCaller2 (dynamic_cast<ICaller2*>(pCaller)) {
 }
 
 Vxa::VCallType2::VCallType2 (
     ThisClass const &rOther
-) : BaseClass (rOther), m_pCaller (rOther.m_pCaller) {
+) : BaseClass (rOther), m_pCaller (rOther.m_pCaller), m_pCaller2 (rOther.m_pCaller2) {
 }
 
 /*************************
@@ -209,6 +211,16 @@ bool Vxa::VCallType2::onParameterReceipt (VTask *pTask, unsigned int xParameter)
     reportParameterReceipt (xParameter);
 
     return pTask->resume ();
+}
+
+/***************************
+ ***************************
+ *****  Remote Control *****
+ ***************************
+ ***************************/
+
+Vxa::ICaller2 *Vxa::VCallType2::getRemoteControlInterface () const {
+    return m_pCaller2;
 }
 
 
