@@ -566,6 +566,12 @@ void VSNFTaskHolder::ReturnS2Integers (IVSNFTaskHolder2 *pRole, Vxa::i32_s2array
  *****  ICaller  *****
  *********************/
 
+void VSNFTaskHolder::getRole (ICaller::Reference &rpRole) {
+    ICaller2::Reference pRoleX;
+    getRole (pRoleX);
+    rpRole.setTo (pRoleX);
+}
+
 void VSNFTaskHolder::GetSelfReference (ICaller *pRole, IVReceiver<object_reference_t> *pResultSink) {
     if (pResultSink && m_pSNFTask) {
 	object_reference_t xSelf;
@@ -734,6 +740,30 @@ void VSNFTaskHolder::ReturnSegmentCount (ICaller *pRole, cardinality_t cSegments
 	    wrapup ();
     }
 }
+
+/**********************
+ *****  ICaller2  *****
+ **********************/
+
+void VSNFTaskHolder::Suspensions (ICaller2 *pRole, IVReceiver<cardinality_t> *pResultSink) {
+    if (pResultSink) {
+        if (m_pSNFTask)
+	    pResultSink->OnData (m_pSNFTask->suspendCount ());
+	else {
+	    pResultSink->OnError (0, "Task Inactive");
+	}
+    }
+}
+
+void VSNFTaskHolder::Suspend (ICaller2 *pRole) {
+    if (m_pSNFTask)
+        m_pSNFTask->suspend ();
+}
+
+void VSNFTaskHolder::Resume (ICaller2 *pRole) {
+    if (m_pSNFTask)
+        m_pSNFTask->resume ();
+}
 
 
 /********************
@@ -798,8 +828,8 @@ void VSNFTaskHolder::start (ISingleton *pExternalObject) {
 
 void VSNFTaskHolder::start (ICollection *pExternalObject) {
     if (m_pSNFTask) {
-	ICaller::Reference pICaller;
-	getRole (pICaller);
+	ICaller2::Reference pICaller2;
+	getRole (pICaller2);
 	if (g_iLogger.isActive ()) {
 	    g_iLogger.printf (
 		"+++%5u: %p->%s [%u x %u]\n", taskId (), pExternalObject,
@@ -810,11 +840,11 @@ void VSNFTaskHolder::start (ICollection *pExternalObject) {
 	    g_iScheduler.incrementTaskCount ();
             if (m_pSNFTask->returnCase () == VComputationUnit::Return_Intension) {
                 pExternalObject->Bind (
-                    pICaller, m_pSNFTask->selectorName (), m_pSNFTask->parameterCount (), m_pSNFTask->cardinality ()
+                    pICaller2, m_pSNFTask->selectorName (), m_pSNFTask->parameterCount (), m_pSNFTask->cardinality ()
                 );
             } else {
                 pExternalObject->Invoke (
-                    pICaller, m_pSNFTask->selectorName (), m_pSNFTask->parameterCount (), m_pSNFTask->cardinality ()
+                    pICaller2, m_pSNFTask->selectorName (), m_pSNFTask->parameterCount (), m_pSNFTask->cardinality ()
                 );
             }
 	} catch (...) {
@@ -864,7 +894,7 @@ void VSNFTaskHolder::wrapup () {
 	onSuccess ();
 
 	g_iScheduler.decrementTaskCount ();
-	m_pSNFTask.clear ();
+    //	m_pSNFTask.clear ();
     }
 }
 
