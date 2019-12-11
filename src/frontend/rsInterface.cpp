@@ -407,11 +407,11 @@ PublicFnDef int RS_sendAndCheck(
     result = FALSE;
 
 /**** check RSstdout ****/
-    VString outp (eatLeadingAndTrailingSpaces(output));
+    V::VString outp (eatLeadingAndTrailingSpaces(output));
     len = strlen(outp);
     while (RS_readLine (buffer, RS_MaxLine))
     {
-	VString buf (eatLeadingAndTrailingSpaces(buffer));
+	V::VString buf (eatLeadingAndTrailingSpaces(buffer));
 	if (0 == strncmp(buf, outp, len))
 	    result = TRUE;
     }
@@ -901,10 +901,12 @@ PrivateFnDef void parentSignalHandler (int sig)
 	ERR_displayError (ERR_FloatSig);
 	break;
 	
+#ifdef SIGBUS
     case SIGBUS:
 	ERR_displayError (ERR_BusSig);
 	break;
-	
+#endif
+
     case SIGSYS:
 	ERR_displayError (ERR_ArgSig);
 	break;
@@ -921,7 +923,7 @@ PrivateFnDef void parentSignalHandler (int sig)
 	ERR_displayError (ERR_User1Sig);
 	break;
 
-#ifndef __APPLE__	
+#ifdef SIGPWR
     case SIGPWR:
 	ERR_displayError (ERR_PowerSig);
 	break;
@@ -939,7 +941,7 @@ PrivateFnDef void parentSignalHandler (int sig)
 	ERR_displayError (ERR_SIGIOSig);
 	break;
 	
-#ifndef __APPLE__
+#ifdef SIGWINDOW
     case SIGWINDOW:
 	ERR_displayError (ERR_WinSig);
 	break;

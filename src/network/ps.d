@@ -644,7 +644,7 @@ struct PS_SH {
 )
 #define PS_SH_ContainerPreamble(sh,offset) (\
     (M_CPreamble*)(\
-	(pointer_t)(sh) + (offset) - (\
+	(V::pointer_t)(sh) + (offset) - (\
 	    PS_SH_IsASmallContainerSegment ((PS_SH*)(sh)) ? sizeof (unsigned int) : 0\
 	)\
     )\

@@ -183,16 +183,16 @@ private:
 
 //  Canonicalization
 private:
-    virtual /*override*/ bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer);
+    virtual bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer) OVERRIDE;
 
 //  Cloning
 private:
-    virtual /*override*/ void clone_(Vdd::Store::Reference &rpResult, rtPTOKEN_Handle *pPPT) const {
+    virtual void clone_(Vdd::Store::Reference &rpResult, rtPTOKEN_Handle *pPPT) const OVERRIDE {
 	Reference pNewHandle;
 	clone (pNewHandle, pPPT);
 	rpResult.setTo (pNewHandle);
     }
-    virtual /*override*/ bool isACloneOfListStore_(rtLSTORE_Handle const *pOther) const {
+    virtual bool isACloneOfListStore_(rtLSTORE_Handle const *pOther) const OVERRIDE {
 	return isACloneOfListStore (pOther);
     }
 public:
@@ -274,10 +274,10 @@ public:
 private:
     bool AlignFromContent ();
 private:
-    virtual /*override*/ bool align_() {
+    virtual bool align_() OVERRIDE {
 	return align ();
     }
-    virtual /*override*/ bool alignAll_(bool bCleaning) {
+    virtual bool alignAll_(bool bCleaning) OVERRIDE {
 	return alignAll (bCleaning);
     }
 public:
@@ -320,7 +320,7 @@ private:
 
 //  Dictionary
 private:
-    rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const {
+    virtual rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const OVERRIDE {
 	return static_cast<rtDICTIONARY_Handle*>(
 	    (isAStringStore () ? TheStringClassDictionary () : TheListClassDictionary ()).ObjectHandle ()
 	);
@@ -328,7 +328,7 @@ private:
 
 //  Cluster Access
 private:
-    virtual /*override*/ rtPTOKEN_Handle *getPToken_() const {
+    virtual rtPTOKEN_Handle *getPToken_() const OVERRIDE {
 	return getPToken ();
     }
 public:
@@ -338,11 +338,11 @@ public:
 
 //  Cluster Forwarding
 private:
-    virtual /*override*/ bool forwardToSpace_(M_ASD *pSpace);
+    virtual bool forwardToSpace_(M_ASD *pSpace) OVERRIDE;
 
 //  Cluster Update
 private:
-    virtual /*override*/ rtLINK_CType *addInstances_(rtPTOKEN_Handle *pAdditionPPT);
+    virtual rtLINK_CType *addInstances_(rtPTOKEN_Handle *pAdditionPPT) OVERRIDE;
 
 private:
     void setBreakpointCountTo (unsigned int iValue) {
@@ -352,49 +352,49 @@ private:
 //  Cluster Verification
 public:
     void CheckBreakpointConsistency () const;
-    void CheckConsistency ();
+    virtual void CheckConsistency () OVERRIDE;
 
 //  Associative Operations
 private:
-    virtual /*override*/ void associativeInsert_(
+    virtual void associativeInsert_(
 	VCollectionOfStrings *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-    );
-    virtual /*override*/ void associativeInsert_(
+    ) OVERRIDE;
+    virtual void associativeInsert_(
 	VCollectionOfUnsigned32 *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-    ) {
+    ) OVERRIDE {
     }
     /*****/
-    virtual /*override*/ void associativeLocate_(
+    virtual void associativeLocate_(
 	VCollectionOfStrings *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-    );
+    ) OVERRIDE;
     virtual void associativeLocate_(
 	VCollectionOfUnsigned32 *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-    ) {
+    ) OVERRIDE {
     }
     /*****/
-    virtual /*override*/ void associativeDelete_(
+    virtual void associativeDelete_(
 	VCollectionOfStrings *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-    );
-    virtual /*override*/ void associativeDelete_(
+    ) OVERRIDE;
+    virtual void associativeDelete_(
 	VCollectionOfUnsigned32 *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-    ) {
+    ) OVERRIDE {
     }
 
 //  Instance Deletion
 private:
-    virtual bool deleteInstances_(DSC_Scalar &pInstances) {
+    virtual bool deleteInstances_(DSC_Scalar &pInstances) OVERRIDE {
 	return doInstanceDeletion (pInstances);
     }
-    virtual bool deleteInstances_(rtLINK_CType *pInstances, rtLINK_CType *&rpTrues, rtLINK_CType *&rpFalses) {
+    virtual bool deleteInstances_(rtLINK_CType *pInstances, rtLINK_CType *&rpTrues, rtLINK_CType *&rpFalses) OVERRIDE {
 	return doInstanceDeletion (pInstances, rpTrues, rpFalses);
     }
 
 //  List Cardinality Access
 private:
-    virtual /*override*/ bool getCardinality_(M_CPD *&rpResult, rtLINK_CType *pSubscript) {
+    virtual bool getCardinality_(M_CPD *&rpResult, rtLINK_CType *pSubscript) OVERRIDE {
 	return getCardinality (rpResult, pSubscript);
     }
-    virtual /*override*/ bool getCardinality_(unsigned int &rpResult, DSC_Scalar &rSubscript) {
+    virtual bool getCardinality_(unsigned int &rpResult, DSC_Scalar &rSubscript) OVERRIDE {
 	return getCardinality (rpResult, rSubscript);
     }
 public:
@@ -403,29 +403,29 @@ public:
 
 //  List Element Access
 private:
-    virtual /*override*/ bool getListElements_(
+    virtual bool getListElements_(
 	DSC_Descriptor &rResult, rtLINK_CType *pInstances, M_CPD *pSubscript, int keyModifier, rtLINK_CType **ppGuard
-    ) {
+    ) OVERRIDE {
 	return getListElements (rResult, pInstances, pSubscript, keyModifier, ppGuard);
     }
-    virtual /*override*/ bool getListElements_(
+    virtual bool getListElements_(
 	DSC_Descriptor &rResult, DSC_Scalar &rInstance, int xSubscript, int iModifier
-    ) {
+    ) OVERRIDE {
 	return getListElements (rResult, rInstance, xSubscript, iModifier);
     }
-    virtual /*override*/ bool getListElements_(
+    virtual bool getListElements_(
 	DSC_Descriptor &rResult, DSC_Pointer &rInstances, DSC_Descriptor &rSubscript, int iModifier, rtLINK_CType **ppGuard
-    ) {
+    ) OVERRIDE {
 	return getListElements (rResult, rInstances, rSubscript, iModifier, ppGuard);
     }
-    virtual /*override*/ bool getListElements_(
+    virtual bool getListElements_(
 	DSC_Pointer&		rInstances,
 	Vdd::Store::Reference&	rpElementStore,
 	rtLINK_CType*&		rpElementPointer,
 	rtLINK_CType*&		rpExpansion,
 	M_CPD*&			rpDistribution,
 	rtINDEX_Key*&		rpKey
-    ) {
+    ) OVERRIDE {
 	rpKey = 0;
 	return getListElements (
 	    rInstances, rpElementStore, rpElementPointer, rpExpansion, rpDistribution
@@ -488,17 +488,17 @@ public:
 
 //  Callbacks
 protected:
-    bool PersistReferences ();
+    virtual bool PersistReferences () OVERRIDE;
 
 //  Display and Inspection
 public:
-    virtual /*override*/ void getClusterReferenceMapData (MapEntryData &rData, unsigned int xReference);
-    virtual /*override*/ unsigned int getClusterReferenceMapSize ();
+    virtual void getClusterReferenceMapData (MapEntryData &rData, unsigned int xReference) OVERRIDE;
+    virtual unsigned int getClusterReferenceMapSize () OVERRIDE;
 
-    virtual /*override*/ unsigned __int64 getClusterSize ();
+    virtual unsigned __int64 getClusterSize () OVERRIDE;
 
-    virtual /*override*/ bool getPOP (M_POP *pResult, unsigned int xPOP) const;
-    virtual /*override*/ unsigned int getPOPCount () const {
+    virtual bool getPOP (M_POP *pResult, unsigned int xPOP) const OVERRIDE;
+    virtual unsigned int getPOPCount () const OVERRIDE {
 	return 3;
     }
 };

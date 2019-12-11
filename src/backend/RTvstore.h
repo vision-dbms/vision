@@ -114,10 +114,10 @@ private:
 
 //  Alignment
 private:
-    virtual /*override*/ bool align_() {
+    virtual bool align_() OVERRIDE {
 	return align ();
     }
-    virtual /*override*/ bool alignAll_(bool bCleaning) {
+    virtual bool alignAll_(bool bCleaning) OVERRIDE {
 	return alignAll (bCleaning);
     }
 public:
@@ -126,21 +126,21 @@ public:
 
 //  Canonicalization
 private:
-    virtual /*override*/ bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer);
+    virtual bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer) OVERRIDE;
 public:
     void canonicalize (DSC_Pointer &rPointer) const;
 
 //  Cloning
 private:
-    virtual /*override*/ void clone_(Vdd::Store::Reference &rpResult, rtPTOKEN_Handle *pPPT) const {
+    virtual void clone_(Vdd::Store::Reference &rpResult, rtPTOKEN_Handle *pPPT) const OVERRIDE {
 	Reference pHandle;
 	clone (pHandle, pPPT);
 	rpResult.setTo (pHandle);
     }
-    virtual /*override*/ bool isACloneOfValueStore_(rtVSTORE_Handle const *pOther) const {
+    virtual bool isACloneOfValueStore_(rtVSTORE_Handle const *pOther) const OVERRIDE {
 	return isACloneOfValueStore (pOther);
     }
-    virtual /*override*/ bool isACloneOf_(Vdd::Store const *pOther) const {
+    virtual bool isACloneOf_(Vdd::Store const *pOther) const OVERRIDE {
 	if (pOther->rtype () == RTYPE_C_ValueStore)
 	    return isACloneOfValueStore (dynamic_cast<rtVSTORE_Handle const*>(pOther));
 	return false;
@@ -152,7 +152,7 @@ public:
 
 //  Forwarding
 private:
-    virtual /*override*/ bool forwardToSpace_(M_ASD *pSpace);
+    virtual bool forwardToSpace_(M_ASD *pSpace) OVERRIDE;
 
 //  Dictionary Operations
 public:
@@ -220,46 +220,46 @@ public:
     bool Names (VContainerHandle const *pThat) const {
 	return static_cast<HandleBase const*>(this)->Names (pThat);
     }
-    virtual /*override*/ bool Names (M_KOTM pKOTM) const {
+    virtual bool Names (M_KOTM pKOTM) const OVERRIDE {
 	return static_cast<HandleBase const*>(this)->Names (pKOTM);
     }
-    virtual /*override*/ bool NamesTheDateClass () const {
+    virtual bool NamesTheDateClass () const OVERRIDE {
 	return static_cast<HandleBase const*>(this)->NamesTheDateClass ();
     }
-    virtual /*override*/ bool NamesTheDoubleClass () const {
+    virtual bool NamesTheDoubleClass () const OVERRIDE {
 	return static_cast<HandleBase const*>(this)->NamesTheDoubleClass ();
     }
-    virtual /*override*/ bool NamesTheFloatClass () const {
+    virtual bool NamesTheFloatClass () const OVERRIDE {
 	return static_cast<HandleBase const*>(this)->NamesTheFloatClass ();
     }
-    virtual /*override*/ bool NamesTheIntegerClass () const {
+    virtual bool NamesTheIntegerClass () const OVERRIDE {
 	return static_cast<HandleBase const*>(this)->NamesTheIntegerClass ();
     }
-    virtual /*override*/ bool NamesThePrimitiveClass () const {
+    virtual bool NamesThePrimitiveClass () const OVERRIDE {
 	return static_cast<HandleBase const*>(this)->NamesThePrimitiveClass ();
     }
-    virtual /*override*/ bool NamesTheSelectorClass () const {
+    virtual bool NamesTheSelectorClass () const OVERRIDE {
 	return static_cast<HandleBase const*>(this)->NamesTheSelectorClass ();
     }
-    virtual /*override*/ bool NamesTheNAClass () const {
+    virtual bool NamesTheNAClass () const OVERRIDE {
 	return static_cast<HandleBase const*>(this)->NamesTheNAClass ();
     }
-    virtual /*override*/ bool NamesTheTrueClass () const {
+    virtual bool NamesTheTrueClass () const OVERRIDE {
 	return static_cast<HandleBase const*>(this)->NamesTheTrueClass ();
     }
-    virtual /*override*/ bool NamesTheFalseClass () const {
+    virtual bool NamesTheFalseClass () const OVERRIDE {
 	return static_cast<HandleBase const*>(this)->NamesTheFalseClass ();
     }
-    virtual /*override*/ bool NamesABuiltInNumericClass () const {
+    virtual bool NamesABuiltInNumericClass () const OVERRIDE {
 	return static_cast<HandleBase const*>(this)->NamesABuiltInNumericClass ();
     }
 
 //  Stock Access
 private:
-    virtual /*override*/ rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const {
+    virtual rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const OVERRIDE {
 	return getDictionary ();
     }
-    virtual /*override*/ rtPTOKEN_Handle *getPToken_() const {
+    virtual rtPTOKEN_Handle *getPToken_() const OVERRIDE {
 	return getPToken ();
     }
 public:
@@ -269,8 +269,8 @@ public:
 
 //  Instance Creation
 private:
-    virtual /*override*/ rtLINK_CType *addInstances_(rtPTOKEN_Handle *pAdditionPPT);
-    virtual /*override*/ rtLINK_CType *addExtensions_(
+    virtual rtLINK_CType *addInstances_(rtPTOKEN_Handle *pAdditionPPT) OVERRIDE;
+    rtLINK_CType *addExtensions_(
 	ExtensionType	xExtensionType,
 	Vdd::Store*	pInheritanceStore,
 	M_CPD*		pInheritancePointer,
@@ -280,18 +280,18 @@ private:
 
 //  Instance Deletion
 private:
-    virtual /*override*/ bool deleteInstances_(DSC_Scalar &rInstances);
-    virtual /*override*/ bool deleteInstances_(
+    virtual bool deleteInstances_(DSC_Scalar &rInstances) OVERRIDE;
+    virtual bool deleteInstances_(
 	rtLINK_CType *pInstances, rtLINK_CType *&rpTrues, rtLINK_CType *&rpFalses
-    );
+    ) OVERRIDE;
 protected:
     bool doVStoreInstanceDeletionSetup (VReference<rtPTOKEN_CType> &rpPTC);
 
 //  Property Management
 private:
-    virtual /*override*/ bool getProperty_(
+    virtual bool getProperty_(
 	Vdd::Store::Reference &rpResult, DSC_Pointer &rPointer, unsigned int xPropertySlot, Vdd::Store *pPropertyPrototype
-    ) {
+    ) OVERRIDE {
 	return getProperty (rpResult, rPointer, xPropertySlot, pPropertyPrototype);
     }
 public:
@@ -302,18 +302,18 @@ public:
 //  Transient Extension Support
 private:
     void setTransientExtensionTo (VGroundStore *pExtension);
-    transientx_t *transientExtension_() const {
+    virtual transientx_t *transientExtension_() const OVERRIDE {
 	return m_pExtension;
     }
-    transientx_t *transientExtensionIfA_(VRunTimeType const &rRTT) const;
-    bool transientExtensionIsA_(VRunTimeType const &rRTT) const;
+    virtual transientx_t *transientExtensionIfA_(VRunTimeType const &rRTT) const OVERRIDE;
+    virtual bool transientExtensionIsA_(VRunTimeType const &rRTT) const OVERRIDE;
 
 //  Display and Inspection
 public:
-    virtual /*override*/ void getClusterReferenceMapData (MapEntryData &rData, unsigned int xReference);
-    virtual /*override*/ unsigned int getClusterReferenceMapSize ();
+    virtual void getClusterReferenceMapData (MapEntryData &rData, unsigned int xReference) OVERRIDE;
+    virtual unsigned int getClusterReferenceMapSize () OVERRIDE;
 
-    virtual /*override*/ unsigned __int64 getClusterSize ();
+    virtual unsigned __int64 getClusterSize () OVERRIDE;
 
 //  State
 private:

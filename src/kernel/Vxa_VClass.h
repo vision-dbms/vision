@@ -11,13 +11,12 @@
  *****  Components  *****
  ************************/
 
-#include "VStaticTransient.h"
+#include "Vxa_VExportable.h"
 
 /**************************
  *****  Declarations  *****
  **************************/
 
-#include "Vxa_VExportable.h"
 #include "Vxa_VMethod.h"
 
 /*************************
@@ -25,8 +24,10 @@
  *************************/
 
 namespace Vxa {
-    class Vxa_API VClass : virtual public VStaticTransient, virtual public VExportableType {
-	DECLARE_FAMILY_MEMBERS (VClass, VStaticTransient);
+    class VCallData;
+
+    class Vxa_API VClass : virtual public VExportableType {
+	DECLARE_FAMILY_MEMBERS (VClass, VExportableType);
 
     //  Aliases
     public:
@@ -39,11 +40,6 @@ namespace Vxa {
     //  Destruction
     protected:
 	~VClass ();
-
-    //  Initialization
-    protected:
-	void initialize () {
-	}
 
     //  Accounting and Labeling
     public:
@@ -60,40 +56,27 @@ namespace Vxa {
 	}
 
     //  Method Definition
-    private:
-	template <typename T> bool defineConstantImpl (VString const &rName, T const &rConstant) {
-	    m_iHelpInfo << rName << "\n";
-	    VMethod::Reference pMethod;
-	    return VExportable<T>::CreateMethod (pMethod, rName, rConstant) && defineMethod (pMethod);
-	}
-    protected:
-#ifndef sun
-	template <typename T> bool defineConstant (VString const &rName, T rConstant[]) {
-	    return defineConstantImpl (rName, static_cast<T*>(rConstant));
-	}
-#endif
-	template <typename T> bool defineConstant (VString const &rName, T const &rConstant) {
-	    return defineConstantImpl (rName, rConstant);
-	}
+    public:
+	bool defineMethod (VString const &rName, VMethod *pMethod);
+	bool defineDefault (VMethod *pMethod);
 
-	bool defineMethod (VMethod *pMethod);
+    //  Method Access
+    public:
+        virtual bool getMethod (VMethod::Reference &rpMethod, VCallData const &rCallData) const;
 
     //  Method Execution
     public:
-	bool invokeMethod (
-	    VString const &rName, VCallHandle const &rCallHandle, VCollection *pCollection
-	) const;
+	bool invokeCall (VCallHandle const &rCallHandle) const;
 
     //  State
     private:
 	dictionary_t m_iDictionary;
+	VMethod::Reference m_pDefaultMethod;
 	unsigned __int64 m_cCollectionsCreated;
 	unsigned __int64 m_cCollectionsDeleted;
 	unsigned __int64 m_cInstancesReported;
 	unsigned __int64 m_cInstancesReleased;
 	VString m_iIdentification;
-    protected:
-	VString m_iHelpInfo;
     };
 } //  namespace Vxa
 

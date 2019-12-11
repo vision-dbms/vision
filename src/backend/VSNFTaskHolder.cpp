@@ -217,7 +217,7 @@ template void VSNFTaskHolder::ReturnArray<unsigned int,int>  (VkDynamicArrayOf<u
 template void VSNFTaskHolder::ReturnArray<double,double>     (VkDynamicArrayOf<double>const&,double const*&);
 template void VSNFTaskHolder::ReturnArray<float,float>       (VkDynamicArrayOf<float>const&,float const*&);
 
-template void VSNFTaskHolder::ReturnArray<VString,VString>   (VkDynamicArrayOf<VString>const&,VString const*&);
+template void VSNFTaskHolder::ReturnArray<V::VString,V::VString>   (VkDynamicArrayOf<VString>const&,VString const*&);
 template void VSNFTaskHolder::ReturnArray<Vxa::ISingleton::Reference,Vxa::ISingleton::Reference> (
     VkDynamicArrayOf<Vxa::ISingleton::Reference>const&,Vxa::ISingleton::Reference const*&
 );
@@ -233,7 +233,7 @@ template <typename Source_T> void VSNFTaskHolder::ReturnArray (VkDynamicArrayOf<
 template void VSNFTaskHolder::ReturnArray<double>      (VkDynamicArrayOf<double>const&);
 template void VSNFTaskHolder::ReturnArray<float>       (VkDynamicArrayOf<float>const&);
 template void VSNFTaskHolder::ReturnArray<int>         (VkDynamicArrayOf<int>const&);
-template void VSNFTaskHolder::ReturnArray<VString>     (VkDynamicArrayOf<VString>const&);
+template void VSNFTaskHolder::ReturnArray<V::VString>  (VkDynamicArrayOf<VString>const&);
 template void VSNFTaskHolder::ReturnArray<Vxa::ISingleton::Reference> (VkDynamicArrayOf<Vxa::ISingleton::Reference>const&);
 
 
@@ -264,7 +264,7 @@ template void VSNFTaskHolder::ReturnSegment<unsigned int,int>  (object_reference
 template void VSNFTaskHolder::ReturnSegment<double,double>     (object_reference_array_t const&,VkDynamicArrayOf<double>const&,double const*&);
 template void VSNFTaskHolder::ReturnSegment<float,float>       (object_reference_array_t const&,VkDynamicArrayOf<float>const&,float const*&);
 
-template void VSNFTaskHolder::ReturnSegment<VString,VString>   (object_reference_array_t const&,VkDynamicArrayOf<VString>const&,VString const*&);
+template void VSNFTaskHolder::ReturnSegment<V::VString,V::VString> (object_reference_array_t const&,VkDynamicArrayOf<VString>const&,VString const*&);
 
 /*****************************************************
  *----  VSNFTaskHolder::ReturnSegment<Source_T>  ----*
@@ -279,7 +279,7 @@ template <typename Source_T> void VSNFTaskHolder::ReturnSegment (
 template void VSNFTaskHolder::ReturnSegment<double>  (object_reference_array_t const&,VkDynamicArrayOf<double>const&);
 template void VSNFTaskHolder::ReturnSegment<float>   (object_reference_array_t const&,VkDynamicArrayOf<float>const&);
 template void VSNFTaskHolder::ReturnSegment<int>     (object_reference_array_t const&,VkDynamicArrayOf<int>const&);
-template void VSNFTaskHolder::ReturnSegment<VString> (object_reference_array_t const&,VkDynamicArrayOf<VString>const&);
+template void VSNFTaskHolder::ReturnSegment<V::VString> (object_reference_array_t const&,VkDynamicArrayOf<VString>const&);
 
 
 /*******************************************************
@@ -370,7 +370,7 @@ void VSNFTaskHolder::GetParameter (IVSNFTaskHolder *pRole, unsigned int xParamet
 		    g_iLogger.log (taskId (), sWhere, dynamicArray);
 
 		pImplementation->SetToDouble (xParameter, dynamicArray);
-	    } else if (rtype == RTYPE_C_FloatUV && store->NamesTheDoubleClass ()) {
+	    } else if (rtype == RTYPE_C_FloatUV && store->NamesTheFloatClass ()) {
     // ... float cast to double, ...
 		float const *const pParameterArray = rDatum;
 		VkDynamicArrayOf<Vca::F64> dynamicArray(elementCount);
@@ -566,6 +566,12 @@ void VSNFTaskHolder::ReturnS2Integers (IVSNFTaskHolder2 *pRole, Vxa::i32_s2array
  *****  ICaller  *****
  *********************/
 
+void VSNFTaskHolder::getRole (ICaller::Reference &rpRole) {
+    ICaller2::Reference pRoleX;
+    getRole (pRoleX);
+    rpRole.setTo (pRoleX);
+}
+
 void VSNFTaskHolder::GetSelfReference (ICaller *pRole, IVReceiver<object_reference_t> *pResultSink) {
     if (pResultSink && m_pSNFTask) {
 	object_reference_t xSelf;
@@ -656,7 +662,7 @@ void VSNFTaskHolder::ReturnNASegment (ICaller *pRole, object_reference_array_t c
     if (m_pSNFTask) {
 	if (g_iLogger.isActive ())
 	    g_iLogger.log (taskId (), "NA", "Segment");
-	if (m_pSNFTask->ReturnNA (rInjector))
+	if (m_pSNFTask->ReturnNASegment (rInjector))
 	    wrapup ();
     }
 }
@@ -734,6 +740,32 @@ void VSNFTaskHolder::ReturnSegmentCount (ICaller *pRole, cardinality_t cSegments
 	    wrapup ();
     }
 }
+
+/**********************
+ *****  ICaller2  *****
+ **********************/
+
+void VSNFTaskHolder::Suspensions (ICaller2 *pRole, IVReceiver<cardinality_t> *pResultSink) {
+    if (pResultSink) {
+        if (m_pSNFTask)
+	    pResultSink->OnData (m_pSNFTask->suspendCount ());
+	else {
+	    pResultSink->OnError (0, "Task Inactive");
+	}
+    }
+}
+
+void VSNFTaskHolder::Suspend (ICaller2 *pRole) {
+    if (m_pSNFTask)
+        m_pSNFTask->suspend ();
+}
+
+void VSNFTaskHolder::Resume (ICaller2 *pRole) {
+    if (m_pSNFTask) {
+        m_pSNFTask->resume ();
+        wrapup ();
+    }
+}
 
 
 /********************
@@ -761,7 +793,7 @@ void VSNFTaskHolder::start (ISingleton *pExternalObject) {
     if (m_pSNFTask) {
 	if (g_iLogger.isActive ()) {
 	    g_iLogger.printf (
-		"+++%5u: %llp->%s [%u x %u]\n", taskId (), pExternalObject,
+		"+++%5u: %p->%s [%u x %u]\n", taskId (), pExternalObject,
 		m_pSNFTask->selectorName (), m_pSNFTask->cardinality (), m_pSNFTask->parameterCount ()
 	    );
 	}
@@ -798,19 +830,25 @@ void VSNFTaskHolder::start (ISingleton *pExternalObject) {
 
 void VSNFTaskHolder::start (ICollection *pExternalObject) {
     if (m_pSNFTask) {
-	ICaller::Reference pICaller;
-	getRole (pICaller);
+	ICaller2::Reference pICaller2;
+	getRole (pICaller2);
 	if (g_iLogger.isActive ()) {
 	    g_iLogger.printf (
-		"+++%5u: %llp->%s [%u x %u]\n", taskId (), pExternalObject,
+		"+++%5u: %p->%s [%u x %u]\n", taskId (), pExternalObject,
 		m_pSNFTask->selectorName (), m_pSNFTask->cardinality (), m_pSNFTask->parameterCount ()
 	    );
 	}
 	try {
 	    g_iScheduler.incrementTaskCount ();
-	    pExternalObject->Invoke (
-		pICaller, m_pSNFTask->selectorName (), m_pSNFTask->parameterCount (), m_pSNFTask->cardinality ()
-	    );
+            if (m_pSNFTask->returnCase () == VComputationUnit::Return_Intension) {
+                pExternalObject->Bind (
+                    pICaller2, m_pSNFTask->selectorName (), m_pSNFTask->parameterCount (), m_pSNFTask->cardinality ()
+                );
+            } else {
+                pExternalObject->Invoke (
+                    pICaller2, m_pSNFTask->selectorName (), m_pSNFTask->parameterCount (), m_pSNFTask->cardinality ()
+                );
+            }
 	} catch (...) {
 	    g_iScheduler.decrementTaskCount ();
 	    throw;
@@ -850,6 +888,9 @@ void VSNFTaskHolder::onSent () {
 }
 
 void VSNFTaskHolder::wrapup () {
+    if (m_pSNFTask && m_pSNFTask->blocked ())
+        return;
+
     if (m_pNoRouteToPeerTriggerTicket) {
 	m_pNoRouteToPeerTriggerTicket->cancel ();
 	m_pNoRouteToPeerTriggerTicket.clear ();

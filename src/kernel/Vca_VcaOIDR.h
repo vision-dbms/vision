@@ -69,7 +69,8 @@ namespace Vca {
 	//  Grip
 	public:
 	    void detachInterface (IVUnknown *pProxy) const {
-		m_pReferent->detachInterface (pProxy);
+                if (isntNil ())
+                    m_pReferent->detachInterface (pProxy);
 	    }
 	};
 	friend class Vise;
@@ -86,7 +87,7 @@ namespace Vca {
     //  Access
     private:
 	virtual VcaOIDR *oidr_();
-	virtual VTypeInfo *objectType_() const;
+	virtual VTypeInfo *objectType_() const OVERRIDE;
     public:
 	VcaOIDR *oidr () {
 	    return oidr_();
@@ -100,7 +101,7 @@ namespace Vca {
 	virtual bool isConnected_() const = 0;
 	virtual bool isUsable_() const = 0;
     public:
-	bool isConnected () const {
+	virtual bool isConnected () const OVERRIDE {
 	    return isConnected_();
 	}
 	bool isUsable () const {
@@ -109,7 +110,7 @@ namespace Vca {
 
     //  Interface Management
     protected:
-	virtual void supplyInterface_(VReference<IVUnknown>&rpInterface); // override VcaOID
+	virtual void supplyInterface_(VReference<IVUnknown>&rpInterface) OVERRIDE; // override VcaOID
 	virtual bool detachInterface (IVUnknown *pProxy);
 
     //  Message Scheduling
@@ -195,8 +196,8 @@ namespace Vca {
 	//  Display
 	public:
 	    using BaseClass::displayInfo;
-	    void displayInfo () const;
-	    void getInfo (VString &rResult, const VString &rPrefix) const;
+	    virtual void displayInfo () const OVERRIDE;
+	    virtual void getInfo (VString &rResult, const VString &rPrefix) const OVERRIDE;
 
 	//  State
 	private:
@@ -240,11 +241,11 @@ namespace Vca {
 
     //  Access
     private:
-	virtual VcaOIDR *oidr_();
+	virtual VcaOIDR *oidr_() OVERRIDE;
 	VcaPeer *objectSite () const {
 	    return m_pObjectSite;
 	}
-	uuid_t const& objectSiteUUID_() const {
+	virtual uuid_t const& objectSiteUUID_() const OVERRIDE {
 	    return objectSiteUUID ();
 	}
     public:
@@ -259,10 +260,10 @@ namespace Vca {
 
     //  Connectivity
     protected:
-	virtual /*override*/ bool isConnected_() const;
-	virtual /*override*/ bool isUsable_() const;
+	virtual bool isConnected_() const OVERRIDE;
+	virtual bool isUsable_() const OVERRIDE;
     public:
-	bool isConnected () const;
+	virtual bool isConnected () const OVERRIDE;
 	bool isntConnected () const {
 	    return !isConnected ();
 	}
@@ -286,22 +287,22 @@ namespace Vca {
 
     //  Message Scheduling
     public:
-	virtual bool defersTo (VMessageScheduler &rScheduler);
+	virtual bool defersTo (VMessageScheduler &rScheduler) OVERRIDE;
 
     //  Message Starting
     private:
-	void start_(VMessage *pMessage);
+	virtual void start_(VMessage *pMessage) OVERRIDE;
 
     //  Object Access
     private:
-	virtual void supplyInterface_(VReference<IVUnknown>&rpInterface);	// override VcaOID
-	virtual bool detachInterface (IVUnknown *pProxy);			// override VcaOIDX
+	virtual void supplyInterface_(VReference<IVUnknown>&rpInterface) OVERRIDE; // override VcaOID
+	virtual bool detachInterface (IVUnknown *pProxy) OVERRIDE;                 // override VcaOIDX
 
     //  Object Import
     private:
-        void createImportFrom (VcaPeer *pPeer, bool bWeak);
-	void deleteImportFrom (VcaPeer *pPeer);
-	bool weakenImportFrom (VcaPeer *pPeer);
+        virtual void createImportFrom (VcaPeer *pPeer, bool bWeak) OVERRIDE;
+	virtual void deleteImportFrom (VcaPeer *pPeer) OVERRIDE;
+	virtual bool weakenImportFrom (VcaPeer *pPeer) OVERRIDE;
 
 	void detach (Import *pImport);
 
@@ -376,9 +377,9 @@ namespace Vca {
 	    g_bTracingGC = bTracingGC ? Tracing_On : Tracing_Off;
 	}
 
-	void displayInfo () const;
-	void displayInfo (char const *pWhat) const;
-	void getInfo (VString &rResult, const VString &rPrefix) const;
+	virtual void displayInfo () const OVERRIDE;
+	virtual void displayInfo (char const *pWhat) const OVERRIDE;
+	virtual void getInfo (VString &rResult, const VString &rPrefix) const OVERRIDE;
 
 	void displayImportTable () const;
 	void getImportTable (VString &rResult, const VString &rPrefix) const;

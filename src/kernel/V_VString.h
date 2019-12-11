@@ -12,6 +12,7 @@
  *****  Definitions  *****
  *************************/
 
+namespace V {
 class V_API VString : public VTransient {
 //  Family
     DECLARE_FAMILY_MEMBERS (VString, VTransient);
@@ -217,6 +218,6 @@ public:
 protected:
     V::VCOS m_iStorage;
 };
-
+} // namespace V
 
 #endif

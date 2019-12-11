@@ -63,8 +63,7 @@ namespace Vca {
 
     //  Destruction
     protected:
-	~VcaSerializerForMessage () {
-	}
+	~VcaSerializerForMessage ();
 
     //  Sequencer Actions
     protected:
@@ -74,11 +73,11 @@ namespace Vca {
 
     //  Transport Callbacks
     protected:
-	void localizeData ();
-	void getData ();
-	void putData ();
-	void wrapupIncomingSerialization ();
-	void wrapupOutgoingSerialization ();
+	virtual void localizeData () OVERRIDE;
+	virtual void getData () OVERRIDE;
+	virtual void putData () OVERRIDE;
+	virtual void wrapupIncomingSerialization () OVERRIDE;
+	virtual void wrapupOutgoingSerialization () OVERRIDE;
 
     //  State
     protected:
@@ -116,6 +115,15 @@ Vca::VcaSerializerForMessage::VcaSerializerForMessage (VcaTransportInbound *pTra
 {
     m_pSequencer.setTo (new Sequencer (this, &ThisClass::doSequenceNumber));
 }
+
+Vca::VcaSerializerForMessage::~VcaSerializerForMessage () {
+    if (isOutgoing ()) {
+        transport()->defaultLogger().printf (
+            "+++ VcaSerializerForMessage: %p->%s[%u]: destruction\n",
+            m_pMessage->recipient (), m_pApplicable->name (), m_xMessage, m_xArgument
+        );
+    }
+}
 
 
 /*******************************
@@ -125,16 +133,34 @@ Vca::VcaSerializerForMessage::VcaSerializerForMessage (VcaTransportInbound *pTra
  *******************************/
 
 void Vca::VcaSerializerForMessage::doSequenceNumber (Sequencer *pSequencer) {
+    if (isOutgoing ()) {
+        transport()->defaultLogger().printf (
+            "+++ VcaSerializerForMessage: %p->%s[%u]: doSequenceNumber\n",
+            m_pMessage->recipient (), m_pApplicable->name (), m_xMessage
+        );
+    }
     pSequencer->setActionTo (&ThisClass::doApplicable);
     transferData ();
 }
 
 void Vca::VcaSerializerForMessage::doApplicable (Sequencer *pSequencer) {
+    if (isOutgoing ()) {
+        transport()->defaultLogger().printf (
+            "+++ VcaSerializerForMessage: %p->%s[%u]: doApplicable: %p\n",
+            m_pMessage->recipient (), m_pApplicable->name (), m_xMessage, m_pApplicable
+        );
+    }
     pSequencer->setActionTo (&ThisClass::doArguments);
     start (this, New_VcaSerializer_(this, m_pApplicable));
 }
 
 void Vca::VcaSerializerForMessage::doArguments (Sequencer *pSequencer) {
+    if (isOutgoing ()) {
+        transport()->defaultLogger().printf (
+            "+++ VcaSerializerForMessage: %p->%s[%u]: doArgument: %u\n",
+            m_pMessage->recipient (), m_pApplicable->name (), m_xMessage, m_xArgument
+        );
+    }
     if (m_pMessage.isNil () && m_pApplicable)
 	m_pMessage.setTo (m_pApplicable->newMessage (m_xMessage));
 
@@ -251,12 +277,12 @@ namespace Vca {
 
     //  Transport Callbacks
     protected:
-	void localizeData ();
+	virtual void localizeData () OVERRIDE;
 
-	void getData ();
-	void putData ();
+	virtual void getData () OVERRIDE;
+	virtual void putData () OVERRIDE;
 
-	void wrapupIncomingSerialization ();
+	virtual void wrapupIncomingSerialization () OVERRIDE;
 
     //  State
     protected:
@@ -416,7 +442,7 @@ void Vca::VcaTransport::BSManager::onTransfer (size_t sTransfer) {
 bool Vca::VcaTransport::BSManager::onStatus (VStatus const &rStatus) {
     bool const bClosedOrFailed = rStatus.isClosed () || rStatus.isFailed ();
     if (bClosedOrFailed) {
-	m_pTransport->defaultLogger().printf ("+++ VcaTransportOutbound[%llp]::BSManager[%llp]::onStatus %s\n",
+	m_pTransport->defaultLogger().printf ("+++ VcaTransportOutbound[%p]::BSManager[%p]::onStatus %s\n",
  				m_pTransport.referent(), this, rStatus.CodeDescription ());
 	log ("\nVca::VcaTransport::BSManager::onStatus...Aborting Transport...");
 
@@ -482,8 +508,11 @@ Vca::VcaTransport::TransportTracing  Vca::VcaTransport::g_bTracingTransfers = Tr
 
 bool Vca::VcaTransport::TracingTransfers () {
     if (Tracing_NotInitialized == g_bTracingTransfers) {
-	char const *const pEnvValue = getenv ("TraceTransports");
-	g_bTracingTransfers = !pEnvValue || strcasecmp (pEnvValue, "TRUE") ? Tracing_Off : Tracing_On;
+	g_bTracingTransfers = (
+            V::GetEnvironmentBoolean ("TracingTransportsByPID") ||
+            V::GetEnvironmentBoolean ("TracingTransports") ||
+            V::GetEnvironmentBoolean ("TraceTransports")
+        ) ? Tracing_On : Tracing_Off;
     }
     return Tracing_On == g_bTracingTransfers;
 }
@@ -619,8 +648,16 @@ namespace {
 
 	if (bNotInitialized) {
 	    bNotInitialized = false;
-	    if (char const * const pEnvValue = getenv ("TraceTransportPath"))
-		pDisplayFile = fopen (pEnvValue, "a");
+            VString iLogFileName;
+            char const *pLogFileName = NULL;
+            if (!V::GetEnvironmentBoolean ("TracingTransportsByPID"))
+                pLogFileName = getenv ("TraceTransportPath");
+            else {
+		iLogFileName << "p_" << getpid () << "_transport.log";
+                pLogFileName = iLogFileName;
+	    }
+            if (pLogFileName)
+		pDisplayFile = fopen (pLogFileName, "a");
 	}
 	return pDisplayFile;
     }
@@ -636,7 +673,7 @@ void Vca::VcaTransport::displayDataAtTransferPoint (
     char const *pData, size_t sData, FILE *pFile
 ) const {
     m_cBytesTransfered += sData;
-    if (sData > 0 && IsntNil (pFile) && tracingTransfers () && transferDisplayLimit () > m_cBytesTransfered) {
+    if (sData > 0 && pFile && tracingTransfers () && transferDisplayLimit () > m_cBytesTransfered) {
 	RTTI iSerializerRTTI (m_pInTransitSerializer);
 	fprintf (
 	    pFile, "%s %p: %p: %s:", directionCode (), this,
@@ -727,15 +764,24 @@ void Vca::VcaTransport::schedule (VcaSerializer *pSerializer) {
  ***************************
  ***************************/
 
+void ReportNoInTransitSerializer (V::VLogger &rLogger, VcaTransport *pTransport) {
+    rLogger.printf (
+        "Vca::VcaTransport[%p]::resumeSerialization: No %s In Transit Serializer",
+        pTransport, pTransport->isIncoming () ? "Incoming" : "Outgoing"
+    );
+}
+
 void Vca::VcaTransport::resumeSerialization (bool notSuspended) {
     if (notSuspended)
 	m_pInTransitSerializer.clear ();
-    else {
+    else if (m_pInTransitSerializer) {
 	VcaSerializer::Pointer const pSuspendedSerializer (m_pInTransitSerializer);
 	pSuspendedSerializer->retain ();
 	m_pInTransitSerializer.clear ();
 	pSuspendedSerializer->untain ();
 	pSuspendedSerializer->resume ();
+    } else {
+        ReportNoInTransitSerializer (defaultLogger (), this);
     }
 }
 
@@ -888,7 +934,7 @@ void Vca::VcaTransportInbound::OnError (
     IClient *pRole, IError *pError, VString const &rMessage
 ) {
     if (m_pBS) {
-	defaultLogger().printf ("+++ VcaTransportInbound[%llp]::OnError %s\n", this, rMessage.content ());
+	defaultLogger().printf ("+++ VcaTransportInbound[%p]::OnError %s\n", this, rMessage.content ());
 
 //	onActivityError (pError, rMessage);
 	abortSerialization ();
@@ -973,7 +1019,7 @@ void Vca::VcaTransportInbound::wrapup (VcaSerializer *pSerializer) {
  *****************************************************************************/ 
 
 void Vca::VcaTransportInbound::Close () {
-    defaultLogger().printf ("+++ VcaTransportInbound[%llp]::Close\n", this);
+    defaultLogger().printf ("+++ VcaTransportInbound[%p]::Close\n", this);
     if (m_pBS) {
 	m_pBS->Close ();
 	m_pBS.clear ();
@@ -982,7 +1028,7 @@ void Vca::VcaTransportInbound::Close () {
 }
 
 void Vca::VcaTransportInbound::Abort () {
-    defaultLogger().printf ("+++ VcaTransportInbound[%llp]::Abort\n", this);
+    defaultLogger().printf ("+++ VcaTransportInbound[%p]::Abort\n", this);
     if (m_pBS) {
 	m_pBS->Abort ();
 	m_pBS.clear ();
@@ -1075,7 +1121,7 @@ void Vca::VcaTransportOutbound::OnError (
     IClient *pRole, IError *pError, VString const &rMessage
 ) {
     if (m_pBS) {
-	defaultLogger().printf ("+++ VcaTransportOutbound[%llp]::OnError %s\n", this, rMessage.content ());
+	defaultLogger().printf ("+++ VcaTransportOutbound[%p]::OnError %s\n", this, rMessage.content ());
 
 //	onActivityError (pError, rMessage);
 	abortSerialization ();
@@ -1235,7 +1281,7 @@ void Vca::VcaTransportOutbound::startHeartBeat () {
 	getRole (pTrigger);
 
 	VString sTimerPurpose;
-	sTimerPurpose.printf ("Connection %llp Heartbeat", m_pConnection.referent());
+	sTimerPurpose.printf ("Connection %p Heartbeat", m_pConnection.referent());
 
 	m_pHeartBeatTimer.setTo (new VTimer (VCohort::Vca (), sTimerPurpose, pTrigger, HEARTBEAT_VALUE, true));
 
@@ -1285,10 +1331,10 @@ void Vca::VcaTransportOutbound::Process (ITrigger *pRole) {
 		);
 		startMessage (pMessage);
 	    } else if (shutdownInProgress () && uSecondsSinceLastMessage >= 10 * HEARTBEAT_VALUE) {
-		defaultLogger().printf ("+++ VcaTransportOutbound[%llp]: Heartbeat aborting stalled shutdown.\n", this);
+		defaultLogger().printf ("+++ VcaTransportOutbound[%p]: Heartbeat aborting stalled shutdown.\n", this);
 		Abort ();
 	    } else if (0 == m_sHeartBeatStall++) {
-		defaultLogger().printf ("+++ VcaTransportOutbound[%llp]: Heartbeat transport busy.\n", this);
+		defaultLogger().printf ("+++ VcaTransportOutbound[%p]: Heartbeat transport busy.\n", this);
 	    }
 	}
     }
@@ -1302,7 +1348,7 @@ void Vca::VcaTransportOutbound::Process (ITrigger *pRole) {
  **********************/
 
 void Vca::VcaTransportOutbound::Close () {
-    defaultLogger().printf ("+++ VcaTransportOutbound[%llp]::Close\n", this);
+    defaultLogger().printf ("+++ VcaTransportOutbound[%p]::Close\n", this);
     stopHeartBeat ();
     if (m_pBS) {
         m_pBS->unregisterManager (m_pBSManager);
@@ -1313,7 +1359,7 @@ void Vca::VcaTransportOutbound::Close () {
 }
 
 void Vca::VcaTransportOutbound::Abort () {
-    defaultLogger().printf ("+++ VcaTransportOutbound[%llp]::Abort\n", this);
+    defaultLogger().printf ("+++ VcaTransportOutbound[%p]::Abort\n", this);
     stopHeartBeat ();
     if (m_pBS) {
         m_pBS->unregisterManager (m_pBSManager);

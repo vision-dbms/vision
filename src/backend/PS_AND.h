@@ -9,6 +9,8 @@
 #include "VkMemory.h"
 #include "VdbNetwork.h"
 
+#include "V_VString.h"
+
 /**************************
  *****  Declarations  *****
  **************************/
@@ -151,6 +153,7 @@ class PS_AND {
 //  Aliases
 public:
     typedef V::VArgList VArgList;
+    typedef V::VString VString;
 
 //  Construction
 public:
@@ -238,6 +241,10 @@ public:
 
     PS_TID const& TID () const {
 	return m_iTID;
+    }
+
+    VString const &UpdateAnnotation () const {
+	return m_pUpdateAnnotation;
     }
 
     PS_Type_FO UpdateFO () const {
@@ -341,7 +348,7 @@ public:
 
 //  Space Access
 public:
-    PS_ASD *AccessSpace (unsigned int spaceIndex);
+    bool AccessSpace (PS_ASD *&rpResult, unsigned int spaceIndex);
 
 //  Database Update
 protected:
@@ -432,7 +439,7 @@ protected:
     PS_Type_FO			m_iUpdateFO;
     PS_NVD			m_iUpdateNVD;
     PS_UpdateStatus		m_xUpdateStatus;
-    char const*			m_pUpdateAnnotation;
+    VString			m_pUpdateAnnotation;
     PS_ASD*			m_pUngrantedASD;
     unsigned int		m_xScanGeneration;
     unsigned int		m_bDoingCompaction	:  1,

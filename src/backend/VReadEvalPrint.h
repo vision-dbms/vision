@@ -51,6 +51,7 @@ public:
     //  State
     private:
 	Query::Reference m_pQuery;
+        Vsa::request_index_t m_xRequestInProgress;
     };
 
 /************************************************************************/
@@ -72,15 +73,21 @@ private:
 //  Query
 protected:
     bool isAController () const;
+    bool isClientQuery () const {
+        return m_bClientQuery;
+    }
 
 //  Execution
 protected:
     void exit ();
-    void fail ();
+    virtual void fail () OVERRIDE;
 
 //  Execution Support
 protected:
     void ProcessCommand (char const *pLine);
+
+    void RunQuery ();
+    void EndQuery ();
 
     void ScheduleEvaluation ();
     void ConcludeEvaluation (bool fDisplayingOutput = true);
@@ -123,7 +130,8 @@ protected:
 					m_bExecutionLogged,
 					m_bNeedingSetup,
 					m_bVerboseStats,
-					m_bGCEnabled;
+					m_bGCEnabled,
+                                        m_bClientQuery;
 };
 
 

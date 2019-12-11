@@ -102,28 +102,28 @@ namespace Vxa {
 
 	//  Update
 	public:
-	    virtual bool setResultTo (exporter_t *pExporter, bool iValue) {
+	    virtual bool setResultTo (exporter_t *pExporter, bool iValue) OVERRIDE {
 		return pExporter->storeResult (m_iStorage, iValue);
 	    }
-	    virtual bool setResultTo (exporter_t *pExporter, int iValue) {
+	    virtual bool setResultTo (exporter_t *pExporter, int iValue) OVERRIDE {
 		return pExporter->storeResult (m_iStorage, iValue);
 	    }
-	    virtual bool setResultTo (exporter_t *pExporter, float iValue) {
+	    virtual bool setResultTo (exporter_t *pExporter, float iValue) OVERRIDE {
 		return pExporter->storeResult (m_iStorage, iValue);
 	    }
-	    virtual bool setResultTo (exporter_t *pExporter, double iValue) {
+	    virtual bool setResultTo (exporter_t *pExporter, double iValue) OVERRIDE {
 		return pExporter->storeResult (m_iStorage, iValue);
 	    }
-	    virtual bool setResultTo (exporter_t *pExporter, VString const &rValue) {
+	    virtual bool setResultTo (exporter_t *pExporter, VString const &rValue) OVERRIDE {
 		return pExporter->storeResult (m_iStorage, rValue);
 	    }
-	    virtual bool setResultTo (exporter_t *pExporter, ISingleton *pValue) {
+	    virtual bool setResultTo (exporter_t *pExporter, ISingleton *pValue) OVERRIDE {
 		return pExporter->storeResult (m_iStorage, pValue);
 	    }
 
 	//  Transmission
 	public:
-	    virtual bool transmitUsing (VCallType1Exporter *pExporter) const {
+	    virtual bool transmitUsing (VCallType1Exporter *pExporter) const OVERRIDE {
 		return pExporter->transmit (m_iStorage);
 	    }
 
@@ -253,7 +253,6 @@ namespace Vxa {
     //  State
     private:
 	ResultSet::Reference m_pResultSet;
-	VTask *m_pTask;
 	bool m_bDisabled;
     };
 }

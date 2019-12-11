@@ -16,6 +16,10 @@
  *************************/
 
 class V_API VkBuffer : public VTransient {
+//  Aliases
+public:
+    typedef V::pointer_t pointer_t;
+
 //  Constants
 public:
     enum {
@@ -79,6 +83,5 @@ protected:
     pointer_t	m_pStorage;
     size_t	m_sStorage;
 };
-
 
 #endif

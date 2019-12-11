@@ -80,12 +80,12 @@ namespace Vca {
 		BaseClass::setTo (pRequest);
 	    }
 	private:
-	    void onNeed () {
+	    virtual void onNeed () OVERRIDE {
 		m_pSource.materializeFor (this);
 		m_pSink.materializeFor (this);
 		BaseClass::onNeed ();
 	    }
-	    void onData () {
+	    virtual void onData () OVERRIDE {
 		IRequestSink::Reference pRequestSink;
 		m_pIRequestSink.getRole (pRequestSink);
 		submit (pRequestSink, m_pSource, m_pSink);
@@ -265,7 +265,7 @@ namespace {
 
     // Other Callbacks
     public:
-	void OnError_(IError *pInterface, VString const &rMessage) {
+	virtual void OnError_(IError *pInterface, VString const &rMessage) OVERRIDE {
 	    cerr << "Error: " << rMessage << endl;
             onDone ();
 	}
@@ -366,12 +366,12 @@ namespace Vca {
 
 	//  Event Callbacks
 	private:
-	    void OnEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, VString const& rDescription);
-	    void OnEndEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp);
-	    void OnErrorEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, IError* pInterface, VString const& rMessage);
-	    void OnFailureEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, IError* pInterface, VString const& rMessage);
+	    virtual void OnEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, VString const& rDescription) OVERRIDE;
+	    virtual void OnEndEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp) OVERRIDE;
+	    virtual void OnErrorEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, IError* pInterface, VString const& rMessage) OVERRIDE;
+	    virtual void OnFailureEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, IError* pInterface, VString const& rMessage) OVERRIDE;
 
-	    void onCompletion_();
+	    virtual void onCompletion_() OVERRIDE;
 
 	//  State
 	private:
@@ -389,7 +389,7 @@ namespace Vca {
 
     //  Activity Sink Callbacks
     private:
-	void createMonitorFor (VActivity *pActivity) const;
+	virtual void createMonitorFor (VActivity *pActivity) const OVERRIDE;
     };
 }
 

@@ -65,13 +65,13 @@ namespace Vca {
 
     //  Implementation
     private:
-	void onAuthoritativeSourceNeeded_();
-	void onPIDNeeded_();
-	void onUIDNeeded_();
-	void onGIDNeeded_();
-	void onHostNameNeeded_();
-	void onUserNameNeeded_();
-	void onGroupNameNeeded_();
+	virtual void onAuthoritativeSourceNeeded_() OVERRIDE;
+	virtual void onPIDNeeded_() OVERRIDE;
+	virtual void onUIDNeeded_() OVERRIDE;
+	virtual void onGIDNeeded_() OVERRIDE;
+	virtual void onHostNameNeeded_() OVERRIDE;
+	virtual void onUserNameNeeded_() OVERRIDE;
+	virtual void onGroupNameNeeded_() OVERRIDE;
     };
 }
 
@@ -200,13 +200,13 @@ namespace {
 
     //  Callbacks and Triggers
     private:
-	void onNeed () {
+	virtual void onNeed () OVERRIDE {
 	    m_iObjectName.materializeFor (this);
 	    m_pNamespace.materializeFor (this);
 	    BaseClass::onNeed ();
 	}
 
-	void onData () {
+	virtual void onData () OVERRIDE {
 	    VQueryInterface<Interface_T> iQuery (0);
 	    VcaOffer::Offering iOffering;
 	    Gofer::Supply (iQuery,iOffering,m_iObjectName,m_pNamespace);

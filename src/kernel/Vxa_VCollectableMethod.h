@@ -7,14 +7,15 @@
 
 #include "Vxa_VMethod.h"
 #include "Vxa_VTask.h"
-#include "Vxa_VCallType1.h"
-#include "Vxa_VCallType2.h"
+#include "Vxa_VCallType1Importer.h"
+#include "Vxa_VCallType2Importer.h"
 
 /**************************
  *****  Declarations  *****
  **************************/
 
 #include "Vxa_VCollectableCollectionOf.h"
+#include "Vxa_VImportable.h"
 
 /*************************
  *****  Definitions  *****
@@ -30,10 +31,10 @@ namespace Vxa {
 
     //  Aliases
     public:
-	typedef T* val_t;
-	typedef typename T::Reference var_t;
-	typedef VCollectableCollectionOf<val_t,var_t> collection_t;
-	typedef VScalar<typename collection_t::val_t> self_provider_t;
+	typedef typename VCollectableTraits<T>::val_t val_t;
+	typedef typename VCollectableTraits<T>::var_t var_t;
+        typedef typename VCollectableTraits<T>::cluster_t cluster_t;
+	typedef VScalar<val_t> self_provider_t;
 
     //  Implementation
     public:
@@ -43,8 +44,8 @@ namespace Vxa {
 	//  Construction
 	protected:
 	    Implementation (
-		VCallData const &rCallData, VCollection *pCollection
-	    ) : BaseClass (rCallData), m_pCollection (static_cast<collection_t*>(pCollection)) {
+		VCallData const &rCallData
+	    ) : BaseClass (rCallData) {
 	    }
 
 	//  Destruction
@@ -55,7 +56,7 @@ namespace Vxa {
 	//  Startup
 	protected:
 	    template <class importer_t> bool startUsing (importer_t &rImporter) {
-		return rImporter.getSelfProviderFor (this, m_pCollection.referent (), m_pSelfProvider)
+		return rImporter.getSelfProviderFor (m_pSelfProvider, this)
 		    && BaseClass::startUsing (rImporter);
 	    }
 
@@ -67,13 +68,12 @@ namespace Vxa {
 
 	//  State
 	private:
-	    typename collection_t::Reference const m_pCollection;
 	    typename self_provider_t::Reference m_pSelfProvider;
 	};
 
     //  Construction
     protected:
-	VCollectableMethodBase (VString const &rName) : BaseClass (rName) {
+	VCollectableMethodBase () {
 	}
 
     //  Destruction
@@ -103,10 +103,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (
-		VCallData const &rCallData, VCollection *pCollection, method_t *pMethod
-	    ) : BaseClass (rCallData, pCollection), m_pMethod (pMethod) {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -130,27 +130,27 @@ namespace Vxa {
 		    && m_iP16.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    virtual bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    virtual bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(
 			m_iP1 , m_iP2 , m_iP3 , m_iP4 ,	m_iP5 , m_iP6 , m_iP7 , m_iP8 ,
 			m_iP9 , m_iP10, m_iP11, m_iP12,	m_iP13, m_iP14, m_iP15, m_iP16
 		    );
-		    BaseClass::next ();
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(m_pMethod->name ());
-		    BaseClass::onFailure (0, iMessage);
+		    iMessage<<(this->selectorName ());
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear (); m_iP7.clear (); m_iP8.clear ();
@@ -178,7 +178,7 @@ namespace Vxa {
 	    typename VImportable<P16>::Instance m_iP16;
 	};
     public:
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName), m_pMember (pMember) {
+	VCollectableMethod (member_t pMember) : m_pMember (pMember) {
 	}
     protected:
 	~VCollectableMethod () {
@@ -189,15 +189,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCollection) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (pCollection);
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (pCollection);
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -224,10 +224,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCollection, method_t *pMethod)
-		: BaseClass (rCallData, pCollection), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -250,27 +250,27 @@ namespace Vxa {
 		    && m_iP15.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    virtual bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    virtual bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(
 			m_iP1 , m_iP2 , m_iP3 , m_iP4 , m_iP5 , m_iP6 , m_iP7 , m_iP8 ,
 			m_iP9 , m_iP10, m_iP11, m_iP12,	m_iP13, m_iP14, m_iP15
 		    );
-		    BaseClass::next ();
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(m_pMethod->name ());
-		    BaseClass::onFailure (0, iMessage);
+		    iMessage<<(this->selectorName ());
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear (); m_iP7.clear (); m_iP8.clear ();
@@ -297,7 +297,7 @@ namespace Vxa {
 	    typename VImportable<P15>::Instance m_iP15;
 	};
     public:
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName), m_pMember (pMember) {
+	VCollectableMethod (member_t pMember) : m_pMember (pMember) {
 	}
     protected:
 	~VCollectableMethod () {
@@ -308,15 +308,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCollection) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -340,9 +340,9 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCollection, method_t *pMethod)
-		: BaseClass (rCallData, pCollection), m_pMethod (pMethod)
-	    {
+	    Implementation (
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
 	    }
 	protected:
 	    ~Implementation () {
@@ -365,27 +365,27 @@ namespace Vxa {
 		    && m_iP14.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    virtual bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    virtual bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(
 			m_iP1 , m_iP2 , m_iP3 , m_iP4 ,	m_iP5 , m_iP6 , m_iP7 , m_iP8 ,
 			m_iP9 , m_iP10, m_iP11, m_iP12,	m_iP13, m_iP14
 		    );
-		    BaseClass::next ();
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(m_pMethod->name ());
-		    BaseClass::onFailure (0, iMessage);
+		    iMessage<<(this->selectorName ());
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear (); m_iP7.clear (); m_iP8.clear ();
@@ -411,7 +411,7 @@ namespace Vxa {
 	    typename VImportable<P14>::Instance m_iP14;
 	};
     public:
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName), m_pMember (pMember) {
+	VCollectableMethod (member_t pMember) : m_pMember (pMember) {
 	}
     protected:
 	~VCollectableMethod () {
@@ -422,15 +422,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCollection) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -454,9 +454,9 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCollection, method_t *pMethod)
-		: BaseClass (rCallData, pCollection), m_pMethod (pMethod)
-	    {
+	    Implementation (
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
 	    }
 	protected:
 	    ~Implementation () {
@@ -478,27 +478,27 @@ namespace Vxa {
 		    && m_iP13.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    virtual bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    virtual bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(
 			m_iP1 , m_iP2 , m_iP3 , m_iP4 ,	m_iP5 , m_iP6 , m_iP7 , m_iP8 ,
 			m_iP9 , m_iP10, m_iP11, m_iP12,	m_iP13
 		    );
-		    BaseClass::next ();
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(m_pMethod->name ());
-		    BaseClass::onFailure (0, iMessage);
+		    iMessage<<(this->selectorName ());
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear (); m_iP7.clear (); m_iP8.clear ();
@@ -523,7 +523,7 @@ namespace Vxa {
 	    typename VImportable<P13>::Instance m_iP13;
 	};
     public:
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName), m_pMember (pMember) {
+	VCollectableMethod (member_t pMember) : m_pMember (pMember) {
 	}
     protected:
 	~VCollectableMethod () {
@@ -534,15 +534,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCollection) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -565,9 +565,9 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCollection, method_t *pMethod)
-		: BaseClass (rCallData, pCollection), m_pMethod (pMethod)
-	    {
+	    Implementation (
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
 	    }
 	protected:
 	    ~Implementation () {
@@ -588,27 +588,27 @@ namespace Vxa {
 		    && m_iP12.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    virtual bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    virtual bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(
 			m_iP1 , m_iP2 , m_iP3 , m_iP4 ,	m_iP5 , m_iP6 , m_iP7 , m_iP8 ,
 			m_iP9 , m_iP10, m_iP11, m_iP12
 		    );
-		    BaseClass::next ();
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(m_pMethod->name ());
-		    BaseClass::onFailure (0, iMessage);
+		    iMessage<<(this->selectorName ());
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear (); m_iP7.clear (); m_iP8.clear ();
@@ -631,7 +631,7 @@ namespace Vxa {
 	    typename VImportable<P12>::Instance m_iP12;
 	};
     public:
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName), m_pMember (pMember) {
+	VCollectableMethod (member_t pMember) : m_pMember (pMember) {
 	}
     protected:
 	~VCollectableMethod () {
@@ -642,15 +642,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCollection) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -673,10 +673,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCollection, method_t *pMethod)
-		: BaseClass (rCallData, pCollection), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -695,26 +695,26 @@ namespace Vxa {
 		    && m_iP11.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    virtual bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    virtual bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(
 			m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6, m_iP7, m_iP8, m_iP9, m_iP10, m_iP11
 		    );
-		    BaseClass::next ();
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(m_pMethod->name ());
-		    BaseClass::onFailure (0, iMessage);
+		    iMessage<<(this->selectorName ());
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear (); m_iP7.clear (); m_iP8.clear ();
@@ -736,7 +736,7 @@ namespace Vxa {
 	    typename VImportable<P11>::Instance m_iP11;
 	};
     public:
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName), m_pMember (pMember) {
+	VCollectableMethod (member_t pMember) : m_pMember (pMember) {
 	}
     protected:
 	~VCollectableMethod () {
@@ -747,15 +747,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCollection) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -778,10 +778,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCollection, method_t *pMethod)
-		: BaseClass (rCallData, pCollection), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -799,26 +799,26 @@ namespace Vxa {
 		    && m_iP10.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    virtual bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    virtual bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(
 			m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6, m_iP7, m_iP8, m_iP9, m_iP10
 		    );
-		    BaseClass::next ();
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(m_pMethod->name ());
-		    BaseClass::onFailure (0, iMessage);
+		    iMessage<<(this->selectorName ());
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear (); m_iP7.clear (); m_iP8.clear ();
@@ -839,7 +839,7 @@ namespace Vxa {
 	    typename VImportable<P10>::Instance m_iP10;
 	};
     public:
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName), m_pMember (pMember) {
+	VCollectableMethod (member_t pMember) : m_pMember (pMember) {
 	}
     protected:
 	~VCollectableMethod () {
@@ -850,15 +850,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCollection) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -880,10 +880,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCollection, method_t *pMethod)
-		: BaseClass (rCallData, pCollection), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -900,26 +900,26 @@ namespace Vxa {
 		    && m_iP9.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    virtual bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    virtual bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(
 			m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6, m_iP7, m_iP8, m_iP9
 		    );
-		    BaseClass::next ();
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(m_pMethod->name ());
-		    BaseClass::onFailure (0, iMessage);
+		    iMessage<<(this->selectorName ());
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear (); m_iP7.clear (); m_iP8.clear ();
@@ -939,7 +939,7 @@ namespace Vxa {
 	    typename VImportable<P9>::Instance m_iP9;
 	};
     public:
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName), m_pMember (pMember) {
+	VCollectableMethod (member_t pMember) : m_pMember (pMember) {
 	}
     protected:
 	~VCollectableMethod () {
@@ -950,15 +950,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCollection) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -980,10 +980,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCollection, method_t *pMethod)
-		: BaseClass (rCallData, pCollection), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -999,24 +999,24 @@ namespace Vxa {
 		    && m_iP8.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    virtual bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    virtual bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6, m_iP7, m_iP8);
-		    BaseClass::next ();
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6, m_iP7, m_iP8);
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(m_pMethod->name ());
-		    BaseClass::onFailure (0, iMessage);
+		    iMessage<<(this->selectorName ());
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear (); m_iP7.clear (); m_iP8.clear();
@@ -1034,7 +1034,7 @@ namespace Vxa {
 	    typename VImportable<P8>::Instance m_iP8;
 	};
     public:
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName), m_pMember (pMember) {
+	VCollectableMethod (member_t pMember) : m_pMember (pMember) {
 	}
     protected:
 	~VCollectableMethod () {
@@ -1045,15 +1045,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCollection) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -1074,10 +1074,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCollection, method_t *pMethod)
-		: BaseClass (rCallData, pCollection), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -1092,24 +1092,24 @@ namespace Vxa {
 		    && m_iP7.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    virtual bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    virtual bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6, m_iP7);
-		    BaseClass::next ();
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6, m_iP7);
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(m_pMethod->name ());
-		    BaseClass::onFailure (0, iMessage);
+		    iMessage<<(this->selectorName ());
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear (); m_iP7.clear();
@@ -1126,7 +1126,7 @@ namespace Vxa {
 	    typename VImportable<P7>::Instance m_iP7;
 	};
     public:
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName), m_pMember (pMember) {
+	VCollectableMethod (member_t pMember) : m_pMember (pMember) {
 	}
     protected:
 	~VCollectableMethod () {
@@ -1137,15 +1137,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCollection) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -1166,10 +1166,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCollection, method_t *pMethod)
-		: BaseClass (rCallData, pCollection), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -1183,24 +1183,24 @@ namespace Vxa {
 		    && m_iP6.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    virtual bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    virtual bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6);
-		    BaseClass::next ();
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6);
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(m_pMethod->name ());
-		    BaseClass::onFailure (0, iMessage);
+		    iMessage<<(this->selectorName ());
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear();
@@ -1216,7 +1216,7 @@ namespace Vxa {
 	    typename VImportable<P6>::Instance m_iP6;
 	};
     public:
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName), m_pMember (pMember) {
+	VCollectableMethod (member_t pMember) : m_pMember (pMember) {
 	}
     protected:
 	~VCollectableMethod () {
@@ -1227,15 +1227,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCollection) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -1256,10 +1256,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCollection, method_t *pMethod)
-		: BaseClass (rCallData, pCollection), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -1272,24 +1272,24 @@ namespace Vxa {
 		    && m_iP5.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    virtual bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    virtual bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4, m_iP5);
-		    BaseClass::next ();
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4, m_iP5);
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(m_pMethod->name ());
-		    BaseClass::onFailure (0, iMessage);
+		    iMessage<<(this->selectorName ());
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear();
@@ -1304,7 +1304,7 @@ namespace Vxa {
 	    typename VImportable<P5>::Instance m_iP5;
 	};
     public:
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName), m_pMember (pMember) {
+	VCollectableMethod (member_t pMember) : m_pMember (pMember) {
 	}
     protected:
 	~VCollectableMethod () {
@@ -1315,15 +1315,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCollection) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -1345,10 +1345,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCollection, method_t *pMethod)
-		: BaseClass (rCallData, pCollection), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -1360,24 +1360,24 @@ namespace Vxa {
 		    && m_iP4.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    virtual bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    virtual bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4);
-		    BaseClass::next ();
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4);
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(m_pMethod->name ());
-		    BaseClass::onFailure (0, iMessage);
+		    iMessage<<(this->selectorName ());
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear();
 		return true;
@@ -1390,7 +1390,7 @@ namespace Vxa {
 	    typename VImportable<P4>::Instance m_iP4;
 	};
     public:
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName), m_pMember (pMember) {
+	VCollectableMethod (member_t pMember) : m_pMember (pMember) {
 	}
     protected:
 	~VCollectableMethod () {
@@ -1401,15 +1401,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCollection) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -1430,10 +1430,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCollection, method_t *pMethod)
-		: BaseClass (rCallData, pCollection), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -1444,24 +1444,24 @@ namespace Vxa {
 		    && m_iP3.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    virtual bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    virtual bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2, m_iP3);
-		    BaseClass::next ();
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(m_iP1, m_iP2, m_iP3);
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(m_pMethod->name ());
-		    BaseClass::onFailure (0, iMessage);
+		    iMessage<<(this->selectorName ());
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear();
 		return true;
@@ -1473,7 +1473,7 @@ namespace Vxa {
 	    typename VImportable<P3>::Instance m_iP3;
 	};
     public:
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName), m_pMember (pMember) {
+	VCollectableMethod (member_t pMember) : m_pMember (pMember) {
 	}
     protected:
 	~VCollectableMethod () {
@@ -1484,15 +1484,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCollection) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -1511,10 +1511,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCollection, method_t *pMethod)
-		: BaseClass (rCallData, pCollection), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -1524,24 +1524,24 @@ namespace Vxa {
 		    && m_iP2.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    virtual bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    virtual bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2);
-		    BaseClass::next ();
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(m_iP1, m_iP2);
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(m_pMethod->name ());
-		    BaseClass::onFailure (0, iMessage);
+		    iMessage<<(this->selectorName ());
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear();
 		return true;
@@ -1552,7 +1552,7 @@ namespace Vxa {
 	    typename VImportable<P2>::Instance m_iP2;
 	};
     public:
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName), m_pMember (pMember) {
+	VCollectableMethod (member_t pMember) : m_pMember (pMember) {
 	}
     protected:
 	~VCollectableMethod () {
@@ -1563,15 +1563,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCollection) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -1590,10 +1590,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCollection, method_t *pMethod)
-		: BaseClass (rCallData, pCollection), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -1602,24 +1602,24 @@ namespace Vxa {
 		return m_iP1.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    virtual bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    virtual bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(m_iP1);
-		    BaseClass::next ();
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(m_iP1);
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(m_pMethod->name ());
-		    BaseClass::onFailure (0, iMessage);
+		    iMessage<<(this->selectorName ());
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear();
 		return true;
@@ -1629,7 +1629,7 @@ namespace Vxa {
 	    typename VImportable<P1>::Instance m_iP1;
 	};
     public:
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName), m_pMember (pMember) {
+	VCollectableMethod (member_t pMember) : m_pMember (pMember) {
 	}
     protected:
 	~VCollectableMethod () {
@@ -1640,15 +1640,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCollection) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -1668,25 +1668,25 @@ namespace Vxa {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
 	    Implementation (
-		VCallData const &rCallData, VCollection *pCollection, method_t *pMethod
-	    ) : BaseClass (rCallData, pCollection), m_pMethod (pMethod) {
+		VCallData const &rCallData, method_t *pMethod
+	    ) : BaseClass (rCallData), m_pMethod (pMethod) {
 	    }
 	protected:
 	    ~Implementation () {
 	    }
 	private:
-	    virtual bool run () {
+	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)();
-		    BaseClass::next ();
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)();
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(m_pMethod->name ());
-		    BaseClass::onFailure (0, iMessage);
+		    iMessage<<(this->selectorName ());
+		    this->onFailure (0, iMessage);
 		}
 		return true;
 	    }
@@ -1694,7 +1694,7 @@ namespace Vxa {
 	    typename method_t::Reference const m_pMethod;
 	};
     public:
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName), m_pMember (pMember) {
+	VCollectableMethod (member_t pMember) : m_pMember (pMember) {
 	}
     protected:
 	~VCollectableMethod () {
@@ -1705,15 +1705,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCollection) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
-	    return invokeImpl (rCallHandle, pCollection);
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -1735,7 +1735,7 @@ namespace Vxa {
     public:
 	typedef VCollectableMethod<T,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,P14,P15,P16> base_t;
 	typedef typename base_t::member_t member_t;
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName, pMember) {
+	VCollectableMethod (member_t pMember) : base_t (pMember) {
 	}
     };
 
@@ -1751,7 +1751,7 @@ namespace Vxa {
     public:
 	typedef VCollectableMethod<T,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,P14,P15> base_t;
 	typedef typename base_t::member_t member_t;
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName, pMember) {
+	VCollectableMethod (member_t pMember) : base_t (pMember) {
 	}
     };
 
@@ -1767,7 +1767,7 @@ namespace Vxa {
     public:
 	typedef VCollectableMethod<T,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,P14> base_t;
 	typedef typename base_t::member_t member_t;
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName, pMember) {
+	VCollectableMethod (member_t pMember) : base_t (pMember) {
 	}
     };
 
@@ -1783,7 +1783,7 @@ namespace Vxa {
     public:
 	typedef VCollectableMethod<T,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13> base_t;
 	typedef typename base_t::member_t member_t;
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName, pMember) {
+	VCollectableMethod (member_t pMember) : base_t (pMember) {
 	}
     };
 
@@ -1798,7 +1798,7 @@ namespace Vxa {
     public:
 	typedef VCollectableMethod<T,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12> base_t;
 	typedef typename base_t::member_t member_t;
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName, pMember) {
+	VCollectableMethod (member_t pMember) : base_t (pMember) {
 	}
     };
 
@@ -1813,7 +1813,7 @@ namespace Vxa {
     public:
 	typedef VCollectableMethod<T,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11> base_t;
 	typedef typename base_t::member_t member_t;
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName, pMember) {
+	VCollectableMethod (member_t pMember) : base_t (pMember) {
 	}
     };
 
@@ -1828,7 +1828,7 @@ namespace Vxa {
     public:
 	typedef VCollectableMethod<T,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10> base_t;
 	typedef typename base_t::member_t member_t;
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName, pMember) {
+	VCollectableMethod (member_t pMember) : base_t (pMember) {
 	}
     };
 
@@ -1843,7 +1843,7 @@ namespace Vxa {
     public:
 	typedef VCollectableMethod<T,P1,P2,P3,P4,P5,P6,P7,P8,P9> base_t;
 	typedef typename base_t::member_t member_t;
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName, pMember) {
+	VCollectableMethod (member_t pMember) : base_t (pMember) {
 	}
     };
 
@@ -1857,7 +1857,7 @@ namespace Vxa {
     public:
 	typedef VCollectableMethod<T,P1,P2,P3,P4,P5,P6,P7,P8> base_t;
 	typedef typename base_t::member_t member_t;
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName, pMember) {
+	VCollectableMethod (member_t pMember) : base_t (pMember) {
 	}
     };
 
@@ -1870,7 +1870,7 @@ namespace Vxa {
     public:
 	typedef VCollectableMethod<T,P1,P2,P3,P4,P5,P6,P7> base_t;
 	typedef typename base_t::member_t member_t;
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName, pMember) {
+	VCollectableMethod (member_t pMember) : base_t (pMember) {
 	}
     };
 
@@ -1882,7 +1882,7 @@ namespace Vxa {
     public:
 	typedef VCollectableMethod<T,P1,P2,P3,P4,P5,P6> base_t;
 	typedef typename base_t::member_t member_t;
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName, pMember) {
+	VCollectableMethod (member_t pMember) : base_t (pMember) {
 	}
     };
 
@@ -1893,7 +1893,7 @@ namespace Vxa {
     public:
 	typedef VCollectableMethod<T,P1,P2,P3,P4,P5> base_t;
 	typedef typename base_t::member_t member_t;
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName, pMember) {
+	VCollectableMethod (member_t pMember) : base_t (pMember) {
 	}
     };
 
@@ -1904,7 +1904,7 @@ namespace Vxa {
     public:
 	typedef VCollectableMethod<T,P1,P2,P3,P4> base_t;
 	typedef typename base_t::member_t member_t;
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName, pMember) {
+	VCollectableMethod (member_t pMember) : base_t (pMember) {
 	}
     };
 
@@ -1915,7 +1915,7 @@ namespace Vxa {
     public:
 	typedef VCollectableMethod<T,P1,P2,P3> base_t;
 	typedef typename base_t::member_t member_t;
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName, pMember) {
+	VCollectableMethod (member_t pMember) : base_t (pMember) {
 	}
     };
 
@@ -1926,7 +1926,7 @@ namespace Vxa {
     public:
 	typedef VCollectableMethod<T,P1,P2> base_t;
 	typedef typename base_t::member_t member_t;
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName, pMember) {
+	VCollectableMethod (member_t pMember) : base_t (pMember) {
 	}
     };
 
@@ -1937,7 +1937,7 @@ namespace Vxa {
     public:
 	typedef VCollectableMethod<T,P1> base_t;
 	typedef typename base_t::member_t member_t;
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName, pMember) {
+	VCollectableMethod (member_t pMember) : base_t (pMember) {
 	}
     };
 
@@ -1946,7 +1946,7 @@ namespace Vxa {
     public:
 	typedef VCollectableMethod<T> base_t;
 	typedef typename base_t::member_t member_t;
-	VCollectableMethod (VString const &rName, member_t pMember) : base_t (rName, pMember) {
+	VCollectableMethod (member_t pMember) : base_t (pMember) {
 	}
     };
 } //  namespace Vxa

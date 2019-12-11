@@ -184,7 +184,7 @@ bool VkSocketAddress::constructGenericAddress (
 	m_iAddress.inOpenVisionFormat.sa_family
     );
     size_t index = 0;
-    u_long nextByte;
+    unsigned int  nextByte;
     int	   nextOffset;
 
     while (
@@ -226,7 +226,7 @@ bool VkSocketAddress::construct (
  *  valid input to a %u format.  This is wrong on two counts: '-' by itself isn't a
  *  a valid number and unsigned numbers are never negative!
  *----------------------------------------------------------------------------------*/
-    int xFamily; char familyName[64], typeName[64];
+    int xFamily; char familyName[65], typeName[65];
     if (bNotAWildFamily && STD_sscanf (
 	    pProtocolString, "%u/%u/%u", &xFamily, pTypeReturn, pProtocolReturn
 	) >= 2

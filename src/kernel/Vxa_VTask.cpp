@@ -75,16 +75,6 @@ public:
 public:
     void process () {
 	if (m_pTask) {
-	//--------------------------------------------------------------------------------
-	//---  This code is running in a thread pool thread.  Since this is Vca code,
-	//---  it is quite likely that a call will be made that needs the current
-	//---  cohort.  Make sure the cohort it gets isn't permanently locked to this
-	//---  thread by attempting a non-blocking claim of the task's cohort or, if
-	//---  that fails, claiming a new virtual cohort before running the task.
-	//--------------------------------------------------------------------------------
-	    Vca::VCohort::Claim iCC (m_pTask, false); // ... attempt a non-blocking claim of the task's cohort
-	    if (iCC.isntHeld ())  //  ... if the claim didn't succeed, ...
-		iCC.clear ();  //  ... clear the claim so that it's free to create a new cohort if necessary.
 	    m_pTask->runWithMonitor ();
 	}
     }
@@ -94,6 +84,67 @@ private:
     VTask::Reference m_pTask;
 };
 template class Vxa_API V::VThreadedProcessor_<Vxa::VTask::LaunchRequest>;
+
+
+/***************************************
+ ***************************************
+ *****                             *****
+ *****  Vxa::VTask::RemoteControl  *****
+ *****                             *****
+ ***************************************
+ ***************************************/
+
+/**************************
+ **************************
+ *****  Construction  *****
+ **************************
+ **************************/
+
+Vxa::VTask::RemoteControl::RemoteControl (
+    ICaller2 *pRemoteInterface
+) : m_pRemoteInterface (pRemoteInterface), m_cSuspensions (0) {
+}
+
+/*************************
+ *************************
+ *****  Destruction  *****
+ *************************
+ *************************/
+
+Vxa::VTask::RemoteControl::~RemoteControl () {
+}
+
+/****************************
+ ****************************
+ *****  Remote Control  *****
+ ****************************
+ ****************************/
+
+bool Vxa::VTask::RemoteControl::suspend () {
+    return 0 == m_cSuspensions++ && sendRemoteSuspend ();
+}
+
+bool Vxa::VTask::RemoteControl::resume () {
+    return m_cSuspensions > 0 && 0 == --m_cSuspensions && sendRemoteResume ();
+}
+
+bool Vxa::VTask::RemoteControl::sendRemoteSuspend () const {
+    Vca::VCohortClaim iCohortClaim;
+
+    if (m_pRemoteInterface.isNil ())
+        return false;
+    m_pRemoteInterface->Suspend ();
+    return true;
+}
+
+bool Vxa::VTask::RemoteControl::sendRemoteResume () const {
+    Vca::VCohortClaim iCohortClaim;
+
+    if (m_pRemoteInterface.isNil ())
+        return false;
+    m_pRemoteInterface->Resume ();
+    return true;
+}
 
 
 /************************
@@ -122,6 +173,7 @@ Vxa::VTask::VTask (
  *************************/
 
 Vxa::VTask::~VTask () {
+    wrapupRemoteControl ();
 }
 
 /***********************
@@ -149,14 +201,32 @@ bool Vxa::VTask::startWithMonitorUsing (VCallType2Importer &rImporter) {
 }
 
 bool Vxa::VTask::runWithMonitor () {
-    bool iResult = run ();
-/* After testing, we may get rid of runWithMonitor ()
-    if (iResult)
+//--------------------------------------------------------------------------------
+//---  This code is running in an arbitrary thread.  Since this is Vca code, it
+//---  is quite likely that a call will be made that needs the current cohort.
+//---  Make sure the cohort it gets isn't permanently locked to this thread by
+//---  first attempting a non-blocking claim of the task's cohort and, if that
+//---  fails, claiming a new virtual cohort before running the task.
+//--------------------------------------------------------------------------------
+    Vca::VCohort::Claim iCC (this, false); // ... attempt a non-blocking claim of the task's cohort
+    if (iCC.isntHeld ())  //  ... if the claim didn't succeed, ...
+        iCC.clear ();  //  ... clear the claim so that it's free to create a new cohort if necessary.
+
+    bool const bSuccessful = run ();
+
+/*****
+ *  Remove the protective remote suspension set during remote control creation...
+ *****/
+    wrapupRemoteControl ();
+
+/*
+    if (bSuccessful)
 	onSuccess ();
     else
 	onFailure (0, "Vxa task run error!");
 */
-    return iResult;
+
+    return bSuccessful;
 }
 
 void Vxa::VTask::onErrorEvent (VError *pError) {
@@ -166,6 +236,10 @@ void Vxa::VTask::onErrorEvent (VError *pError) {
 }
 
 bool Vxa::VTask::launch () {
+    return m_iCallData.launchTask (this);
+}
+
+bool Vxa::VTask::launchInThreadPool () {
     static V::VThreadedProcessor_<LaunchRequest>::Reference g_pRequestProcessor;
     if (g_pRequestProcessor.isNil ()) {
 	V::VThreadedProcessor_<LaunchRequest>::Reference const pRequestProcessor (
@@ -175,7 +249,38 @@ bool Vxa::VTask::launch () {
 	pRequestProcessor->setWorkerLimit	(V::GetEnvironmentUnsigned ("VxaTaskLimit", 32));		//  ... a number drawn from a hat
 	g_pRequestProcessor.interlockedSetIfNil (pRequestProcessor);
     }
-    LaunchRequest iLR (this);
-    g_pRequestProcessor->process (iLR);
+//    LaunchRequest iLR (this);
+    g_pRequestProcessor->process (LaunchRequest (this));
     return true;
+}
+
+
+/****************************
+ ****************************
+ *****  Remote Control  *****
+ ****************************
+ ****************************/
+
+Vxa::VTask::RemoteControl *Vxa::VTask::getRemoteControl (
+    Vxa::ICaller2 *pRemoteInterface
+) {
+    if (m_pRemoteControl.isNil ()) {
+        RemoteControl::Reference const pRemoteControl (
+            new RemoteControl (pRemoteInterface)
+        );
+        if (m_pRemoteControl.interlockedSetIfNil (pRemoteControl))
+        /*****
+         *  Tasks send a protective remote suspension on newly minted remote controls
+         *  which they remove on task completion/finalization...
+         *****/
+            m_pRemoteControl->suspend ();
+    }
+    return m_pRemoteControl;
+}
+
+void Vxa::VTask::wrapupRemoteControl () {
+    if (m_pRemoteControl) {
+        m_pRemoteControl->resume ();
+        m_pRemoteControl.clear ();
+    }
 }

@@ -34,7 +34,7 @@ public:
     unsigned int cardinality () const {
 	return m_pDomain->cardinality ();
     }
-    unsigned int cardinality_() const {
+    virtual unsigned int cardinality_() const OVERRIDE {
 	return cardinality ();
     }
 
@@ -45,7 +45,7 @@ public:
     rtPTOKEN_Handle *ptoken () const {
 	return m_pDomain->ptoken ();
     }
-    rtPTOKEN_Handle *ptoken_() const {
+    virtual rtPTOKEN_Handle *ptoken_() const OVERRIDE {
 	return ptoken ();
     }
 

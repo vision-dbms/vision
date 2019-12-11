@@ -30,7 +30,6 @@
 
 #include "Vca_VTimer.h"
 
-class VString;
 class VTypeInfo;
 
 
@@ -92,11 +91,11 @@ namespace Vca {
 
         //  Callbacks
         public:
-            void onEnd      () {}
-            void onError    (IError *pError, VString const &rMessage) {}
-            void onTransfer (size_t sTransfer);
-            bool onStatus   (VStatus const &rStatus);
-            void onChange   (U32 sChange);
+            virtual void onEnd      () OVERRIDE {}
+            virtual void onError    (IError *pError, VString const &rMessage) OVERRIDE {}
+            virtual void onTransfer (size_t sTransfer) OVERRIDE;
+            virtual bool onStatus   (VStatus const &rStatus) OVERRIDE;
+            virtual void onChange   (U32 sChange) OVERRIDE;
 
         //  Query
         public:
@@ -230,7 +229,7 @@ namespace Vca {
     /// @name Access
     //@{
     protected:
-	void getDescription_(VString &rResult) const;
+	virtual void getDescription_(VString &rResult) const OVERRIDE;
     public:
         char const *directionCode () const;
 
@@ -394,7 +393,7 @@ namespace Vca {
         }
 
     public:
-        VcaTransportInbound *transportIfInbound () {
+        virtual VcaTransportInbound *transportIfInbound () OVERRIDE {
             return this;
         }
 
@@ -403,7 +402,7 @@ namespace Vca {
 	bool isConnected () const {
 	    return m_pBS.isntNil ();
 	}
-        bool isIncoming () const {
+        virtual bool isIncoming () const OVERRIDE {
             return true;
         }
 
@@ -423,35 +422,35 @@ namespace Vca {
 
     //  Callbacks
     public/*private*/:
-        void OnTransfer (IBSClient *pRole, size_t sTransfer);
+        virtual void OnTransfer (IBSClient *pRole, size_t sTransfer) OVERRIDE;
 
-        void OnError (IClient *pRole, IError *pError, VString const &rMessage);
+        virtual void OnError (IClient *pRole, IError *pError, VString const &rMessage) OVERRIDE;
 
     //  Data Transfer
     public:
-        void getData (VcaSerializer *pSerializer, void *pVoid, size_t sVoid);
+        virtual void getData (VcaSerializer *pSerializer, void *pVoid, size_t sVoid) OVERRIDE;
 
-        void transferDataFor (VcaSerializer *pSerializer);
+        virtual void transferDataFor (VcaSerializer *pSerializer) OVERRIDE;
 
     //  Plumbing
     private:
 	void onAttach (VcaPeer *pPeer);
 	void onDetach (VcaPeer *pPeer);
     public:
-        void setPeerFrom (VcaSerializerForPlumbing *pSerializer);
+        virtual void setPeerFrom (VcaSerializerForPlumbing *pSerializer) OVERRIDE;
 
     //  Scheduling
     private:
         void startMessage ();
 
-        void startNextSerializer ();
+        virtual void startNextSerializer () OVERRIDE;
 
-        void wrapup (VcaSerializer *pSerializer);
+        virtual void wrapup (VcaSerializer *pSerializer) OVERRIDE;
 
     //  Shutdown
     public:
-        void Close ();
-        void Abort ();
+        virtual void Close () OVERRIDE;
+        virtual void Abort () OVERRIDE;
 
     //  State
     private:
@@ -502,7 +501,7 @@ namespace Vca {
         }
 
     public:
-        VcaTransportOutbound *transportIfOutbound () {
+        virtual VcaTransportOutbound *transportIfOutbound () OVERRIDE {
             return this;
         }
 
@@ -511,7 +510,7 @@ namespace Vca {
 	bool isConnected () const {
 	    return m_pBS.isntNil ();
 	}
-        bool isOutgoing () const {
+        virtual bool isOutgoing () const OVERRIDE {
             return true;
         }
 
@@ -523,40 +522,40 @@ namespace Vca {
 
     //  Callbacks
     public/*private*/:
-        void OnTransfer (IBSClient *pRole, size_t sTransfer);
+        virtual void OnTransfer (IBSClient *pRole, size_t sTransfer) OVERRIDE;
 
-        void OnError (IClient *pRole, IError *pError, VString const &rMessage);
+        virtual void OnError (IClient *pRole, IError *pError, VString const &rMessage) OVERRIDE;
 
     //  Data Transfer
     public:
-        void putData (VcaSerializer *pSerializer, void const *pData, size_t sData);
+        virtual void putData (VcaSerializer *pSerializer, void const *pData, size_t sData) OVERRIDE ;
 
-        void transferDataFor (VcaSerializer *pSerializer);
+        virtual void transferDataFor (VcaSerializer *pSerializer) OVERRIDE;
 
     //  Plumbing
     private:
 	void onAttach (VcaPeer *pPeer);
 	void onDetach (VcaPeer *pPeer);
     public:
-        void setPeerFrom (VcaSerializerForPlumbing *pSerializer);
+        virtual void setPeerFrom (VcaSerializerForPlumbing *pSerializer) OVERRIDE;
 
     //  Scheduling
     private:
         void startMessage (VMessage *pMessage);
 
-        void startNextSerializer ();
+        virtual void startNextSerializer () OVERRIDE;
 
-        void wrapup (VcaSerializer *pSerializer);
+        virtual void wrapup (VcaSerializer *pSerializer) OVERRIDE;
 
     //  BSManager Calls
     protected:
-        void onBytesTransferred ();
-        void onChange (U32 sChange);
-        void onFailedOrClosed ();
+        virtual void onBytesTransferred () OVERRIDE;
+        virtual void onChange (U32 sChange) OVERRIDE;
+        virtual void onFailedOrClosed () OVERRIDE;
 
     //  Message Serialization
     protected:
-        void onWrapupSerialization ();
+        virtual void onWrapupSerialization () OVERRIDE;
 
     //  HeartBeat
     private:
@@ -582,8 +581,8 @@ namespace Vca {
 
     //  Shutdown
     public:
-        void Close ();
-        void Abort ();
+        virtual void Close () OVERRIDE;
+        virtual void Abort () OVERRIDE;
 
     //  State
     private:

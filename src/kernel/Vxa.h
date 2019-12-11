@@ -35,6 +35,8 @@
  *******************************/
 
 namespace Vxa {
+    typedef V::VString VString;
+
     typedef Vca::U32 cardinality32_t;
     typedef Vca::U64 cardinality64_t;
 

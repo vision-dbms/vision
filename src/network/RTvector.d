@@ -250,8 +250,8 @@ struct rtVECTOR_Type {
 	    * sizeof (rtVECTOR_PMRDType))
 
 #define rtVECTOR_Tail(preamblePtr)\
-    ((pointer_t)\
-        ((pointer_t)preamblePtr +\
+    ((V::pointer_t)\
+        ((V::pointer_t)preamblePtr +\
 	    M_SizeOfPreambleType +\
 	    sizeof (rtVECTOR_Type) +\
 	    rtVECTOR_V_PMapSize (rtVECTOR_Content (preamblePtr))\

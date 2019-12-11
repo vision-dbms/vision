@@ -18,8 +18,6 @@
  *****  Declarations  *****
  **************************/
 
-class VString;
-
 #include "Vca_VTypePattern.h"
 
 /*************************
@@ -27,9 +25,11 @@ class VString;
  *************************/
 
 namespace Vxa {
-    /*****************************************************
-     *----  template <typename Val_T> class VScalar  ----*
-     *****************************************************/
+    class VAny;
+
+/*****************************************************
+ *----  template <typename Val_T> class VScalar  ----*
+ *****************************************************/
 
     template <typename Val_T> class VScalar : public VReferenceable {
 	DECLARE_ABSTRACT_RTTLITE (VScalar<Val_T>, VReferenceable);
@@ -57,6 +57,11 @@ namespace Vxa {
 	VType::Pointer const m_pType;
     };
 
+/*******************************************************************
+ *----  typename VScalar<Val_T>::Reference Return Type Aliases ----*
+ *******************************************************************/
+
+    typedef VScalar<VAny const&>::Reference	any_scalar_return_t;
     typedef VScalar<bool>::Reference		bool_scalar_return_t;
     typedef VScalar<short>::Reference		short_scalar_return_t;
     typedef VScalar<unsigned short>::Reference	unsigned_short_scalar_return_t;
@@ -66,9 +71,9 @@ namespace Vxa {
     typedef VScalar<double>::Reference		double_scalar_return_t;
     typedef VScalar<VString const&>::Reference	VString_scalar_return_t;
 
-    /*****************************************************************************
-     *----  template <typename Val_T, typename Var_T> class VScalarInstance  ----*
-     *****************************************************************************/
+/*****************************************************************************
+ *----  template <typename Val_T, typename Var_T> class VScalarInstance  ----*
+ *****************************************************************************/
 
     template <
 	typename Val_T, typename Var_T = typename Vca::VTypePattern<Val_T>::var_t
@@ -106,7 +111,7 @@ namespace Vxa {
 
     //  Access
     public:
-	virtual Val_T value () {
+	virtual Val_T value () OVERRIDE {
 	    return m_iValue;
 	}
 

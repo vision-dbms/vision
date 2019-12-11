@@ -83,7 +83,11 @@ namespace Vsa {
 
 	    //  Access
 	    public:
-		Entry *get (VEvaluation::Reference &rpRequest, unsigned int &rcPrompts) const;
+                bool getEvaluation (VEvaluation::Reference &rpEvaluation, request_index_t xRequest) const {
+                    return m_pRequest->getEvaluation (rpEvaluation, xRequest);
+                }
+
+		Entry* getNextRequest (VEvaluation::Reference &rpRequest, unsigned int &rcPrompts) const;
 
 	    //  State
 	    private:
@@ -102,6 +106,10 @@ namespace Vsa {
 	public:
 	    ~IQueue () {
 	    }
+
+        //  Access
+        public:
+            bool getEvaluation (VEvaluation::Reference &rpEvaluation, request_index_t xRequest) const;
 
 	//  Query		
 	private:
@@ -363,9 +371,7 @@ namespace Vsa {
 	}
 
     public:
-	VEvaluation *incomingClient () const {
-	    return m_pIncomingClient;
-	}
+        bool getEvaluation (VEvaluation::Reference &rpEvaluation, request_index_t xRequest) const;
 
 	bool incomingPumpIsBusy () const {
 	    return m_pBSProducer.isNil ()
@@ -391,16 +397,16 @@ namespace Vsa {
 	void OnTransfer (BSConsumerClient *pRole, size_t sTransfer);
 	void OnTransfer (BSProducerClient *pRole, size_t sTransfer);
 
-        void OnEnd (Vca::IClient *pRole) {
+        virtual void OnEnd (Vca::IClient *pRole) OVERRIDE {
             OnError (pRole, 0, "Process Terminated");
         }
-	void OnError (
+	virtual void OnError (
 	    Vca::IClient *pRole, Vca::IError *pError, VString const &rDescription
-	);
+	) OVERRIDE;
 
     //  Execution
     private:
-	void onQueue_ ();
+	virtual void onQueue_ () OVERRIDE;
 
 	void primeOutgoingPump ();
 	void crankOutgoingPump (IBSClient *pRole);
@@ -417,7 +423,7 @@ namespace Vsa {
 
     //  Cancellation
     protected:
-        virtual bool cancel_ (VEvaluation *pEvaluation);
+        virtual bool cancel_ (VEvaluation *pEvaluation) OVERRIDE;
         virtual void cancelCurrent () {}
 
     //  State

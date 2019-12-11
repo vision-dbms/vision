@@ -59,6 +59,12 @@ namespace V {
 	    return 0 == iValue;
 	}
 
+	static value_t fetchAndAdd (value_t volatile &rValue, value_t iAddend) {
+	    value_t result = rValue;
+	    rValue += iAddend;
+	    return result;
+	}
+
 	static value_t fetchAndIncrement (value_t volatile &rValue) {
 	    return rValue++;
 	}

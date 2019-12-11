@@ -89,15 +89,15 @@ Vca_IVReceiver_InstantiationsForPODT (VTypeInfo*);
 
 Vca_IVReceiver_InstantiationsForREFT (V::uuid_t);
 Vca_IVReceiver_InstantiationsForREFT (V::VBlob);
-Vca_IVReceiver_InstantiationsForREFT (VString);
+Vca_IVReceiver_InstantiationsForREFT (V::VString);
 Vca_IVReceiver_InstantiationsForREFT (V::VTime);
 
 Vca_IVReceiver_InstantiationsForArrayOf (Vca::U32);
 Vca_IVReceiver_InstantiationsForArrayOf (Vca::U64);
 Vca_IVReceiver_InstantiationsForArrayOf (Vca::F64);
 Vca_IVReceiver_InstantiationsForArrayOf (V::VTime);
-Vca_IVReceiver_InstantiationsForArrayOf (VString);
-Vca_IVReceiver_InstantiationsForPODT (Vca::IDataSource<VString const&>*);
+Vca_IVReceiver_InstantiationsForArrayOf (V::VString);
+Vca_IVReceiver_InstantiationsForPODT (Vca::IDataSource<V::VString const&>*);
 
 #endif
 

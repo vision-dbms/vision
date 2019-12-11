@@ -44,7 +44,7 @@ Vca::Vps::VPublication::Watermark::Watermark (
 ) : m_iWatermarkPreamble (WatermarkPreamble (rWatermarkData)) {
 }
 
-VString Vca::Vps::VPublication::Watermark::WatermarkPreamble (VString const &rWatermarkData) {
+V::VString Vca::Vps::VPublication::Watermark::WatermarkPreamble (VString const &rWatermarkData) {
     VString iWatermarkPreamble (32);
     iWatermarkPreamble << "VcaNewsWM Dst:" << rWatermarkData << ",Src:";
     iWatermarkPreamble.printf ("%08X", getpid ());
@@ -59,7 +59,7 @@ VString Vca::Vps::VPublication::Watermark::WatermarkPreamble (VString const &rWa
  ********************
  ********************/
 
-VString Vca::Vps::VPublication::Watermark::watermark () const {
+V::VString Vca::Vps::VPublication::Watermark::watermark () const {
     VString iWatermark (m_iWatermarkPreamble);
 
     V::VTime iNow;

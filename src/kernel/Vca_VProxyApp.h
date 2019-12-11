@@ -121,7 +121,7 @@ namespace Vca {
 
     //  Run State Transition
     private:
-	bool start_();
+	virtual bool start_() OVERRIDE;
     };
 }
 

@@ -32,7 +32,7 @@ protected:
 
 //  Access
 public:
-    VSelector const& selector_ () const;
+    virtual VSelector const& selector_ () const OVERRIDE;
 
 //  State
 protected:

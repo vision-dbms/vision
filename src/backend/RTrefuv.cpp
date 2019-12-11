@@ -1575,7 +1575,7 @@ PublicFnDef M_CPD *rtREFUV_LCAssignScalar (
 /*****  Align the reference and 'target' and perform the assignment  *****/
     targetCPD->align ();
     return UV_LCAssignScalar (
-	targetCPD, linkConstructor, (pointer_t)&rtREFUV_Ref_Element (rtREFUV_AlignReference (valuePtr))
+	targetCPD, linkConstructor, (V::pointer_t)&rtREFUV_Ref_Element (rtREFUV_AlignReference (valuePtr))
     );
 }
 

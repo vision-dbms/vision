@@ -85,11 +85,32 @@ Vxa::VClass::~VClass () {
  *******************************
  *******************************/
 
-bool Vxa::VClass::defineMethod (VMethod *pMethod) {
+bool Vxa::VClass::defineMethod (VString const &rName, VMethod *pMethod) {
     unsigned int xElement;
-    m_iDictionary.Insert (pMethod->name (), xElement);
+    m_iDictionary.Insert (rName, xElement);
     m_iDictionary.value(xElement).setTo (pMethod);
     return true;
+}
+
+bool Vxa::VClass::defineDefault (VMethod *pMethod) {
+    m_pDefaultMethod.setTo (pMethod);
+    return true;
+}
+
+/***************************
+ ***************************
+ *****  Method Access  *****
+ ***************************
+ ***************************/
+
+bool Vxa::VClass::getMethod (VMethod::Reference &rpMethod, VCallData const &rCallData) const {
+    unsigned int xElement = UINT_MAX;
+    if (m_iDictionary.Locate (rCallData.selectorName (), xElement)) {
+	rpMethod.setTo (m_iDictionary.value(xElement));
+	return true;
+    }
+    rpMethod.setTo (m_pDefaultMethod);
+    return rpMethod.isntNil ();
 }
 
 /*******************************
@@ -98,11 +119,9 @@ bool Vxa::VClass::defineMethod (VMethod *pMethod) {
  *******************************
  *******************************/
 
-bool Vxa::VClass::invokeMethod (
-    VString const &rName, VCallHandle const &rCallHandle, VCollection *pCollection
-) const {
-    unsigned int xElement = UINT_MAX;
-    return m_iDictionary.Locate (rName, xElement)
-	?  rCallHandle.invoke (m_iDictionary.value(xElement), pCollection)
+bool Vxa::VClass::invokeCall (VCallHandle const &rCallHandle) const {
+    VMethod::Reference pMethod;
+    return getMethod (pMethod, rCallHandle)
+	?  rCallHandle.invokeMethod (pMethod)
 	:  rCallHandle.returnSNF ();
 }

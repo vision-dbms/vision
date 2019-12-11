@@ -45,7 +45,7 @@
  ***********************
  ***********************/
 
-VString const &Vsa::VQueryApp::Environment (argv_t ppEnvironment) {
+V::VString const &Vsa::VQueryApp::Environment (argv_t ppEnvironment) {
     static bool bNotInitialized = true;
     static VString g_iString;
 
@@ -91,13 +91,13 @@ Vsa::VQueryApp::VQueryApp (Context *pContext, argv_t envp)
 	aggregate (new Vca::Gofer::Named<Vca::IRoleProvider,Vca::IDirectory>(pBridgeServerName));
 }
 
-VString Vsa::VQueryApp::getPathInfo () {
+V::VString Vsa::VQueryApp::getPathInfo () {
     char const *pArgument = m_iCommandCursor.firstToken ();
     VString iResult (EnvironmentString ("PATH_INFO", pArgument ? pArgument : "/"));
     return iResult;
 }
 
-VString Vsa::VQueryApp::getQueryString () {
+V::VString Vsa::VQueryApp::getQueryString () {
     if (isGET ()) {
 	char const *pArgument = m_iCommandCursor.nextToken ();
 	VString iResult (
@@ -111,7 +111,7 @@ VString Vsa::VQueryApp::getQueryString () {
     }
 }
 
-VString const &Vsa::VQueryApp::getInput () {
+V::VString const &Vsa::VQueryApp::getInput () {
     static bool bNotInitialized = true;
     static VString g_iString;
 
@@ -167,7 +167,7 @@ void Vsa::VQueryApp::report (char const *pMessage) const {
     printf ("<H2> VQuery Error </H2>\n");
     printf ("<HR>\n");
     // printf ("<STRONG>\n");
-    printf ("Your request to access", m_iPathInfo.content ());
+    printf ("Your request to access %s", m_iPathInfo.content ());
     // printf (strlen (m_iServiceName) > 0 ? " the '%s'" : " a", m_iServiceName.content ());
     printf (" Vision server failed.\n%s\n", pMessage);
     // printf ("</STRONG>\n");

@@ -700,7 +700,7 @@ namespace Vca {
     /** @name Run State Access/Query */
     //@{
     protected:
-	void getDescription_(VString& rResult) const;
+	virtual void getDescription_(VString& rResult) const OVERRIDE;
     public:
         /**
 	 * Returns the name of a run state.
@@ -774,7 +774,7 @@ namespace Vca {
          * @param bHardStop if false, this method will return true only if this application is stopped; if true, this method will additionally return true if this application is @e not stopped.
          */
         bool isStopping (bool bHardStop) const {
-            return isStopping () || bHardStop && isntStopped ();
+            return isStopping () || (bHardStop && isntStopped ());
         }
     //@}
 
@@ -837,6 +837,12 @@ namespace Vca {
          * @return false on failure, true otherwise.
          */
         bool setRunStateToStopped ();
+
+        /**
+         * Called whenever the run state changes.  Derived class overrides MUST
+         * call the BaseClass version of this routine as the FIRST thing they do.
+         */
+        virtual void onRunStateChange_(RunState xOldState, RunState xNewState);
 
         /**
          * Handles application startup; must be implemented by concrete subclasses.

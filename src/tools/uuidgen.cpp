@@ -36,7 +36,7 @@ int main (int argc, char *argv[]) {
 //  Create and format a UUID...
     VkUUIDGenerate const iUUID;
     V::uuid_t const &rUUID = iUUID;
-    VString iUUIDString;
+    V::VString iUUIDString;
     iUUID.GetString (iUUIDString);
 
 //  Output the UUID in standard format...

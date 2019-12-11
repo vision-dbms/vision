@@ -913,7 +913,7 @@ void nicePrintRealNumber (VOutputGenerator &rOutputGenerator, int iFieldWidth, i
  ***** left justifies strings.
  *****/
 V_DefinePrimitive (IntegerPrintOf) {
-    bool	 withCommas, bNice = false, bCompact = false;
+    bool	 withCommas = false, bNice = false, bCompact = false;
     unsigned int converseMessageSelector;
     FMTType	 resultFormat;
 
@@ -921,7 +921,6 @@ V_DefinePrimitive (IntegerPrintOf) {
 /*****  Decode the alias by which this primitive was invoked...  *****/
     switch (V_TOTSC_Primitive) {
     case XIntegerPrintOf:
-        withCommas = false;
 	converseMessageSelector = KS__PrintColon;
         break;
     case XIntegerPrintWithCommasOf:
@@ -1196,11 +1195,10 @@ V_DefinePrimitive (DoublePrintOf) {
 
 
 /*****  Decode the alias by which this primitive was invoked...  *****/
-    bool withCommas, bNice = false, bCompact = false;
+    bool withCommas = false, bNice = false, bCompact = false;
     int converseMessageSelector;
     switch (V_TOTSC_Primitive) {
     case XDoublePrintOf:
-        withCommas = false;
 	converseMessageSelector = KS__PrintColon;
         break;
     case XDoublePrintWithCommasOf:
@@ -2137,7 +2135,10 @@ PrivateFnDef void PrintAAsStrings (VPrimitiveTask* pTask, int size) {
     }
 
     char format[32];
-    STD_sprintf (format, size == 0 ? "%%s" : "%%-%d.%ds", size, size);
+    if (0 == size)
+	STD_sprintf (format, "%%s");
+    else
+	STD_sprintf (format, "%%-%d.%ds", size, size);
 
     switch (ADescriptor.pointerRType ()) {
     case RTYPE_C_IntUV: {
@@ -2327,7 +2328,7 @@ PrivateFnDef void PrintAAsBlockClosureIndices (
     VPrimitiveTask *pTask, rtBLOCK_Handle *pBlock, int lbracket, int rbracket
 ) {
     VCPDReference pBlockCPD (0, pBlock->GetCPD ());
-    VString iSource;
+    V::VString iSource;
     RSLANG_Decompile (iSource, pBlockCPD);
     pTask->printf (
 	iSource.length () + 2, "%c%s%c", lbracket, (char const*)iSource, rbracket
@@ -2402,7 +2403,7 @@ PrivateFnDef void SPrintAAsBlockClosureIndices (
     VPrimitiveTask *pTask, rtBLOCK_Handle *pBlock, char const *lbracket, char const *rbracket
 ) {
     VCPDReference pBlockCPD (0, pBlock->GetCPD ());
-    VString iSource;
+    V::VString iSource;
     RSLANG_Decompile (iSource, pBlockCPD);
     pTask->loadDucWithListOrStringStore (
 	rtLSTORE_NewStringStoreWithDelm (

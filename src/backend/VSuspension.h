@@ -82,9 +82,9 @@ public:
 
 //  Mandated Access
 public:
-    unsigned int cardinality_() const;
+    virtual unsigned int cardinality_() const OVERRIDE;
 
-    rtPTOKEN_Handle *ptoken_() const;
+    virtual rtPTOKEN_Handle *ptoken_() const OVERRIDE;
 
 //  Access
 public:

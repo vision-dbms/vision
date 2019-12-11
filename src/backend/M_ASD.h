@@ -17,6 +17,8 @@
 
 #include "PS_ASD.h"
 
+#include "Vdd_Object.h"
+
 class M_CTE;
 
 class rtPCT_Handle;
@@ -192,7 +194,9 @@ class M_ASD : public VTransient {
 
 //  Aliases
 public:
-    typedef V::VArgList VArgList;
+    typedef V::VArgList  VArgList;
+    typedef V::VString   VString;
+    typedef V::pointer_t pointer_t;
 
 //  Container Table
 public:
@@ -382,6 +386,9 @@ public:
 		bool holdsAContainerAddress () const {
 		    return m_xAddressType < M_CTEAddressType_CPCC;
 		}
+		bool holdsAContainerHandle () const {
+		    return holdsACPCC ();
+		}
 		bool holdsACPCC () const {
 		    return m_xAddressType == M_CTEAddressType_CPCC;
 		}
@@ -510,20 +517,20 @@ public:
 		    m_iReferenceCount = M_CTE_MaxReferenceCount;
 		}
 
-		bool gcVisited() {
+		bool gcVisited() const {
 		    return m_bGcVisited;
 		}
 		void gcVisited(bool visited) {
 		    m_bGcVisited = visited;
 		}
 
-		bool cdVisited() {
+		bool cdVisited() const {
 		    return m_bCdVisited;
 		}
 		void cdVisited (bool visited) {
 		    m_bCdVisited = visited;
 		}
-		bool foundAllReferences() {
+		bool foundAllReferences() const {
 		    return m_bFoundAllReferences;
 		}
 		void foundAllReferences (bool foundAll) {
@@ -755,28 +762,49 @@ public:
     };
 
 
-// GC Traversal Controllers: GCTraverseMarkBase
+// GC Traversal Controllers : GCVisitBase
 public:
-    class GCVisitBase {
+   class GCVisitBase : public Vdd::Object::Visitor {
+	friend class M_ASD;
+
     public:
-	void Mark (M_ASD* pASD, M_POP const *pPOP) { this->Mark_(pASD, pPOP); }
-	void Mark (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences)
-	  { this->Mark_(pASD, pReferences, cReferences); }
+	void Mark (M_ASD* pASD, M_POP const *pPOP) {
+	    Mark_(pASD, pPOP);
+	}
+	void Mark (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences) {
+	    Mark_(pASD, pReferences, cReferences);
+	}
 
-    private: 
-	virtual void Mark_ (M_ASD* pASD, M_POP const *pPOP) { }
-	virtual void Mark_ (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences) { }
+    protected:
+	virtual void Mark_(M_ASD* pASD, M_POP const *pPOP);
+	virtual void Mark_(M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences);
 
+	virtual void processContainerAddress (M_CTE &rCTE, M_CPreamble *pAddress);
+	virtual void processContainerHandle  (M_CTE &rCTE, VContainerHandle *pHandle);
     };
+
+// GC Traversal Controllers : GCVisitMark
     class GCVisitMark : public GCVisitBase {
-    private:
-	virtual void Mark_ (M_ASD* pASD, M_POP const *pPOP);
-	virtual void Mark_ (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences);
+	DECLARE_FAMILY_MEMBERS (GCVisitMark,GCVisitBase);
+
+    protected:
+	using BaseClass::Mark_;
+	virtual void Mark_(M_ASD* pASD, M_POP const *pPOP) OVERRIDE;
+
+	virtual void processContainerHandle  (M_CTE &rCTE, VContainerHandle *pHandle) OVERRIDE;
+
+	virtual void visitHandle (VContainerHandle *pHandle) OVERRIDE;
     };
+
+// GC Traversal Controllers : GCVisitCycleDetect
     class GCVisitCycleDetect : public GCVisitBase {
-    private:
-	virtual void Mark_ (M_ASD* pASD, M_POP const *pPOP);
-	virtual void Mark_ (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences);
+	DECLARE_FAMILY_MEMBERS (GCVisitCycleDetect,GCVisitBase);
+
+    protected:
+	virtual void processContainerAddress (M_CTE &rCTE, M_CPreamble *pAddress) OVERRIDE;
+	virtual void processContainerHandle  (M_CTE &rCTE, VContainerHandle *pHandle) OVERRIDE;
+
+	virtual void visitHandle (VContainerHandle *pHandle) OVERRIDE;
     };
 
 
@@ -838,6 +866,10 @@ public:
 	return m_sTransientAllocation;
     }
 
+    VString const &UpdateAnnotation () const {
+	return m_pAND->UpdateAnnotation ();
+    }
+
 //  Query
 public:
     bool IsTheScratchPad () const {
@@ -890,7 +922,7 @@ public:
 
     bool GetCTE (unsigned int xContainer, CTE &rResult) const;
     bool GetCTE (unsigned int xContainer, PS_CTE &rResult) const {
-	return IsntNil (this) && m_pPASD->GetCTE (xContainer, rResult);
+	return m_pPASD->GetCTE (xContainer, rResult);
     }
 
     bool GetCTE (int xContainer, CTE &rResult) const {

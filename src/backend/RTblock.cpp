@@ -35,13 +35,13 @@
 
 /*****  Private Macros  *****/
 #define ComputeSize(cpd)\
-    ((pointer_t) rtBLOCK_CPDBase(cpd) + M_CPD_Size(cpd))
+    ((V::pointer_t) rtBLOCK_CPDBase(cpd) + M_CPD_Size(cpd))
 
 #define FindOffset(b, e)\
-    ((pointer_t) (e) - (pointer_t) (b))
+    ((V::pointer_t) (e) - (V::pointer_t) (b))
 
 #define FindAddress(b, o)\
-    ((pointer_t) (b) + (o))
+    ((V::pointer_t) (b) + (o))
 
 
 /*************************************
@@ -187,13 +187,13 @@ PublicFnDef void rtBLOCK_InitStdCPD (M_CPD* cpd) {
 	(unsigned char *) FindAddress (a, rtBLOCK_byteCodeVector (a));
 
     /****   set the address of the string space 	****/
-    rtBLOCK_CPD_StringSpace (cpd) = (pointer_t) FindAddress (a, rtBLOCK_stringSpace (a));
+    rtBLOCK_CPD_StringSpace (cpd) = (V::pointer_t) FindAddress (a, rtBLOCK_stringSpace (a));
 
     /****   set the address of the physical literal vector	****/
     rtBLOCK_CPD_PLiteralVector (cpd) =
 	(rtBLOCK_PLVectorType *) FindAddress (a, rtBLOCK_PLVector (a));
     rtBLOCK_CPD_PLVectorElement (cpd) =
-	(M_POP*) ((pointer_t)rtBLOCK_CPD_PLiteralVector (cpd) +
+	(M_POP*) ((V::pointer_t)rtBLOCK_CPD_PLiteralVector (cpd) +
 	(rtBLOCK_PLVector (a) ==  0 ? 0 : sizeof (int)));
 
     /****   set the address of the selector if it is in string space   ****/
@@ -295,7 +295,7 @@ PublicFnDef void rtBLOCK_AppendStringSpace (
     rtBLOCK_stringSpace (p) = FindOffset (p, oldend + addition);
 
     /****	Reset end of block pointer	****/
-    rtBLOCK_CPDEnd (cpd) = (pointer_t)p + M_CPD_Size (cpd);
+    rtBLOCK_CPDEnd (cpd) = (V::pointer_t)p + M_CPD_Size (cpd);
 
     char *pp = oldend + addition;
     oldend = rtBLOCK_CPDEnd (cpd);
@@ -339,7 +339,7 @@ PublicFnDef void rtBLOCK_AppendPLVector (
     rtBLOCK_PLVector (p) =  FindOffset (p, oldend);
     rtBLOCK_PLVector_Count (plv) = size;
 
-    rtBLOCK_CPDEnd (cpd) = (pointer_t) (oldend + realsize);
+    rtBLOCK_CPDEnd (cpd) = (V::pointer_t) (oldend + realsize);
 
     rtBLOCK_CPD_PLVectorElement (cpd) = rtBLOCK_PLVector_POP (plv);
     for (int i = 0; i < size; i++) {
@@ -374,7 +374,7 @@ PublicFnDef void rtBLOCK_AppendELEVector (M_CPD* cpd, int *evaledLEVector, int s
     rtBLOCK_ELEVector (p) = FindOffset (p, oldend);
     rtBLOCK_ELEVector_Count (elv) = size;
 
-    rtBLOCK_CPDEnd (cpd) = (pointer_t) (oldend + realsize);
+    rtBLOCK_CPDEnd (cpd) = (V::pointer_t) (oldend + realsize);
 
     int *pp, *p1;
     for (p1 = size + (pp = rtBLOCK_ELEVector_Points (elv)); pp < p1; pp++) {
@@ -729,7 +729,7 @@ IOBJ_DefineNilaryMethod (New) {
  **********************/
 
 IOBJ_DefineUnaryMethod (Decompile) {
-    VString iSource;
+    V::VString iSource;
     RSLANG_Decompile (iSource, RTYPE_QRegisterCPD (self));
     return RTYPE_QRegister (rtSTRING_New (iSource));
 }

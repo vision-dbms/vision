@@ -272,11 +272,11 @@ namespace Vca {
 	
 	//  Callbacks
 	public:
-  	    void onEnd      () {}
-	    void onError    (IError *pError, VString const &rMessage) {}
-  	    void onTransfer (size_t sTransfer) {}
-	    bool onStatus   (VStatus const &rStatus);
-	    void onChange   (U32 sChange) {}
+	    virtual void onEnd      () OVERRIDE {}
+	    virtual void onError    (IError *pError, VString const &rMessage) OVERRIDE {}
+	    virtual void onTransfer (size_t sTransfer) OVERRIDE {}
+	    virtual bool onStatus   (VStatus const &rStatus) OVERRIDE;
+	    virtual void onChange   (U32 sChange) OVERRIDE {}
     
 	//  Query
 	public:
@@ -306,9 +306,9 @@ namespace Vca {
 
     //  Callback
     private:
-	virtual void onEnd_();
-	virtual void onError_(IError *pError, VString const &rMessage);
-	virtual void onTransfer_(size_t sTransfer);
+	virtual void onEnd_() OVERRIDE;
+	virtual void onError_(IError *pError, VString const &rMessage) OVERRIDE;
+	virtual void onTransfer_(size_t sTransfer) OVERRIDE;
 
     //  Execution
     public:
@@ -497,9 +497,9 @@ namespace Vca {
 
     //  Callback
     private:
-	virtual void onEnd_();
-	virtual void onError_(IError *pError, VString const &rMessage);
-	virtual void onTransfer_(size_t sTransfer);
+	virtual void onEnd_() OVERRIDE;
+	virtual void onError_(IError *pError, VString const &rMessage) OVERRIDE;
+	virtual void onTransfer_(size_t sTransfer) OVERRIDE;
 
     //  Execution
     private:

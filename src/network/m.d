@@ -102,7 +102,7 @@ union M_POP {
 /*---------------------------------------------------------------------------
  * The container preamble pointer of a CPD always points to a structure of
  * type M_CPreamble.  The first data byte of a container is always located at
- * (pointer_t)(cPreamblePtr + 1).  The preamble holds two useful pieces
+ * (V::pointer_t)(cPreamblePtr + 1).  The preamble holds two useful pieces
  * of container information - the container's allocated size in bytes and the
  * index of its representation type.  Because the address of the preamble is
  * placed in a CPD (see below), these pieces of information are always just a
@@ -150,7 +150,7 @@ struct M_CPreamble {
     M_CPreamble_POP (p)\
 )
 
-#define M_CPreamble_ContainerBase(p)			((pointer_t)((p) + 1))
+#define M_CPreamble_ContainerBase(p)			((V::pointer_t)((p) + 1))
 #define M_CPreamble_ContainerBaseAsType(p, type)	((type *)((p) + 1))
 
 #define M_CPreamble_ValidateFraming(p) if (\

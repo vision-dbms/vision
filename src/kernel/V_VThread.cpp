@@ -24,6 +24,7 @@
 
 #include "V_VString.h"
 #include "V_VUnmanagedThread.h"
+#include "V_VRandom.h"
 
 
 /************************
@@ -48,7 +49,7 @@ DEFINE_ABSTRACT_RTT (V::VThread);
  *************************
  *************************/
 
-V::VThreadSpecific::Key const V::VThread::g_iTLSKey;
+V::VThread::EternalKey V::VThread::g_iTLSKey;
 
 /**************************
  **************************
@@ -128,7 +129,7 @@ pthread_id_t V::VThread::CurrentThreadId () {
 
 V::VThread::Reference V::VThread::Here () {
     BaseClass::Reference pSpecific; Reference pThisInstance;
-    if (g_iTLSKey.getSpecific (pSpecific) && pSpecific.isntNil ())
+    if (g_iTLSKey->getSpecific (pSpecific) && pSpecific.isntNil ())
 	pThisInstance.setTo (static_cast<ThisClass*>(pSpecific.referent ()));
     else
 	pThisInstance.setTo (new VUnmanagedThread ());
@@ -149,6 +150,8 @@ bool V::VThread::start (pthread_routine_t *pThreadProcedure, void *pThreadData) 
     retain ();		//  ... protect this thread from garbage collection while it is running.
 			//  ... This protection MUST be removed by the thread procedure when the
     			//  ... thread exits.
+
+    CheckSingleCoreExecution();
 
 #if !defined(V_THREAD_ENABLED)
     bool bStarted = false;
@@ -194,4 +197,42 @@ bool V::VThread::stop () {
 #else
     return pthread_cancel (m_hThread) == 0;
 #endif
+}
+
+bool const V::VThread::m_VSingleCoreExecution = V::GetEnvironmentBoolean ("VSingleCoreExecution");
+bool       V::VThread::m_VSingleCoreExecutionChecked = false;
+
+void V::VThread::CheckSingleCoreExecution () {
+    if (!m_VSingleCoreExecutionChecked) {
+        if (m_VSingleCoreExecution) {
+            SetSingleCoreExecution();
+        }
+    }
+
+    m_VSingleCoreExecutionChecked = true;
+}
+
+int V::VThread::SetSingleCoreExecution () {
+    bool success = -1;
+
+#if defined(V_THREAD_ENABLED) && defined (__linux__)
+
+    // Determine how many CPUs exist in order to randomly assign appropriately
+    unsigned int cpu_count = sysconf(_SC_NPROCESSORS_ONLN);
+    
+    // get our random-ish CPU index
+    int cpu = V::VRandom::BoundedValue(cpu_count);
+
+    // Configure a CPU mask that only includes the specified CPU.
+    cpu_set_t cpu_mask;
+    CPU_ZERO(&cpu_mask);
+    CPU_SET(cpu, &cpu_mask);
+    
+    // Tell the scheduler to only run the process on the CPU set defined
+    // in the mask. Passing zero for the first argument operates on the
+    // calling process. 
+    success = sched_setaffinity(0, sizeof(cpu_mask), &cpu_mask);
+#endif
+
+    return success;
 }

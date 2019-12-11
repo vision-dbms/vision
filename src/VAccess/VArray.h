@@ -7,7 +7,6 @@
  ******************************************/
 
 #include "VStdLib.h"
-class VString;
 
 
 /**************************************************
@@ -183,7 +182,7 @@ protected:
 /*****  Formatting  *****/
 public:
     void formatForVision (
-	VString&	iExpression,
+	V::VString&	iExpression,
 	char const*	pKeyword,
 	bool		fQuote = true,
 	bool		fClose = true,

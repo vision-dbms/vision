@@ -2475,7 +2475,6 @@ PrivateFnDef void PrintLStore (M_CPD *lstore, bool full) {
  ********************/
 
 IOBJ_DefineNewaryMethod (NewDM) {
-    Vdd::Store::Reference pContentPrototype (rtVECTOR_Handle());
     return RTYPE_QRegister (new rtLSTORE_Handle (RTYPE_QRegisterPToken (parameterArray[0])));
 }
 

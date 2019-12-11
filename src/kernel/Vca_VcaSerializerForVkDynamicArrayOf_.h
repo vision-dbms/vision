@@ -194,7 +194,7 @@ namespace Vca {
 		unsigned int iLength = 0;
 		for (unsigned int xEle = 0; xEle < m_cElements; xEle++) 
 		    iLength += m_iElementSizes[xEle];
-		pointer_t pPos = m_iConcatenatedData.guarantee (iLength + 1);   // including null
+                V::pointer_t pPos = m_iConcatenatedData.guarantee (iLength + 1);   // including null
 		*pPos = '\0';
 		for (unsigned int xElement = 0; xElement < m_cElements; xElement++) {
 		    strncat (pPos, m_rDatum[xElement].storage (), m_iElementSizes[xElement] + 1);  // including null
@@ -208,7 +208,7 @@ namespace Vca {
 	void doArray (Sequencer *pSequencer) {
 	    if (isIncoming ()) { // get data
 		m_rDatum.Append (m_cElements);
-		pointer_t pPos = m_iConcatenatedData.storage ();   
+		V::pointer_t pPos = m_iConcatenatedData.storage ();   
 		for (unsigned int xElement = 0; xElement < m_cElements; xElement++) {
 		    m_rDatum[xElement].setTo (pPos, m_iElementSizes[xElement]); 
 		    pPos += m_iElementSizes[xElement]; 

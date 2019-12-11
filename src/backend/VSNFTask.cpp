@@ -208,7 +208,7 @@ bool VSNFTask::getParameter (unsigned int xParameter, VDescriptor& rDatum) {
 bool VSNFTask::getSelfReference (object_reference_t &rSelfReference) {
     bool bGood = false;
 
-    DSC_Descriptor &rSelf = getSelf ();
+    DSC_Descriptor &rSelf = getCurrent ();
     if (rSelf.isScalar ()) {
 	rtREFUV_AlignReference (&DSC_Descriptor_Scalar (rSelf));
 	rSelfReference = DSC_Descriptor_Scalar_Int (rSelf);
@@ -226,7 +226,7 @@ bool VSNFTask::getSelfReference (object_reference_array_t &rSelfReferences) {
 
     rSelfReferences.DeleteAll ();
 
-    DSC_Descriptor &rSelf = getSelf ();
+    DSC_Descriptor &rSelf = getCurrent ();
     if (rSelf.isScalar ()) {
 	rtREFUV_AlignReference (&DSC_Descriptor_Scalar (rSelf));
 	rSelfReferences.Append (DSC_Descriptor_Scalar_Int (rSelf));
@@ -471,7 +471,9 @@ char const* VSNFTask::description () const {
  *********************************/
 
 void VSNFTask::startExternalInvocation (ISingleton *pISingleton) {
-    static bool const bICE = getenv ("VxaICE") ? true : false;  //  ICE == ICollection Enabled
+//  ICE == ICollection Enabled
+//  (enabled by default unless the 'VxaNoICE' environment variable is set)
+    static bool const bICE = getenv ("VxaICE") || !getenv("VxaNoICE");
     suspend ();
 
     if (Vxa::ICollection *const pICollection = bICE ? dynamic_cast<Vxa::ICollection*>(pISingleton) : 0) {
@@ -557,12 +559,13 @@ VFragment *VSNFTask::createSegment (object_reference_array_t const &rInjector) {
 }
 
 bool VSNFTask::wrapupSegment () {
-    if (allSegmentsReceived ()) {
-	dismiss ();
-	resume ();
-	return true;
-    }
-    return false;
+    return allSegmentsReceived () && wrapup ();
+}
+
+bool VSNFTask::wrapup () {
+    dismiss ();
+    resume ();
+    return true;
 }
 
 bool VSNFTask::SetSegmentCountTo (unsigned int cSegments) {
@@ -609,10 +612,10 @@ template void VSNFTask::ProcessArray<double,double>      (VDescriptor&, rtPTOKEN
 static char const * DynamicArrayStringAccessFn(bool reset, va_list pArgs) {
     V::VArgList iArgList (pArgs);
 
-    static VkDynamicArrayOf<VString> const  *pStrings;
+    static VkDynamicArrayOf<V::VString> const  *pStrings;
     static unsigned int xString;
     if (reset) {
-        pStrings = iArgList.arg<VkDynamicArrayOf<VString> const*>();
+        pStrings = iArgList.arg<VkDynamicArrayOf<V::VString> const*>();
         xString = 0;
     }
     else if (xString < pStrings->cardinality())
@@ -620,7 +623,7 @@ static char const * DynamicArrayStringAccessFn(bool reset, va_list pArgs) {
     return NilOf (char const*);
 }
 
-template<> void VSNFTask::ProcessArray<VString,VString> (
+template<> void VSNFTask::ProcessArray<V::VString,V::VString> (
     VDescriptor &rResult, rtPTOKEN_Handle *pPPT, VkDynamicArrayOf<VString> const &rSourceArray, VString const *&rpResultArray
 ) const {
     rResult.setToCorrespondence (
@@ -675,8 +678,7 @@ template <typename Source_T, typename Result_T> void VSNFTask::ReturnArray (
     VkDynamicArrayOf<Source_T> const &rSourceArray, Result_T const *&rpResultArray
 ) {
     ProcessArray (duc (), ptoken (), rSourceArray, rpResultArray);
-    dismiss ();
-    resume ();
+    wrapup ();
 }
 template void VSNFTask::ReturnArray<bool,int>          (VkDynamicArrayOf<bool> const&, int const*&);
 
@@ -691,7 +693,7 @@ template void VSNFTask::ReturnArray<unsigned int,int>  (VkDynamicArrayOf<unsigne
 template void VSNFTask::ReturnArray<float,float>       (VkDynamicArrayOf<float> const&,float const*&);
 template void VSNFTask::ReturnArray<double,double>     (VkDynamicArrayOf<double> const&,double const*&);
 
-template void VSNFTask::ReturnArray<VString,VString>   (VkDynamicArrayOf<VString> const&,VString const*&);
+template void VSNFTask::ReturnArray<V::VString,V::VString> (VkDynamicArrayOf<VString> const&,VString const*&);
 
 template void VSNFTask::ReturnArray<Vxa::ISingleton::Reference,Vxa::ISingleton::Reference>(
     VkDynamicArrayOf<Vxa::ISingleton::Reference> const&,Vxa::ISingleton::Reference const*&
@@ -722,7 +724,7 @@ template bool VSNFTask::ReturnSegment<unsigned int,int>   (object_reference_arra
 template bool VSNFTask::ReturnSegment<double,double>      (object_reference_array_t const &rInjector, VkDynamicArrayOf<double> const&, double const*&);
 template bool VSNFTask::ReturnSegment<float,float>        (object_reference_array_t const &rInjector, VkDynamicArrayOf<float> const&, float const*&);
 
-template bool VSNFTask::ReturnSegment<VString,VString>    (object_reference_array_t const &rInjector, VkDynamicArrayOf<VString> const&, VString const*&);
+template bool VSNFTask::ReturnSegment<V::VString,V::VString>    (object_reference_array_t const &rInjector, VkDynamicArrayOf<VString> const&, VString const*&);
 
 
 /************************************************
@@ -731,8 +733,7 @@ template bool VSNFTask::ReturnSegment<VString,VString>    (object_reference_arra
 
 template <typename Source_T> void VSNFTask::ReturnSingleton (Source_T iSingleton) {
     loadDucWith (iSingleton);
-    dismiss ();
-    resume ();
+    wrapup ();
 }
 template void VSNFTask::ReturnSingleton<int>         (int);
 template void VSNFTask::ReturnSingleton<double>      (double);
@@ -740,11 +741,11 @@ template void VSNFTask::ReturnSingleton<float>       (float);
 template void VSNFTask::ReturnSingleton<char const*> (char const*);
 
 
-/********************************
- *----  VSNFTask::ReturnNA  ----*
- ********************************/
+/***************************************
+ *----  VSNFTask::ReturnNASegment  ----*
+ ***************************************/
 
-bool VSNFTask::ReturnNA (object_reference_array_t const &rInjector) {
+bool VSNFTask::ReturnNASegment (object_reference_array_t const &rInjector) {
     VFragment *const pFragment = createSegment (rInjector);
     pFragment->datum ().setToNA (pFragment->subset ()->PPT (), codKOT ());
     return wrapupSegment ();
@@ -782,18 +783,16 @@ bool VSNFTask::ReturnObjects (
     VFragment *const pFragment = createSegment (rInjector);
     ProcessObjects (pFragment->datum (), pFragment->subset ()->PPT (), pCluster, sCluster, rxObjects);
     return wrapupSegment ();
-    }
+}
 
 void VSNFTask::ReturnObjects (ICollection *pCluster, object_reference_t sCluster, object_reference_array_t const &rxObjects) {
     ProcessObjects (duc (), ptoken (), pCluster, sCluster, rxObjects);
-    dismiss ();
-    resume ();
+    wrapup ();
 }
 
 void VSNFTask::ReturnObject (ICollection *pCluster, object_reference_t sCluster, object_reference_t xObject) {
     loadDucWithRepresentative (new VExternalGroundStore (codSpace (), pCluster, sCluster), xObject);
-    dismiss ();
-    resume ();
+    wrapup ();
 }
 
 /***********************************
@@ -823,6 +822,5 @@ void VSNFTask::SetOutput (VkDynamicArrayOf<VString> const & rArray){
 void VSNFTask::TurnBackSNFTask () {
     DoAnOldFashionedSNF ();		
     loadDucWithNA ();
-    dismiss ();
-    resume ();
+    wrapup ();
 }

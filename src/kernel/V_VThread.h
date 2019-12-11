@@ -66,7 +66,8 @@ namespace V {
 
     //  Key
     private:
-        static Key const g_iTLSKey;
+        typedef V::VEternal<Key const> EternalKey;
+        static EternalKey g_iTLSKey;
 
     //  State
     public:
@@ -98,7 +99,7 @@ namespace V {
 
     //  Access
     private:
-        virtual Thread *thread_() const {
+        virtual Thread *thread_() const OVERRIDE {
             return const_cast<VThread*>(this);
         }
     public:
@@ -132,6 +133,10 @@ namespace V {
         }
         bool isntStarted () const {
             return m_xState != State_Started;
+        }
+
+        int isSingleCoreExecution () const {
+            return m_VSingleCoreExecution;
         }
 
     /**
@@ -186,13 +191,18 @@ namespace V {
             return m_pReaper.clearIf (pReaper);
         }
 
+    //  Multi-Core Execution Control
+    public:
+        static int SetSingleCoreExecution ();
+        static void CheckSingleCoreExecution (); 
+
     //  Thread Attachment
     protected:
         /**
          * Attaches this descriptor to the thread-local storage map.
          */
         bool becomeSpecific () {
-            return g_iTLSKey.setSpecific (this);
+            return g_iTLSKey->setSpecific (this);
         }
 
     //  State
@@ -202,6 +212,10 @@ namespace V {
         pthread_t       m_hThread;
         pthread_id_t    m_xThread;
         Reaper::Pointer m_pReaper;
+
+        /** state of all threads **/
+        static bool const m_VSingleCoreExecution;
+        static bool m_VSingleCoreExecutionChecked;
     };
 }
 

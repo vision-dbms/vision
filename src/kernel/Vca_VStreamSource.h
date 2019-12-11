@@ -43,27 +43,27 @@ namespace Vca {
 
     //  Access
     public:
-	size_t GetByteCount ();
+	virtual size_t GetByteCount () OVERRIDE;
 
     //  Callback
     private:
-	void trigger_() {
+	virtual void trigger_() OVERRIDE {
 	    onGetContinuation ();
 	}
 
     //  Completion
     private:
-	void onTransfer_(size_t sTransfer) {
+	virtual void onTransfer_(size_t sTransfer) OVERRIDE {
 	    onGetCompletion (sTransfer);
 	}
 
     //  Control
     private:
-	void endTransfers ();
+	virtual void endTransfers () OVERRIDE;
 
     //  Data Transfer
     private:
-	void transferData ();
+	virtual void transferData () OVERRIDE;
     };
 }
 

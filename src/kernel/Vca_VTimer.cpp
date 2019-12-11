@@ -43,7 +43,7 @@
  ***********************
  ***********************/
 
-VString const Vca::VTimer::g_sDefaultPurpose ("UNKNOWN", false);
+V::VString const Vca::VTimer::g_sDefaultPurpose ("UNKNOWN", false);
 
 /***************************
  ***************************

@@ -28,7 +28,12 @@
  *****  Declarations  *****
  **************************/
 
+namespace V {
+    class VString;
+}
+
 namespace VcaSamples {
+    typedef V::VString VString;
 }
 
 

@@ -12,8 +12,6 @@
  **************************/
 
 #include "VDatabase.h"
-
-class VString;
 
 
 /*************************
@@ -23,6 +21,10 @@ class VString;
 class ABSTRACT VDatabaseComponent : public VReferenceable {
 //  Run Time Type
     DECLARE_ABSTRACT_RTT (VDatabaseComponent, VReferenceable);
+
+//  Aliases
+public:
+    typedef V::VString VString;
 
 //  Construction
 protected:

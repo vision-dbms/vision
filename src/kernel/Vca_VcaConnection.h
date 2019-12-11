@@ -15,8 +15,6 @@
  *****  Declarations  *****
  **************************/
 
-class VString;
-
 #include "Vca_IAckReceiver.h"
 #include "Vca_IPeer.h"
 

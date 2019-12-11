@@ -148,7 +148,7 @@ public:
 //  Destruction
 protected:
     ~rtPTOKEN_CType ();
-    void deleteThis ();
+    virtual void deleteThis () OVERRIDE;
 
 //  Access
 public:
@@ -384,7 +384,7 @@ private:
 private:
     ~rtPTOKEN_Handle () {
     }
-    void deleteThis ();
+    virtual void deleteThis () OVERRIDE;
 
 //  Access
 private:
@@ -537,9 +537,9 @@ private:
 
 //  Callbacks
 public:
-    void CheckConsistency ();
+    virtual void CheckConsistency () OVERRIDE;
 protected:
-    bool PersistReferences ();
+    virtual bool PersistReferences () OVERRIDE;
 
 //  Display and Inspection
 public:
@@ -548,8 +548,8 @@ public:
 
     void dump () const;
 
-    virtual /*override*/ bool getPOP (M_POP *pResult, unsigned int xPOP) const;
-    virtual /*override*/ unsigned int getPOPCount () const {
+    virtual bool getPOP (M_POP *pResult, unsigned int xPOP) const OVERRIDE;
+    virtual unsigned int getPOPCount () const OVERRIDE {
 	return typeIsCartesian () ? 3 : 1;
     }
 

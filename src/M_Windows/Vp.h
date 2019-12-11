@@ -29,7 +29,12 @@ namespace std {
 typedef char*			caddr_t;
 typedef unsigned short		mode_t;
 typedef short			pid_t;
+
+#ifdef _WIN64
+typedef __int64			ssize_t;
+#else
 typedef int			ssize_t;
+#endif
 
 //  ISO <inttypes.h>
 #define USING_STDINT

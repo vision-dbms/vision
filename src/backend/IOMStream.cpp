@@ -73,6 +73,9 @@ public:
     typedef Vca::IBSClient	IBSClient;
     typedef Vca::IClient	IClient;
 
+    typedef V::VString   VString;
+    typedef V::pointer_t pointer_t;
+
 //  Construction
 public:
     IOMStreamProducer (IOMStream *pIOMStream, BS *pBS);
@@ -98,8 +101,8 @@ public:
 //  Callbacks
 public:
     void OnTransfer (IBSClient *pRole, Vca::U32 sTransfer);
-    void OnEnd (IClient *pRole);
-    void OnError (IClient *pRole, Vca::IError *pError, VString const &rMessage);
+    virtual void OnEnd (IClient *pRole) OVERRIDE;
+    virtual void OnError (IClient *pRole, Vca::IError *pError, VString const &rMessage) OVERRIDE;
 
 //  Termination
 public:
@@ -481,6 +484,9 @@ public:
     typedef Vca::IBSClient	IBSClient;
     typedef Vca::IClient	IClient;
 
+    typedef V::VString   VString;
+    typedef V::pointer_t pointer_t;
+
 //  Constants
 protected:
     enum {
@@ -517,8 +523,8 @@ public:
 //  Callbacks
 public:
     void OnTransfer (IBSClient *pRole, Vca::U32 sTransfer);
-    void OnEnd (IClient *pRole);
-    void OnError (IClient *pRole, Vca::IError *pError, VString const &rMessage);
+    virtual void OnEnd (IClient *pRole) OVERRIDE;
+    virtual void OnError (IClient *pRole, Vca::IError *pError, VString const &rMessage) OVERRIDE;
 
 //  State Update
 protected:
@@ -909,14 +915,10 @@ IOMStream::WindowFrame::~WindowFrame () {
 }
 
 IOMStream::WindowFrame *IOMStream::WindowFrame::Pop (VReference<Producer> &rpProducer) {
-    WindowFrame *pPriorFrame = 0;
-    if (!this)
-	rpProducer.clear ();
-    else {
-	pPriorFrame = m_pPredecessor;
-	rpProducer.setTo (m_pProducer);
-	delete this;
-    }
+    WindowFrame *const pPriorFrame = m_pPredecessor;
+    rpProducer.setTo (m_pProducer);
+    delete this;
+
     return pPriorFrame;
 }
 
@@ -992,7 +994,7 @@ void IOMStream::onConnect (VBSConsumerSink *pReceiver, VBSConsumer *pBS) {
 void IOMStream::onError (
     VBSProducerSink *pReceiver, Vca::IError *pError, VString const &rMessage
 ) {
-    m_pInputStack = m_pInputStack->Pop (m_pProducer);
+    PopInput ();
 }
 
 void IOMStream::onError (
@@ -1027,30 +1029,10 @@ char const* IOMStream::consumedStartupExpression () {
     return pStartupExpression ? pStartupExpression : "";
 }
 
-int IOMStream::getPeerNameString (char** ppString, size_t* psString) {
-#if 0
-    return GetSocketStream ()->GetSocketPeerName (&m_iStatus, ppString, psString);
-#else
-    return BaseClass::getPeerNameString (ppString, psString);
-#endif
-}
-
-int IOMStream::getSocketNameString (char** ppString, size_t* psString) {
-#if 0
-    return GetSocketStream ()->GetSocketName (&m_iStatus, ppString, psString);
-#else
-    return BaseClass::getSocketNameString (ppString, psString);
-#endif
-}
-
 int IOMStream::getTcpNodelay (int* fOnOff) {
-#if 0
-    return GetSocketStream ()->GetTcpNodelay (&m_iStatus, fOnOff);
-#else
     *fOnOff = false;
     m_iStatus.MakeFailureStatus ();
     return -1;
-#endif
 }
 
 
@@ -1064,11 +1046,23 @@ int IOMStream::getTcpNodelay (int* fOnOff) {
  *****  Input Stack  *****
  *************************/
 
+void IOMStream::PushInput () {
+    m_pInputStack = new WindowFrame (m_pInputStack, m_pProducer);
+}
+
+void IOMStream::PopInput () {
+    if (m_pInputStack)
+        m_pInputStack = m_pInputStack->Pop (m_pProducer);
+    else {
+        m_pProducer.clear ();
+    }
+}
+
 void IOMStream::PopAllInput () {
     while (m_pInputStack) {
 	if (m_pProducer)
 	    m_pProducer->Close ();
-	m_pInputStack = m_pInputStack->Pop (m_pProducer);
+        PopInput ();
     }
 }
 
@@ -1157,12 +1151,8 @@ int IOMStream::EndReception () {
  *****************/
 
 int IOMStream::SetTcpNodelay (int fOnOff) {
-#if 0
-    return GetSocketStream ()->SetTcpNodelay (&m_iStatus, fOnOff);
-#else
     m_iStatus.MakeFailureStatus ();
     return -1;
-#endif
 }
 
 
@@ -1419,7 +1409,7 @@ VkStatusType IOMStream::GetLine (
 		    return VkStatusType_Failed;
 	    case VkStatusType_Closed:
 		if (m_pInputStack) {
-		    m_pInputStack = m_pInputStack->Pop (m_pProducer);
+                    PopInput ();
 		    bRescanning = true;
 		}
 		else {
@@ -1462,7 +1452,7 @@ VkStatusType IOMStream::GetLine (
 	);
 	else {
 	    m_iStatus.MakeBlockedStatus ();
-	    m_pInputStack = m_pInputStack->Push (m_pProducer);
+            PushInput ();
 	    plumb (pBS);
 	}
 

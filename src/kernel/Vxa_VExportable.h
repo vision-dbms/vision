@@ -23,8 +23,6 @@ namespace Vxa {
     class VMapMaker;
     class VResultBuilder;
 
-    Vxa_API    void InitializeStockExportables ();
-
     typedef ICollection::Reference export_return_t;
 
 /***********************************
@@ -49,7 +47,7 @@ namespace Vxa {
  *----  template <typename T> class VExportable  ----*
  *****************************************************/
 
-    template <typename T> class Vxa_API VExportable : virtual public VExportableType {
+    template <typename T> class VExportable : virtual public VExportableType {
 	DECLARE_FAMILY_MEMBERS (VExportable<T>, VExportableType);
 
     //  Construction
@@ -68,8 +66,8 @@ namespace Vxa {
 
     //  Result Generation
     public:
-	static bool CreateMethod (method_return_t &rResult, VString const &rName, T const &rInstance) {
-	    return g_pTraits && g_pTraits->createMethod (rResult, rName, rInstance);
+	static bool CreateMethod (method_return_t &rResult, T const &rInstance) {
+	    return g_pTraits && g_pTraits->createMethod (rResult, rInstance);
 	}
 	static bool CreateExport (export_return_t &rResult, T const &rInstance) {
 	    return g_pTraits && g_pTraits->createExport (rResult, rInstance);
@@ -101,7 +99,7 @@ namespace Vxa {
 	    return g_pTraits && g_pTraits->returnResult (pResultBuilder, rInstance);
 	}
     private:
-	virtual bool createMethod (method_return_t &rResult, VString const &rName, T const &rInstance) = 0;
+	virtual bool createMethod (method_return_t &rResult, T const &rInstance) = 0;
 	virtual bool createExport (export_return_t &rResult, T const &rInstance) = 0;
 	virtual bool returnResult (VResultBuilder *pResultBuilder, T const &rInstance) = 0;
 
@@ -109,6 +107,7 @@ namespace Vxa {
     private:
 	static ThisClass *g_pTraits;
     };
+
     template <typename T> VExportable<T>* VExportable<T>::g_pTraits = 0;
 
 /*********************************************************************
@@ -158,5 +157,28 @@ namespace Vxa {
     }
 }
 
+
+/*************************************
+ *****  Template Instantiations  *****
+ *************************************/
+
+#if defined(USING_HIDDEN_DEFAULT_VISIBILITY) || defined(Vxa_VExportable_Implementation)
+
+#ifndef Vxa_VExportable_Implementation
+#define Vxa_VExportable_Implementation extern
+#endif
+
+Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<bool>;
+Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<short>;
+Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<unsigned short>;
+Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<int>;
+Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<unsigned int>;
+Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<float>;
+Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<double>;
+
+Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<char const*>;
+Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<V::VString>;
+
+#endif
 
 #endif

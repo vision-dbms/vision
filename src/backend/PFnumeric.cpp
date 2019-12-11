@@ -163,7 +163,7 @@ extern "C" {
  ******************************************
  ******************************************/
 
-#if defined(__APPLE__) || (defined (__HP_aCC) && __cplusplus >= 199707L)
+#if defined(__linux__) || defined(__APPLE__) || (defined (__HP_aCC) && __cplusplus >= 199707L)
 struct exception {
     int type;
     char *name;
@@ -188,8 +188,6 @@ struct exception {
 int __cdecl matherr (
 #if defined(_WIN32)
     struct  _exception *pException
-#elif defined(__linux__)
-    struct __exception *pException
 #else
     struct   exception *pException
 #endif

@@ -11,8 +11,6 @@
  *****  Declarations  *****
  **************************/
 
-class VString;
-
 /*************************
  *****  Definitions  *****
  *************************/
@@ -42,7 +40,7 @@ namespace Vca {
  ***********************************************************/
 
     template <typename T> struct VTypePattern<T*> {
-	typedef T val_t;
+	typedef T* val_t;
 	typedef typename T::Reference var_t;
     };
 

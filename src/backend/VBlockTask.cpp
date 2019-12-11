@@ -60,7 +60,7 @@ VBlockTask::Decompilation::Decompilation (
     VBlockTask const *pBlockTask, VCall const *pContext
 ) {
     RSLANG_Decompile (
-	m_iSource, pBlockTask->blockCPD (), &m_iOffset, pContext->callerPC ()
+        m_iSource, pBlockTask->blockCPD (), &m_iOffset, VCall::CallerPCOf (pContext)
     );
     m_pPrefix = m_iSource;
 
@@ -161,7 +161,7 @@ DEFINE_CONCRETE_RTT (VBlockTask);
  ************************
  ************************/
 
-template class Vsi_getr_c<VBlockTask, VString>;
+template class Vsi_getr_c<VBlockTask, V::VString>;
 template class Vsi_f0_c<VBlockTask, unsigned int>;
 template class Vsi_p0_c<VBlockTask>;
 

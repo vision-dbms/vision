@@ -16,7 +16,6 @@
 #include "VpSocket.h"
 
 class VkStatus;
-class VString;
 
 
 /*************************
@@ -33,6 +32,10 @@ struct sockaddr_ov {
  */
 class Vca_API VkSocketAddress : public VTransient {
     DECLARE_FAMILY_MEMBERS (VkSocketAddress, VTransient);
+
+//  Aliases
+ public:
+    typedef V::VString VString;
 
 //  Hostname
 public:

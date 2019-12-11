@@ -83,8 +83,8 @@ namespace Vca {
 
 	    //  IClient Callbacks
 	    private:
-		void OnEnd_();
-		void OnError_(IError *pInterface, VString const &rMessage);
+		virtual void OnEnd_() OVERRIDE;
+		virtual void OnError_(IError *pInterface, VString const &rMessage) OVERRIDE;
 
 	    //  Application Registration
 	    private:

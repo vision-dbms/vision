@@ -77,7 +77,6 @@ template<class T> class VReference;
 
 class IVUnknown;
 
-class VString;
 class VTypeInfo;
 
 namespace V {
@@ -126,6 +125,7 @@ namespace Vca {
     typedef V::VSSID VcaSSID;
     typedef V::VSSID SSID;
     typedef V::ssid_t ssid_t;
+    typedef V::VString VString;
 
     typedef V::unsigned_int32_count_t	counter_t;
     typedef counter_t::value_t		count_t;

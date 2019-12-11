@@ -290,19 +290,19 @@ typedef void (*DispatchHandler) (
     char*			specRecord,
     DispatchVector*		dv,
     Spec*			spec,
-    pointer_t			state
+    V::pointer_t		state
 );
 
 DispatchVector {
     void (*ifHandler) (
 	Spec*			spec,
-	pointer_t			state,
+	V::pointer_t		state,
 	char*			fname,
 	int			recordSize
     );
     void (*naHandler) (
 	Spec*			spec,
-	pointer_t			state,
+	V::pointer_t		state,
 	int			inputOrigin,
 	int			fieldWidth,
 	char			patternType,
@@ -310,69 +310,69 @@ DispatchVector {
     );
     void (*ofHandler) (
 	Spec*			spec,
-	pointer_t			state,
+	V::pointer_t		state,
 	char*			fname,
 	int			recordSize
     );
     void (*orHandler) (
 	Spec*			spec,
-	pointer_t			state
+	V::pointer_t		state
     );
     void (*crHandler) (
 	Spec*			spec,
-	pointer_t			state,
+	V::pointer_t		state,
 	int			registerIndex
     );
     void (*fcHandler) (
 	Spec*			spec,
-	pointer_t			state,
+	V::pointer_t		state,
 	int			outputOrigin,
 	int			fieldWidth,
 	int			inputOrigin
     );
     void (*fnHandler) (
 	Spec*			spec,
-	pointer_t			state,
+	V::pointer_t		state,
 	int			outputOrigin,
 	int			fieldWidth
     );
     void (*fvHandler) (
 	Spec*			spec,
-	pointer_t			state,
+	V::pointer_t		state,
 	int			outputOrigin,
 	int			fieldWidth,
 	char*			value
     );
     void (*plHandler) (
 	Spec*			spec,
-	pointer_t			state,
+	V::pointer_t		state,
 	int			inputOrigin,
 	int			fieldWidth
     );
     void (*pcHandler) (
 	Spec*			spec,
-	pointer_t			state,
+	V::pointer_t		state,
 	int			inputOrigin,
 	int			fieldWidth
     );
     void (*pvHandler) (
 	Spec*			spec,
-	pointer_t			state,
+	V::pointer_t		state,
 	char*			value
     );
     void (*prHandler) (
 	Spec*			spec,
-	pointer_t			state,
+	V::pointer_t		state,
 	int			registerIndex
     );
     void (*stHandler) (
 	Spec*			spec,
-	pointer_t			state,
+	V::pointer_t		state,
 	int			registerIndex
     );
     void (*doHandler) (
 	Spec*			spec,
-	pointer_t			state,
+	V::pointer_t		state,
 	Operator		xOperator
     );
 };
@@ -388,59 +388,59 @@ static void InitializeDispatchVector (
 )
 {
     dv->ifHandler = (
-	void (*) (Spec*, pointer_t, char*, int)
+	void (*) (Spec*, V::pointer_t, char*, int)
     ) DefaultHandler;
 
     dv->naHandler = (
-	void (*) (Spec*, pointer_t, int, int, char, char*)
+	void (*) (Spec*, V::pointer_t, int, int, char, char*)
     ) DefaultHandler;
 
     dv->ofHandler = (
-	void (*) (Spec*, pointer_t, char*, int)
+	void (*) (Spec*, V::pointer_t, char*, int)
     ) DefaultHandler;
 
     dv->orHandler = (
-	void (*) (Spec*, pointer_t)
+	void (*) (Spec*, V::pointer_t)
     ) DefaultHandler;
 
     dv->crHandler = (
-	void (*) (Spec*, pointer_t, int)
+	void (*) (Spec*, V::pointer_t, int)
     ) DefaultHandler;
 
     dv->fcHandler = (
-	void (*) (Spec*, pointer_t, int, int, int)
+	void (*) (Spec*, V::pointer_t, int, int, int)
     ) DefaultHandler;
 
     dv->fnHandler = (
-	void (*) (Spec*, pointer_t, int, int)
+	void (*) (Spec*, V::pointer_t, int, int)
     ) DefaultHandler;
 
     dv->fvHandler = (
-	void (*) (Spec*, pointer_t, int, int, char*)
+	void (*) (Spec*, V::pointer_t, int, int, char*)
     ) DefaultHandler;
 
     dv->plHandler = (
-	void (*) (Spec*, pointer_t, int, int)
+	void (*) (Spec*, V::pointer_t, int, int)
     ) DefaultHandler;
 
     dv->pcHandler = (
-	void (*) (Spec*, pointer_t, int, int)
+	void (*) (Spec*, V::pointer_t, int, int)
     ) DefaultHandler;
 
     dv->pvHandler = (
-	void (*) (Spec*, pointer_t, char*)
+	void (*) (Spec*, V::pointer_t, char*)
     ) DefaultHandler;
 
     dv->prHandler = (
-	void (*) (Spec*, pointer_t, int)
+	void (*) (Spec*, V::pointer_t, int)
     ) DefaultHandler;
 
     dv->stHandler = (
-	void (*) (Spec*, pointer_t, int)
+	void (*) (Spec*, V::pointer_t, int)
     ) DefaultHandler;
     
     dv->doHandler = (
-	void (*) (Spec*, pointer_t, Operator)
+	void (*) (Spec*, V::pointer_t, Operator)
     ) DefaultHandler;
 }
 
@@ -467,7 +467,7 @@ static void Process_IF (
     char*			specRecord,
     DispatchVector*		dv,
     Spec*			spec,
-    pointer_t			state
+    V::pointer_t		state
 )
 {
     char fname[BufferSize];
@@ -484,7 +484,7 @@ static void Process_NA (
     char*			specRecord,
     DispatchVector*		dv,
     Spec*			spec,
-    pointer_t			state
+    V::pointer_t		state
 )
 {
     char patternType[2], pattern[BufferSize];
@@ -503,7 +503,7 @@ static void Process_OF (
     char*			specRecord,
     DispatchVector*		dv,
     Spec*			spec,
-    pointer_t			state
+    V::pointer_t		state
 )
 {
     char fname[BufferSize];
@@ -520,7 +520,7 @@ static void Process_OR (
     char*			specRecord,
     DispatchVector*		dv,
     Spec*			spec,
-    pointer_t			state
+    V::pointer_t		state
 )
 {
     CheckParse ("OR", specRecord, 0, sscanf (specRecord, " %*s"));
@@ -532,7 +532,7 @@ static void Process_CR (
     char*			specRecord,
     DispatchVector*		dv,
     Spec*			spec,
-    pointer_t			state
+    V::pointer_t		state
 )
 {
     int registerIndex;
@@ -553,7 +553,7 @@ static void Process_FC (
     char*			specRecord,
     DispatchVector*		dv,
     Spec*			spec,
-    pointer_t			state
+    V::pointer_t		state
 )
 {
     int outputOrigin, fieldWidth, inputOrigin;
@@ -570,7 +570,7 @@ static void Process_FN (
     char*			specRecord,
     DispatchVector*		dv,
     Spec*			spec,
-    pointer_t			state
+    V::pointer_t		state
 )
 {
     int outputOrigin, fieldWidth;
@@ -586,7 +586,7 @@ static void Process_FV (
     char*			specRecord,
     DispatchVector*		dv,
     Spec*			spec,
-    pointer_t			state
+    V::pointer_t		state
 )
 {
     int outputOrigin, fieldWidth;
@@ -604,7 +604,7 @@ static void Process_PL (
     char*			specRecord,
     DispatchVector*		dv,
     Spec*			spec,
-    pointer_t			state
+    V::pointer_t		state
 )
 {
     int inputOrigin, fieldWidth;
@@ -620,7 +620,7 @@ static void Process_PC (
     char*			specRecord,
     DispatchVector*		dv,
     Spec*			spec,
-    pointer_t			state
+    V::pointer_t		state
 )
 {
     int inputOrigin, fieldWidth;
@@ -636,7 +636,7 @@ static void Process_PV (
     char*			specRecord,
     DispatchVector*		dv,
     Spec*			spec,
-    pointer_t			state
+    V::pointer_t		state
 )
 {
     char value[BufferSize];
@@ -652,7 +652,7 @@ static void Process_PR (
     char*			specRecord,
     DispatchVector*		dv,
     Spec*			spec,
-    pointer_t			state
+    V::pointer_t		state
 )
 {
     int registerIndex;
@@ -673,7 +673,7 @@ static void Process_ST (
     char*			specRecord,
     DispatchVector*		dv,
     Spec*			spec,
-    pointer_t			state
+    V::pointer_t		state
 )
 {
     int registerIndex;
@@ -694,7 +694,7 @@ static void Process_DO (
     char*			specRecord,
     DispatchVector*		dv,
     Spec*			spec,
-    pointer_t			state
+    V::pointer_t		state
 )
 {
     char operatorName[BufferSize];
@@ -737,7 +737,7 @@ static void Process_Unknown (
     char*			specRecord,
     DispatchVector*		Unused(dv),
     Spec*			Unused(spec),
-    pointer_t			Unused(state)
+    V::pointer_t		Unused(state)
 )
 {
     error ("Unrecognized Spec Record:\n\t%s\n", specRecord);
@@ -752,7 +752,7 @@ static void Dispatch (
     char*			specRecord,
     Spec*			spec,
     DispatchVector*		dv,
-    pointer_t			state
+    V::pointer_t		state
 )
 {
     char tag[BufferSize];
@@ -802,7 +802,7 @@ static void DoSpecFilePass (
     FILE*			sfile,
     Spec*			spec,
     DispatchVector*		dv,
-    pointer_t			state
+    V::pointer_t		state
 )
 {
     char
@@ -831,7 +831,7 @@ static struct Pass1State_t {
 
 static void Pass1IFHandler (
     Spec*			Unused(spec),
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     char*			Unused(fname),
     int				recordSize
 )
@@ -844,7 +844,7 @@ static void Pass1IFHandler (
 
 static void Pass1NAHandler (
     Spec*			Unused(spec),
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     int				inputOrigin,
     int				fieldWidth,
     char			Unused(patternType),
@@ -863,7 +863,7 @@ static void Pass1NAHandler (
 
 static void Pass1OFHandler (
     Spec*			Unused(spec),
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     char*			Unused(fname),
     int				recordSize
 )
@@ -876,7 +876,7 @@ static void Pass1OFHandler (
 
 static void Pass1FCHandler (
     Spec*			Unused(spec),
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     int				outputOrigin,
     int				fieldWidth,
     int				inputOrigin
@@ -897,7 +897,7 @@ static void Pass1FCHandler (
 
 static void Pass1FNHandler (
     Spec*			Unused(spec),
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     int				outputOrigin,
     int				fieldWidth
 )
@@ -914,7 +914,7 @@ static void Pass1FNHandler (
 
 static void Pass1FVHandler (
     Spec*			Unused(spec),
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     int				outputOrigin,
     int				fieldWidth,
     char*			Unused(value)
@@ -932,7 +932,7 @@ static void Pass1FVHandler (
 
 static void Pass1PLHandler (
     Spec*			Unused(spec),
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     int				inputOrigin,
     int				fieldWidth
 )
@@ -949,7 +949,7 @@ static void Pass1PLHandler (
 
 static void Pass1PCHandler (
     Spec*			Unused(spec),
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     int				inputOrigin,
     int				fieldWidth
 )
@@ -986,7 +986,7 @@ static void SpecLoaderPass1 (
     Pass1State.currentOutputSize	=
     Pass1State.outputBufferSize		= 0;
 
-    DoSpecFilePass (sfile, spec, &dv, NilOf (pointer_t));
+    DoSpecFilePass (sfile, spec, &dv, NilOf (V::pointer_t));
 
     if (Pass1State.inputBufferSize <= 0)
     {
@@ -1030,7 +1030,7 @@ static struct Pass2State_t {
 
 static void Pass2IFHandler (
     Spec*			spec,
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     char*			fname,
     int				Unused(recordSize)
 )
@@ -1043,7 +1043,7 @@ static void Pass2IFHandler (
 
 static void Pass2NAHandler (
     Spec*			spec,
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     int				inputOrigin,
     int				fieldWidth,
     char			patternType,
@@ -1083,7 +1083,7 @@ static void Pass2NAHandler (
 
 static void Pass2OFHandler (
     Spec*			spec,
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     char*			fname,
     int				recordSize
 )
@@ -1109,7 +1109,7 @@ static void Pass2OFHandler (
 
 static void Pass2ORHandler (
     Spec*			Unused(spec),
-    pointer_t			Unused(state)
+    V::pointer_t		Unused(state)
 )
 {
     OutputRecord* pOR;
@@ -1129,7 +1129,7 @@ static void Pass2ORHandler (
 
 static void Pass2CRHandler (
     Spec*			Unused(spec),
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     int				registerIndex
 )
 {
@@ -1150,7 +1150,7 @@ static void Pass2CRHandler (
 
 static void Pass2FCHandler (
     Spec*			spec,
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     int				outputOrigin,
     int				fieldWidth,
     int				inputOrigin
@@ -1173,7 +1173,7 @@ static void Pass2FCHandler (
 
 static void Pass2FNHandler (
     Spec*			spec,
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     int				outputOrigin,
     int				fieldWidth
 )
@@ -1197,7 +1197,7 @@ static void Pass2FNHandler (
 
 static void Pass2FVHandler (
     Spec*			spec,
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     int				outputOrigin,
     int				fieldWidth,
     char*			value
@@ -1222,7 +1222,7 @@ static void Pass2FVHandler (
 
 static void Pass2PLHandler (
     Spec*			spec,
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     int				inputOrigin,
     int				fieldWidth
 )
@@ -1245,7 +1245,7 @@ static void Pass2PLHandler (
 
 static void Pass2PCHandler (
     Spec*			spec,
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     int				inputOrigin,
     int				fieldWidth
 )
@@ -1268,7 +1268,7 @@ static void Pass2PCHandler (
 
 static void Pass2PVHandler (
     Spec*			Unused(spec),
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     char*			value
 )
 {
@@ -1290,7 +1290,7 @@ static void Pass2PVHandler (
 
 static void Pass2PRHandler (
     Spec*			Unused(spec),
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     int				registerIndex
 )
 {
@@ -1307,7 +1307,7 @@ static void Pass2PRHandler (
 
 static void Pass2STHandler (
     Spec*			Unused(spec),
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     int				registerIndex
 )
 {
@@ -1324,7 +1324,7 @@ static void Pass2STHandler (
 
 static void Pass2DOHandler (
     Spec*			Unused(spec),
-    pointer_t			Unused(state),
+    V::pointer_t		Unused(state),
     Operator			xOperator
 )
 {
@@ -1384,7 +1384,7 @@ static void SpecLoaderPass2 (
     Pass2State.outputFile	= NilOf (OutputFile*);
     Pass2State.outputRecord	= NilOf (OutputRecord*);
 
-    DoSpecFilePass (sfile, spec, &dv, NilOf (pointer_t));
+    DoSpecFilePass (sfile, spec, &dv, NilOf (V::pointer_t));
 
     UpdateComputationList (spec);
 }

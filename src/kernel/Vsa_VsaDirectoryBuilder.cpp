@@ -60,13 +60,13 @@ namespace Vsa {
 
     //  Query
     public:
-	void getInfo (VString &rInfo) const;
+	virtual void getInfo (VString &rInfo) const OVERRIDE;
         using BaseClass::getInfo;
     private:
-	void getStatusMessage_(VString &rInfo) const;
+	virtual void getStatusMessage_(VString &rInfo) const OVERRIDE;
 
     private:
-	bool supplyObjectSource_(IObjectSource::Reference &rpObjectSource) const;
+	virtual bool supplyObjectSource_(IObjectSource::Reference &rpObjectSource) const OVERRIDE;
 
     //  Update
     public:

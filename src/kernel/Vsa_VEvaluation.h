@@ -120,9 +120,11 @@ namespace Vsa {
 	    return m_pQuery->getValue (pKey, rResult);
 	}
 
+        bool getEvaluation (Reference &rpEvaluation, request_index_t xRequest);
+
 	void getVisionExpression (VPathQuery::Formatter const &rFormatter, VString &rResult);
 
-	unsigned int index () const {
+	request_index_t index () const {
 	    return m_xRequest;
 	}
 
@@ -189,7 +191,7 @@ namespace Vsa {
     //  State
     protected:
 	VReference<VEvaluator>		const	m_pEvaluator;
-	Vca::U32    			const	m_xRequest;
+	request_index_t			const	m_xRequest;
 	IEvaluatorClient::Reference	const	m_pClient;
 	QueryType			const	m_xQueryType;
 	VPathQuery::Reference		const	m_pQuery;

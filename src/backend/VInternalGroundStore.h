@@ -71,7 +71,7 @@ protected:
     virtual VSymbolImplementation const *implementationOf (char const *pName) const;
 
 public:
-    bool groundImplementationSucceeded (VSNFTask* pTask);
+    virtual bool groundImplementationSucceeded (VSNFTask* pTask) OVERRIDE;
 
 //  State
 private:

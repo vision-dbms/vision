@@ -81,7 +81,7 @@ typedef struct {
 
 #define BUF_rowSize(ptr)\
     (((((2 * sizeof(char *)) + sizeof(int) + (BUF_lineSize(ptr) * sizeof(char)))\
-         / sizeof(int)) + 1) * sizeof(int))
+         / sizeof(char*)) + 1) * sizeof(char *))
 
 
 /*********************************************************

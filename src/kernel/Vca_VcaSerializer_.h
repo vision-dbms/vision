@@ -76,14 +76,14 @@ namespace Vca {
 
     //  Transport Callbacks
     protected:
-	void localizeData () {
+	virtual void localizeData () OVERRIDE {
 	    peer ()->localize (m_rDatum);
 	}
 
-	void getData () {
+	virtual void getData () OVERRIDE {
 	    get (&m_rDatum, sizeof (Datum));
 	}
-	void putData () {
+	virtual void putData () OVERRIDE {
 	    put (&m_rDatum, sizeof (Datum));
 	}
 
@@ -113,7 +113,7 @@ namespace Vca {
 
     //  Transport Callbacks
     protected:
-	void wrapupIncomingSerialization ();
+	virtual void wrapupIncomingSerialization () OVERRIDE;
 
     //  State
     protected:
@@ -143,7 +143,7 @@ namespace Vca {
 
     //  Transport Callbacks
     protected:
-	void wrapupIncomingSerialization ();
+	virtual void wrapupIncomingSerialization () OVERRIDE;
 
     //  State
     protected:
@@ -190,12 +190,12 @@ namespace Vca {
 
     //  Transport Callbacks
     protected:
-	void localizeData ();
+	virtual void localizeData () OVERRIDE;
 
-	void getData ();
-	void putData ();
+	virtual void getData () OVERRIDE;
+	virtual void putData () OVERRIDE;
 
-	void wrapupIncomingSerialization ();
+	virtual void wrapupIncomingSerialization () OVERRIDE;
 
     //  State
     protected:
@@ -229,12 +229,12 @@ namespace Vca {
 
     //  Transport Callbacks
     protected:
-	void localizeData ();
+	virtual void localizeData () OVERRIDE;
 
-	void getData ();
-	void putData ();
+	virtual void getData () OVERRIDE;
+	virtual void putData () OVERRIDE;
 
-	void wrapupIncomingSerialization ();
+	virtual void wrapupIncomingSerialization () OVERRIDE;
 
     //  State
     protected:
@@ -274,12 +274,12 @@ namespace Vca {
 
     //  Transport Callbacks
     protected:
-	void localizeData ();
+	virtual void localizeData () OVERRIDE;
 
-	void getData ();
-	void putData ();
+	virtual void getData () OVERRIDE;
+	virtual void putData () OVERRIDE;
 
-	void wrapupIncomingSerialization ();
+	virtual void wrapupIncomingSerialization () OVERRIDE;
 
     //  State
     protected:
@@ -311,7 +311,7 @@ namespace Vca {
 
     //  Transport Callbacks
     protected:
-	void wrapupIncomingSerialization ();
+	virtual void wrapupIncomingSerialization () OVERRIDE;
 
     //  State
     protected:
@@ -333,8 +333,7 @@ namespace Vca {
 
     //  Destruction
     protected:
-	~VcaSerializer_() {
-	}
+	~VcaSerializer_();
 
     //  Sequencer Actions
     protected:
@@ -343,12 +342,12 @@ namespace Vca {
 
     //  Transport Callbacks
     protected:
-	void localizeData ();
+	virtual void localizeData () OVERRIDE;
 
-	void getData ();
-	void putData ();
+	virtual void getData () OVERRIDE;
+	virtual void putData () OVERRIDE;
 
-	void wrapupIncomingSerialization ();
+	virtual void wrapupIncomingSerialization () OVERRIDE;
 
     //  State
     protected:
@@ -391,12 +390,12 @@ namespace Vca {
 
     //  Transport Callbacks
     protected:
-	void localizeData ();
+	virtual void localizeData () OVERRIDE;
 
-	void getData ();
-	void putData ();
+	virtual void getData () OVERRIDE;
+	virtual void putData () OVERRIDE;
 
-	void wrapupIncomingSerialization ();
+	virtual void wrapupIncomingSerialization () OVERRIDE;
 
     //  State
     protected:
@@ -428,12 +427,12 @@ namespace Vca {
 
     //  Transport Callbacks
     protected:
-	void localizeData ();
+	virtual void localizeData () OVERRIDE;
 
-	void getData ();
-	void putData ();
+	virtual void getData () OVERRIDE;
+	virtual void putData () OVERRIDE;
 
-	void wrapupIncomingSerialization ();
+	virtual void wrapupIncomingSerialization () OVERRIDE;
 
     // State
     private:
@@ -474,10 +473,10 @@ namespace Vca {
 
     //  Transport Callbacks
     protected:
-	void localizeData ();
+	virtual void localizeData () OVERRIDE;
 
-	void getData ();
-	void putData ();
+	virtual void getData () OVERRIDE;
+	virtual void putData () OVERRIDE;
 
     //  State
     protected:
@@ -562,12 +561,12 @@ namespace Vca {
 
     //  Transport Callbacks
     protected:
-	void localizeData ();
+	virtual void localizeData () OVERRIDE;
 
-	void getData ();
-	void putData ();
+	virtual void getData () OVERRIDE;
+	virtual void putData () OVERRIDE;
 
-	void wrapupIncomingSerialization ();
+	virtual void wrapupIncomingSerialization () OVERRIDE;
 
     //  State
     protected:

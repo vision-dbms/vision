@@ -19,9 +19,19 @@
 
 namespace Vxa {
     class VCallHandle;
+    class VClass;
+    class VCollectableObject;
+    class VCollectableCollection;
+    class VTask;
 
     class Vxa_API VCollection : public VSet {
 	DECLARE_ABSTRACT_RTTLITE (VCollection, VSet);
+
+        friend class VCallData;
+
+    //  Aliases
+    public:
+	typedef cardinality_t collection_index_t;
 
     //  Construction
     protected:
@@ -30,6 +40,23 @@ namespace Vxa {
     //  Destruction
     protected:
 	~VCollection ();
+
+
+    //  Access
+    private:
+        virtual VCollectableObject *object_ (collection_index_t xElement) const {
+            return 0;
+        }
+        virtual VClass *type_() const {
+            return 0;
+        }
+    public:
+        VCollectableObject *object (collection_index_t xElement) const {
+            return object_(xElement);
+        }
+        VClass *type () const {
+            return type_();
+        }
 
     //  Roles
     public:
@@ -70,7 +97,9 @@ namespace Vxa {
 	 *  return false.  (This convention may change in the future).
 	 *-----------------------------
 	 */
-	virtual bool invokeMethod_(VString const &rMessageName, VCallHandle const &rCallHandle) = 0;
+	virtual bool invokeCall (VCallHandle const &rCallHandle) = 0;
+
+        virtual bool launchTask (VTask *pTask) = 0;
     };
 }
 

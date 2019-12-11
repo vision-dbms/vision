@@ -430,7 +430,7 @@ namespace Vsa {
 
     //  Request Index Allocation
     private:
-	Vca::U32 newRequestIndex () {
+	request_index_t newRequestIndex () {
 	    return m_xNextRequest++;
 	}
 
@@ -516,9 +516,8 @@ namespace Vsa {
 
     //  State
     protected:
-	Vca::U32		m_xNextRequest;
+	request_index_t		m_xNextRequest;
 	Queue			m_iQueue;
-    bool                     m_bProcessingQueue;
 	VReference<VEvaluation>	m_pThisRequest;
 
 	VOdometer<Vca::U32>		m_cQueriesProcessed;
@@ -530,7 +529,9 @@ namespace Vsa {
 	V::VTime		m_iLastUsed; // for evaluating queries
       
 	Subscriber::Pointer     m_pSubscriberList;
-    Vca::U32                m_cSubscribers;
+        Vca::U32                m_cSubscribers;
+    private:
+        bool                    m_bProcessingQueue;
     };
 }
 

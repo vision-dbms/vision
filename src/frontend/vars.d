@@ -26,7 +26,7 @@ typedef struct {
 	char const	*name;
 	int		type;
 	caddr_t		p;
-	VString		menustring;
+	V::VString	menustring;
 	MENU::Reference m;
 } VARS_Type;
 

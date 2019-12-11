@@ -159,10 +159,10 @@ private:
 
 //  Maintenance
 protected:
-    virtual /*override*/ bool align_() {
+    virtual bool align_() OVERRIDE {
 	return align ();
     }
-    virtual /*override*/ bool alignAll_(bool bCleaning) {
+    virtual bool alignAll_(bool bCleaning) OVERRIDE {
 	return align ();
     }
 public:
@@ -170,14 +170,14 @@ public:
     using BaseClass::alignAll;
 
 protected:
-    bool PersistReferences ();
+    virtual bool PersistReferences () OVERRIDE;
 
 //  Display and Inspection
 public:
-    virtual /*override*/ unsigned __int64 getClusterSize ();
+    virtual unsigned __int64 getClusterSize () OVERRIDE;
 
-    virtual /*override*/ bool getPOP (M_POP *pResult, unsigned int xPOP) const;
-    virtual /*override*/ unsigned int getPOPCount () const {
+    virtual bool getPOP (M_POP *pResult, unsigned int xPOP) const OVERRIDE;
+    virtual unsigned int getPOPCount () const OVERRIDE {
 	return 2;
     }
 };

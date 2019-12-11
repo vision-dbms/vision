@@ -30,6 +30,8 @@
 #include "RTlink.h"
 #include "RTrefuv.h"
 
+class rtVECTOR_CType;
+
 class VBlockTask;
 class VDescriptor;
 class VectorReconstructor;
@@ -341,17 +343,32 @@ private:
 	g_cAllocations++;
     }
 
-public:
-    rtVECTOR_PMRDC *Append (rtVECTOR_USDC *pUSDC, unsigned int xOrigin, unsigned int sRun) {
-	rtVECTOR_PMRDC *pResult = this;
-	if (this && pUSDC == m_pUSDC)
-	    m_iSegmentLength += sRun;
-	else if (sRun) {
-	    pResult = new rtVECTOR_PMRDC (pUSDC, xOrigin, sRun);
-	    if (this)
-		m_pSuccessor = pResult;
+private:
+    static bool NewTail (rtVECTOR_PMRDC *&rpChainTail, rtVECTOR_USDC *const pUSDC, unsigned int xOrigin, unsigned int sRun) {
+    //  Return true if a new PMRD was created, false otherwise...
+	if (sRun > 0) {
+	    rpChainTail = new rtVECTOR_PMRDC (pUSDC, xOrigin, sRun);
+	    return true;
 	}
-	return pResult;
+	return false;
+    }
+
+    bool UpdateTail (rtVECTOR_PMRDC *&rpChainTail, rtVECTOR_USDC *const pUSDC, unsigned int xOrigin, unsigned int sRun) {
+    //  Return true if a new PMRD was created, false otherwise...
+	bool bNewTail = false;
+	if (pUSDC == m_pUSDC)
+	    m_iSegmentLength += sRun;
+	else if (NewTail (m_pSuccessor, pUSDC, xOrigin, sRun)) {
+	    rpChainTail = m_pSuccessor;
+	    bNewTail = true;
+	}
+	return bNewTail;
+    }
+
+public:
+    static bool Append (rtVECTOR_PMRDC *&rpChainTail, rtVECTOR_USDC *const pUSDC, unsigned int xOrigin, unsigned int sRun) {
+    //  Return true if a new PMRD was created, false otherwise...
+	return rpChainTail ? rpChainTail->UpdateTail (rpChainTail, pUSDC, xOrigin, sRun) : NewTail (rpChainTail, pUSDC, xOrigin, sRun);
     }
 
 //  Destruction
@@ -443,12 +460,11 @@ public:
     rtVECTOR_CType (rtVECTOR_Handle *pVector);
 
     void AppendPMRD (rtVECTOR_USDC *pUSDC, unsigned int xOrigin, unsigned int sRun) {
-	rtVECTOR_PMRDC *pNewPMRD = m_pPMRDChainTail->Append (pUSDC, xOrigin, sRun);
-	if (m_pPMRDChainTail != pNewPMRD) {
-	    m_pPMRDChainTail = pNewPMRD;
+    //  Append returns true if the PMRD list was extended, false otherwise...
+	if (rtVECTOR_PMRDC::Append (m_pPMRDChainTail, pUSDC, xOrigin, sRun)) {
 	    m_iPMRDCount++;
 	    if (!m_pPMRDChainHead)
-		m_pPMRDChainHead = pNewPMRD;
+		m_pPMRDChainHead = m_pPMRDChainTail;
 	}
     }
     void AppendPMRD (unsigned int xSegment, unsigned int xOrigin, unsigned int sRun) {
@@ -688,10 +704,10 @@ private:
 
 //  Alignment
 private:
-    virtual /*override*/ bool align_() {
+    virtual bool align_() OVERRIDE {
 	return align ();
     }
-    virtual /*override*/ bool alignAll_(bool bCleaning) {
+    virtual bool alignAll_(bool bCleaning) OVERRIDE {
 	return alignAll (bCleaning);
     }
 public:
@@ -700,11 +716,11 @@ public:
 
 //  Canonicalization
 private:
-    virtual /*override*/ bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer);
+    virtual bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer) OVERRIDE;
 
 //  Cloning
 private:
-    virtual /*override*/ void clone_(StoreBase::Reference &rpResult, rtPTOKEN_Handle *pPPT) const {
+    virtual void clone_(StoreBase::Reference &rpResult, rtPTOKEN_Handle *pPPT) const OVERRIDE {
 	Reference pHandle;
 	clone (pHandle, pPPT);
 	rpResult.setTo (pHandle);
@@ -744,8 +760,8 @@ private:
 
 //  Component Access
 private:
-    virtual /*overrride*/ rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const;
-    virtual /*overrride*/ rtPTOKEN_Handle *getPToken_() const {
+    virtual rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const OVERRIDE;
+    virtual rtPTOKEN_Handle *getPToken_() const OVERRIDE {
 	return getPToken ();
     }
 public:
@@ -887,13 +903,13 @@ private:
 
 //  Element Access
 private:
-    virtual bool getElements_(VReference<rtVECTOR_Handle> &rpResult, rtLINK_CType *pSubscript) {
+    virtual bool getElements_(VReference<rtVECTOR_Handle> &rpResult, rtLINK_CType *pSubscript) OVERRIDE {
 	return getElements (rpResult, pSubscript);
     }
-    virtual bool getElements_(VDescriptor &rResult, rtLINK_CType *pSubscript) {
+    virtual bool getElements_(VDescriptor &rResult, rtLINK_CType *pSubscript) OVERRIDE {
 	return getElements (rResult, pSubscript);
     }
-    virtual bool getElements_(DSC_Descriptor &rResult, DSC_Scalar &rSubscript) {
+    virtual bool getElements_(DSC_Descriptor &rResult, DSC_Scalar &rSubscript) OVERRIDE {
 	return getElements (rResult, rSubscript);
     }
 public:
@@ -975,16 +991,16 @@ private:
 
 //  Element Update
 private:
-    virtual /*override*/ bool setElements_(rtLINK_CType *pSubscript, DSC_Descriptor &rValues) {
+    virtual bool setElements_(rtLINK_CType *pSubscript, DSC_Descriptor &rValues) OVERRIDE {
 	return setElements (pSubscript, rValues);
     }
-    virtual /*override*/ bool setElements_(rtLINK_CType *pSubscript, rtVECTOR_CType *pValues) {
+    virtual bool setElements_(rtLINK_CType *pSubscript, rtVECTOR_CType *pValues) OVERRIDE {
 	return setElements (pSubscript, pValues);
     }
-    virtual /*override*/ bool setElements_(DSC_Scalar &rSubscript, DSC_Descriptor &rValues) {
+    virtual bool setElements_(DSC_Scalar &rSubscript, DSC_Descriptor &rValues) OVERRIDE {
 	return setElements (rSubscript, rValues);
     }
-    virtual /*override*/ bool setElements_(DSC_Scalar &rSubscript, rtVECTOR_CType *pValues) {
+    virtual bool setElements_(DSC_Scalar &rSubscript, rtVECTOR_CType *pValues) OVERRIDE {
 	return setElements (rSubscript, pValues);
     }
 public:
@@ -995,10 +1011,10 @@ public:
 
 //  Instance Deletion
 private:
-    virtual bool deleteInstances_(DSC_Scalar &pInstances) {
+    virtual bool deleteInstances_(DSC_Scalar &pInstances) OVERRIDE {
 	return doInstanceDeletion (pInstances);
     }
-    virtual bool deleteInstances_(rtLINK_CType *pInstances, rtLINK_CType *&rpTrues, rtLINK_CType *&rpFalses) {
+    virtual bool deleteInstances_(rtLINK_CType *pInstances, rtLINK_CType *&rpTrues, rtLINK_CType *&rpFalses) OVERRIDE {
 	return doInstanceDeletion (pInstances, rpTrues, rpFalses);
     }
 
@@ -1044,21 +1060,21 @@ private:
 
 //  Callbacks
 public:
-    void CheckConsistency ();
+    virtual void CheckConsistency () OVERRIDE;
 protected:
-    bool PersistReferences ();
+    virtual bool PersistReferences () OVERRIDE;
 
 //  Display and Inspection
 public:
-    virtual /*override*/ void getClusterReferenceMapData (MapEntryData &rData, unsigned int xReference);
-    virtual /*override*/ unsigned int getClusterReferenceMapSize ();
+    virtual void getClusterReferenceMapData (MapEntryData &rData, unsigned int xReference) OVERRIDE;
+    virtual unsigned int getClusterReferenceMapSize () OVERRIDE;
 
-    virtual /*override*/ unsigned __int64 getClusterSize ();
+    virtual unsigned __int64 getClusterSize () OVERRIDE;
 
-    virtual /*override*/ unsigned int getPOPCount () const {
+    virtual unsigned int getPOPCount () const OVERRIDE {
 	return 1/*ptoken*/ + rtVECTOR_USD_POPsPerUSD * segmentArraySize ();
     }
-    virtual /*override*/ bool getPOP (M_POP *pResult, unsigned int xPOP) const;
+    virtual bool getPOP (M_POP *pResult, unsigned int xPOP) const OVERRIDE;
 };
 
 

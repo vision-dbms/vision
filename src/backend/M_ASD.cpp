@@ -71,7 +71,7 @@ M_ASD::~M_ASD () {
  ******************************************/
 
 bool M_ASD::GetCTE (unsigned int xContainer, CTE &rResult) const {
-    if (this && xContainer < cteCount ()) {
+    if (xContainer < cteCount ()) {
 	rResult = *cte (xContainer);
 	return true;
     }

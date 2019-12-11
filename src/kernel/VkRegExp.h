@@ -15,6 +15,9 @@
 
 class VkRegExp {
 public:
+    typedef V::VString VString;
+
+public:
     class V_API Query {
 	friend class VkRegExp;
 
@@ -80,7 +83,7 @@ private:
     void reginsert (char, char *);
     void regtail (char *, char *);
     void regoptail (char *, char *);
-    char *regnext (register char*) const;
+    char *regnext (REGISTER char*) const;
     bool regtry (Query& rQuery, char const*) const;
     bool regmatch (Query& rQuery, char*) const;
     int regrepeat (Query& rQuery, char*) const;
@@ -105,6 +108,5 @@ private:
     VString m_vsInfo;
     bool m_bValid;
 };
-
 
 #endif

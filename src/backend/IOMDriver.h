@@ -40,6 +40,11 @@ class VTask;
 class ABSTRACT IOMDriver : public Vca::VRolePlayer {
     DECLARE_ABSTRACT_RTT (IOMDriver, Vca::VRolePlayer);
 
+//  Aliases
+ public:
+    typedef V::VString VString;
+    typedef V::pointer_t pointer_t;
+
 //  Friends
     friend class VChannelController;
     friend class VReadEvalPrintController;
@@ -63,10 +68,8 @@ public:
 	VEvaluatorPump *evaluator () const {
 	    return m_pEvaluator;
 	}
-	bool getEvaluation (Vsa::VEvaluation::Reference &rpEvaluation) const {
-	    if (m_pEvaluator)
-		rpEvaluation.setTo (m_pEvaluator->incomingClient ());
-	    return rpEvaluation.isntNil ();
+	bool getEvaluation (Vsa::VEvaluation::Reference &rpEvaluation, Vsa::request_index_t xRequestInProgress) const {
+	    return m_pEvaluator && m_pEvaluator->getEvaluation (rpEvaluation, xRequestInProgress);
 	}
 	unsigned int optionValue (
 	    IOMHandle const* pHandle, IOMDriver const* pDriver
@@ -152,15 +155,15 @@ public:
     }
 
     IOMDriver* errorInputDriver	() const {
-	return this ? m_pErrorInputDriver.operator->() : 0;
+	return m_pErrorInputDriver;
     }
     IOMDriver* errorOutputDriver () const {
-	return this ? m_pErrorOutputDriver.operator->() : 0;
+	return m_pErrorOutputDriver;
     }
 
     bool getInputHandler (DSC_Descriptor& rInputHandler);
-    bool getEvaluation (Vsa::VEvaluation::Reference &rpEvaluation) const {
-	return m_iOptions.getEvaluation (rpEvaluation);
+    bool getEvaluation (Vsa::VEvaluation::Reference &rpEvaluation, Vsa::request_index_t xRequestInProgress) const {
+	return m_iOptions.getEvaluation (rpEvaluation, xRequestInProgress);
     }
 
     virtual int	getPeerNameString   (char** ppString, size_t* psString);
@@ -176,7 +179,7 @@ public:
     }
 
     unsigned int optionValue (IOMHandle const* pHandle) const {
-	return this ? m_iOptions.optionValue (pHandle, this) : 0;
+	return m_iOptions.optionValue (pHandle, this);
     }
 
     IOMPromptFormat promptFormat () const {

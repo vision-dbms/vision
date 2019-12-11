@@ -178,7 +178,7 @@ namespace Vsa {
     /// @name IEvaluatorSource Implementation
     //@{
     public:
-        void Supply (IEvaluatorSource *pRole, IEvaluatorSink *pSink);
+        virtual void Supply (IEvaluatorSource *pRole, IEvaluatorSink *pSink) OVERRIDE;
 
     private:
         void supply (IEvaluatorSink *pSink);

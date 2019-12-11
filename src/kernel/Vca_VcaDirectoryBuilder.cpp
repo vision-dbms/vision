@@ -59,6 +59,8 @@
  ***********************/
 
 namespace {
+    typedef V::VString VString;
+
     VString ToLower (VString const& rInput) {
 	VString iOutput (rInput);
 	for (char* pOutput = iOutput.storage (); *pOutput; pOutput++)
@@ -393,7 +395,7 @@ namespace {
 
     //  Callbacks
     private:
-	void onTrigger_() {
+	virtual void onTrigger_() OVERRIDE {
 	    (m_pTarget.referent()->*m_pMember) (this);
 	}
 
@@ -430,7 +432,7 @@ namespace Vca {
 
     //  Access
     protected:
-	void getDescription_(VString &rDescription) const {
+	virtual void getDescription_(VString &rDescription) const OVERRIDE {
 	    m_pSession->getDescription (rDescription);
 	}
     public:
@@ -440,10 +442,10 @@ namespace Vca {
 
     //  Callbacks
     private:
-	void onData ();
-	void onReset ();
+	virtual void onData () OVERRIDE;
+	virtual void onReset () OVERRIDE;
 
-	void onError (IError *pInterface, VString const &rMessage);
+	virtual void onError (IError *pInterface, VString const &rMessage) OVERRIDE;
 	void onValue (IVUnknown *pObject);
 
     //  TTL
@@ -579,9 +581,13 @@ Vca::VcaDirectoryBuilder::Order::Session::Fallback::Fallback (
  ********************
  ********************/
 
-void Vca::VcaDirectoryBuilder::Order::Session::Fallback::getReversedList (Reference &rpReversed) const {
-    for (ThisClass const *pNext = this; pNext; pNext = pNext->successor ())
-	rpReversed.setTo (new ThisClass (pNext->name (), rpReversed));
+void Vca::VcaDirectoryBuilder::Order::Session::Fallback::GetReversedList (
+    Reference &rpReversed, ThisClass *pList
+) {
+    while (pList) {
+	rpReversed.setTo (new ThisClass (pList->name (), rpReversed));
+        pList = pList->successor ();
+    }
 }
 
 /*****************
@@ -680,7 +686,7 @@ void Vca::VcaDirectoryBuilder::Order::Session::getInfo (VString &rInfo) const {
 
     //  Reverse the alias list so names are displayed in the correct order:
     Fallback::Reference pReversed;
-    m_pFallbackList->getReversedList (pReversed);
+    Fallback::GetReversedList (pReversed, m_pFallbackList);
 
     while (pReversed) {
 	rInfo << "\r\nElse Use: " << pReversed->name ();
@@ -849,7 +855,7 @@ namespace Vca {
 
     //  Instantiation
     private:
-	Session* instantiationFor_(Bindings const& rBindings) const;
+	virtual Session* instantiationFor_(Bindings const& rBindings) const OVERRIDE;
 	Fallback* aliasListFor (Bindings const& rBindings) const;
 
     //  Access
@@ -857,13 +863,13 @@ namespace Vca {
 	unsigned int aliasCount () const;
 
     private:
-	virtual bool supplyObjectGofer_(gofer_t::Reference& rpObjectGofer) const;
+	virtual bool supplyObjectGofer_(gofer_t::Reference& rpObjectGofer) const OVERRIDE;
 
     //  Query
     public:
 	void initialize (gofer_array_t &rGoferArray) const;
 
-	void getInfo (VString &rInfo) const;
+	virtual void getInfo (VString &rInfo) const OVERRIDE;
 	using BaseClass::getInfo;
 
 	bool oneOf () const {
@@ -871,7 +877,7 @@ namespace Vca {
 	}
 
     private:
-	void getStatusMessage_(VString &rInfo) const;
+	virtual void getStatusMessage_(VString &rInfo) const OVERRIDE;
 
     //  State
     private:
@@ -951,7 +957,7 @@ void Vca::VcaDirectoryBuilder::Order::AliasSession::getInfo (VString &rInfo) con
     else {
     //  Reverse the alias list so names are displayed in the correct order:
 	Fallback::Reference pReversed;
-	m_pAliasList->getReversedList (pReversed);
+	Fallback::GetReversedList (pReversed, m_pAliasList);
 
 	rInfo << "\r\nOne Of:";
 
@@ -969,7 +975,7 @@ void Vca::VcaDirectoryBuilder::Order::AliasSession::getStatusMessage_(VString &r
     else {
     //  Reverse the alias list so names are displayed in the correct order:
 	Fallback::Reference pReversed;
-	m_pAliasList->getReversedList (pReversed);
+	Fallback::GetReversedList (pReversed, m_pAliasList);
 
 	char const *pPrefix = "One Of {";
 
@@ -1029,7 +1035,7 @@ namespace Vca {
 
     //  Instantiation
     private:
-	Session* instantiationFor_(Bindings const& rBindings) const;
+	virtual Session* instantiationFor_(Bindings const& rBindings) const OVERRIDE;
 
     //  Access
     public:
@@ -1041,18 +1047,18 @@ namespace Vca {
 	}
 
     private:
-	virtual bool supplyObjectGofer_(gofer_t::Reference& rpObjectGofer) const;
+	virtual bool supplyObjectGofer_(gofer_t::Reference& rpObjectGofer) const OVERRIDE;
 
     //  Query
     public:
 	void initialize (gofer_array_t &rGoferArray) const;
 
-	void getInfo (VString &rInfo) const;
+	virtual void getInfo (VString &rInfo) const OVERRIDE;
 
 	using BaseClass::getInfo;
 
     private:
-	void getStatusMessage_(VString &rInfo) const;
+	virtual void getStatusMessage_(VString &rInfo) const OVERRIDE;
 
     //  State
     private:
@@ -1104,7 +1110,7 @@ void Vca::VcaDirectoryBuilder::Order::LinkedSession::getInfo (VString &rInfo) co
     else {
     //  Reverse the alias list so names are displayed in the correct order:
 	Fallback::Reference pReversed;
-	m_pAliasList->getReversedList (pReversed);
+	Fallback::GetReversedList (pReversed, m_pAliasList);
 
 	rInfo << "\r\nOne Of:";
 
@@ -1124,7 +1130,7 @@ void Vca::VcaDirectoryBuilder::Order::LinkedSession::getStatusMessage_(VString &
     else {
     //  Reverse the alias list so names are displayed in the correct order:
 	Fallback::Reference pReversed;
-	m_pAliasList->getReversedList (pReversed);
+	Fallback::GetReversedList (pReversed, m_pAliasList);
 
 	char const *pPrefix = "One Of {";
 
@@ -1345,7 +1351,7 @@ namespace Vca {
 
     //  Instantiation
     private:
-	Session* instantiationFor_(Bindings const& rBindings) const;
+	virtual Session* instantiationFor_(Bindings const& rBindings) const OVERRIDE;
 
     //  Access
     public:
@@ -1370,12 +1376,13 @@ namespace Vca {
 
     //  Query
     public:
-	void getInfo (VString &rInfo) const;
+	virtual void getInfo (VString &rInfo) const OVERRIDE;
 	using BaseClass::getInfo;
     protected:
-	bool supplyPassiveServerGofer_(PassiveServerGofer::Reference &rpPassiveServer) const;
-	bool supplyPipeSourceGofer_(PipeSourceGofer::Reference &rpPipeSourceGofer) const;
+	virtual bool supplyPassiveServerGofer_(PassiveServerGofer::Reference &rpPassiveServer) const OVERRIDE;
+	virtual bool supplyPipeSourceGofer_(PipeSourceGofer::Reference &rpPipeSourceGofer) const OVERRIDE;
     private:
+
 	bool supplyPipeSourceGoferForDirective (
 	    PipeSourceGofer::Reference &rpPipeSourceGofer, VString const &rDirective
 	) const {
@@ -1393,7 +1400,7 @@ namespace Vca {
 	) const;
 
     private:
-	bool isAPassiveAgent_() const {
+	virtual bool isAPassiveAgent_() const OVERRIDE {
 	    return isAPassiveAgent ();
 	}
     public:
@@ -1633,7 +1640,7 @@ namespace Vca {
 
 	//  Instantiation
     private:
-	Session* instantiationFor_(Bindings const& rBindings) const;
+	virtual Session* instantiationFor_(Bindings const& rBindings) const OVERRIDE;
 
     //  Access
     public:
@@ -1656,11 +1663,11 @@ namespace Vca {
 
     //  Query
     public:
-	void getInfo (VString &rInfo) const;
+	virtual void getInfo (VString &rInfo) const OVERRIDE;
 	using BaseClass::getInfo;
     protected:
-	bool supplyPassiveServerGofer_(PassiveServerGofer::Reference &rpPassiveServer) const;
-	bool supplyPipeSourceGofer_(PipeSourceGofer::Reference &rpPipeSourceGofer) const;
+	virtual bool supplyPassiveServerGofer_(PassiveServerGofer::Reference &rpPassiveServer) const OVERRIDE;
+	virtual bool supplyPipeSourceGofer_(PipeSourceGofer::Reference &rpPipeSourceGofer) const OVERRIDE;
 
     //  State
     protected:

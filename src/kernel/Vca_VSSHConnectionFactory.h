@@ -81,7 +81,7 @@ namespace Vca {
 
         //  Implementation
         private:
-            void supply_(IPipeSourceClient *pClient);
+            virtual void supply_(IPipeSourceClient *pClient) OVERRIDE;
 
         //  State
         private:

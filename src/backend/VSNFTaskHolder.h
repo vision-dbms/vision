@@ -7,8 +7,7 @@
 
 #include "Vca_VActivity.h"
 
-#include "Vxa_ICaller.h"
-#include "Vxa_IVSNFTaskHolder2.h"
+#include "Vxa_ICaller2.h"
 
 /**************************
  *****  Declarations  *****
@@ -33,6 +32,8 @@ class VSNFTaskHolder : public Vca::VActivity {
 
 //  Aliases
 public:
+    typedef V::VString VString;
+
     typedef Reference TaskHolderReference;
     typedef Vca::VTrigger<ThisClass> Trigger;
 
@@ -42,6 +43,7 @@ public:
     typedef Vxa::object_reference_array_t object_reference_array_t;
 
     typedef Vxa::ICaller ICaller;
+    typedef Vxa::ICaller2 ICaller2;
     typedef Vxa::ICollection ICollection;
     typedef Vxa::ISingleton ISingleton;
 
@@ -111,7 +113,7 @@ public:
 
 	//  Execution
 	public:
-	    void start () const {
+	    virtual void start () const OVERRIDE {
 		startIt (m_pT.referent ());
 	    }
 
@@ -177,7 +179,7 @@ public:
 public:
     template <typename T> VSNFTaskHolder (
 	VSNFTask *pSNFTask, T *pT
-    ) : m_pSNFTask (pSNFTask), m_pICaller (this), m_pIVSNFTaskHolder (this), m_pIVSNFTaskHolderNC (this) {
+    ) : m_pSNFTask (pSNFTask), m_pICaller2 (this), m_pIVSNFTaskHolder (this), m_pIVSNFTaskHolderNC (this) {
 	retain (); {
 	    onStart ();
 	    g_iScheduler.schedule (this, pT);
@@ -256,12 +258,8 @@ public:
     void ReturnS2Integers	(IVSNFTaskHolder2 *pRole, Vxa::i32_s2array_t const&);
 
 //  ICaller Role
-private:
-    Vca::VRole<ThisClass,ICaller> m_pICaller;
 public:
-    void getRole (ICaller::Reference &rpRole) {
-	m_pICaller.getRole (rpRole);
-    }
+    void getRole (ICaller::Reference &rpRole);
 
 //  ICaller Methods
 public:
@@ -308,9 +306,23 @@ public:
 
     void ReturnSegmentCount (ICaller *pRole, cardinality_t cSegments);
 
+//  ICaller2 Role
+private:
+    Vca::VRole<ThisClass,ICaller2> m_pICaller2;
+public:
+    void getRole (ICaller2::Reference &rpRole) {
+        m_pICaller2.getRole (rpRole);
+    }
+
+//  ICaller2 Methods
+public:
+    void Suspensions (ICaller2 *pRole, IVReceiver<cardinality_t> *pResultSink);
+    void Suspend (ICaller2 *pRole);
+    void Resume  (ICaller2 *pRole);
+
 //  Access/Query
 protected:
-    void getDescription_(VString& rResult) const;
+    virtual void getDescription_(VString& rResult) const OVERRIDE;
 public:
     unsigned int taskCardinality () const {
 	return m_pSNFTask ? m_pSNFTask->cardinality () : 0;

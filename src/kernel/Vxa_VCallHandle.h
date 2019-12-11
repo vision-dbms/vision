@@ -11,12 +11,13 @@
  *****  Declarations  *****
  **************************/
 
+#include "Vxa_VPack.h"
+
 /*************************
  *****  Definitions  *****
  *************************/
 
 namespace Vxa {
-    class VCollection;
     class VMethod;
 
     class Vxa_API VCallHandle : public VCallData {
@@ -24,7 +25,9 @@ namespace Vxa {
 
     //  Construction
     protected:
-	VCallHandle (cardinality_t cParameters, cardinality_t cTask);
+	VCallHandle (
+            VCollection *pCluster, VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask, bool bIntensional
+        );
 	VCallHandle (ThisClass const &rOther);
 
     //  Destruction
@@ -62,7 +65,7 @@ namespace Vxa {
 	    std::type_info const &rOriginatorType, char const *pWhere
 	) const;
     public:
-	virtual bool invoke (VMethod *pMethod, VCollection *pCollection) const = 0;
+	virtual bool invokeMethod (VMethod *pMethod) const = 0;
 
 	virtual bool returnError (VString const &rMessage) const = 0;
 	virtual bool returnSNF () const = 0;

@@ -20,7 +20,6 @@
 class rtBLOCK_Handle;
 class rtINDEX_Key;
 
-class VString;
 class VTask;
 
 
@@ -98,19 +97,19 @@ public:
 
 //  Query
 public:
-    bool atOrAbove (VCall const* pCall) const;
-    bool atOrAbove (VTask const* pTask) const;
-    bool atOrAbove (VComputationUnit const* pUnit) const;
+    virtual bool atOrAbove (VCall const* pCall) const OVERRIDE;
+    virtual bool atOrAbove (VTask const* pTask) const OVERRIDE;
+    virtual bool atOrAbove (VComputationUnit const* pUnit) const OVERRIDE;
 
-    bool atOrBelow (VCall const* pCall) const;
-    bool atOrBelow (VTask const* pTask) const;
-    bool atOrBelow (VComputationUnit const* pUnit) const;
+    virtual bool atOrBelow (VCall const* pCall) const OVERRIDE;
+    virtual bool atOrBelow (VTask const* pTask) const OVERRIDE;
+    virtual bool atOrBelow (VComputationUnit const* pUnit) const OVERRIDE;
 
 //  Access
 public:
     virtual rtBLOCK_Handle *boundBlock () const;
 
-    unsigned int cardinality_ () const;
+    virtual unsigned int cardinality_ () const OVERRIDE;
 
     void callerDecompilation		(VString& rString) const;
     void callerDecompilationPrefix	(VString& rString) const;
@@ -119,38 +118,41 @@ public:
     unsigned int callerDecompilationIndent () const;
     unsigned int callerDecompilationOffset () const;
 
+    static unsigned int CallerPCOf (VCall const *pCall) {
+        return pCall ? pCall->callerPC () : UINT_MAX;
+    }
     unsigned int callerPC () const {
-	return this ? m_xCallerPC : UINT_MAX;
+	return m_xCallerPC;
     }
 
     rtLINK_CType* callerSubset () const {
 	return m_pCallerSubset;
     }
 
-    IOMDriver* channel_ () const;
+    virtual IOMDriver* channel_ () const OVERRIDE;
 
-    VComputationUnit* consumer_ () const;
+    virtual VComputationUnit* consumer_ () const OVERRIDE;
     VComputationUnit* consumer  () const {
 	return m_pConsumer;
     }
 
-    bool datumAvailable_ () const;
+    virtual bool datumAvailable_ () const OVERRIDE;
 
     void dumpCallerByteCodes () const;
 
     unsigned int parameterCount	() const {
 	return m_iParameterArray.count ();
     }
-    unsigned int parameterCount_() const {
+    virtual unsigned int parameterCount_() const OVERRIDE {
 	return parameterCount ();
     }
 
     rtPTOKEN_Handle *ptoken () const;
-    rtPTOKEN_Handle *ptoken_() const {
+    virtual rtPTOKEN_Handle *ptoken_() const OVERRIDE {
 	return ptoken ();
     }
 
-    bool recipientAvailable_ () const;
+    virtual bool recipientAvailable_ () const OVERRIDE;
 
     VMagicWord recipientSource () const {
 	return (VMagicWord)m_xRecipient;
@@ -161,7 +163,7 @@ public:
     ReturnCase returnCase () const {
 	return (ReturnCase)m_xReturnCase;
     }
-    ReturnCase returnCase_ () const {
+    virtual ReturnCase returnCase_ () const OVERRIDE {
 	return returnCase ();
     }
 
@@ -198,26 +200,26 @@ public:
 
 //  Datum/Path Access
 public:
-    bool getParameter (unsigned int xParameter, VDescriptor& rDatum);
+    virtual bool getParameter (unsigned int xParameter, VDescriptor& rDatum) OVERRIDE;
 
     bool crecipient (VDescriptor& rDatum) const;
     bool csearchOrigin (VDescriptor& rDatum) const;
 
-    bool getPathToCaller (
+    virtual bool getPathToCaller (
 	M_CPD*& rpReordering, rtLINK_CType*& rpRestriction, VTask*& rpCaller
-    ) const;
+    ) const OVERRIDE;
 
-    bool getPathToConsumer (
+    virtual bool getPathToConsumer (
 	M_CPD*& rpReordering, rtLINK_CType*& rpRestriction, VComputationUnit*& rpConsumer
-    ) const;
-    bool getPathToCreator (
+    ) const OVERRIDE;
+    virtual bool getPathToCreator (
 	M_CPD*& rpReordering, rtLINK_CType*& rpRestriction, VComputationUnit*& rpCreator
-    ) const;
+    ) const OVERRIDE;
 
 //  Execution...
 protected:
-    void fail ();
-    void run ();
+    virtual void fail () OVERRIDE;
+    virtual void run () OVERRIDE;
 
 //  ... Consumer Control
 public:

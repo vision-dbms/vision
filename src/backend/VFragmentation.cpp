@@ -633,7 +633,7 @@ void VFragmentation::Flatten () {
 	    m_iFragmentCount += rSubFragmentation.fragmentCount () - 1;
 
 /*****  And free the replaced fragment ...  *****/
-	    pFragment->discard ();
+	    VFragment::Discard(pFragment);
 	}
 	else {
 /***** else, a simple content - go to the next fragment ... *****/
@@ -655,7 +655,7 @@ void VFragmentation::Flatten () {
 
 void VFragmentation::clear () {
     m_pPPT->release ();
-    m_pFragmentList->discard ();
+    VFragment::Discard (m_pFragmentList);
 }
 
 

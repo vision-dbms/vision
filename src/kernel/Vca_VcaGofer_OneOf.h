@@ -130,11 +130,11 @@ namespace Vca {
             /**
              * Samples without replacement from our candidate list.
              */
-	    void onData () {
+	    virtual void onData () OVERRIDE {
 		if (TracingGofers ()) {
 		    VString iDesc;
 		    BaseClass::getDescription (iDesc);
-		    printf ("+++ %s[%llp]::onData ()\n", iDesc.content (), this);
+		    printf ("+++ %s[%p]::onData ()\n", iDesc.content (), this);
 		}
 
 	    //  Reset the randomizer, ...
@@ -155,7 +155,7 @@ namespace Vca {
 		if (TracingGofers ()) {
 		    VString iDesc;
 		    BaseClass::getDescription (iDesc);
-		    printf ("+++ %s[%llp]::onCandidateError (%s)\n", iDesc.content (), this, rMessage.content ());
+		    printf ("+++ %s[%p]::onCandidateError (%s)\n", iDesc.content (), this, rMessage.content ());
 		}
 
 		gofer_reference_t pChoice;
@@ -195,7 +195,7 @@ namespace Vca {
 		    VString iDesc;
 		    BaseClass::getDescription (iDesc);
 		    printf (
-			"+++ %s[%llp]: Choosing one of [%u..%u)...", iDesc.content (), this, m_xCandidateArray, m_xCandidateArray + sCandidateArray
+			"+++ %s[%p]: Choosing one of [%u..%u)...", iDesc.content (), this, m_xCandidateArray, m_xCandidateArray + sCandidateArray
 		    );
 		}
 		if (sCandidateArray > 0) {
@@ -236,11 +236,11 @@ namespace Vca {
             /**
              * Resets candidate availability; delegates to resetElementSelector().
              */
-	    void onReset () { // onGofeReset
+	    virtual void onReset () OVERRIDE { // onGofeReset
 		if (TracingGofers ()) {
 		    VString iDesc;
 		    BaseClass::getDescription (iDesc);
-		    printf ("+++ %s[%llp]: Choice 'onReset'\n", iDesc.content (), this);
+		    printf ("+++ %s[%p]: Choice 'onReset'\n", iDesc.content (), this);
 		}
 		resetElementSelector ();
 		BaseClass::onReset ();

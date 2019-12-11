@@ -104,7 +104,7 @@ public:
 /*****  Vision Expression Formatting  *****/
 public:
     void formatForVision (
-	VString&	iExpression,
+	V::VString&	iExpression,
 	char const*	pKeyword,
 	bool		fQuote = true,
 	bool		fClose = true
@@ -154,11 +154,11 @@ public:
     public:
 	VExtractListType dateListType () const;
 	bool getDateListString (VString& rResult) const;
-	bool getDateListExpression (VString& rResult) const;
+	bool getDateListExpression (V::VString& rResult) const;
 
 	VExtractListType entityListType	() const;
-	bool getEntityListString (VString& rResult) const;
-	bool getEntityListExpression (VString& rResult) const;
+	bool getEntityListString (V::VString& rResult) const;
+	bool getEntityListExpression (V::VString& rResult) const;
 
 	VExtractListType itemListType () const;
 
@@ -169,7 +169,7 @@ public:
     //  Vision Formatting
     public:
 	void formatForVision (
-	    VString& iRequest, Settings const &rRemoteSettings
+	    V::VString& iRequest, Settings const &rRemoteSettings
 	) const;
 
     protected:
@@ -201,10 +201,10 @@ public:
 	VAccessString			m_iDate;
 	VAccessString			m_iCurrency;
 	VAccessString			m_iEntityListString;
-	VArray<VString>		m_iEntityList;
+	VArray<V::VString>		m_iEntityList;
 	VArray<VExtractItem>	m_iItemList;
 	VAccessString			m_iDateListString;
-	VArray<VString>		m_iDateList;
+	VArray<V::VString>		m_iDateList;
     };
 
 
@@ -276,20 +276,20 @@ public:
     VExtractListType dateListType () const {
 	return m_iLocalSettings.dateListType ();
     }
-    bool getDateListString (VString& rResult) const {
+    bool getDateListString (V::VString& rResult) const {
 	return m_iLocalSettings.getDateListString (rResult);
     }
-    bool getDateListExpression (VString& rResult) const {
+    bool getDateListExpression (V::VString& rResult) const {
 	return m_iLocalSettings.getDateListExpression (rResult);
     }
 
     VExtractListType entityListType () const {
 	return m_iLocalSettings.entityListType ();
     }
-    bool getEntityListString (VString& rResult) const {
+    bool getEntityListString (V::VString& rResult) const {
 	return m_iLocalSettings.getDateListString (rResult);
     }
-    bool getEntityListExpression (VString& rResult) const {
+    bool getEntityListExpression (V::VString& rResult) const {
 	return m_iLocalSettings.getDateListExpression (rResult);
     }
 
@@ -378,7 +378,7 @@ protected:
 
 /*****  State  *****/
 protected:
-    VString	m_iRemoteName;
+    V::VString	m_iRemoteName;
     Settings	m_iLocalSettings;
     Settings	m_iRemoteSettings;
 };

@@ -161,9 +161,9 @@ namespace Vca {
 
     //  Communication
     private:
-	void onEnd ();
-	void onError (IError *pError, VString const &rMessage);
-	void onTransfer (size_t sTransfer);
+	virtual void onEnd () OVERRIDE;
+	virtual void onError (IError *pError, VString const &rMessage) OVERRIDE;
+	virtual void onTransfer (size_t sTransfer) OVERRIDE;
 
     //  Queueing
     private:
@@ -387,7 +387,7 @@ namespace Vca {
 	void OnData (ExportStubClient *pRole, Data &rData) {
 	    if (m_iData.contentSize () > 0) {
 		fprintf (
-		    stderr, "%s %p:OnData: Orphaned %u data bytes\n", rttName ().content (), this,
+		    stderr, "%s %p:OnData: Orphaned %lu data bytes\n", rttName ().content (), this,
 		    m_iData.contentSize ()
 		);
 		fflush (stderr);
@@ -395,22 +395,22 @@ namespace Vca {
 	    m_iData.setTo (rData);
 	    onGetContinuation ();
 	}
-	void OnEnd (IClient *pRole) {
+	virtual void OnEnd (IClient *pRole) OVERRIDE {
 	    onEnd ();
 	}
-	void OnError (IClient *pRole, IError *pError, VString const &rMessage) {
+	virtual void OnError (IClient *pRole, IError *pError, VString const &rMessage) OVERRIDE {
 	    onError (pError, rMessage);
 	}
 
     //  Control
     private:
-	void endTransfers () {
+	virtual void endTransfers () OVERRIDE {
 	    m_pRemote->Close ();
 	}
 
     //  Data Transfer
     private:
-	void transferData () {
+	virtual void transferData () OVERRIDE {
 	    if (m_sVoid > 0 && m_iData.contentSize () > 0) {
 		size_t sCopy = m_iData.contentSize ();
 		if (sCopy > m_sVoid)

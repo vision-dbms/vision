@@ -20,7 +20,7 @@
 /**************************
  *****  Declarations  *****
  **************************/
-class VString;
+
 VINTERFACE_TEMPLATE_INSTANTIATIONS (Vsa,IEvaluatorPool_Ex5)
 
 /*************************

@@ -825,7 +825,7 @@ PrivateFnDef int NDFReadCountedArrayElementCount (int fd, PS_Type_FO fo) {
     NDFSeek (fd, fo);
 
     int	elementCount = 0;
-    NDFRead (fd, (pointer_t)&elementCount, sizeof (int));
+    NDFRead (fd, (V::pointer_t)&elementCount, sizeof (int));
 
     return elementCount;
 }
@@ -1490,7 +1490,7 @@ PrivateFnDef PS_SMD *GrowSMV (
     int newByteCount = PS_SMV_ByteCount (newRootSegment, minSegment);
     PS_SMD *result = (PS_SMD*)UTIL_Realloc (oldSMV, newByteCount);
 
-    memset ((pointer_t)result + oldByteCount, 0, newByteCount - oldByteCount);
+    memset ((V::pointer_t)result + oldByteCount, 0, newByteCount - oldByteCount);
 
     return result;
 }
@@ -2561,7 +2561,6 @@ PS_AND::PS_AND (
 , m_iNetworkHandle	(pDatabaseNDF->ndfPathName (), osdPathName, -1)
 , m_pASDList		(0)
 , m_iGeneration		(PS_NDH_Generation (ndh))
-, m_pUpdateAnnotation	(0)
 , m_iSpaceCount		(NDFReadCountedArrayElementCount (ndfd, PS_NVD_SRV (nvd)))
 , m_pSRDArray		((PS_SRD*)UTIL_Malloc (sizeof (PS_SRD) * m_iSpaceCount))
 , m_pSVDArray		((PS_SVD*)UTIL_Malloc (sizeof (PS_SVD) * m_iSpaceCount))
@@ -2700,11 +2699,14 @@ PS_AND::PS_AND (
  *****  Routine to access an object space.
  *
  *  Argument:
+ *      rpResult                - a reference to a PS_ASD* that will be
+ *                                set to point to the PS_ASD for the space
+ *                                if it was successfully accessed.
  *	spaceIndex		- the index of the space to be accessed.
  *
  *  Returns:
- *	The address of an 'accessed space descriptor' describing the accessed
- *	space.  'Nil' will be returned if space index is 0.
+ *	True if the access succeeded (rpResult can be used), false otherwise.
+ *      Access will fail if the space index is 0.
  *
  *  Notes:
  *	This routine accesses the space version consistent with the network
@@ -2713,7 +2715,7 @@ PS_AND::PS_AND (
  *	accessed by this routine.
  *
  *****/
-PS_ASD *PS_AND::AccessSpace (unsigned int spaceIndex) {
+bool PS_AND::AccessSpace (PS_ASD *&rpResult, unsigned int spaceIndex) {
 /*****  Abort if an attempt is made to map an out-of-bounds space...  *****/
     if (spaceIndex >= m_iSpaceCount) {
 	ERR_SignalFault (
@@ -2726,12 +2728,14 @@ PS_ASD *PS_AND::AccessSpace (unsigned int spaceIndex) {
     }
 /*****  Return if an attempt is made to map a non-persistent space...  *****/
     if (PS_AND_Role (this, spaceIndex) == PS_Role_Nonextant)
-	return NilOf (PS_ASD*);
+	return false;
     
 /*****  Return the space if it already exists, ...  *****/
     for (PS_ASD *asd = m_pASDList; asd; asd = asd->NextASD ()) {
-	if (spaceIndex == asd->spaceIndex ())
-	    return asd;
+	if (spaceIndex == asd->spaceIndex ()) {
+	    rpResult = asd;
+            return true;
+        }
     }
 
 #if defined(sun) && !defined (_LP64)
@@ -2747,7 +2751,8 @@ PS_ASD *PS_AND::AccessSpace (unsigned int spaceIndex) {
 #if defined(sun) && !defined (_LP64)
     MappedAddressThreshold = savedThreshold;
 #endif
-    return m_pASDList;
+    rpResult = m_pASDList;
+    return true;
 }
 
 
@@ -2824,7 +2829,7 @@ unsigned __int64 PS_ASD::MappedSizeOfSpace (unsigned int *segCount) const {
 }
 
 void PS_ASD::dumpCTSegment () {
-    VString iDumpName ("ctDump_");
+    V::VString iDumpName ("ctDump_");
     iDumpName << m_xSpace << "_" << RootSegment () << "." << getpid ();
     unlink (iDumpName);
     int fd = open (iDumpName, O_CREAT | O_RDWR, 0644);
@@ -3593,34 +3598,26 @@ void PS_AND::WriteCommitJournalEntry (PS_Type_FO nvdfo) {
     );
 
 //  ... and write it if an annotation was not supplied:
-    if (IsNil (m_pUpdateAnnotation))
+    if (m_pUpdateAnnotation.isEmpty ())
 	WriteJournalEntry (pBasicCommitEntry);
 //  Otherwise, ...
-    else
-    {
-    //  ... allocate a buffer for the annotated message, ...
-	char *pAnnotatedCommitEntry = (char *)UTIL_Malloc (
-	    strlen (pBasicCommitEntry) + strlen (m_pUpdateAnnotation) + 5
-	);
+    else {
+	VString pAnnotatedCommitEntry (strlen (pBasicCommitEntry) + m_pUpdateAnnotation.length () + 5);
 
     //  ... format the annotated message, ...
-	sprintf (
-	    pAnnotatedCommitEntry, "%s<%s>", pBasicCommitEntry, m_pUpdateAnnotation
+	pAnnotatedCommitEntry.printf (
+	    "%s<%s>", pBasicCommitEntry, m_pUpdateAnnotation.content ()
 	);
 
     //  ... convert newlines to spaces, ...
-	char *pNextSubstring = pAnnotatedCommitEntry;
-	while (*(pNextSubstring += strcspn (pNextSubstring, "\r\n")))
-	    *pNextSubstring = ' ';
+	pAnnotatedCommitEntry.replaceSubstring ("\r", " ");
+	pAnnotatedCommitEntry.replaceSubstring ("\n", " ");
 
     //  ... append a terminating new line, ...
-	strcpy (pNextSubstring, "\n");
+	pAnnotatedCommitEntry.append ("\n");
 
     //  ... write the annotated commit message, ...
 	WriteJournalEntry (pAnnotatedCommitEntry);
-
-    //  ... and free the buffer containing it.
-	UTIL_Free (pAnnotatedCommitEntry);
     }
 }
 
@@ -3677,7 +3674,7 @@ void PS_ASD::ValidateChecksum (char const *segmentPathName) const {
 	IO_printf (" of %u ...\n", oldChecksum);
     unsigned int newChecksum = 0;
     AccumulateChecksum (
-	&newChecksum, (pointer_t)(segmentAddress + 1), PS_SMD_SegmentSize (&smd) - sizeof (PS_SH)
+	&newChecksum, (V::pointer_t)(segmentAddress + 1), PS_SMD_SegmentSize (&smd) - sizeof (PS_SH)
     );
     ReclaimSMDMapping (&smd);
     if (oldChecksum != newChecksum) ERR_SignalFault (
@@ -4364,7 +4361,7 @@ void PS_AND::CommitUpdate () {
 /*****  Display trace message, ...  *****/
     if (m_bTracingUpdate) IO_printf (
 	"+++ Starting commit processing with annotation <%s>...\n",
-	m_pUpdateAnnotation ? m_pUpdateAnnotation : ""
+	m_pUpdateAnnotation.content ()
     );
 
 /*****  Lock the object network, ...  *****/
@@ -4451,7 +4448,7 @@ void PS_AND::CommitUpdate () {
     PS_NVD_TID			(nvd) = m_iTID;
 
 
-    if (m_pUpdateAnnotation)
+    if (m_pUpdateAnnotation.isntEmpty ())
 	PS_NVD_Annotation	(nvd) = WriteString (pNDF, m_pUpdateAnnotation);
     else
 	PS_NVD_Annotation	(nvd) = PS_FO_Nil;
@@ -4483,10 +4480,7 @@ void PS_AND::CommitUpdate () {
     );
 
 /*****  ... clear the annotation, ...  *****/
-    if (m_pUpdateAnnotation) {
-	UTIL_Free ((void*)m_pUpdateAnnotation);
-	m_pUpdateAnnotation = NilOf (char const*);
-    }
+    m_pUpdateAnnotation.clear ();
 
 /*****  ... update the process update thread, ...  *****/
     m_iUpdateFO	 = PS_NDH_CurrentNetworkVersion (ndh);
@@ -4977,7 +4971,7 @@ PrivateFnDef PS_CTList* ReadContainerTable (char const *segDirPath, PS_SVD *svdP
     );
     M_CEndMarker_Size (
 	(M_CEndMarker*)(
-	    (pointer_t)(ctList->ct) + M_CPreamble_NSize (&ctList->preamble)
+	    (V::pointer_t)(ctList->ct) + M_CPreamble_NSize (&ctList->preamble)
 	)
     ) = M_CPreamble_NSize (&ctList->preamble);
 
@@ -5408,22 +5402,20 @@ PublicFnDef void PS_CreateNetwork (
  *
  *****/
 void PS_ASD::WriteDBUpdateInfo (unsigned int xContainer, bool replace) {
-    if (this) {
-	char *spacePathName = SpacePathName ();
-	char *p = strrchr (spacePathName, '/');
-	if (IsntNil (p))
-	    *p = '\0';
+    char *spacePathName = SpacePathName ();
+    char *p = strrchr (spacePathName, '/');
+    if (IsntNil (p))
+        *p = '\0';
 
-	DBUPDATE_OutputHeaderRecord (
-	    spacePathName,
-	    m_xSpace,
-	    PS_ASD_RootSegment (this),
-	    xContainer,
-	    replace,
-	    m_pAND->NDFPathName (),
-	    m_pAND->UpdateFO ()
-	);
-    }
+    DBUPDATE_OutputHeaderRecord (
+        spacePathName,
+        m_xSpace,
+        PS_ASD_RootSegment (this),
+        xContainer,
+        replace,
+        m_pAND->NDFPathName (),
+        m_pAND->UpdateFO ()
+    );
 }
 
 
@@ -5673,13 +5665,13 @@ PS_ASD *PS_AND::IncorporateExternalUpdate (char const *xuSpecPathName) {
  *  Access the external update specification and its associated space, ...
  *****/
     XUIS iXUIS (xuSpecPathName);
-    PS_ASD *asd = AccessSpace (iXUIS.spaceIndex ());
 
 /*****
  *  ... validate that the external update is consistent with the current
  *	state of the space, ...
  *****/
-    if (PS_ASD_RootSegment (asd) + 1 != (int)iXUIS.SegmentOrigin ()) {
+    PS_ASD *asd = 0;
+    if (!AccessSpace (asd, iXUIS.spaceIndex ()) || PS_ASD_RootSegment (asd) + 1 != (int)iXUIS.SegmentOrigin ()) {
 	m_xUpdateStatus = PS_UpdateStatus_Inconsistent;
 	return NilOf (PS_ASD*);
     }
@@ -5739,7 +5731,7 @@ PublicFnDef void PS_Initialize () {
 
     if (IsntNil (estring = getenv ("VisionAddressThreshold")) &&
 	(evalue = (unsigned int)strtoul (estring, (char **)NULL, 0)) > 0
-    ) MappedAddressThreshold = (void const*)evalue;
+    ) MappedAddressThreshold = reinterpret_cast<void const*>(static_cast<pointer_size_t>(evalue));
 
     if (IsntNil (estring = getenv ("VisionNSyncRetries")) &&
 	(evalue = (unsigned int)strtoul (estring, (char **)NULL, 0)) > 0
@@ -5827,7 +5819,7 @@ PublicFnDef void PS_SetMappingLimit (int limit) {
 }
 
 PublicFnDef void PS_SetAddressThreshold (unsigned int threshold) {
-    MappedAddressThreshold = (void const*)threshold;
+    MappedAddressThreshold = reinterpret_cast<void const*>(static_cast<pointer_size_t>(threshold));
 }
 
 PublicFnDef void PS_SetNSyncRetries (int retries) {

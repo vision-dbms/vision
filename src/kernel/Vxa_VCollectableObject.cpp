@@ -37,7 +37,7 @@
  **************************
  **************************/
 
-Vxa::VCollectableObject::VCollectableObject () : m_xObject (0) {
+Vxa::VCollectableObject::VCollectableObject () {
 }
 
 /*************************
@@ -49,20 +49,66 @@ Vxa::VCollectableObject::VCollectableObject () : m_xObject (0) {
 Vxa::VCollectableObject::~VCollectableObject () {
 }
 
-/********************
- ********************
- *****  Update  *****
- ********************
- ********************/
+/*******************************
+ *******************************
+ *****  Ticketing Support  *****
+ *******************************
+ *******************************/
 
-bool Vxa::VCollectableObject::attach (VCollectableCollection *pCollection, collection_index_t xObject) {
-    if (m_pCollection.interlockedSetIfNil (pCollection)) {
-	m_xObject = xObject;
-	return true;
-    }
-    return false;
+void Vxa::VCollectableObject::GetHandle (VResultBuilder &rRB) {
+    GetTicketImplementation (rRB, false);
 }
 
-bool Vxa::VCollectableObject::detach (VCollectableCollection *pCollection) {
-    return m_pCollection.interlockedClearIf (pCollection);
+void Vxa::VCollectableObject::GetTicket (VResultBuilder &rRB) {
+    GetTicketImplementation (rRB, true);
+}
+
+void Vxa::VCollectableObject::GetTicketImplementation (VResultBuilder &rRB, bool bSingleUse) {
+    VString iTicket;
+    if (m_iIdentity.getTicket (iTicket, bSingleUse))
+        rRB = iTicket;
+    else
+        rRB = false;
+}
+
+
+/***************************************************
+ ***************************************************
+ *****                                         *****
+ *****  Vxa::VCollectableObject::ClassBuilder  *****
+ *****                                         *****
+ ***************************************************
+ ***************************************************/
+
+/**************************
+ **************************
+ *****  Construction  *****
+ **************************
+ **************************/
+
+Vxa::VCollectableObject::ClassBuilder::ClassBuilder (Vxa::VClass *pClass) : m_pClass (pClass) {
+    defineMethod (".id" , &VCollectableObject::GetTicket);
+    defineMethod (".id:", &VCollectableObject::GetTicketImplementation);
+}
+
+/**************************************
+ **************************************
+ *****  Method Definition Helpers *****
+ **************************************
+ **************************************/
+
+bool Vxa::VCollectableObject::ClassBuilder::defineMethodImpl (VString const &rName, VMethod *pMethod) {
+    m_iHelpInfo << rName << "\n";
+
+    return m_pClass->defineMethod (rName, pMethod);
+}
+
+bool Vxa::VCollectableObject::ClassBuilder::defineDefaultImpl (VMethod *pMethod) {
+    return m_pClass->defineDefault (pMethod);
+}
+
+bool Vxa::VCollectableObject::ClassBuilder::defineHelp (VString const &rWhere) {
+    VString iHelpInfo;
+    iHelpInfo << "The class " << rWhere << " supports the following methods:\nhelp\n" << m_iHelpInfo;
+    return defineConstant ("help", iHelpInfo);
 }

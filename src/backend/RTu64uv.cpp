@@ -658,7 +658,7 @@ PublicFnDef M_CPD *rtU64UV_LCAssignScalar (
 ) {
 /*****  Align 'target' and perform the assignment  *****/
     return UV_LCAssignScalar (
-	rtU64UV_Align (targetCPD), linkConstructor, (pointer_t)valuePtr
+	rtU64UV_Align (targetCPD), linkConstructor, (V::pointer_t)valuePtr
     );
 }
 

@@ -35,7 +35,7 @@ PublicFnDef void STD_checkTerminalCapabilities() {
     if (entryIsntValid)
     {
 	char const *term = getenv ("TERM");
-	VString iTerm (term ? term : "vt100", false);
+	V::VString iTerm (term ? term : "vt100", false);
 
 	entryIsntValid = tgetent (entry, iTerm.storage ()) != 1;
     }

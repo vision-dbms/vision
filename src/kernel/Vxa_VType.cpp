@@ -52,22 +52,13 @@ Vxa::VType::VType () {
 Vxa::VType::~VType () {
 }
 
-/***************************
- ***************************
- *****  Initalization  *****
- ***************************
- ***************************/
-
-void Vxa::VType::initialize () {
-}
-
 /*************************
  *************************
  *****  Description  *****
  *************************
  *************************/
 
-VString &Vxa::VType::getDescription_(VString &rResult) const {
+V::VString &Vxa::VType::getDescription_(VString &rResult) const {
     V::VRTTI iRTTI (typeid (*this));
     return rResult << iRTTI.name ();
 }

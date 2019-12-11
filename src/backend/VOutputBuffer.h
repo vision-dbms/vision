@@ -209,10 +209,10 @@ public:
 	    }
 
 	    size_t cellBlockSize () const {
-		return this ? m_sCellBlock : 0;
+		return m_sCellBlock;
 	    }
 	    size_t freeAreaSize () const {
-		return this ? m_sFreeArea : 0;
+		return m_sFreeArea;
 	    }
 
 	//  Allocation

@@ -26,17 +26,17 @@ namespace V {
     class V_API VAdaptiveAllocator : public VTransient {
 	DECLARE_FAMILY_MEMBERS (VAdaptiveAllocator, VTransient);
 
-	//  Parameters
-	public:
+    //  Globals
+    public:
+        static size_t g_sIncrementDelay;
+        static size_t g_sIncrementMin;
+        static size_t g_sIncrementMax;
+        static size_t g_sIncrementMultiplier;
+
+    //  Parameters
+    public:
 	class V_API Parameters : public VTransient {
 	    DECLARE_FAMILY_MEMBERS (Parameters, VTransient);
-
-	//  Globals
-	public:
-	    static size_t g_sIncrementDelay;
-	    static size_t g_sIncrementMin;
-	    static size_t g_sIncrementMax;
-	    static size_t g_sIncrementMultiplier;
 
 	//  Construction
 	public:
@@ -56,16 +56,16 @@ namespace V {
 	//  Access
 	public:
 	    size_t incrementDelay () const {
-		return this ? m_sIncrementDelay : g_sIncrementDelay;
+		return m_sIncrementDelay;
 	    }
 	    size_t incrementMin () const {
-		return this ? m_sIncrementMin : g_sIncrementMin;
+		return m_sIncrementMin;
 	    }
 	    size_t incrementMax () const {
-		return this ? m_sIncrementMax : g_sIncrementMax;
+		return m_sIncrementMax;
 	    }
 	    size_t incrementMultiplier () const {
-		return this ? m_sIncrementMultiplier : g_sIncrementMultiplier;
+		return m_sIncrementMultiplier;
 	    }
 
 	//  Update
@@ -104,6 +104,21 @@ namespace V {
     public:
 	~VAdaptiveAllocator () {
 	}
+
+    //  Parameter Access
+    public:
+        size_t incrementDelay () const {
+            return m_pParameters ? m_pParameters->incrementDelay() : g_sIncrementDelay;
+        }
+        size_t incrementMin () const {
+            return m_pParameters ? m_pParameters->incrementMin() : g_sIncrementMin;
+        }
+        size_t incrementMax () const {
+            return m_pParameters ? m_pParameters->incrementMax() : g_sIncrementMax;
+        }
+        size_t incrementMultiplier () const {
+            return m_pParameters ? m_pParameters->incrementMultiplier() : g_sIncrementMultiplier;
+        }
 
     //  Use
     public:

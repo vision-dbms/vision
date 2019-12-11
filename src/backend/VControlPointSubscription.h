@@ -60,7 +60,7 @@ public:
     unsigned int cardinality () const {
 	return 1;
     }
-    unsigned int cardinality_() const {
+    virtual unsigned int cardinality_() const OVERRIDE {
 	return cardinality ();
     }
 
@@ -76,7 +76,7 @@ public:
     rtPTOKEN_Handle *ptoken () const {
 	return M_AttachedNetwork->TheScalarPTokenHandle ();
     }
-    rtPTOKEN_Handle *ptoken_() const {
+    virtual rtPTOKEN_Handle *ptoken_() const OVERRIDE {
 	return ptoken ();
     }
 

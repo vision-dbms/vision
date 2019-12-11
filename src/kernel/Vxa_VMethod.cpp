@@ -39,7 +39,7 @@
  **************************
  **************************/
 
-Vxa::VMethod::VMethod (VString const &rName) : m_iName (rName) {
+Vxa::VMethod::VMethod () {
 }
 
 /*************************

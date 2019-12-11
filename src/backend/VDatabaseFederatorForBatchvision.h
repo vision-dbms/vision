@@ -31,9 +31,9 @@ private:
 
 //  Database Activation
 private:
-    VDatabaseActivation *Activate_(
+    virtual VDatabaseActivation *Activate_(
 	VDatabaseNDF *pDatabase, char const *pVersionSpec, bool makingNewNDF
-    );
+    ) OVERRIDE;
 
 //  Resource Utilization Management
 private:

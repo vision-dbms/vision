@@ -316,7 +316,7 @@ namespace Vca {
 
     //  Response Callbacks
     private:
-	void onData (
+	virtual void onData (
 	    VSiteInfo*		pSiteInfo,
 	    ProcessInfo::pid_t	iPID,
 	    ProcessInfo::uid_t	iUID,
@@ -324,7 +324,7 @@ namespace Vca {
 	    VString const&	rHostName,
 	    VString const&	rUserName,
 	    VString const&	rGroupName
-	);
+	) OVERRIDE;
 
     //  State
     private:

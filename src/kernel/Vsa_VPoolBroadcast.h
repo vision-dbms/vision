@@ -93,9 +93,9 @@ namespace Vsa {
 	);
 
     //  IClient Methods
-	void OnError (
+	virtual void OnError (
 	    Vca::IClient *pRole, Vca::IError *pError, VString const &rText
-	);
+	) OVERRIDE;
 
     //  Query
     public:
