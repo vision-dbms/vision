@@ -42,7 +42,7 @@ namespace Vxa {
 
     //  Element Update
     private:
-	virtual bool returnResult (VExportableDatum const &rDatum);
+	virtual bool returnResult (VExportableDatum const &rDatum) OVERRIDE;
     public:
 	template <typename object_reference_t> bool returnObject (VClass *pClass, object_reference_t const &rpObject) {
 	    getObjectIdentity (rpObject, pClass);
