@@ -336,11 +336,11 @@ Vxa::VCallAgent *Vxa::VCallType1Importer::agent (VTask *pTask) const {
     if (m_pAgent.isNil ()) {
 	m_pAgent.setTo (new VCallAgentFor<VCallType1> (pTask, *this));
 	if (g_bVxaCompression) {
-	    VCallAgent::ICallType1Implementation_T::Reference pIVSNFTaskImplementation;
+	    VCallAgent::ICallImplementation_T::Reference pIVSNFTaskImplementation;
 	    m_pAgent->getRole (pIVSNFTaskImplementation);
 	    returnImplementationHandle (pIVSNFTaskImplementation);
 	} else {
-	    VCallAgent::ICallType1ImplementationNC_T::Reference pIVSNFTaskImplementation;
+	    VCallAgent::ICallImplementationNC_T::Reference pIVSNFTaskImplementation;
 	    m_pAgent->getRole (pIVSNFTaskImplementation);
 	    returnImplementationHandle (pIVSNFTaskImplementation);
 	}

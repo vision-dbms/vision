@@ -524,7 +524,7 @@ Vxa::VCallAgent *Vxa::VCallType2Importer::agent (VTask *pTask) const {
     if (m_pAgent.isNil ()) {
 	m_pAgent.setTo (new VCallAgentFor<VCallType2> (pTask, *this));
 
-	VCallAgent::ICallType2Implementation_T::Reference pIVSNFTaskImplementation;
+	VCallAgent::ICallImplementationNC_T::Reference pIVSNFTaskImplementation;
 	m_pAgent->getRole (pIVSNFTaskImplementation);
 	returnImplementationHandle (pIVSNFTaskImplementation);
     }
