@@ -12,7 +12,6 @@
  ************************/
 
 #include "Vca_VServerApplication.h"
-#include "Vxa_ICollection.h"
 
 /**************************
  *****  Declarations  *****
