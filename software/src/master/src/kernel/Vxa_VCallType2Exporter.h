@@ -42,7 +42,7 @@ namespace Vxa {
 
     //  Element Update
     private:
-	virtual bool returnResult (VExportableDatum const &rDatum);
+	virtual bool returnResult (VExportableDatum const &rDatum) OVERRIDE;
     public:
 	template <typename object_reference_t> bool returnObject (VClass *pClass, object_reference_t const &rpObject) {
 	    getObjectIdentity (rpObject, pClass);
@@ -76,6 +76,12 @@ namespace Vxa {
                 );
             }
 	}
+
+    //  Remote Control
+    private:
+        virtual Vxa::ICaller2 *getRemoteControlInterface () const override {
+            return VCallType2::getRemoteControlInterface ();
+        }
 
     //  Map Making
     private:

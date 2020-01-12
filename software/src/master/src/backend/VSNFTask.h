@@ -179,6 +179,7 @@ private:
 private:
     VFragment *createSegment (object_reference_array_t const &rInjector);
     bool       wrapupSegment ();
+    bool       wrapup ();
 
     template <typename Source_T, typename Result_T> void ProcessArray (
 	VDescriptor &rResult, rtPTOKEN_Handle *pPPT, VkDynamicArrayOf<Source_T> const &rArray, Result_T const *&rpResultArray
@@ -199,7 +200,7 @@ public:
 
     template <typename Source_T> void ReturnSingleton (Source_T iSingleton);
 
-    bool ReturnNA (object_reference_array_t const &rInjector); // ... segment
+    bool ReturnNASegment (object_reference_array_t const &rInjector); // ... segment
     void ReturnNA () {
 	loadDucWithNA ();
     }

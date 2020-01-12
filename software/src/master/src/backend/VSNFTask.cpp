@@ -559,12 +559,13 @@ VFragment *VSNFTask::createSegment (object_reference_array_t const &rInjector) {
 }
 
 bool VSNFTask::wrapupSegment () {
-    if (allSegmentsReceived ()) {
-	dismiss ();
-	resume ();
-	return true;
-    }
-    return false;
+    return allSegmentsReceived () && wrapup ();
+}
+
+bool VSNFTask::wrapup () {
+    dismiss ();
+    resume ();
+    return true;
 }
 
 bool VSNFTask::SetSegmentCountTo (unsigned int cSegments) {
@@ -677,8 +678,7 @@ template <typename Source_T, typename Result_T> void VSNFTask::ReturnArray (
     VkDynamicArrayOf<Source_T> const &rSourceArray, Result_T const *&rpResultArray
 ) {
     ProcessArray (duc (), ptoken (), rSourceArray, rpResultArray);
-    dismiss ();
-    resume ();
+    wrapup ();
 }
 template void VSNFTask::ReturnArray<bool,int>          (VkDynamicArrayOf<bool> const&, int const*&);
 
@@ -733,8 +733,7 @@ template bool VSNFTask::ReturnSegment<V::VString,V::VString>    (object_referenc
 
 template <typename Source_T> void VSNFTask::ReturnSingleton (Source_T iSingleton) {
     loadDucWith (iSingleton);
-    dismiss ();
-    resume ();
+    wrapup ();
 }
 template void VSNFTask::ReturnSingleton<int>         (int);
 template void VSNFTask::ReturnSingleton<double>      (double);
@@ -742,11 +741,11 @@ template void VSNFTask::ReturnSingleton<float>       (float);
 template void VSNFTask::ReturnSingleton<char const*> (char const*);
 
 
-/********************************
- *----  VSNFTask::ReturnNA  ----*
- ********************************/
+/***************************************
+ *----  VSNFTask::ReturnNASegment  ----*
+ ***************************************/
 
-bool VSNFTask::ReturnNA (object_reference_array_t const &rInjector) {
+bool VSNFTask::ReturnNASegment (object_reference_array_t const &rInjector) {
     VFragment *const pFragment = createSegment (rInjector);
     pFragment->datum ().setToNA (pFragment->subset ()->PPT (), codKOT ());
     return wrapupSegment ();
@@ -784,18 +783,16 @@ bool VSNFTask::ReturnObjects (
     VFragment *const pFragment = createSegment (rInjector);
     ProcessObjects (pFragment->datum (), pFragment->subset ()->PPT (), pCluster, sCluster, rxObjects);
     return wrapupSegment ();
-    }
+}
 
 void VSNFTask::ReturnObjects (ICollection *pCluster, object_reference_t sCluster, object_reference_array_t const &rxObjects) {
     ProcessObjects (duc (), ptoken (), pCluster, sCluster, rxObjects);
-    dismiss ();
-    resume ();
+    wrapup ();
 }
 
 void VSNFTask::ReturnObject (ICollection *pCluster, object_reference_t sCluster, object_reference_t xObject) {
     loadDucWithRepresentative (new VExternalGroundStore (codSpace (), pCluster, sCluster), xObject);
-    dismiss ();
-    resume ();
+    wrapup ();
 }
 
 /***********************************
@@ -825,6 +822,5 @@ void VSNFTask::SetOutput (VkDynamicArrayOf<VString> const & rArray){
 void VSNFTask::TurnBackSNFTask () {
     DoAnOldFashionedSNF ();		
     loadDucWithNA ();
-    dismiss ();
-    resume ();
+    wrapup ();
 }

@@ -37,10 +37,8 @@ namespace Vxa {
 
     //  Aliases
     public:
-	typedef Vxa::IVSNFTaskImplementation3   ICallType1Implementation_T;
-	typedef Vxa::IVSNFTaskImplementation3NC ICallType1ImplementationNC_T;
-
-	typedef Vxa::IVSNFTaskImplementation3NC ICallType2Implementation_T;
+	typedef Vxa::IVSNFTaskImplementation3   ICallImplementation_T;
+	typedef Vxa::IVSNFTaskImplementation3NC ICallImplementationNC_T;
 
     /*********************************************************
      *----  template <typename storage_t> class Wrapped  ----*
@@ -620,17 +618,17 @@ namespace Vxa {
 
     //  Role IVSNFTaskImplementation
     private:
-	Vca::VRole<ThisClass,ICallType1Implementation_T> m_pIVSNFTaskImplementation;
+	Vca::VRole<ThisClass,ICallImplementation_T> m_pIVSNFTaskImplementation;
     public:
-	void getRole (ICallType1Implementation_T::Reference &rpRole) {
+	void getRole (ICallImplementation_T::Reference &rpRole) {
 	    m_pIVSNFTaskImplementation.getRole (rpRole);
 	}
 
     //  Role IVSNFTaskImplementationNC
     private:
-	Vca::VRole<ThisClass,ICallType1ImplementationNC_T> m_pIVSNFTaskImplementationNC;
+	Vca::VRole<ThisClass,ICallImplementationNC_T> m_pIVSNFTaskImplementationNC;
     public:
-	void getRole (ICallType1ImplementationNC_T::Reference &rpRole) {
+	void getRole (ICallImplementationNC_T::Reference &rpRole) {
 	    m_pIVSNFTaskImplementationNC.getRole (rpRole);
 	}
 

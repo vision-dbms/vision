@@ -70,6 +70,7 @@ public:
 
     friend class VCall;
     friend class VTask;
+    friend class VSNFTaskHolder;
     friend class VSuspension;
 
     friend class VWaitTaskTrigger;
@@ -629,6 +630,10 @@ public:
 
     VComputationScheduler *scheduler () const {
 	return m_pScheduler;
+    }
+
+    unsigned int suspendCount () const {
+        return m_iSuspendCount;
     }
 
     virtual VSelector const& selector_ () const = 0;

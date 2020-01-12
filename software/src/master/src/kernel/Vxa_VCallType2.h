@@ -11,7 +11,7 @@
  *****  Declarations  *****
  **************************/
 
-#include "Vxa_ICaller.h"
+#include "Vxa_ICaller2.h"
 
 #include "Vxa_VScalar.h"
 #include "Vxa_VTaskCursor.h"
@@ -228,6 +228,10 @@ namespace Vxa {
 	    return true;
 	}
 
+    //  Remote Control
+    protected:
+        Vxa::ICaller2 *getRemoteControlInterface () const;
+
     //  Result Return
     public:
     //  ... constants:
@@ -298,7 +302,8 @@ namespace Vxa {
 
     //  State
     private:
-	ICaller::Reference const m_pCaller;
+	ICaller::Reference  const m_pCaller;
+        ICaller2::Reference const m_pCaller2;
     };
 }
 
