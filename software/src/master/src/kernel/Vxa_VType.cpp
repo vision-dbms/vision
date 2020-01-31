@@ -58,7 +58,7 @@ Vxa::VType::~VType () {
  *************************
  *************************/
 
-V::VString &Vxa::VType::getDescription_(VString &rResult) const {
+V::VString &Vxa::VType::getDescription_(V::VString &rResult) const {
     V::VRTTI iRTTI (typeid (*this));
     return rResult << iRTTI.name ();
 }
