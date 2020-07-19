@@ -24,6 +24,7 @@
 
 #include "V_VAllocator.h"
 #include "V_VArgList.h"
+#include "V_VThread.h"
 
 #include "VTransientServices.h"
 
@@ -72,11 +73,11 @@ void VTransient::detachTransientServicesProvider (VTransientServices *pTSP) {
  *******************************/
 
 void *VTransient::operator new (size_t sObject) {
-    return V::VThreadSafeAllocator::Data.allocate (sObject);
+    return V::VThread::Allocate (sObject);
 }
 
 void VTransient::operator delete (void *pObject, size_t sObject) {
-    V::VThreadSafeAllocator::Data.deallocate (pObject, sObject);
+    V::VThread::Deallocate (pObject, sObject);
 }
 
 void *VTransient::allocate (size_t cBytes) {
@@ -93,10 +94,7 @@ void VTransient::deallocate (void *pMemory) {
 }
 
 void VTransient::DisplayAllocationStatistics () {
-    display ("\n====  Standard Allocator:");
-    V::VThreadDumbAllocator::Data.displayCounts ();
-    display ("\n====  Thread Safe Allocator:");
-    V::VThreadSafeAllocator::Data.displayCounts ();
+    V::VThread::DisplayAllocationStatistics ();
 }
 
 
@@ -201,9 +199,17 @@ void VTransient::vraiseException (
 void VTransient::traceInfo (char const *pWhat) const {
     if (objectsTrace ()) {
 #if 0
-	display ("\n+++ %-50s: %p", pWhat, this);
+	display ("\n+++ %-50s:", pWhat);
+	if (!this)
+	    display (" Nil");
+	else 
+	    display (" %p", this);
 #else
-	fprintf (stderr, "\n+++ %-50s: %p", pWhat, this);
+	fprintf (stderr, "\n+++ %-50s:", pWhat);
+	if (!this)
+	    fprintf (stderr, " Nil");
+	else 
+	    fprintf (stderr, " %p", this);
 	fflush (stderr);
 #endif
     }

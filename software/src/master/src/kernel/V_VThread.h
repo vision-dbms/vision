@@ -1,21 +1,19 @@
 #ifndef V_VThread_Interface
 #define V_VThread_Interface
 
-/*********************
- *****  Library  *****
- *********************/
-
-#include "V.h"
-
 /************************
  *****  Components  *****
  ************************/
 
 #include "V_VThreadSpecific.h"
 
+#include "V_VAllocator.h"
+
 /**************************
  *****  Declarations  *****
  **************************/
+
+#include "V_VTime.h"
 
 /*************************
  *****  Definitions  *****
@@ -66,8 +64,7 @@ namespace V {
 
     //  Key
     private:
-        typedef V::VEternal<Key const> EternalKey;
-        static EternalKey g_iTLSKey;
+        static Key const g_iTLSKey;
 
     //  State
     public:
@@ -106,6 +103,7 @@ namespace V {
         static pthread_t CurrentThread ();
         static pthread_id_t CurrentThreadId ();
 
+	static bool GetHere (Reference &rpHere);
         static Reference Here ();
 
         bool isInitialized () const {
@@ -169,6 +167,42 @@ namespace V {
         bool stop ();
     //@}
 
+    /**
+     * @name Memory Management
+     */
+    //@{
+    private:
+	static VThreadSafeAllocator GlobalAllocator;
+    public:
+	static void *Allocate (size_t sObject);
+	template <class hazard_pointer_t> static void *AllocateGlobal (size_t sObject, hazard_pointer_t &rpHazard) {
+	    return GlobalAllocator.allocate (sObject, rpHazard);
+	}
+	static void *AllocateGlobal (size_t sObject);
+	void *allocateLocal (size_t sObject) {
+	    return m_iTLA.allocate (sObject, m_pAllocatorHazard);
+	}
+
+	static void Deallocate (void *pObject, size_t sObject);
+	static void DeallocateGlobal (void *pObject, size_t sObject) {
+	    GlobalAllocator.deallocate (pObject, sObject);
+	}
+	void deallocateLocal (void *pObject, size_t sObject) {
+	    m_bAllocatorFlushed = true;
+	    m_iTLA.deallocate (pObject, sObject);
+	}
+
+	static void FlushAllocator ();
+	void flushAllocator ();
+
+	static void DisplayAllocationStatistics ();
+	void displayAllocationStatistics () const;
+
+	bool allocatorFlushed () const {
+	    return m_bAllocatorFlushed;
+	}
+	    
+    //@}
     //  Object Reclamation
     public:
         static void ReclaimObject (VReferenceableBase *pObject) {
@@ -202,7 +236,7 @@ namespace V {
          * Attaches this descriptor to the thread-local storage map.
          */
         bool becomeSpecific () {
-            return g_iTLSKey->setSpecific (this);
+            return g_iTLSKey.setSpecific (this);
         }
 
     //  State
@@ -212,6 +246,9 @@ namespace V {
         pthread_t       m_hThread;
         pthread_id_t    m_xThread;
         Reaper::Pointer m_pReaper;
+	VThreadDumbAllocator m_iTLA;
+	HazardPointer   m_pAllocatorHazard;
+	bool            m_bAllocatorFlushed;
 
         /** state of all threads **/
         static bool const m_VSingleCoreExecution;

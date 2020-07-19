@@ -14,6 +14,10 @@
 #ifndef VReferenceable_Interface
 #define VReferenceable_Interface
 
+#ifndef V_VReferenceable
+#define V_VReferenceable extern
+#endif
+
 /************************
  *****  Components  *****
  ************************/
@@ -34,6 +38,7 @@
 #include "VConfig.h"
 
 template <class R> class VReference;
+namespace V { class VString; }
 
 
 /*****************************************
@@ -293,17 +298,19 @@ namespace V {
 	void die () {
 	    die_();
 	}
+    protected:
+	void reclaimThis ();
 
     //  Run Time Type
     public:
 	virtual VRunTimeType *rtt () const = 0;
-	virtual VString rttName () const;
+	virtual V::VString rttName () const;
 
     //  Display
     public:
 	virtual void displayInfo (char const *pWhat) const;
 	virtual void displayInfo () const;
-        virtual void getInfo (VString &rResult, const VString &rPrefix) const;
+        virtual void getInfo (V::VString &rResult, const V::VString &rPrefix) const;
 
     //  State
     private:
@@ -311,93 +318,18 @@ namespace V {
     };
 
 
-    /*---------------------------------------*
-     *----  class V::ThreadModel::Multi  ----*
-     *---------------------------------------*/
+    /*-----------------------------------------------------------------------------*
+     *----  template <class Counter_T> class V::VReferenceableImplementation_  ----*
+     *-----------------------------------------------------------------------------*/
 
-    namespace ThreadModel {
-	class V_API Multi {
-	    DECLARE_NUCLEAR_FAMILY(Multi);
-
-	public:	    
-	    typedef counter32_t counter_t;
-
-	public:
-	    static void *allocate (size_t sObject) {
-		return VThreadSafeAllocator::Data.allocate (sObject);
-	    }
-	    static void deallocate (void *pObject, size_t sObject) {
-		VThreadSafeAllocator::Data.deallocate (pObject, sObject);
-	    }
-	    static void reclaim (VReferenceableBase *pObject);
-	};
-    }
-
-    /*----------------------------------------*
-     *----  class V::ThreadModel::Single  ----*
-     *----------------------------------------*/
-
-    namespace ThreadModel {
-	class V_API Single {
-	    DECLARE_NUCLEAR_FAMILY(Single);
-
-	public:
-	    typedef counter32nil_t counter_t;
-
-	public:
-	    static void *allocate (size_t sObject) {
-		return VThreadDumbAllocator::Data.allocate (sObject);
-	    }
-	    static void deallocate (void *pObject, size_t sObject) {
-		VThreadDumbAllocator::Data.deallocate (pObject, sObject);
-	    }
-	    static void reclaim (VReferenceableBase *pObject);
-	};
-    }
-
-
-    /*-------------------------------------------------------------------------*
-     *----  template <class Model> class V::VReferenceableImplementation_  ----*
-     *-------------------------------------------------------------------------*/
-
-    template <class Model> class VReferenceableImplementation_ : public VReferenceableBase {
+    template <class Counter_T> class V_API VReferenceableImplementation_ : public VReferenceableBase {
     public:
-	typedef VReferenceableImplementation_<Model> Referenceable;
+	typedef VReferenceableImplementation_<Counter_T> Referenceable;
 	DECLARE_ABSTRACT_RTT (Referenceable, VReferenceableBase);
-
-	friend class ThreadModel::Single;
 
     //  Aliases
     public:
-	typedef typename Model::counter_t model_counter_t;
-
-#if defined(WIN32_COM_SERVER)
-	class ComWrapperCache {
-	public:
-	    ComWrapperCache () : m_pComWrapper (0) {
-	    }
-
-	    ~ComWrapperCache () {
-		ATLASSERT (m_pComWrapper == NULL);
-	    }
-
-	public:
-	    void *comWrapper () const {
-		return m_pComWrapper;
-	    }
-	    void setComWrapperTo (void *pComWrapper) {
-		ATLASSERT (m_pComWrapper == NULL);
-		m_pComWrapper = pComWrapper;
-	    }
-	    void clearComWrapper () {
-		ATLASSERT (m_pComWrapper != NULL);
-		m_pComWrapper = NULL;
-	    }
-
-	private:
-	    void *m_pComWrapper;
-	};
-#endif
+	typedef Counter_T model_counter_t;
 
 //  RTTI
     public:
@@ -409,39 +341,15 @@ namespace V {
 	    }
 	};
 
-//  new/delete
-    public:
-	void *operator new (size_t sObject) {
-	    return Model::allocate (sObject);
-	}
-/*******************************************************************************
- *>>>>  'operator delete' should be protected in this class since we NEVER want
- *>>>>  it called from ANYWHERE EXCEPT the subclass implementations of
- *>>>>  'virtual void deleteThis ()'.  Unfortunately, too many compilers and
- *>>>>	perhaps the standard itself INCORRECTLY complain that it must be
- *>>>>	accessible whenever 'operator new' is made accessible.
- *******************************************************************************/
-//protected:
-	void operator delete (void *pObject, size_t sObject) {
-	    Model::deallocate (pObject, sObject);
-	}
-
-    #if defined(MEMORY_MANAGER_CONTROL_OVERRIDES)
-    DEFINE_MEMORY_MANAGER_REFERENCEABLE_NEW_OVERRIDES
-    #endif
 
 //  Construction
     protected:
-	VReferenceableImplementation_(unsigned int iReferenceCount) : m_iReferenceCount (iReferenceCount) {
-	}
+	VReferenceableImplementation_(unsigned int iReferenceCount);
+	VReferenceableImplementation_();
 
-	VReferenceableImplementation_() : m_iReferenceCount (0) {
-	}
-
-//  Destruction
+    //  Destruction
     protected:
 	~VReferenceableImplementation_();
-
 	/**
 	 *  Override this function in any subclass to gain control of the
 	 *  deletion process.  If your override returns true, this object
@@ -450,8 +358,14 @@ namespace V {
 	 *
 	 *  This function is non-virtual by design.  There is absolutely
 	 *  no value in making it virtual since 'deleteThis' is already
-	 *  virtual and explicitly overridden in all derived concrete
+	 *  virtual and explicitly overridden in all concrete derived
 	 *  classes.
+	 *
+	 *  Special Note For Overrides In Concrete Classes - Declare
+	 *  concrete classes that need to explicitly override this member
+	 *  using 'DECLARE_CONCRETE_RTT_NODT' to suppress the automatic
+	 *  inclusion of a 'using BaseClass::onDeleteThis' statement in
+	 *  your class definition.
 	 */
 	bool onDeleteThis () {
 	    return true;
@@ -473,7 +387,7 @@ namespace V {
 	}
 	void reclaimThis () {
 	    m_iReferenceCount = 1;
-	    Model::reclaim (this);
+	    BaseClass::reclaimThis ();
 	}
 
 //  Reference Monitoring
@@ -518,12 +432,20 @@ namespace V {
     protected:
 	model_counter_t	m_iReferenceCount;
     };
-    template<class Model> typename DEFINE_ABSTRACT_RTT (VReferenceableImplementation_<Model>);
 
-    template<class Model> VReferenceableImplementation_<Model>::~VReferenceableImplementation_() {
+/********************************
+ *****  Member Definitions  *****
+ ********************************/
+
+    template <class Counter_T> typename DEFINE_ABSTRACT_RTT (VReferenceableImplementation_<Counter_T>);
+
+    template <class Counter_T> VReferenceableImplementation_<Counter_T>::VReferenceableImplementation_(unsigned int iReferenceCount) : m_iReferenceCount (iReferenceCount) {
     }
-
-    template<class Model> void VReferenceableImplementation_<Model>::die_() {
+    template <class Counter_T> VReferenceableImplementation_<Counter_T>::VReferenceableImplementation_() : m_iReferenceCount (0) {
+    }
+    template <class Counter_T> VReferenceableImplementation_<Counter_T>::~VReferenceableImplementation_() {
+    }
+    template <class Counter_T> void V::VReferenceableImplementation_<Counter_T>::die_() {
 	die ();
     }
 }
@@ -534,18 +456,14 @@ namespace V {
  **************************************************/
 
 /// Interlocked (thread-safe) Reference Count Base Class Implementation
-typedef V::VReferenceableImplementation_<V::ThreadModel::Multi> VReferenceable;
+typedef V::VReferenceableImplementation_<V::counter32_t> VReferenceable;
 
 /// Non-interlocked (single-threaded) Reference Count Base ClassImplementation
-typedef V::VReferenceableImplementation_<V::ThreadModel::Single> VReferenceableNIL;
-
-#ifndef V_VReferenceable
-#define V_VReferenceable extern
-#endif
+typedef V::VReferenceableImplementation_<V::counter32nil_t> VReferenceableNIL;
 
 #if defined(USING_HIDDEN_DEFAULT_VISIBILITY) || defined(V_VReferenceable_Instantiations)
-V_VReferenceable template class V_API V::VReferenceableImplementation_<V::ThreadModel::Multi>;
-V_VReferenceable template class V_API V::VReferenceableImplementation_<V::ThreadModel::Single>;
+V_VReferenceable template class V_API V::VReferenceableImplementation_<V::counter32_t>;
+V_VReferenceable template class V_API V::VReferenceableImplementation_<V::counter32nil_t>;
 #endif
 
 /*************************************

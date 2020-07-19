@@ -25,13 +25,13 @@
 #include "V_VMutex.h"
 
 
-/****************************************
- ****************************************
- *****                              *****
- *****  VStaticTransient::ListLink  *****
- *****                              *****
- ****************************************
- ****************************************/
+/************************************
+ ************************************
+ *****                          *****
+ *****  VStaticTransient::Link  *****
+ *****                          *****
+ ************************************
+ ************************************/
 
 /**************************
  **************************
@@ -50,6 +50,33 @@ VStaticTransient::Link::Link (Instance* pInstance) : m_pInstance (pInstance) {
 
 VStaticTransient::Link::~Link () {
 }
+
+
+/************************************
+ ************************************
+ *****                          *****
+ *****  VStaticTransient::List  *****
+ *****                          *****
+ ************************************
+ ************************************/
+
+/**************************
+ **************************
+ *****  Construction  *****
+ **************************
+ **************************/
+
+VStaticTransient::List::List () {
+}
+
+/*************************
+ *************************
+ *****  Destruction  *****
+ *************************
+ *************************/
+
+VStaticTransient::List::~List () {
+}
 
 /*****************
  *****************
@@ -57,14 +84,14 @@ VStaticTransient::Link::~Link () {
  *****************
  *****************/
 
-void VStaticTransient::Link::interlockedPush (Instance* pInstance) {
-    m_pListLink.interlockedPush (&pInstance->listLink(), &ThisClass::m_pListLink);
+void VStaticTransient::List::interlockedPush (Instance* pInstance) {
+    m_pListHead.interlockedPush (&pInstance->listLink(), &Link::m_pListLink);
 }
 
-bool VStaticTransient::Link::interlockedPop (InstancePointer& rpInstance) {
-    Pointer pListLink;
-    if (m_pListLink.interlockedPop (pListLink, &ThisClass::m_pListLink)) {
-	rpInstance.setTo (pListLink->instance ());
+bool VStaticTransient::List::interlockedPop (InstancePointer& rpInstance) {
+    Link::Pointer pListHead;
+    if (m_pListHead.interlockedPop (pListHead, &Link::m_pListLink)) {
+	rpInstance.setTo (pListHead->instance ());
 	return true;
     }
     return false;
@@ -92,7 +119,7 @@ namespace {
     EternalMutex g_iInitializationMutex;
 }
 
-VStaticTransient::EternalLink VStaticTransient::g_pListHead;
+VStaticTransient::EternalList VStaticTransient::g_pListHead;
 
 
 /**************************

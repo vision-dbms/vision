@@ -825,7 +825,7 @@ namespace Vca {
          * Head of the list of claims that have attempted, failed and are waiting to acquire a locking claim on this cohort.
          * @see VCohort::Claim::m_pCohortLink
          */
-	Claim::Pointer		m_pBlockedClaims;
+	V::VAtomicallyLinkablePointer<Claim> m_pBlockedClaims;
         /** Used to interface with the system and to handle lower-level event wait control. */
 	DMPointer		m_pDeviceManager;
         /** Used by cohorts to process events. */

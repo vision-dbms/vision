@@ -30,13 +30,13 @@ public:
 //  class Link
 public:
     class V_API Link {
-	DECLARE_FAMILY_MEMBERS (Link,void);
+	DECLARE_NUCLEAR_FAMILY (Link);
 
 	friend class VStaticTransient;
 
     //  Construction
     public:
-	Link (Instance* pInstance = 0);
+	Link (Instance *pInstance);
 
     //  Destruction
     public:
@@ -44,27 +44,49 @@ public:
 
     //  Access
     public:
-	Instance* instance () const {
+	Instance *instance () const {
 	    return m_pInstance;
 	}
 
     //  Use
-    public:
-	void interlockedPush (Instance* pInstance);
-	bool interlockedPop (InstancePointer& rpInstance);
     private:
-	bool detach (Instance* pInstance) {
+	bool detach (Instance *pInstance) {
 	    return m_pInstance.clearIf (pInstance);
 	}
 
     //  State
     private:
 	InstancePointer	m_pInstance;
+    public:
 	Pointer		m_pListLink;
     };
     typedef V::VEternal<Link> EternalLink;
 
-    friend class Link;
+//****************
+//  class List
+public:
+    class V_API List {
+	DECLARE_NUCLEAR_FAMILY (List);
+
+    //  Construction
+    public:
+	List ();
+
+    //  Destruction
+    public:
+	~List ();
+
+    //  Use
+    public:
+	void interlockedPush (Instance *pInstance);
+	bool interlockedPop (InstancePointer &rpInstance);
+
+    //  State
+    private:
+	V::VAtomicallyLinkablePointer<Link> m_pListHead;
+    };
+    friend class List;
+    typedef V::VEternal<List> EternalList;
 
 //****************
 //  Construction
@@ -83,16 +105,16 @@ private:
 
 //  Access
 private:
-    static Link& listHead () {
+    static List &listHead () {
 	return g_pListHead;
     }
-    Link& listLink() {
+    Link &listLink() {
 	return m_pListLink;
     }
 
 //  State
 private:
-    static EternalLink  g_pListHead;
+    static EternalList  g_pListHead;
     EternalLink		m_pListLink;
 };
 

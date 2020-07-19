@@ -102,7 +102,7 @@ namespace Vca {
 
 	//  State
 	private:
-	    EntryReference m_pEntries;
+	    VAtomicallyLinkableReference<Entry> m_pEntries;
 	};
 	typedef typename List::Entry ListEntry;
 	friend class List;

@@ -7,11 +7,11 @@
 
 #include "VTransient.h"
 
+#include "V_VAtomicLink.h"
+
 /**************************
  *****  Declarations  *****
  **************************/
-
-#include "V_VAtomicMemoryOperations_.h"
 
 namespace V {
     class VRunTimeType;
@@ -21,17 +21,23 @@ namespace V {
  *****  Templates  *****
  ***********************/
 
-template <class ReferenceableClass> class VReference : public VTransient {
-//  Family
-    DECLARE_FAMILY_MEMBERS (VReference<ReferenceableClass>, VTransient);
+/************************************************************
+ *----  template <class Referenced_T> class VReference  ----*
+ ************************************************************/
+
+template <class Referenced_T> class VReference : public VTransient {
+    DECLARE_FAMILY_MEMBERS (VReference<Referenced_T>, VTransient);
+
+    friend class V::VAtomicLink<ThisClass>;
 
 //  Aliases
 public:
-    typedef ReferenceableClass ReferencedClass;
+    typedef Referenced_T ReferencedClass;
+    typedef Referenced_T ReferenceableClass;
 
 //  Link Member
 public:
-    typedef ThisClass ReferenceableClass::*LinkMember;
+    typedef ThisClass Referenced_T::*LinkMember;
 
 //  Reclamation Control
 protected:
@@ -256,29 +262,21 @@ public:
 	return interlockedSetIf (pNew, 0);
     }
 
-    void interlockedPush (ReferenceableClass *pFirst, LinkMember pLinkMember) {
-	V::VAtomicMemoryOperations::MemoryBarrierProduce ();
+    /**
+     * Thread-safe stack push operation:
+     *
+     *    void interlockedPush (ReferencedClass *pFirst, LinkMember pLinkMember);
+     *
+     *  moved to V_VAtomicLinkable.h.
+     */
 
-	ReferenceableClass *&rpFirstLink = (pFirst->*pLinkMember).m_pReferent;
-	do {
-          (pFirst->*pLinkMember).setTo (m_pReferent);
-
-	} while (!interlockedSetIf (pFirst, rpFirstLink));
-    }
-    bool interlockedPop (ThisClass &rpFirst, LinkMember pLinkMember) {
-	ReferencedClass *pFirst;
-	do {
-	    pFirst = m_pReferent;
-	    rpFirst.setTo (pFirst);
-	} while (pFirst && !interlockedSetIf ((pFirst->*pLinkMember).m_pReferent, pFirst));
-	if (!pFirst)
-	    return false;
-
-	V::VAtomicMemoryOperations::MemoryBarrierConsume ();
-	(pFirst->*pLinkMember).clear ();
-
-	return true;
-    }
+    /**
+     * Thread-safe stack pop operation:
+     *
+     *    bool interlockedPop (ReferencedClass *&rpFirst, LinkMember pLinkMember);
+     *
+     *  moved to V_VAtomicLinkable.h.
+     */
 
 //  Backdoor (intended for use by VcaSerializer's and other reference protective code)
 public:
@@ -289,6 +287,29 @@ public:
 //  State
 protected:
     ReferenceableClass *m_pReferent;
+};
+
+
+/******************************************************************************
+ *----  template <class Referenced_T> class VAtomicallyLinkableReference  ----*
+ ******************************************************************************/
+
+template <class Referenced_T> class VAtomicallyLinkableReference : public V::VAtomicLink<VReference<Referenced_T> > {
+    DECLARE_FAMILY_MEMBERS (VAtomicallyLinkableReference<Referenced_T>,V::VAtomicLink<VReference<Referenced_T> >);
+
+//  Construction
+public:
+    explicit VAtomicallyLinkableReference (Referenced_T *pReferent) : BaseClass (pReferent) {
+    }
+    VAtomicallyLinkableReference (ThisClass const &rOther) : BaseClass (rOther) {
+    }
+    VAtomicallyLinkableReference () {
+    }
+
+//  Destruction
+public:
+    ~VAtomicallyLinkableReference () {
+    }
 };
 
 

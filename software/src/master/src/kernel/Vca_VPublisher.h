@@ -135,7 +135,7 @@ namespace Vca {
 
 	//  State
 	private:
-	    SubscriptionReference mutable m_pSubscriptions;
+	    VAtomicallyLinkableReference<Subscription> mutable m_pSubscriptions;
 	};
 	typedef typename SubscriptionManager::Subscription Subscription;
 
